@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-brand-50 text-brand-950 font-sans antialiased;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-brand-950 text-white hover:bg-brand-900 focus:ring-brand-950;
+  }
+  .btn-secondary {
+    @apply bg-white text-brand-950 border border-brand-200 hover:bg-brand-100 focus:ring-brand-300;
+  }
+  .btn-ghost {
+    @apply text-brand-600 hover:text-brand-950 hover:bg-brand-100;
+  }
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-600;
+  }
+  .input {
+    @apply w-full rounded-lg border border-brand-200 bg-white px-3 py-2.5 text-sm text-brand-950 placeholder:text-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-950 focus:border-transparent transition-all duration-200;
+  }
+  .card {
+    @apply bg-white rounded-xl border border-brand-100 shadow-sm;
+  }
+  .card-hover {
+    @apply hover:shadow-md hover:border-brand-200 transition-all duration-200;
+  }
+}
+
+/* SurveyJS custom styles */
+.sd-root {
+  --sjs-primary-backcolor: #0b0907;
+  --sjs-primary-backcolor-light: #f6f5f4;
+  --sjs-primary-backcolor-dark: #292524;
+  --sjs-base-unit: 8px;
+  --sjs-corner-radius: 8px;
+  --sjs-shadow-small: 0px 1px 2px 0px rgba(0, 0, 0, 0.06);
+  --sjs-shadow-medium: 0px 2px 6px 0px rgba(0, 0, 0, 0.08);
+  --sjs-shadow-large: 0px 4px 12px 0px rgba(0, 0, 0, 0.1);
+  --sjs-border-default: #e7e5e4;
+  --sjs-border-light: #f6f5f4;
+  --sjs-general-backcolor: #ffffff;
+  --sjs-general-backcolor-dim: #fafaf9;
+  --sjs-general-backcolor-dim-light: #f6f5f4;
+  --sjs-general-forecolor: #0b0907;
+  --sjs-general-forecolor-light: #57534e;
+}
+
+.sc-root {
+  --sjs-primary-backcolor: #0b0907;
+}

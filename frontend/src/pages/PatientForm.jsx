@@ -1,0 +1,113 @@
+import { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Model } from "survey-core";
+import { Survey } from "survey-react-ui";
+import "survey-core/survey-core.min.css";
+import { Check, Loader2, AlertCircle } from "lucide-react";
+import { api } from "../lib/api";
+
+export default function PatientForm() {
+  const { token } = useParams();
+  const navigate = useNavigate();
+  const surveyRef = useRef(null);
+  const [form, setForm] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    api.getSharedForm(token)
+      .then((data) => {
+        setForm(data);
+      })
+      .catch((err) => {
+        setError(err.message);
+      })
+      .finally(() => setLoading(false));
+  }, [token]);
+
+  const handleComplete = async (survey) => {
+    try {
+      await api.submitSharedForm(token, survey.data);
+      setSubmitted(true);
+    } catch (err) {
+      alert("Failed to submit. Please try again.");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-brand-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="animate-spin text-brand-400" size={32} />
+          <p className="text-sm text-brand-500">Loading form...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-brand-50 flex items-center justify-center px-4">
+        <div className="card max-w-md w-full p-8 text-center">
+          <AlertCircle size={48} className="mx-auto text-red-400 mb-4" />
+          <h1 className="text-xl font-semibold text-brand-950 mb-2">Form Not Available</h1>
+          <p className="text-brand-500 mb-6">{error}</p>
+          <button onClick={() => navigate("/")} className="btn btn-primary">
+            Go Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-brand-50 flex items-center justify-center px-4">
+        <div className="card max-w-md w-full p-8 text-center animate-fade-in">
+          <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6">
+            <Check size={32} className="text-emerald-600" />
+          </div>
+          <h1 className="text-2xl font-semibold text-brand-950 mb-2">Thank You!</h1>
+          <p className="text-brand-500 mb-6">
+            Your responses have been submitted successfully.
+          </p>
+          <div className="text-sm text-brand-400">
+            You can close this window.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!form) return null;
+
+  return (
+    <div className="min-h-screen bg-brand-50">
+      {/* Header */}
+      <header className="bg-white border-b border-brand-100">
+        <div className="max-w-3xl mx-auto px-4 py-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-brand-950 flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 140 31" fill="white">
+                <path d="M64.062 26.378v3.771H77.96v-3.771h-4.386V9.652h-9.1v3.73h4.303v12.996h-4.714Z" />
+              </svg>
+            </div>
+            <span className="text-sm font-medium text-brand-950">Curious</span>
+          </div>
+        </div>
+      </header>
+
+      {/* Form */}
+      <main className="max-w-3xl mx-auto px-4 py-8">
+        <h1 className="text-2xl font-semibold text-brand-950 mb-6">{form.title}</h1>
+        <div className="card p-6">
+          <Survey
+            model={new Model(form.schema)}
+            onComplete={handleComplete}
+          />
+        </div>
+      </main>
+    </div>
+  );
+}

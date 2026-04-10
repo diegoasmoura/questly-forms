@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  forms      Form[]
+  responses  Response[]
+}
+
+model Form {
+  id        String   @id @default(uuid())
+  title     String
+  schema    Json     // SurveyJS JSON schema
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  creator       User           @relation(fields: [createdBy], references: [id])
+  shareLinks    ShareLink[]
+  responses     Response[]
+}
+
+model ShareLink {
+  id        String   @id @default(uuid())
+  token     String   @unique // unique share token
+  formId    String
+  patientName String?
+  patientEmail String?
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+  active    Boolean  @default(true)
+
+  form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+}
+
+model Response {
+  id        String   @id @default(uuid())
+  formId    String
+  userId    String?  // null if submitted via share link
+  data      Json     // SurveyJS response data
+  createdAt DateTime @default(now())
+
+  form  Form @relation(fields: [formId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id])
+}
