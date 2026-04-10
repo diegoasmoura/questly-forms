@@ -1,103 +1,175 @@
-# Curious Landing Page Clone
+# Curious - Form Builder Platform
 
-Réplica da seção superior do site [gettingcurious.com](https://www.gettingcurious.com/), recriada em HTML/CSS puro.
+Sistema completo para profissionais de saúde criarem formulários, compartilharem com pacientes e coletarem respostas.
 
-## Estrutura do Layout
+## 🏗️ Arquitetura
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                        NAV (90px)                           │
-│  background: #FFFFFF                                        │
-│  ┌─────────┐                    ┌──────────────────────┐    │
-│  │  LOGO   │                    │ Solutions For  Pricing│    │
-│  │  (SVG)  │                    │ Company  Support      │    │
-│  │         │                    │ [Log In] [Get Started]│    │
-│  └─────────                    └──────────────────────┘    │
-├─────────────────────────────────────────────────────────────┤
-│                    HERO SECTION                             │
-│  background: #F6F5F4 (cinza claro)                          │
+│                     FRONTEND (React + Vite)                 │
+│  Port: 3000                                                 │
 │                                                             │
-│              Curious today.                                 │
-│            Impact tomorrow.                                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │ Landing Page │  │  Auth (JWT)  │  │  Dashboard   │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
 │                                                             │
-│     Evidence-based tools for scientific discovery           │
-│         and better real-world outcomes.                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │Form Builder  │  │  Responses   │  │ Patient Form │      │
+│  │(SurveyJS)    │  │  Viewer      │  │  (Public)    │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+└─────────────────────────────┬───────────────────────────────┘
+                              │ REST API (JSON)
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  BACKEND (Node.js + Express)                │
+│  Port: 3001                                                 │
 │                                                             │
-├─────────────────────────────────────────────────────────────┤
-│                    IMAGE GALLERY                            │
-│  background: #F6F5F4                                        │
-│  height: 540px                                              │
+│  - JWT Authentication (bcrypt)                              │
+│  - CRUD: Forms, Responses, Share Links                     │
+│  - Server-side validation with survey-core                 │
+│  - PostgreSQL via Prisma ORM                               │
+└─────────────────────────────┬───────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  DATABASE (PostgreSQL)                      │
+│  Port: 5432                                                 │
 │                                                             │
-│  ┌──────────────┬──────────────┬──────────────┐            │
-│  │   YELLOW     │    GREEN     │     PINK     │            │
-│  │   PANEL      │    PANEL     │    PANEL     │            │
-│  │              │              │              │            │
-│  │  silhouettes │ silhouettes  │ silhouettes  │            │
-│  └──────────────┴──────────────┴──────────────┘            │
-│                                                             │
-│  ┌───────────────────────────────────────────┐             │
-│  │         GIF OVERLAY (white line)          │             │
-│  │  positioned absolute, z-index: 2          │             │
-│  │  left: 16%, width: 70%                    │             │
-│  └───────────────────────────────────────────┘             │
+│  Users → Forms → ShareLinks                                 │
+│              → Responses                                    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Paleta de Cores
+## 🚀 Quick Start
 
-| Elemento | Cor | Hex |
-|----------|-----|-----|
-| Fundo Nav | Branco | `#FFFFFF` |
-| Fundo Hero | Cinza claro | `#F6F5F4` |
-| Fundo Gallery | Cinza claro | `#F6F5F4` |
-| Texto principal | Preto | `#0B0907` |
-| Botão Get Started | Preto | `#0B0907` |
-| Botão Log In border | Preto | `#0B0907` |
-| Links nav | Preto | `#0B0907` |
-| Painel esquerdo | Amarelo | imagem com overlay |
-| Painel central | Verde | imagem com overlay |
-| Painel direito | Rosa | imagem com overlay |
-
-## Tipografia
-
-| Elemento | Fonte | Peso | Tamanho |
-|----------|-------|------|---------|
-| Logo | SVG customizado | - | 140x31px |
-| H1 Hero | Affix Light / Inter | 400 | 100px |
-| Subtítulo hero | Inter | 400 | 20px |
-| Links nav | Inter | 400 | 14px |
-| Botões nav | Inter | 400 | 14px |
-
-## Imagens e Assets
-
-- **Logo**: SVG inline extraído do site original
-- **Painéis**: 3 imagens PNG com silhuetas sobre fundos coloridos
-- **GIF**: Animação de linha branca sobreposta aos painéis
-- **Fonte Hero**: Affix Light (Google Fonts fallback para Inter)
-- **Fonte Corpo**: Inter (Google Fonts)
-
-## URL das Imagens
-
-| Asset | URL |
-|-------|-----|
-| Painel 1 (amarelo) | `https://framerusercontent.com/images/mC0Sc4vTdjcQqUVBVx1FhCQ.png` |
-| Painel 2 (verde) | `https://framerusercontent.com/images/rwyV1jqnGKXOf7GSXDcYednbUwY.png` |
-| Painel 3 (rosa) | `https://framerusercontent.com/images/OaQ3oQjxq0byEb1WtRvNY9MNPMk.png` |
-| GIF (linha branca) | `https://framerusercontent.com/images/pnBNiqSTQAyb7J4zzu8XVt8Y.gif` |
-
-## Como Visualizar
+### Com Docker (recomendado)
 
 ```bash
-cd '/Users/diegoangelosantosdemoura/Desktop/Projetos Python/Formulários/surveyJS'
-python3 -m http.server 8080
-# Acesse http://localhost:8080
+docker compose up -d
+# Aguardar banco iniciar
+cd backend && npx prisma db push
+# Acessar:
+# Frontend: http://localhost:3000
+# Backend:  http://localhost:3001
 ```
 
-Ou simplesmente abra o arquivo `index.html` no navegador.
+### Desenvolvimento local
 
-## Tecnologias
+```bash
+# Terminal 1 - Database
+docker compose up -d db
 
-- HTML5 semântico
-- CSS3 (Flexbox, posicionamento absoluto)
-- Zero dependências JavaScript
-- Google Fonts (Inter)
+# Terminal 2 - Backend
+cd backend
+npm install
+npx prisma db push
+npm run dev
+
+# Terminal 3 - Frontend
+cd frontend
+npm install
+npm run dev
+```
+
+## 📁 Estrutura
+
+```
+surveyJS/
+├── backend/
+│   ├── src/
+│   │   ├── server.js          # Express app + routes
+│   │   ├── db.js              # Prisma client
+│   │   ├── middleware/auth.js # JWT middleware
+│   │   └── routes/
+│   │       ├── auth.js        # /api/auth/register, /login, /me
+│   │       ├── forms.js       # /api/forms (CRUD + stats)
+│   │       ├── responses.js   # /api/responses (view, aggregate)
+│   │       └── share.js       # /api/share (create, revoke links)
+│   ├── prisma/
+│   │   └── schema.prisma      # Database schema
+│   └── Dockerfile
+│
+├── frontend/
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── Landing.jsx      # Homepage
+│   │   │   ├── Login.jsx        # Login page
+│   │   │   ├── Register.jsx     # Registration page
+│   │   │   ├── Dashboard.jsx    # Forms management
+│   │   │   ├── FormBuilder.jsx  # SurveyJS Creator
+│   │   │   ├── FormResponses.jsx# Responses viewer
+│   │   │   ├── ShareLink.jsx    # Share confirmation
+│   │   │   └── PatientForm.jsx  # Public form renderer
+│   │   ├── context/AuthContext.jsx
+│   │   ├── lib/api.js           # API client
+│   │   └── index.css            # Tailwind + custom styles
+│   └── Dockerfile
+│
+└── docker-compose.yml
+```
+
+## 🔑 API Endpoints
+
+### Auth
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Criar conta |
+| POST | `/api/auth/login` | Login |
+| GET | `/api/auth/me` | Dados do usuário |
+
+### Forms
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/forms` | Listar formulários |
+| GET | `/api/forms/:id` | Obter formulário |
+| POST | `/api/forms` | Criar formulário |
+| PUT | `/api/forms/:id` | Atualizar formulário |
+| DELETE | `/api/forms/:id` | Deletar formulário |
+| POST | `/api/forms/:id/duplicate` | Duplicar formulário |
+| GET | `/api/forms/:id/stats` | Estatísticas |
+
+### Responses
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/responses/form/:formId` | Listar respostas |
+| GET | `/api/responses/form/:formId/aggregate` | Agregação |
+| DELETE | `/api/responses/:id` | Deletar resposta |
+
+### Share
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/share/create` | Criar link de compartilhamento |
+| GET | `/api/share/form/:formId` | Listar links |
+| PATCH | `/api/share/:id/revoke` | Revogar link |
+| GET | `/api/share/:token` | Obter formulário público |
+| POST | `/api/share/:token/submit` | Submeter resposta |
+
+## 🎨 UI Components
+
+- **Tailwind CSS** com tema customizado (cores brand)
+- **Lucide React** para ícones
+- **SurveyJS** para formulários
+- Animações CSS (fade-in, slide-in, pulse)
+- Design responsivo (mobile-first)
+
+## 🔐 Security
+
+- JWT tokens com expiração de 7 dias
+- Senhas hasheadas com bcrypt (12 rounds)
+- Validação server-side com survey-core
+- CORS configurado
+- Share links com tokens UUID únicos
+
+## 📊 Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18 + Vite 5 |
+| Styling | Tailwind CSS 3 |
+| Forms | SurveyJS 1.9 |
+| Icons | Lucide React |
+| Backend | Node.js 20 + Express 4 |
+| Database | PostgreSQL 16 |
+| ORM | Prisma 5 |
+| Auth | JWT + bcrypt |
+| Container | Docker + Docker Compose |

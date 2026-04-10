@@ -42,6 +42,8 @@ services:
       dockerfile: Dockerfile
     container_name: curious-frontend
     restart: always
+    environment:
+      - VITE_API_URL=http://localhost:3001/api
     ports:
       - "3000:3000"
     depends_on:
