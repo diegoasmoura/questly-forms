@@ -1,0 +1,199 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - navigation [ref=e6]:
+      - link [ref=e9] [cursor=pointer]:
+        - /url: ./
+        - img [ref=e11]
+      - generic [ref=e13]:
+        - generic [ref=e15] [cursor=pointer]:
+          - paragraph [ref=e17]: Solutions For
+          - img [ref=e22]
+        - link "Pricing" [ref=e25] [cursor=pointer]:
+          - /url: ./pricing
+          - paragraph [ref=e27]: Pricing
+        - link "Company" [ref=e29] [cursor=pointer]:
+          - /url: ./company
+          - paragraph [ref=e31]: Company
+        - link "Support" [ref=e33] [cursor=pointer]:
+          - /url: https://gettingcurious.com/help-center
+          - paragraph [ref=e35]: Support
+        - generic [ref=e36]:
+          - link "Log In" [ref=e38] [cursor=pointer]:
+            - /url: https://admin.mindlogger.org/#/login?lang=en_US
+            - paragraph [ref=e40]: Log In
+          - link "Get Started" [ref=e42] [cursor=pointer]:
+            - /url: ./contact
+            - paragraph [ref=e44]: Get Started
+    - generic [ref=e48]:
+      - heading "Curious today. Impact tomorrow." [level=1] [ref=e50]
+      - paragraph [ref=e52]: Evidence-based tools for scientific discovery and better real-world outcomes.
+    - generic [ref=e68]:
+      - list [ref=e71]:
+        - listitem [ref=e72]
+        - listitem [ref=e75]
+        - listitem [ref=e78]
+        - listitem [ref=e81]
+        - listitem [ref=e84]
+        - listitem [ref=e87]
+        - listitem [ref=e90]
+        - listitem [ref=e93]
+        - listitem [ref=e96]
+        - listitem [ref=e99]
+        - listitem [ref=e102]
+        - listitem [ref=e105]
+        - listitem [ref=e108]
+        - listitem [ref=e111]
+        - listitem [ref=e114]
+        - listitem [ref=e117]
+        - listitem [ref=e120]
+        - listitem [ref=e123]
+        - listitem [ref=e126]
+        - listitem [ref=e129]
+        - listitem [ref=e132]
+        - listitem [ref=e135]
+        - listitem [ref=e138]
+        - listitem [ref=e141]
+        - listitem [ref=e144]
+        - listitem [ref=e147]
+        - listitem [ref=e150]
+        - listitem [ref=e153]
+        - listitem [ref=e156]
+        - listitem [ref=e159]
+        - listitem [ref=e162]
+        - listitem [ref=e165]
+        - listitem [ref=e168]
+      - heading "Trusted by leading research and health care organizations" [level=5] [ref=e173]
+    - generic [ref=e176]:
+      - heading "For Research Organizations" [level=2] [ref=e178]
+      - paragraph [ref=e180]: Curious delivers the tools you need to expand the reach of your work. Create and conduct research studies with scientific rigor and enterprise-grade data privacy.
+    - generic [ref=e185]:
+      - generic [ref=e186]:
+        - generic [ref=e188] [cursor=pointer]:
+          - img [ref=e191]
+          - paragraph [ref=e194]:
+            - strong [ref=e195]: Simple
+        - paragraph [ref=e197]: Curious is a powerful no-code platform for research. Effortlessly design and deploy assessments, interventions, cognitive tasks, and more. We're here to amplify your organization’s impact.
+      - generic [ref=e200] [cursor=pointer]:
+        - img [ref=e203]
+        - paragraph [ref=e206]:
+          - strong [ref=e207]: Secure
+      - generic [ref=e210] [cursor=pointer]:
+        - img [ref=e213]
+        - paragraph [ref=e216]:
+          - strong [ref=e217]: Scalable
+    - generic [ref=e226]:
+      - heading "Accelerate Discovery. Expand Your Impact." [level=4] [ref=e228]
+      - generic [ref=e229]:
+        - generic [ref=e230]:
+          - paragraph [ref=e235]:
+            - strong [ref=e236]: Design and distribute... most anything
+          - paragraph [ref=e239]: Curious is the backbone for harmonized data collection in your organization. Create novel assessments and interventions for research or draw from a comprehensive library of measures — saving time and increasing reliability across studies.
+        - generic [ref=e240]:
+          - paragraph [ref=e245]:
+            - strong [ref=e246]: Laboratory-quality research, anywhere
+          - paragraph [ref=e249]: Capture robust data from participants anywhere, anytime with research-grade tooling including ecological momentary assessments and fully customizable cognitive tasks.
+        - generic [ref=e250]:
+          - paragraph [ref=e255]:
+            - strong [ref=e256]: Broader participation, deeper insights
+          - paragraph [ref=e259]: Reach more diverse populations with user-friendly tools that generate comprehensive and representative data. Curious supports all common devices including web, iOS, and Android.
+    - generic [ref=e262]:
+      - heading "For Health Care Organizations" [level=2] [ref=e264]
+      - paragraph [ref=e266]: Curious offers a new approach to personalized mental health support based on top research. Our family-centered model enhances the impact of primary care providers, eliminates unnecessary costs, and reduces administrative burden.
+    - generic [ref=e271]:
+      - generic [ref=e272]:
+        - generic [ref=e274] [cursor=pointer]:
+          - img [ref=e277]
+          - paragraph [ref=e280]:
+            - strong [ref=e281]: A multiplier for pediatric primary care
+        - paragraph [ref=e283]: Curious delivers personalized mental health plans crafted by the Child Mind Institute and backed by leading research. Through real-time monitoring, engaging digital experiences, and tailored content, we amplify the impact of pediatric healthcare providers while reducing their administrative burden.
+      - generic [ref=e286] [cursor=pointer]:
+        - img [ref=e289]
+        - paragraph [ref=e292]:
+          - strong [ref=e293]: Always-on support for families
+      - generic [ref=e296] [cursor=pointer]:
+        - img [ref=e299]
+        - paragraph [ref=e302]:
+          - strong [ref=e303]: Behavioral health management built on research
+    - generic [ref=e308]:
+      - paragraph [ref=e310]: Curious is built to the highest standards of privacy and security
+      - img [ref=e313]
+      - img [ref=e317]
+      - img [ref=e321]
+    - heading "Where curiosity opens doors to better outcomes" [level=4] [ref=e337]
+    - generic [ref=e349]:
+      - paragraph [ref=e352]: Curious is a digital platform that enables both scientific discovery and better care — bridging the gap between research breakthroughs and everyday health. Our tools help researchers collect vital data while delivering the latest evidence-based support for better health outcomes. By connecting research insights and real-world applications, Curious is transforming how we understand and support health — making validated tools accessible to everyone who needs them.
+      - heading "Primary support for Curious is provided by the Child Mind Institute, with generous funding by the partners below." [level=5] [ref=e354]
+    - generic [ref=e375]:
+      - heading "Curious today. Better care tomorrow." [level=2] [ref=e377]
+      - paragraph [ref=e379]: Evidence-based tools for scientific discovery and better real-world outcomes
+      - link "Get Started" [ref=e381] [cursor=pointer]:
+        - /url: ./contact
+        - paragraph [ref=e383]: Get Started
+    - generic [ref=e386]:
+      - generic [ref=e387]:
+        - generic [ref=e388]:
+          - img [ref=e392]
+          - generic [ref=e396]:
+            - paragraph [ref=e398]: Download the mobile app for research participants
+            - generic [ref=e399]:
+              - link "Download for iOS" [ref=e401] [cursor=pointer]:
+                - /url: https://apps.apple.com/us/app/curious-mobile/id1299242097
+                - img [ref=e404]
+                - paragraph [ref=e407]: Download for iOS
+                - img [ref=e410]
+              - link "Download for Android" [ref=e413] [cursor=pointer]:
+                - /url: https://play.google.com/store/apps/details?id=lab.childmindinstitute.data&hl=en_US
+                - img [ref=e416]
+                - paragraph [ref=e419]: Download for Android
+                - img [ref=e422]
+        - generic [ref=e424]:
+          - generic [ref=e425]:
+            - link "For Researchers" [ref=e427] [cursor=pointer]:
+              - /url: ./research
+              - paragraph [ref=e429]: For Researchers
+            - link "For Healthcare" [ref=e431] [cursor=pointer]:
+              - /url: ./healthcare
+              - paragraph [ref=e433]: For Healthcare
+          - generic [ref=e434]:
+            - link "Pricing" [ref=e436] [cursor=pointer]:
+              - /url: ./pricing
+              - paragraph [ref=e438]: Pricing
+            - link "Company" [ref=e440] [cursor=pointer]:
+              - /url: ./company
+              - paragraph [ref=e442]: Company
+            - link "Support" [ref=e444] [cursor=pointer]:
+              - /url: http://help.mindlogger.org/
+              - paragraph [ref=e446]: Support
+            - link "Careers" [ref=e448] [cursor=pointer]:
+              - /url: https://childmind.org/about-us/careers/
+              - img [ref=e451]
+              - paragraph [ref=e454]: Careers
+          - generic [ref=e455]:
+            - link "Terms of Service" [ref=e457] [cursor=pointer]:
+              - /url: ./terms
+              - paragraph [ref=e459]: Terms of Service
+            - link "Privacy Policy" [ref=e461] [cursor=pointer]:
+              - /url: ./privacy-policy
+              - paragraph [ref=e463]: Privacy Policy
+            - link "LinkedIn" [ref=e465] [cursor=pointer]:
+              - /url: https://www.linkedin.com/company/childmindinstitute/posts/?feedView=all
+              - paragraph [ref=e467]: LinkedIn
+            - link "YouTube" [ref=e469] [cursor=pointer]:
+              - /url: https://www.youtube.com/@hqcurious
+              - paragraph [ref=e471]: YouTube
+      - paragraph [ref=e473]:
+        - text: Curious is a product of the
+        - link "Child Mind Institute" [ref=e474] [cursor=pointer]:
+          - /url: https://childmind.org
+        - text: © 2025
+  - img [ref=e475]
+  - img [ref=e479]
+  - img [ref=e481]
+  - img [ref=e483]
+  - img [ref=e487]
+  - img [ref=e491]
+  - img [ref=e495]
+  - img [ref=e497]
+  - img [ref=e499]
+  - img [ref=e501]
+  - img [ref=e510]

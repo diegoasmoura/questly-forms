@@ -1,0 +1,29 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - link [ref=e4] [cursor=pointer]:
+      - /url: ./
+      - img [ref=e5]
+    - generic [ref=e9]:
+      - generic [ref=e10] [cursor=pointer]:
+        - link "Solutions For" [ref=e11]:
+          - /url: "#"
+        - img [ref=e12]
+      - link "Pricing" [ref=e14] [cursor=pointer]:
+        - /url: ./pricing
+      - link "Company" [ref=e15] [cursor=pointer]:
+        - /url: ./company
+      - link "Support" [ref=e16] [cursor=pointer]:
+        - /url: https://gettingcurious.com/help-center
+      - link "Log In" [ref=e17] [cursor=pointer]:
+        - /url: https://admin.mindlogger.org/#/login?lang=en_US
+      - link "Get Started" [ref=e18] [cursor=pointer]:
+        - /url: ./contact
+  - generic [ref=e19]:
+    - heading "Curious today. Impact tomorrow." [level=1] [ref=e20]:
+      - text: Curious today.
+      - text: Impact tomorrow.
+    - paragraph [ref=e21]: Evidence-based tools for scientific discovery and better real-world outcomes.
+  - generic [ref=e22]:
+    - img "Two people talking" [ref=e24]
+    - img "Healthcare professional" [ref=e26]
+    - img "Adult and child" [ref=e28]

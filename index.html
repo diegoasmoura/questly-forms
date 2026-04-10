@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curious</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'Affix Light';
+            src: local('Affix Light'), local('affix-light');
+            font-weight: 300;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #FFFFFF;
+            color: #0B0907;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 90px;
+            padding: 0 20px;
+            background-color: #FFFFFF;
+        }
+
+        .logo a {
+            display: block;
+            text-decoration: none;
+        }
+
+        .logo svg {
+            width: 140px;
+            height: 31px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #0B0907;
+            font-size: 14px;
+            font-weight: 400;
+            transition: opacity 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.7;
+        }
+
+        .nav-links .dropdown {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .nav-links .dropdown svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .nav-links .log-in {
+            padding: 8px 16px;
+            border: 1px solid #0B0907;
+            border-radius: 2px;
+            background: transparent;
+        }
+
+        .nav-links .get-started {
+            padding: 8px 16px;
+            background-color: #0B0907;
+            color: #FFFFFF !important;
+            border-radius: 2px;
+        }
+
+        .nav-links .get-started:hover {
+            opacity: 0.9;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 60px 20px 40px;
+            background-color: #F6F5F4;
+        }
+
+        .hero h1 {
+            font-family: 'Affix Light', 'Inter', sans-serif;
+            font-size: 100px;
+            font-weight: 400;
+            color: #0B0907;
+            line-height: 90px;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+        }
+
+        .hero p {
+            font-family: 'Inter', sans-serif;
+            font-size: 20px;
+            font-weight: 400;
+            color: #0B0907;
+            line-height: 1.5;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* Image Gallery */
+        .gallery {
+            position: relative;
+            display: flex;
+            width: 100%;
+            height: 540px;
+            background-color: #F6F5F4;
+        }
+
+        .gallery-panel {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gallery-panel img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* GIF Overlay */
+        .gif-overlay {
+            position: absolute;
+            top: 0;
+            left: 16%;
+            width: 70%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .gif-overlay img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">
+            <a href="./">
+                <svg width="140" height="31" fill="none" viewBox="0 0 140 31">
+                    <path d="M64.062 26.378v3.771H77.96v-3.771h-4.386V9.652h-9.1v3.73h4.303v12.996h-4.714ZM70.703.6c-1.886 0-3.443 1.394-3.443 3.444s1.557 3.443 3.443 3.443c1.886 0 3.444-1.394 3.444-3.443 0-2.05-1.558-3.444-3.444-3.444Z" fill="#0B0907"/>
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M88.586 30.6c-6.272 0-10.249-4.796-10.249-10.7 0-5.943 3.977-10.699 10.249-10.699s10.248 4.756 10.248 10.7c0 5.903-3.976 10.7-10.248 10.7ZM83.42 19.9c0 3.608 2.132 5.945 5.166 5.945 3.074 0 5.165-2.337 5.165-5.944 0-3.608-2.09-5.985-5.165-5.985-3.034 0-5.166 2.377-5.166 5.985Z" fill="#0B0907"/>
+                    <path d="M132.754 30.6c-2.459 0-4.263-.779-5.37-2.09v1.64h-3.73V22.4h3.525c.369 2.419 2.009 4.1 4.796 4.1 1.927 0 3.034-.861 3.034-2.091 0-1.312-.779-1.968-3.772-2.706l-1.475-.369c-3.116-.82-5.739-2.582-5.739-6.272 0-3.566 2.705-5.862 6.436-5.862 2.09 0 3.566.78 4.427 1.968V9.652h3.73v6.887h-3.525c-.328-2.214-1.599-3.607-3.772-3.607-1.762 0-2.705.82-2.705 1.967 0 1.148.902 1.804 3.443 2.46l1.435.369c3.403.902 6.395 2.337 6.395 6.518 0 3.935-2.951 6.354-7.133 6.354Zm-87.244-.45v-3.772h3.198V13.383h-3.197v-3.73h7.993v2.91c1.066-2.09 2.854-3.362 5.109-3.362 3.156 0 4.475 1.886 4.475 4.55 0 2.01-1.189 3.526-3.074 3.526-1.271 0-2.132-.697-2.173-2.132-.041-1.147-.574-1.803-1.722-1.803-1.68 0-2.614 1.64-2.614 6.395v6.64h4.96v3.772H45.51Zm-21.621-6.683c0 4.55 2.787 7.133 6.518 7.133 2.87 0 4.755-1.599 5.575-3.485v3.034h7.993v-3.771h-3.197V9.652h-7.994v3.73h3.198v7.584c0 3.198-1.763 5.043-3.977 5.043-2.213 0-3.32-1.435-3.32-3.936V9.653H20.69v3.73h3.198v10.084ZM108.55 30.6c-3.731 0-6.518-2.583-6.518-7.133V13.383h-3.198v-3.73h7.994v12.42c0 2.5 1.107 3.936 3.32 3.936 2.214 0 3.977-1.845 3.977-5.043v-7.584h-3.198v-3.73h7.994v16.726h3.198v3.771h-7.994v-3.034c-.82 1.886-2.706 3.485-5.575 3.485ZM0 19.76C0 25.702 3.813 30.5 10.29 30.5c5.616 0 9.1-3.854 9.634-8.322h-5.125c-.41 2.05-2.05 3.648-4.632 3.648-3.034 0-5.125-2.46-5.125-6.067s2.132-5.985 5.33-5.985c1.803 0 3.238.943 3.238 2.296 0 .273-.065.509-.133.756-.075.273-.154.56-.154.924 0 1.312.943 2.214 2.378 2.214 2.009 0 3.32-1.476 3.32-3.566 0-3.485-2.992-7.297-8.65-7.297C4.059 9.1 0 13.815 0 19.759Z" fill="#0B0907"/>
+                </svg>
+            </a>
+        </div>
+        <div class="nav-links">
+            <div class="dropdown">
+                <a href="#">Solutions For</a>
+                <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 5l3 3 3-3" stroke="#0B0907" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <a href="./pricing">Pricing</a>
+            <a href="./company">Company</a>
+            <a href="https://gettingcurious.com/help-center">Support</a>
+            <a href="https://admin.mindlogger.org/#/login?lang=en_US" class="log-in">Log In</a>
+            <a href="./contact" class="get-started">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Organize a jornada.<br>Potencialize a cura.</h1>
+        <p>Evidence-based tools for scientific discovery and better real-world outcomes.</p>
+    </section>
+
+    <!-- Image Gallery with GIF Overlay -->
+    <section class="gallery">
+        <div class="gallery-panel">
+            <img src="https://framerusercontent.com/images/mC0Sc4vTdjcQqUVBVx1FhCQ.png" alt="">
+        </div>
+        <div class="gallery-panel">
+            <img src="https://framerusercontent.com/images/rwyV1jqnGKXOf7GSXDcYednbUwY.png" alt="">
+        </div>
+        <div class="gallery-panel">
+            <img src="https://framerusercontent.com/images/OaQ3oQjxq0byEb1WtRvNY9MNPMk.png" alt="">
+        </div>
+        <!-- GIF Overlay on top -->
+        <div class="gif-overlay">
+            <img src="https://framerusercontent.com/images/pnBNiqSTQAyb7J4zzu8XVt8Y.gif" alt="">
+        </div>
+    </section>
+</body>
+</html>
