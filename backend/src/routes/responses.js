@@ -1,9 +1,49 @@
 import { Router } from "express";
+import { Parser } from "json2csv";
 import prisma from "../db.js";
 import { authMiddleware } from "../middleware/auth.js";
 
 const router = Router();
 router.use(authMiddleware);
+
+// Export responses to CSV
+router.get("/form/:formId/export", async (req, res) => {
+  try {
+    const formId = req.params.formId;
+    const form = await prisma.form.findFirst({
+      where: { id: formId, createdBy: req.user.id },
+    });
+    if (!form) return res.status(404).json({ error: "Form not found" });
+
+    const responses = await prisma.response.findMany({
+      where: { formId },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (responses.length === 0) {
+      return res.status(404).json({ error: "No responses to export" });
+    }
+
+    // Flattening and cleaning up the data for CSV
+    const data = responses.map((r) => ({
+      id: r.id,
+      date: new Date(r.createdAt).toLocaleString(),
+      ... (typeof r.data === 'object' ? r.data : {}),
+    }));
+
+    const json2csvParser = new Parser();
+    const csv = json2csvParser.parse(data);
+
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=responses_${formId}.csv`
+    );
+    res.status(200).send(csv);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 // Get responses for a form
 router.get("/form/:formId", async (req, res) => {
