@@ -2,55 +2,51 @@
 
 Sistema completo para psicólogos e profissionais de saúde criarem formulários clínicos, compartilharem com pacientes e coletarem respostas de forma estruturada.
 
-## ✨ Funcionalidades Profissionais (SurveyJS V2)
+## ✨ Funcionalidades Profissionais
 
-O editor de formulários foi atualizado para a versão **SurveyJS Creator V2**, oferecendo uma experiência completa de criação:
+O Curious foi expandido para ser uma ferramenta completa de gestão clínica:
 
-- **🎨 Designer:** Arrastar e soltar elementos para construir o formulário.
+- **👥 Gestão de Pacientes:** Cadastro completo de pacientes com dados de contato, data de nascimento e notas clínicas.
+- **📁 Prontuário Eletrônico:** Histórico centralizado de todas as respostas e formulários enviados para cada paciente.
+- **🎨 Designer (SurveyJS V2):** Arrastar e soltar elementos para construir formulários profissionais.
 - **👁️ Preview:** Testar o formulário em tempo real (Desktop, Tablet e Mobile).
-- **💅 Themes:** Personalizar o visual (cores, fontes, bordas) sem precisar de código.
-- **🧠 Logic:** Criar fluxos condicionais (pular perguntas, mostrar campos baseados em respostas).
-- **🌐 Translations:** Traduzir o formulário para múltiplos idiomas de forma centralizada.
-- **💻 JSON Editor:** Acesso direto ao esquema JSON para ajustes avançados.
-- **🖥️ UI Otimizada:** Interface em tela cheia (full-screen) para melhor aproveitamento do espaço e remoção de banners para uma experiência clínica limpa.
+- **🧠 Logic & Translation:** Fluxos condicionais e suporte a múltiplos idiomas.
+- **🖥️ UI Otimizada:** Interface limpa, profissional e em tela cheia.
 
 ## 🏗️ Arquitetura
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                     FRONTEND (React + Vite)                 │
-│  Port: 3000                                                 │
 │                                                             │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │ Landing Page │  │  Auth (JWT)  │  │  Dashboard   │      │
+│  │ Dashboard    │  │  Patients    │  │Patient Record│      │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
 │                                                             │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
 │  │Form Builder  │  │  Responses   │  │ Patient Form │      │
-│  │(SurveyJS)    │  │  Viewer      │  │  (Public)    │      │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
-└─────────────────────────────┬───────────────────────────────┘
-                              │ REST API (JSON)
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                  BACKEND (Node.js + Express)                │
-│  Port: 3001                                                 │
-│                                                             │
-│  - JWT Authentication (bcrypt)                              │
-│  - CRUD: Forms, Responses, Share Links                     │
-│  - Server-side validation with survey-core                 │
-│  - PostgreSQL via Prisma ORM                               │
 └─────────────────────────────┬───────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                  DATABASE (PostgreSQL)                      │
-│  Port: 5432                                                 │
+│                  BACKEND (Node.js + Express)                │
 │                                                             │
-│  Users → Forms → ShareLinks                                 │
-│              → Responses                                    │
+│  - JWT Auth | Prisma ORM | PostgreSQL                      │
+│  - CRUD: Forms, Patients, Responses, Share Links            │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+## 🔑 API Endpoints (Novos)
+
+### Patients
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/patients` | Listar pacientes |
+| GET | `/api/patients/:id` | Prontuário completo |
+| POST | `/api/patients` | Criar paciente |
+| PUT | `/api/patients/:id` | Atualizar dados |
+| DELETE | `/api/patients/:id` | Remover paciente |
 
 ## 🚀 Quick Start
 

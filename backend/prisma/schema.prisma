@@ -17,6 +17,25 @@ model User {
 
   forms      Form[]
   responses  Response[]
+  patients   Patient[]
+}
+
+model Patient {
+  id             String   @id @default(uuid())
+  name           String
+  email          String?
+  phone          String?
+  birthDate      DateTime?
+  notes          String?  @db.Text
+  psychologistId String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  psychologist User       @relation(fields: [psychologistId], references: [id])
+  responses    Response[]
+  shareLinks   ShareLink[]
+
+  @@unique([email, psychologistId])
 }
 
 model Form {
@@ -36,22 +55,26 @@ model ShareLink {
   id        String   @id @default(uuid())
   token     String   @unique // unique share token
   formId    String
-  patientName String?
-  patientEmail String?
+  patientId String?
+  patientName String?  // Keep for legacy/quick links
+  patientEmail String? // Keep for legacy/quick links
   createdAt DateTime @default(now())
   expiresAt DateTime?
   active    Boolean  @default(true)
 
   form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  patient   Patient? @relation(fields: [patientId], references: [id])
 }
 
 model Response {
   id        String   @id @default(uuid())
   formId    String
-  userId    String?  // null if submitted via share link
+  userId    String?  // Psychologist id (if tested by them)
+  patientId String?  // Linked patient
   data      Json     // SurveyJS response data
   createdAt DateTime @default(now())
 
-  form  Form @relation(fields: [formId], references: [id], onDelete: Cascade)
-  user  User? @relation(fields: [userId], references: [id])
+  form    Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  user    User?    @relation(fields: [userId], references: [id])
+  patient Patient? @relation(fields: [patientId], references: [id])
 }

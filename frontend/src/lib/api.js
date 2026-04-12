@@ -53,4 +53,11 @@ export const api = {
   // Public share
   getSharedForm: (token) => request(`/share/${token}`),
   submitSharedForm: (token, data) => request(`/share/${token}/submit`, { method: "POST", body: JSON.stringify(data) }),
+
+  // Patients
+  getPatients: () => request("/patients"),
+  getPatient: (id) => request(`/patients/${id}`),
+  createPatient: (data) => request("/patients", { method: "POST", body: JSON.stringify(data) }),
+  updatePatient: (id, data) => request(`/patients/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  deletePatient: (id) => request(`/patients/${id}`, { method: "DELETE" }),
 };

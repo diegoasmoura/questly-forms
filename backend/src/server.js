@@ -5,6 +5,7 @@ import authRoutes from "./routes/auth.js";
 import formRoutes from "./routes/forms.js";
 import responseRoutes from "./routes/responses.js";
 import shareRoutes from "./routes/share.js";
+import patientRoutes from "./routes/patients.js";
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/forms", formRoutes);
 app.use("/api/responses", responseRoutes);
 app.use("/api/share", shareRoutes);
+app.use("/api/patients", patientRoutes);
 
 // Public form access
 app.get("/api/share/:token", async (req, res) => {
@@ -66,6 +68,7 @@ app.post("/api/share/:token/submit", async (req, res) => {
     const response = await prisma.response.create({
       data: {
         formId: shareLink.formId,
+        patientId: shareLink.patientId,
         data: req.body,
       },
     });

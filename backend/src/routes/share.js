@@ -9,7 +9,7 @@ router.use(authMiddleware);
 // Create share link
 router.post("/create", async (req, res) => {
   try {
-    const { formId, patientName, patientEmail, expiresAt } = req.body;
+    const { formId, patientId, patientName, patientEmail, expiresAt } = req.body;
     if (!formId) return res.status(400).json({ error: "Form ID required" });
 
     // Verify form ownership
@@ -18,11 +18,20 @@ router.post("/create", async (req, res) => {
     });
     if (!form) return res.status(404).json({ error: "Form not found" });
 
+    // Verify patient ownership if patientId is provided
+    if (patientId) {
+      const patient = await prisma.patient.findFirst({
+        where: { id: patientId, psychologistId: req.user.id },
+      });
+      if (!patient) return res.status(404).json({ error: "Patient not found" });
+    }
+
     const token = uuidv4().replace(/-/g, "");
     const shareLink = await prisma.shareLink.create({
       data: {
         token,
         formId,
+        patientId,
         patientName,
         patientEmail,
         expiresAt: expiresAt ? new Date(expiresAt) : null,
@@ -46,6 +55,11 @@ router.get("/form/:formId", async (req, res) => {
     if (!form) return res.status(404).json({ error: "Form not found" });
     const links = await prisma.shareLink.findMany({
       where: { formId: req.params.formId },
+      include: {
+        patient: {
+          select: { name: true }
+        }
+      },
       orderBy: { createdAt: "desc" },
     });
     res.json(links);
