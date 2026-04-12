@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
+import { exportToPdf } from "../lib/pdf";
 import {
   ArrowLeft,
   Mail,
@@ -16,7 +17,8 @@ import {
   LayoutDashboard,
   Users,
   LogOut,
-  AlertCircle
+  AlertCircle,
+  FileDown
 } from "lucide-react";
 
 export default function PatientRecord() {
@@ -46,6 +48,20 @@ export default function PatientRecord() {
   const handleLogout = () => {
     logout();
     navigate("/login");
+  };
+
+  const handleExportPdf = (response) => {
+    try {
+      const fileName = `${patient.name}_${response.form.title}_${new Date(response.createdAt).toISOString().split('T')[0]}.pdf`;
+      // We need the form schema. In the patient route, we are including the response.form, 
+      // but let's make sure the backend returns the schema in the patient details.
+      if (!response.form.schema) {
+        throw new Error("Form schema not found. Cannot export PDF.");
+      }
+      exportToPdf(response.form.schema, response.data, fileName);
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   if (loading) {
@@ -160,11 +176,13 @@ export default function PatientRecord() {
               <div className="space-y-4">
                 {patient.responses.map((response) => (
                   <div key={response.id} className="card overflow-hidden">
-                    <button
-                      onClick={() => setSelectedResponse(selectedResponse === response.id ? null : response.id)}
+                    <div
                       className="w-full flex items-center justify-between p-4 hover:bg-brand-50 transition-colors text-left"
                     >
-                      <div className="flex items-center gap-4">
+                      <button 
+                        onClick={() => setSelectedResponse(selectedResponse === response.id ? null : response.id)}
+                        className="flex items-center gap-4 flex-1"
+                      >
                         <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
                           <FileText size={20} />
                         </div>
@@ -174,12 +192,22 @@ export default function PatientRecord() {
                             {new Date(response.createdAt).toLocaleString()}
                           </p>
                         </div>
+                      </button>
+                      
+                      <div className="flex items-center gap-2 px-4">
+                        <button
+                          onClick={() => handleExportPdf(response)}
+                          className="p-2 rounded-lg hover:bg-brand-100 text-brand-400 hover:text-brand-950 transition-colors"
+                          title="Export PDF"
+                        >
+                          <FileDown size={18} />
+                        </button>
+                        <ChevronRight
+                          size={18}
+                          className={`text-brand-300 transition-transform ${selectedResponse === response.id ? 'rotate-90' : ''}`}
+                        />
                       </div>
-                      <ChevronRight
-                        size={18}
-                        className={`text-brand-300 transition-transform ${selectedResponse === response.id ? 'rotate-90' : ''}`}
-                      />
-                    </button>
+                    </div>
 
                     {selectedResponse === response.id && (
                       <div className="p-4 bg-brand-50 border-t border-brand-100 animate-fade-in">

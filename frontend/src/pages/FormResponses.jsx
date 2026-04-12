@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { api } from "../lib/api";
-import { ArrowLeft, Download, Filter, Trash2, Eye, Calendar } from "lucide-react";
+import { exportToPdf } from "../lib/pdf";
+import { ArrowLeft, Download, Filter, Trash2, Eye, Calendar, FileDown } from "lucide-react";
 
 export default function FormResponses() {
   const { id } = useParams();
@@ -62,6 +63,15 @@ export default function FormResponses() {
     a.download = `${form?.title || "responses"}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleExportPdf = (response) => {
+    try {
+      const fileName = `${form?.title || "Survey"}_${new Date(response.createdAt).toISOString().split('T')[0]}.pdf`;
+      exportToPdf(form.schema, response.data, fileName);
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   if (loading) {
@@ -128,8 +138,16 @@ export default function FormResponses() {
                     <button
                       onClick={() => setSelectedResponse(selectedResponse?.id === response.id ? null : response)}
                       className="p-1.5 rounded-lg hover:bg-brand-100 text-brand-400"
+                      title="View data"
                     >
                       <Eye size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleExportPdf(response)}
+                      className="p-1.5 rounded-lg hover:bg-brand-100 text-brand-400 hover:text-brand-950"
+                      title="Export to PDF"
+                    >
+                      <FileDown size={16} />
                     </button>
                     <span className="text-sm text-brand-400">
                       <Calendar size={12} className="inline mr-1" />

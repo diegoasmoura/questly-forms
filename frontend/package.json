@@ -9,15 +9,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "clsx": "^2.1.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^0.344.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.0",
     "survey-core": "^1.9.132",
-    "survey-react-ui": "^1.9.132",
     "survey-creator-core": "^1.9.132",
     "survey-creator-react": "^1.9.132",
-    "lucide-react": "^0.344.0",
-    "clsx": "^2.1.0",
+    "survey-pdf": "^1.12.61",
+    "survey-react-ui": "^1.9.132",
     "tailwind-merge": "^2.2.1"
   },
   "devDependencies": {

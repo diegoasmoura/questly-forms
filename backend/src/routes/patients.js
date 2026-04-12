@@ -34,7 +34,10 @@ router.get("/:id", async (req, res) => {
         responses: {
           include: {
             form: {
-              select: { title: true }
+              select: { 
+                title: true,
+                schema: true
+              }
             }
           },
           orderBy: { createdAt: "desc" }
@@ -42,7 +45,10 @@ router.get("/:id", async (req, res) => {
         shareLinks: {
           include: {
             form: {
-              select: { title: true }
+              select: { 
+                title: true,
+                schema: true
+              }
             }
           },
           orderBy: { createdAt: "desc" }
