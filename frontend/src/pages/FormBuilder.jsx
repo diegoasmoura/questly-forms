@@ -15,7 +15,6 @@ export default function FormBuilder() {
   const [title, setTitle] = useState("");
   const [saving, setSaving] = useState(false);
   const [savingSuccess, setSavingSuccess] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
   const titleInputRef = useRef(null);
 
   // Load existing form
@@ -36,13 +35,16 @@ export default function FormBuilder() {
     if (!creatorContainerRef.current || creatorInstanceRef.current) return;
 
     const creator = new SurveyCreator();
-    creator.showLogicTab = true;
-    creator.showJSONEditorTab = true;
-    creator.showTranslationTab = false;
-    creator.showEmbeddedSurveyTab = false;
+
+    // Set tab visibility BEFORE render
     creator.showThemeTab = true;
+    creator.showLogicTab = true;
+    creator.showTranslationTab = true;
+    creator.showJSONEditorTab = true;
+    creator.showEmbeddedSurveyTab = false;
     creator.isAutoSave = false;
 
+    // Set initial JSON
     if (form?.schema) {
       creator.JSON = form.schema;
     } else {
@@ -52,12 +54,40 @@ export default function FormBuilder() {
       };
     }
 
+    // Render to container
     creator.render(creatorContainerRef.current);
+
+    // Set tab visibility AFTER render (v1.12.x requires this)
+    // Using microtask to ensure DOM is ready
+    Promise.resolve().then(() => {
+      if (creator.tabs) {
+        creator.tabs.forEach((tab) => {
+          const tabId = (tab.id || tab.name || "").toLowerCase();
+          if (["designer", "preview", "theme", "logic", "translation", "json"].includes(tabId)) {
+            tab.visible = true;
+          }
+        });
+      }
+    });
+
     creatorInstanceRef.current = creator;
+
+    // Listen for title changes
+    if (creator.survey) {
+      creator.survey.onPropertyChanged.add((_, options) => {
+        if (options.name === "title" && titleInputRef.current) {
+          setTitle(options.newValue || "");
+        }
+      });
+    }
 
     return () => {
       if (creatorInstanceRef.current) {
-        creatorInstanceRef.current.dispose();
+        try {
+          creatorInstanceRef.current.dispose();
+        } catch (e) {
+          // Ignore disposal errors
+        }
         creatorInstanceRef.current = null;
       }
     };
@@ -69,7 +99,7 @@ export default function FormBuilder() {
     setSavingSuccess(false);
     try {
       const json = creatorInstanceRef.current.JSON;
-      const surveyTitle = title || titleInputRef.current?.value || "Untitled Form";
+      const surveyTitle = titleInputRef.current?.value || title || "Untitled Form";
       if (id) {
         await api.updateForm(id, { title: surveyTitle, schema: json });
       } else {
@@ -109,13 +139,6 @@ export default function FormBuilder() {
     URL.revokeObjectURL(url);
   };
 
-  const handleTitleChange = (e) => {
-    setTitle(e.target.value);
-    if (creatorInstanceRef.current) {
-      creatorInstanceRef.current.survey.title = e.target.value;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-brand-50 flex flex-col">
       {/* Toolbar */}
@@ -129,20 +152,13 @@ export default function FormBuilder() {
               ref={titleInputRef}
               type="text"
               defaultValue={title}
-              onChange={handleTitleChange}
+              onChange={(e) => setTitle(e.target.value)}
               placeholder="Form title..."
               className="text-base font-medium text-brand-950 bg-transparent border-none focus:outline-none placeholder:text-brand-300 w-64"
             />
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowPreview(!showPreview)}
-              className="btn btn-ghost text-sm"
-            >
-              <Eye size={16} />
-              {showPreview ? "Edit" : "Preview"}
-            </button>
             <button onClick={handleExport} className="btn btn-ghost text-sm">
               <Download size={16} />
               Export
