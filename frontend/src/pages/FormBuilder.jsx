@@ -27,6 +27,11 @@ export default function FormBuilder() {
       showJSONEditorTab: true,
       showEmbeddedSurveyTab: false,
       isAutoSave: false,
+      // Professional settings to show all options
+      showOneCategoryInPropertyGrid: false,
+      propertyGridNavigationMode: "accordion",
+      allowModifyPages: true,
+      showPropertyGrid: true,
     };
     const c = new SurveyCreator(options);
     
