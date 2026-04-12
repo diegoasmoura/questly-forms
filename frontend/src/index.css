@@ -59,3 +59,14 @@
 .sc-root {
   --sjs-primary-backcolor: #0b0907;
 }
+
+/* Remove SurveyJS Non-Commercial Banner */
+.svc-creator__non-commercial-text {
+  display: none !important;
+}
+
+/* Ensure Survey Creator fills its container */
+.svc-creator-component {
+  height: 100% !important;
+  width: 100% !important;
+}

@@ -121,10 +121,10 @@ export default function FormBuilder() {
   };
 
   return (
-    <div className="min-h-screen bg-brand-50 flex flex-col">
+    <div className="h-screen w-screen overflow-hidden bg-brand-50 flex flex-col">
       {/* Toolbar */}
-      <header className="bg-white border-b border-brand-100 sticky top-0 z-40">
-        <div className="flex items-center justify-between h-14 px-4">
+      <header className="bg-white border-b border-brand-100 h-14 shrink-0 z-40">
+        <div className="flex items-center justify-between h-full px-4">
           <div className="flex items-center gap-3">
             <Link to="/dashboard" className="p-1.5 rounded-lg hover:bg-brand-100 text-brand-500 transition-colors">
               <ArrowLeft size={18} />
@@ -165,8 +165,10 @@ export default function FormBuilder() {
       </header>
 
       {/* Creator Container */}
-      <div className="flex-1 overflow-hidden h-[calc(100vh-3.5rem)]">
-        <SurveyCreatorComponent creator={creator} />
+      <div className="flex-1 relative w-full overflow-hidden">
+        <div className="absolute inset-0">
+          <SurveyCreatorComponent creator={creator} />
+        </div>
       </div>
     </div>
   );

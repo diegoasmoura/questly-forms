@@ -12,6 +12,7 @@ O editor de formulários foi atualizado para a versão **SurveyJS Creator V2**, 
 - **🧠 Logic:** Criar fluxos condicionais (pular perguntas, mostrar campos baseados em respostas).
 - **🌐 Translations:** Traduzir o formulário para múltiplos idiomas de forma centralizada.
 - **💻 JSON Editor:** Acesso direto ao esquema JSON para ajustes avançados.
+- **🖥️ UI Otimizada:** Interface em tela cheia (full-screen) para melhor aproveitamento do espaço e remoção de banners para uma experiência clínica limpa.
 
 ## 🏗️ Arquitetura
 
