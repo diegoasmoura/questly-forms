@@ -1,21 +1,41 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../lib/api";
-import "survey-core/survey-core.min.css";
+
+// SurveyJS imports
+import "survey-core/defaultV2.min.css";
 import "survey-creator-core/survey-creator-core.min.css";
-import { SurveyCreator } from "survey-creator-react";
-import { ArrowLeft, Save, Eye, Download, Loader2 } from "lucide-react";
+import { SurveyCreator, SurveyCreatorComponent } from "survey-creator-react";
+
+import { ArrowLeft, Save, Download, Loader2 } from "lucide-react";
 
 export default function FormBuilder() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const creatorContainerRef = useRef(null);
-  const creatorInstanceRef = useRef(null);
   const [form, setForm] = useState(null);
   const [title, setTitle] = useState("");
   const [saving, setSaving] = useState(false);
   const [savingSuccess, setSavingSuccess] = useState(false);
   const titleInputRef = useRef(null);
+
+  // Initialize SurveyJS Creator with options
+  const creator = useMemo(() => {
+    const options = {
+      showThemeTab: true,
+      showLogicTab: true,
+      showTranslationTab: true,
+      showJSONEditorTab: true,
+      showEmbeddedSurveyTab: false,
+      isAutoSave: false,
+    };
+    const c = new SurveyCreator(options);
+    
+    // Explicitly ensure visibility of all tabs
+    c.showDesignerTab = true;
+    c.showPreviewTab = true;
+    
+    return c;
+  }, []);
 
   // Load existing form
   useEffect(() => {
@@ -26,79 +46,36 @@ export default function FormBuilder() {
         if (titleInputRef.current) {
           titleInputRef.current.value = data.title;
         }
+        if (data.schema) {
+          creator.JSON = data.schema;
+        }
       }).catch(() => navigate("/dashboard"));
-    }
-  }, [id, navigate]);
-
-  // Initialize SurveyJS Creator
-  useEffect(() => {
-    if (!creatorContainerRef.current || creatorInstanceRef.current) return;
-
-    const creator = new SurveyCreator();
-
-    // Set tab visibility BEFORE render
-    creator.showThemeTab = true;
-    creator.showLogicTab = true;
-    creator.showTranslationTab = true;
-    creator.showJSONEditorTab = true;
-    creator.showEmbeddedSurveyTab = false;
-    creator.isAutoSave = false;
-
-    // Set initial JSON
-    if (form?.schema) {
-      creator.JSON = form.schema;
     } else {
       creator.JSON = {
         title: "New Form",
         pages: [{ elements: [] }],
       };
     }
+  }, [id, navigate, creator]);
 
-    // Render to container
-    creator.render(creatorContainerRef.current);
-
-    // Set tab visibility AFTER render (v1.12.x requires this)
-    // Using microtask to ensure DOM is ready
-    Promise.resolve().then(() => {
-      if (creator.tabs) {
-        creator.tabs.forEach((tab) => {
-          const tabId = (tab.id || tab.name || "").toLowerCase();
-          if (["designer", "preview", "theme", "logic", "translation", "json"].includes(tabId)) {
-            tab.visible = true;
-          }
-        });
-      }
-    });
-
-    creatorInstanceRef.current = creator;
-
-    // Listen for title changes
-    if (creator.survey) {
-      creator.survey.onPropertyChanged.add((_, options) => {
-        if (options.name === "title" && titleInputRef.current) {
-          setTitle(options.newValue || "");
-        }
-      });
-    }
-
-    return () => {
-      if (creatorInstanceRef.current) {
-        try {
-          creatorInstanceRef.current.dispose();
-        } catch (e) {
-          // Ignore disposal errors
-        }
-        creatorInstanceRef.current = null;
+  // Listen for title changes in the survey
+  useEffect(() => {
+    const onPropertyChanged = (_, options) => {
+      if (options.name === "title" && titleInputRef.current) {
+        setTitle(options.newValue || "");
+        titleInputRef.current.value = options.newValue || "";
       }
     };
-  }, [form]);
+    creator.survey.onPropertyChanged.add(onPropertyChanged);
+    return () => creator.survey.onPropertyChanged.remove(onPropertyChanged);
+  }, [creator]);
 
   const handleSave = useCallback(async () => {
-    if (!creatorInstanceRef.current || saving) return;
+    if (saving) return;
     setSaving(true);
     setSavingSuccess(false);
     try {
-      const json = creatorInstanceRef.current.JSON;
+      const json = creator.JSON;
       const surveyTitle = titleInputRef.current?.value || title || "Untitled Form";
       if (id) {
         await api.updateForm(id, { title: surveyTitle, schema: json });
@@ -113,7 +90,7 @@ export default function FormBuilder() {
     } finally {
       setSaving(false);
     }
-  }, [id, title, navigate, saving]);
+  }, [id, title, navigate, saving, creator]);
 
   // Keyboard shortcut Ctrl+S
   useEffect(() => {
@@ -128,8 +105,7 @@ export default function FormBuilder() {
   }, [handleSave]);
 
   const handleExport = () => {
-    if (!creatorInstanceRef.current) return;
-    const json = JSON.stringify(creatorInstanceRef.current.JSON, null, 2);
+    const json = JSON.stringify(creator.JSON, null, 2);
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -184,8 +160,8 @@ export default function FormBuilder() {
       </header>
 
       {/* Creator Container */}
-      <div className="flex-1 overflow-hidden">
-        <div ref={creatorContainerRef} className="h-full w-full" />
+      <div className="flex-1 overflow-hidden h-[calc(100vh-3.5rem)]">
+        <SurveyCreatorComponent creator={creator} />
       </div>
     </div>
   );

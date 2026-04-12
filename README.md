@@ -1,6 +1,17 @@
-# Curious - Form Builder Platform
+# Curious - Form Builder Platform para Psicólogos
 
-Sistema completo para profissionais de saúde criarem formulários, compartilharem com pacientes e coletarem respostas.
+Sistema completo para psicólogos e profissionais de saúde criarem formulários clínicos, compartilharem com pacientes e coletarem respostas de forma estruturada.
+
+## ✨ Funcionalidades Profissionais (SurveyJS V2)
+
+O editor de formulários foi atualizado para a versão **SurveyJS Creator V2**, oferecendo uma experiência completa de criação:
+
+- **🎨 Designer:** Arrastar e soltar elementos para construir o formulário.
+- **👁️ Preview:** Testar o formulário em tempo real (Desktop, Tablet e Mobile).
+- **💅 Themes:** Personalizar o visual (cores, fontes, bordas) sem precisar de código.
+- **🧠 Logic:** Criar fluxos condicionais (pular perguntas, mostrar campos baseados em respostas).
+- **🌐 Translations:** Traduzir o formulário para múltiplos idiomas de forma centralizada.
+- **💻 JSON Editor:** Acesso direto ao esquema JSON para ajustes avançados.
 
 ## 🏗️ Arquitetura
 
