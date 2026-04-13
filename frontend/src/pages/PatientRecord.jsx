@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
-import { exportToPdf } from "../lib/pdf";
+import { generatePremiumSummary } from "../lib/pdf";
+import { scoreTest } from "../lib/scoring";
 import {
   ArrowLeft,
   Mail,
@@ -18,7 +19,11 @@ import {
   Users,
   LogOut,
   AlertCircle,
-  FileDown
+  FileDown,
+  Activity,
+  AlertTriangle,
+  Search,
+  BookOpen
 } from "lucide-react";
 
 export default function PatientRecord() {
@@ -27,7 +32,8 @@ export default function PatientRecord() {
   const { user, logout } = useAuth();
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedResponse, setSelectedResponse] = useState(null);
+  const [selectedResponseId, setSelectedResponseId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     loadPatient();
@@ -50,18 +56,18 @@ export default function PatientRecord() {
     navigate("/login");
   };
 
-  const handleExportPdf = (response) => {
+  const handleExportPremium = (response) => {
     try {
-      const fileName = `${patient.name}_${response.form.title}_${new Date(response.createdAt).toISOString().split('T')[0]}.pdf`;
-      // We need the form schema. In the patient route, we are including the response.form, 
-      // but let's make sure the backend returns the schema in the patient details.
-      if (!response.form.schema) {
-        throw new Error("Form schema not found. Cannot export PDF.");
-      }
-      exportToPdf(response.form.schema, response.data, fileName);
+      generatePremiumSummary(patient, response);
     } catch (error) {
       alert(error.message);
     }
+  };
+
+  const toggleResponse = (e, responseId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedResponseId(selectedResponseId === responseId ? null : responseId);
   };
 
   if (loading) {
@@ -177,12 +183,10 @@ export default function PatientRecord() {
                 {patient.responses.map((response) => (
                   <div key={response.id} className="card overflow-hidden">
                     <div
-                      className="w-full flex items-center justify-between p-4 hover:bg-brand-50 transition-colors text-left"
+                      className="w-full flex items-center justify-between p-4 hover:bg-brand-50 transition-colors cursor-pointer"
+                      onClick={(e) => toggleResponse(e, response.id)}
                     >
-                      <button 
-                        onClick={() => setSelectedResponse(selectedResponse === response.id ? null : response.id)}
-                        className="flex items-center gap-4 flex-1"
-                      >
+                      <div className="flex items-center gap-4 flex-1">
                         <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
                           <FileText size={20} />
                         </div>
@@ -192,40 +196,108 @@ export default function PatientRecord() {
                             {new Date(response.createdAt).toLocaleString()}
                           </p>
                         </div>
-                      </button>
+                      </div>
                       
                       <div className="flex items-center gap-2 px-4">
                         <button
-                          onClick={() => handleExportPdf(response)}
-                          className="p-2 rounded-lg hover:bg-brand-100 text-brand-400 hover:text-brand-950 transition-colors"
-                          title="Export PDF"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleExportPremium(response);
+                          }}
+                          className="btn btn-secondary py-1.5 px-3 text-[10px] flex items-center gap-2 border-brand-200 hover:border-brand-950 transition-all"
+                          title="Premium Summary PDF"
                         >
-                          <FileDown size={18} />
+                          <BookOpen size={14} />
+                          Resumo Premium
                         </button>
                         <ChevronRight
                           size={18}
-                          className={`text-brand-300 transition-transform ${selectedResponse === response.id ? 'rotate-90' : ''}`}
+                          className={`text-brand-300 transition-transform duration-300 ${selectedResponseId === response.id ? 'rotate-90 text-brand-950' : ''}`}
                         />
                       </div>
                     </div>
 
-                    {selectedResponse === response.id && (
-                      <div className="p-4 bg-brand-50 border-t border-brand-100 animate-fade-in">
-                        <div className="bg-white rounded-lg p-4 border border-brand-100">
-                          <h5 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-4">Response Data</h5>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {Object.entries(response.data).map(([key, value]) => (
-                              <div key={key} className="space-y-1">
-                                <span className="text-xs text-brand-400 font-medium">{key}</span>
-                                <div className="text-sm text-brand-950 font-medium bg-brand-50/50 p-2 rounded">
-                                  {typeof value === "object" ? JSON.stringify(value) : String(value)}
+                    {selectedResponseId === response.id && (
+                      <div className="p-4 bg-brand-50 border-t border-brand-100 animate-fade-in max-h-[700px] overflow-y-auto">
+                        <div className="sticky top-0 z-10 bg-brand-50 pb-4">
+                          <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-400" size={14} />
+                            <input 
+                              type="text" 
+                              placeholder="Pesquisar nas respostas..."
+                              className="input pl-10 text-xs py-2 bg-white"
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerm(e.target.value)}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Clinical Insight Card (Optional) */}
+                        {(() => {
+                          const result = scoreTest(null, response.data);
+                          if (result.type === "clinical" && !searchTerm) {
+                            return (
+                              <div className={`mb-4 p-5 rounded-xl border-2 bg-white shadow-sm`}>
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <Activity size={18} className="text-brand-950" />
+                                    <h5 className="font-bold text-xs uppercase tracking-widest text-brand-950">{result.title}</h5>
+                                  </div>
+                                  <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${result.color}`}>
+                                    {result.severity}
+                                  </span>
+                                </div>
+                                <div className="flex items-baseline gap-2 mb-3">
+                                  <span className="text-4xl font-bold text-brand-950">{result.score}</span>
+                                  <span className="text-sm text-brand-400 font-medium">de {result.maxScore} pontos</span>
+                                </div>
+                                {result.alert && (
+                                  <div className="flex items-center gap-2 p-3 rounded-lg bg-red-600 text-white text-xs font-bold mb-4 shadow-lg shadow-red-200 animate-pulse">
+                                    <AlertTriangle size={16} />
+                                    {result.alert}
+                                  </div>
+                                )}
+                                <div className="p-3 bg-brand-50 rounded-lg border border-brand-100">
+                                  <p className="text-sm text-brand-700 leading-relaxed italic">"{result.interpretation}"</p>
                                 </div>
                               </div>
-                            ))}
+                            );
+                          }
+                          return null;
+                        })()}
+
+                        <div className="bg-white rounded-lg p-4 border border-brand-100">
+                          <h5 className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-4">Detalhamento das Respostas</h5>
+                          <div className="grid grid-cols-1 gap-2">
+                            {Object.entries(response.data)
+                              .filter(([key, value]) => 
+                                key.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                JSON.stringify(value).toLowerCase().includes(searchTerm.toLowerCase())
+                              )
+                              .map(([key, value]) => (
+                                <div key={key} className="flex items-start gap-4 p-3 rounded-lg hover:bg-brand-50 transition-colors border border-transparent hover:border-brand-100 group">
+                                  <div className="flex-1 min-w-0">
+                                    <span className="text-[10px] text-brand-400 font-bold uppercase tracking-tight block mb-1 group-hover:text-brand-950 transition-colors">
+                                      {key.replace(/_/g, ' ')}
+                                    </span>
+                                    <div className="text-sm text-brand-950 font-medium">
+                                      {typeof value === "object" 
+                                        ? <pre className="text-xs bg-brand-50 p-2 rounded mt-1 overflow-x-auto">{JSON.stringify(value, null, 2)}</pre>
+                                        : String(value)
+                                      }
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
                           </div>
                         </div>
                       </div>
                     )}
+                  </div>
+                ))}
+              </div>
+            )}
                   </div>
                 ))}
               </div>
