@@ -9,6 +9,7 @@ O Curious foi expandido para ser uma ferramenta completa de gestão clínica:
 - **👥 Gestão de Pacientes:** Cadastro completo de pacientes com dados de contato, data de nascimento e notas clínicas.
 - **📁 Prontuário Eletrônico:** Histórico centralizado de todas as respostas e formulários enviados para cada paciente.
 - **📄 Exportação em PDF:** Geração de relatórios clínicos profissionais com layout de papel timbrado para cada resposta.
+- **🔗 Compartilhamento Inteligente:** Gere links únicos para pacientes específicos, associando as respostas automaticamente ao prontuário.
 - **📚 Biblioteca de Templates:** Modelos prontos (PHQ-9, GAD-7, Anamnese) para importação imediata.
 - **🎨 Designer (SurveyJS V2):** Arrastar e soltar elementos para construir formulários profissionais.
 - **👁️ Preview:** Testar o formulário em tempo real (Desktop, Tablet e Mobile).

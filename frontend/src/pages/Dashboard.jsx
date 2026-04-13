@@ -13,10 +13,28 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [showTemplates, setShowTemplates] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [selectedForm, setSelectedForm] = useState(null);
+  const [patients, setPatients] = useState([]);
+  const [shareData, setShareData] = useState({
+    patientId: "",
+    expiresAt: ""
+  });
+  const [generatedLink, setGeneratedLink] = useState("");
 
   useEffect(() => {
     loadData();
+    loadPatients();
   }, []);
+
+  const loadPatients = async () => {
+    try {
+      const data = await api.getPatients();
+      setPatients(data);
+    } catch (error) {
+      console.error("Failed to load patients:", error);
+    }
+  };
 
   const loadData = async () => {
     setLoading(true);
@@ -68,6 +86,22 @@ export default function Dashboard() {
       setShowTemplates(false);
     } catch (error) {
       alert("Failed to import template: " + error.message);
+    }
+  };
+
+  const handleCreateShareLink = async (e) => {
+    e.preventDefault();
+    try {
+      const result = await api.createShareLink({
+        formId: selectedForm.id,
+        patientId: shareData.patientId || undefined,
+        expiresAt: shareData.expiresAt || undefined
+      });
+      // The backend returns a relative shareUrl, let's make it absolute for the UI
+      const absoluteUrl = `${window.location.origin}/form/${result.token}`;
+      setGeneratedLink(absoluteUrl);
+    } catch (error) {
+      alert("Failed to create link: " + error.message);
     }
   };
 
@@ -194,11 +228,103 @@ export default function Dashboard() {
                 stats={stats[form.id]}
                 onDelete={handleDelete}
                 onDuplicate={handleDuplicate}
+                onShare={() => {
+                  setSelectedForm(form);
+                  setShareData({ patientId: "", expiresAt: "" });
+                  setShowShareModal(true);
+                  setGeneratedLink("");
+                }}
               />
             ))}
           </div>
         )}
       </main>
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-950/20 backdrop-blur-sm">
+          <div className="card w-full max-w-md p-6 animate-scale-in">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-brand-950">Share Form</h2>
+              <button onClick={() => setShowShareModal(false)} className="text-brand-400 hover:text-brand-600">
+                <Plus size={24} className="rotate-45" />
+              </button>
+            </div>
+
+            {!generatedLink ? (
+              <form onSubmit={handleCreateShareLink} className="space-y-4">
+                <div className="p-3 bg-brand-50 rounded-lg border border-brand-100 mb-4">
+                  <p className="text-xs text-brand-500 font-medium uppercase tracking-wider mb-1">Form</p>
+                  <p className="text-sm font-semibold text-brand-950">{selectedForm?.title}</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-brand-700 mb-1">Assign to Patient (Optional)</label>
+                  <select 
+                    className="input"
+                    value={shareData.patientId}
+                    onChange={(e) => setShareData({ ...shareData, patientId: e.target.value })}
+                  >
+                    <option value="">Select a patient...</option>
+                    {patients.map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                  <p className="text-[10px] text-brand-400 mt-1">Assignments allow responses to be automatically saved to the patient record.</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-brand-700 mb-1">Expiration Date (Optional)</label>
+                  <input 
+                    type="date" 
+                    className="input"
+                    value={shareData.expiresAt}
+                    onChange={(e) => setShareData({ ...shareData, expiresAt: e.target.value })}
+                  />
+                </div>
+
+                <button type="submit" className="btn btn-primary w-full mt-4">
+                  Generate Link
+                </button>
+              </form>
+            ) : (
+              <div className="space-y-4 animate-fade-in">
+                <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-100 text-center">
+                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Share2 size={24} className="text-emerald-600" />
+                  </div>
+                  <h3 className="font-semibold text-brand-950">Link Generated!</h3>
+                  <p className="text-xs text-brand-500 mt-1">Copy and send this link to your patient.</p>
+                </div>
+
+                <div className="relative group">
+                  <input 
+                    readOnly 
+                    className="input pr-20 bg-brand-50 font-mono text-xs"
+                    value={generatedLink}
+                  />
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(generatedLink);
+                      alert("Link copied to clipboard!");
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-primary py-1 px-3 text-[10px]"
+                  >
+                    Copy
+                  </button>
+                </div>
+
+                <button 
+                  onClick={() => setShowShareModal(false)}
+                  className="btn btn-secondary w-full"
+                >
+                  Close
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Templates Modal */}
       {showTemplates && (
@@ -261,7 +387,7 @@ function StatCard({ icon, label, value, color }) {
   );
 }
 
-function FormCard({ form, stats, onDelete, onDuplicate }) {
+function FormCard({ form, stats, onDelete, onDuplicate, onShare }) {
   const [copied, setCopied] = useState(false);
   const shareUrl = stats?.latestResponse ? `${window.location.origin}/share/${form.id}` : null;
 
@@ -319,6 +445,10 @@ function FormCard({ form, stats, onDelete, onDuplicate }) {
           <FileText size={14} />
           Edit
         </Link>
+        <button onClick={onShare} className="btn btn-primary text-xs flex-1">
+          <Share2 size={14} />
+          Share
+        </button>
         <Link to={`/forms/${form.id}/responses`} className="btn btn-ghost text-xs">
           <BarChart3 size={14} />
           Responses
