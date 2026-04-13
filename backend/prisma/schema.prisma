@@ -8,73 +8,68 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
+  id        String     @id @default(uuid())
+  email     String     @unique
   name      String
   password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  forms      Form[]
-  responses  Response[]
-  patients   Patient[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  forms     Form[]
+  patients  Patient[]
+  responses Response[]
 }
 
 model Patient {
-  id             String   @id @default(uuid())
+  id             String      @id @default(uuid())
   name           String
   email          String?
   phone          String?
   birthDate      DateTime?
-  notes          String?  @db.Text
+  notes          String?
   psychologistId String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  psychologist User       @relation(fields: [psychologistId], references: [id])
-  responses    Response[]
-  shareLinks   ShareLink[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  psychologist   User        @relation(fields: [psychologistId], references: [id])
+  responses      Response[]
+  shareLinks     ShareLink[]
 
   @@unique([email, psychologistId])
 }
 
 model Form {
-  id        String   @id @default(uuid())
-  title     String
-  schema    Json     // SurveyJS JSON schema
-  createdBy String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  creator       User           @relation(fields: [createdBy], references: [id])
-  shareLinks    ShareLink[]
-  responses     Response[]
+  id         String      @id @default(uuid())
+  title      String
+  schema     Json
+  createdBy  String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  creator    User        @relation(fields: [createdBy], references: [id])
+  responses  Response[]
+  shareLinks ShareLink[]
 }
 
 model ShareLink {
-  id        String   @id @default(uuid())
-  token     String   @unique // unique share token
-  formId    String
-  patientId String?
-  patientName String?  // Keep for legacy/quick links
-  patientEmail String? // Keep for legacy/quick links
-  createdAt DateTime @default(now())
-  expiresAt DateTime?
-  active    Boolean  @default(true)
-
-  form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
-  patient   Patient? @relation(fields: [patientId], references: [id])
+  id           String    @id @default(uuid())
+  token        String    @unique
+  formId       String
+  patientName  String?
+  patientEmail String?
+  createdAt    DateTime  @default(now())
+  expiresAt    DateTime?
+  active       Boolean   @default(true)
+  patientId    String?
+  form         Form      @relation(fields: [formId], references: [id], onDelete: Cascade)
+  patient      Patient?  @relation(fields: [patientId], references: [id])
 }
 
 model Response {
   id        String   @id @default(uuid())
   formId    String
-  userId    String?  // Psychologist id (if tested by them)
-  patientId String?  // Linked patient
-  data      Json     // SurveyJS response data
+  userId    String?
+  data      Json
   createdAt DateTime @default(now())
-
-  form    Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
-  user    User?    @relation(fields: [userId], references: [id])
-  patient Patient? @relation(fields: [patientId], references: [id])
+  patientId String?
+  form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  patient   Patient? @relation(fields: [patientId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
 }

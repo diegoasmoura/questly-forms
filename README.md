@@ -9,6 +9,7 @@ O Curious foi expandido para ser uma ferramenta completa de gestão clínica:
 - **👥 Gestão de Pacientes:** Cadastro completo de pacientes com dados de contato, data de nascimento e notas clínicas.
 - **📁 Prontuário Eletrônico:** Histórico centralizado de todas as respostas e formulários enviados para cada paciente.
 - **📄 Exportação em PDF:** Geração de relatórios clínicos profissionais com layout de papel timbrado para cada resposta.
+- **📚 Biblioteca de Templates:** Modelos prontos (PHQ-9, GAD-7, Anamnese) para importação imediata.
 - **🎨 Designer (SurveyJS V2):** Arrastar e soltar elementos para construir formulários profissionais.
 - **👁️ Preview:** Testar o formulário em tempo real (Desktop, Tablet e Mobile).
 - **🧠 Logic & Translation:** Fluxos condicionais e suporte a múltiplos idiomas.
@@ -89,11 +90,13 @@ surveyJS/
 │   │   ├── server.js          # Express app + routes
 │   │   ├── db.js              # Prisma client
 │   │   ├── middleware/auth.js # JWT middleware
-│   │   └── routes/
-│   │       ├── auth.js        # /api/auth/register, /login, /me
-│   │       ├── forms.js       # /api/forms (CRUD + stats)
-│   │       ├── responses.js   # /api/responses (view, aggregate)
-│   │       └── share.js       # /api/share (create, revoke links)
+│       ├── routes/
+│       │   ├── auth.js        # /api/auth/register, /login, /me
+│       │   ├── forms.js       # /api/forms (CRUD + stats)
+│       │   ├── patients.js    # /api/patients (CRUD + records)
+│       │   ├── responses.js   # /api/responses (view, aggregate)
+│       │   └── share.js       # /api/share (create, revoke links)
+
 │   ├── prisma/
 │   │   └── schema.prisma      # Database schema
 │   └── Dockerfile
@@ -104,13 +107,19 @@ surveyJS/
 │   │   │   ├── Landing.jsx      # Homepage
 │   │   │   ├── Login.jsx        # Login page
 │   │   │   ├── Register.jsx     # Registration page
-│   │   │   ├── Dashboard.jsx    # Forms management
+│   │   │   ├── Dashboard.jsx    # Forms management + Templates
+│   │   │   ├── Patients.jsx     # Patient list
+│   │   │   ├── PatientRecord.jsx# Clinical history
 │   │   │   ├── FormBuilder.jsx  # SurveyJS Creator
 │   │   │   ├── FormResponses.jsx# Responses viewer
 │   │   │   ├── ShareLink.jsx    # Share confirmation
 │   │   │   └── PatientForm.jsx  # Public form renderer
 │   │   ├── context/AuthContext.jsx
-│   │   ├── lib/api.js           # API client
+│   │   ├── lib/
+│   │   │   ├── api.js           # API client
+│   │   │   ├── pdf.js           # PDF export logic
+│   │   │   ├── templates.js     # Clinical models library
+│   │   │   └── utils.js
 │   │   └── index.css            # Tailwind + custom styles
 │   └── Dockerfile
 │

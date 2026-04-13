@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
-import { Plus, FileText, BarChart3, Share2, Trash2, Copy, Clock, ExternalLink, LogOut, LayoutDashboard, Settings } from "lucide-react";
+import { clinicalTemplates } from "../lib/templates";
+import { Plus, FileText, BarChart3, Share2, Trash2, Copy, Clock, ExternalLink, LogOut, LayoutDashboard, Settings, BookTemplate, Users } from "lucide-react";
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -11,6 +12,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showTemplates, setShowTemplates] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -56,6 +58,19 @@ export default function Dashboard() {
     }
   };
 
+  const handleImportTemplate = async (template) => {
+    try {
+      const newForm = await api.createForm({
+        title: template.title,
+        schema: template.schema
+      });
+      setForms([newForm, ...forms]);
+      setShowTemplates(false);
+    } catch (error) {
+      alert("Failed to import template: " + error.message);
+    }
+  };
+
   const handleLogout = () => {
     logout();
     navigate("/login");
@@ -78,9 +93,13 @@ export default function Dashboard() {
                 curious
               </Link>
               <nav className="hidden md:flex items-center gap-1">
-                <Link to="/dashboard" className="btn btn-ghost text-sm">
+                <Link to="/dashboard" className="btn btn-ghost text-sm bg-brand-100 text-brand-950">
                   <LayoutDashboard size={16} />
                   Dashboard
+                </Link>
+                <Link to="/patients" className="btn btn-ghost text-sm">
+                  <Users size={16} />
+                  Patients
                 </Link>
               </nav>
             </div>
@@ -113,10 +132,16 @@ export default function Dashboard() {
             <h1 className="text-2xl font-semibold text-brand-950">My Forms</h1>
             <p className="text-sm text-brand-500 mt-1">Create and manage your survey forms</p>
           </div>
-          <Link to="/forms/new" className="btn btn-primary">
-            <Plus size={16} />
-            New Form
-          </Link>
+          <div className="flex gap-2">
+            <button onClick={() => setShowTemplates(true)} className="btn btn-secondary">
+              <BookTemplate size={16} />
+              Templates
+            </button>
+            <Link to="/forms/new" className="btn btn-primary">
+              <Plus size={16} />
+              New Form
+            </Link>
+          </div>
         </div>
 
         {/* Search */}
@@ -174,6 +199,48 @@ export default function Dashboard() {
           </div>
         )}
       </main>
+
+      {/* Templates Modal */}
+      {showTemplates && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-950/20 backdrop-blur-sm">
+          <div className="card w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden animate-scale-in">
+            <div className="p-6 border-b border-brand-100 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-brand-950">Clinical Templates</h2>
+                <p className="text-sm text-brand-500">Professional models ready for use</p>
+              </div>
+              <button onClick={() => setShowTemplates(false)} className="text-brand-400 hover:text-brand-600">
+                <Plus size={24} className="rotate-45" />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {clinicalTemplates.map((template) => (
+                <div key={template.id} className="card p-4 hover:border-brand-300 transition-colors group">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-brand-950">{template.title}</h3>
+                      <p className="text-sm text-brand-500 mt-1">{template.description}</p>
+                    </div>
+                    <button 
+                      onClick={() => handleImportTemplate(template)}
+                      className="btn btn-primary text-xs shrink-0"
+                    >
+                      Use Template
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-6 border-t border-brand-100 bg-brand-50/50">
+              <p className="text-xs text-brand-400 text-center">
+                Imported templates can be fully customized in the Form Builder.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
