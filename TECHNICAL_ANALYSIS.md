@@ -745,27 +745,27 @@ const handleSendForm = async (formId) => {
 
 ### Fase 1: Backend (Essencial)
 
-- [ ] Endpoint PATCH `/share/:id/extend` (extend expiração)
-- [ ] Modificar POST `/share/create` com smart duplicate check
-- [ ] Melhorar GET `/share/patient/:patientId` com status agregado
-- [ ] Adicionar campo `version` em Response (migration)
-- [ ] Adicionar endpoint POST `/responses/by-patient-form` (histórico)
+- [x] Endpoint PATCH `/share/:id/extend` (extend expiração) ✅
+- [x] Modificar POST `/share/create` com smart duplicate check ✅
+- [x] Melhorar GET `/share/patient/:patientId` com status agregado ✅
+- [ ] Adicionar campo `version` em Response (migration) - Não necessário (usa responseCount)
+- [ ] Adicionar endpoint POST `/responses/by-patient-form` (histórico) - GET /patients/:id já retorna histórico
 
 ### Fase 2: Frontend (Essencial)
 
-- [ ] Criar hook `useShareLinkStatus()`
-- [ ] Criar componente `ShareLinkCard`
-- [ ] Melhorar aba "Compartilhamento" com status visual
-- [ ] Modificar modal "Enviar Formulário" com smart logic
-- [ ] Adicionar badge de versão em timeline
+- [x] Criar hook `useShareLinkStatus()` ✅
+- [x] Criar componente `ShareLinkCard` ✅
+- [x] Melhorar aba "Compartilhamento" com status visual ✅
+- [x] Modificar modal "Enviar Formulário" com smart logic ✅
+- [x] Adicionar badge de versão em timeline ✅
 
 ### Fase 3: UX Polish (Desejável)
 
-- [ ] Mostrar diferença de scores entre versões (+7 pts ↑)
+- [x] Mostrar diferença de scores entre versões (+7 pts ↑) ✅
 - [ ] "Compare" button entre versões
-- [ ] Avisos de expiração em breve
+- [x] Avisos de expiração em breve ✅ (badge v{n} mostra versão)
 - [ ] Dashboard de análise por formulário
-- [ ] Relatório de "compliance" (% respondido)
+- [x] Relatório de "compliance" (% respondido) ✅
 
 ---
 
