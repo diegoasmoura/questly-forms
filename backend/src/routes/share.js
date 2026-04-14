@@ -4,6 +4,65 @@ import prisma from "../db.js";
 import { authMiddleware } from "../middleware/auth.js";
 
 const router = Router();
+
+// ==========================================
+// PUBLIC ROUTES (No auth required)
+// ==========================================
+
+// Get form data by share token (public)
+router.get("/:token", async (req, res) => {
+  try {
+    const link = await prisma.shareLink.findFirst({
+      where: { token: req.params.token, active: true },
+      include: { form: true },
+    });
+    
+    if (!link) return res.status(404).json({ error: "Link not found or inactive" });
+    if (link.expiresAt && new Date(link.expiresAt) < new Date()) {
+      return res.status(404).json({ error: "Link has expired" });
+    }
+
+    res.json({
+      id: link.form.id,
+      title: link.form.title,
+      schema: link.form.schema,
+    });
+  } catch (error) {
+    console.error("Error fetching shared form:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Submit response via share link (public)
+router.post("/:token/submit", async (req, res) => {
+  try {
+    const link = await prisma.shareLink.findFirst({
+      where: { token: req.params.token, active: true },
+    });
+    
+    if (!link) return res.status(404).json({ error: "Link not found or inactive" });
+    if (link.expiresAt && new Date(link.expiresAt) < new Date()) {
+      return res.status(404).json({ error: "Link has expired" });
+    }
+
+    const response = await prisma.response.create({
+      data: {
+        formId: link.formId,
+        patientId: link.patientId || null,
+        data: req.body,
+      },
+    });
+
+    res.status(201).json({ success: true, responseId: response.id });
+  } catch (error) {
+    console.error("Error submitting response:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ==========================================
+// AUTHENTICATED ROUTES
+// ==========================================
 router.use(authMiddleware);
 
 // Create share link

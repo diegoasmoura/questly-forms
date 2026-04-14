@@ -22,7 +22,9 @@ export default function Dashboard() {
     patientId: "",
     expiresAt: ""
   });
-  const [generatedLink, setGeneratedLink] = useState("");
+  const [existingLinks, setExistingLinks] = useState([]);
+  const [loadingLinks, setLoadingLinks] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -35,6 +37,18 @@ export default function Dashboard() {
       setPatients(data);
     } catch (error) {
       console.error("Failed to load patients:", error);
+    }
+  };
+
+  const loadExistingLinks = async (formId) => {
+    setLoadingLinks(true);
+    try {
+      const links = await api.getShareLinks(formId);
+      setExistingLinks(links);
+    } catch (error) {
+      console.error("Failed to load links:", error);
+    } finally {
+      setLoadingLinks(false);
     }
   };
 
@@ -101,22 +115,6 @@ export default function Dashboard() {
       setShowTemplates(false);
     } catch (error) {
       alert("Failed to import template: " + error.message);
-    }
-  };
-
-  const handleCreateShareLink = async (e) => {
-    e.preventDefault();
-    try {
-      const result = await api.createShareLink({
-        formId: selectedForm.id,
-        patientId: shareData.patientId || undefined,
-        expiresAt: shareData.expiresAt || undefined
-      });
-      // The backend returns a relative shareUrl, let's make it absolute for the UI
-      const absoluteUrl = `${window.location.origin}/form/${result.token}`;
-      setGeneratedLink(absoluteUrl);
-    } catch (error) {
-      alert("Failed to create link: " + error.message);
     }
   };
 
@@ -264,7 +262,8 @@ export default function Dashboard() {
                   setSelectedForm(form);
                   setShareData({ patientId: "", expiresAt: "" });
                   setShowShareModal(true);
-                  setGeneratedLink("");
+                  setShowCreateForm(false);
+                  loadExistingLinks(form.id);
                 }}
               />
             ))}
@@ -275,83 +274,180 @@ export default function Dashboard() {
       {/* Share Modal */}
       {showShareModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-950/20 backdrop-blur-sm">
-          <div className="card w-full max-w-md p-6 animate-scale-in">
+          <div className="card w-full max-w-2xl p-6 animate-scale-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-brand-950">Share Form</h2>
+              <div>
+                <h2 className="text-xl font-semibold text-brand-950">Links de Compartilhamento</h2>
+                <p className="text-xs text-brand-500 mt-1">{selectedForm?.title}</p>
+              </div>
               <button onClick={() => setShowShareModal(false)} className="text-brand-400 hover:text-brand-600">
                 <Plus size={24} className="rotate-45" />
               </button>
             </div>
 
-            {!generatedLink ? (
-              <form onSubmit={handleCreateShareLink} className="space-y-4">
-                <div className="p-3 bg-brand-50 rounded-lg border border-brand-100 mb-4">
-                  <p className="text-xs text-brand-500 font-medium uppercase tracking-wider mb-1">Form</p>
-                  <p className="text-sm font-semibold text-brand-950">{selectedForm?.title}</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-brand-700 mb-1">Assign to Patient (Optional)</label>
-                  <select 
-                    className="input"
-                    value={shareData.patientId}
-                    onChange={(e) => setShareData({ ...shareData, patientId: e.target.value })}
-                  >
-                    <option value="">Select a patient...</option>
-                    {patients.map(p => (
-                      <option key={p.id} value={p.id}>{p.name}</option>
-                    ))}
-                  </select>
-                  <p className="text-[10px] text-brand-400 mt-1">Assignments allow responses to be automatically saved to the patient record.</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-brand-700 mb-1">Expiration Date (Optional)</label>
-                  <input 
-                    type="date" 
-                    className="input"
-                    value={shareData.expiresAt}
-                    onChange={(e) => setShareData({ ...shareData, expiresAt: e.target.value })}
-                  />
-                </div>
-
-                <button type="submit" className="btn btn-primary w-full mt-4">
-                  Generate Link
-                </button>
-              </form>
-            ) : (
-              <div className="space-y-4 animate-fade-in">
-                <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-100 text-center">
-                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Share2 size={24} className="text-emerald-600" />
-                  </div>
-                  <h3 className="font-semibold text-brand-950">Link Generated!</h3>
-                  <p className="text-xs text-brand-500 mt-1">Copy and send this link to your patient.</p>
-                </div>
-
-                <div className="relative group">
-                  <input 
-                    readOnly 
-                    className="input pr-20 bg-brand-50 font-mono text-xs"
-                    value={generatedLink}
-                  />
-                  <button 
-                    onClick={() => {
-                      navigator.clipboard.writeText(generatedLink);
-                      alert("Link copied to clipboard!");
-                    }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-primary py-1 px-3 text-[10px]"
-                  >
-                    Copy
-                  </button>
-                </div>
-
-                <button 
-                  onClick={() => setShowShareModal(false)}
-                  className="btn btn-secondary w-full"
+            {/* Existing Links */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-bold text-brand-950 uppercase tracking-wider">
+                  Links Existentes ({existingLinks.length})
+                </h3>
+                <button
+                  onClick={() => setShowCreateForm(true)}
+                  className="btn btn-primary text-xs"
                 >
-                  Close
+                  <Plus size={14} />
+                  Novo Link
                 </button>
+              </div>
+
+              {loadingLinks ? (
+                <div className="text-center py-8 text-brand-400">
+                  <div className="animate-spin w-6 h-6 border-2 border-brand-950 border-t-transparent rounded-full mx-auto mb-2" />
+                  <p className="text-xs">Carregando links...</p>
+                </div>
+              ) : existingLinks.length === 0 ? (
+                <div className="text-center py-8 bg-brand-50 rounded-lg border border-brand-100">
+                  <Share2 size={32} className="mx-auto text-brand-300 mb-2" />
+                  <p className="text-sm text-brand-500">Nenhum link criado ainda</p>
+                  <p className="text-xs text-brand-400 mt-1">Clique em "Novo Link" para começar</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {existingLinks.map(link => {
+                    const shareUrl = `${window.location.origin}/share/${link.token}`;
+                    const isActive = link.active && (!link.expiresAt || new Date(link.expiresAt) > new Date());
+                    
+                    return (
+                      <div key={link.id} className={`p-4 rounded-lg border transition-all ${isActive ? 'bg-white border-brand-100 hover:border-brand-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+                        <div className="flex items-start justify-between gap-3 mb-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+                              <span className="text-xs font-medium text-brand-950">
+                                {isActive ? "Ativo" : "Inativo"}
+                              </span>
+                              {link.patient && (
+                                <span className="text-[10px] px-2 py-0.5 bg-brand-100 text-brand-700 rounded-full font-medium">
+                                  {link.patient.name}
+                                </span>
+                              )}
+                              {link.expiresAt && (
+                                <span className="text-[10px] text-brand-400">
+                                  Expira em {new Date(link.expiresAt).toLocaleDateString('pt-BR')}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-brand-400">
+                              Criado em {new Date(link.createdAt).toLocaleDateString('pt-BR')}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <input
+                            readOnly
+                            className="input flex-1 bg-brand-50 font-mono text-[10px] py-1.5"
+                            value={shareUrl}
+                          />
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(shareUrl);
+                              alert("Link copiado!");
+                            }}
+                            className="btn btn-secondary text-[10px] py-1.5 px-3"
+                          >
+                            Copiar
+                          </button>
+                          {isActive && (
+                            <button
+                              onClick={async () => {
+                                if (!confirm("Revogar este link?")) return;
+                                try {
+                                  await api.revokeShareLink(link.id);
+                                  // Reload links
+                                  loadExistingLinks(selectedForm.id);
+                                  // Reload stats to update Active Links count
+                                  loadData();
+                                } catch (error) {
+                                  alert("Erro ao revogar: " + error.message);
+                                }
+                              }}
+                              className="btn btn-ghost text-[10px] py-1.5 px-3 text-red-600 hover:bg-red-50"
+                            >
+                              Revogar
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Create New Link Form */}
+            {showCreateForm && (
+              <div className="border-t border-brand-100 pt-6 animate-fade-in">
+                <h3 className="text-sm font-bold text-brand-950 uppercase tracking-wider mb-4">
+                  Criar Novo Link
+                </h3>
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  try {
+                    const result = await api.createShareLink({
+                      formId: selectedForm.id,
+                      ...shareData,
+                    });
+                    const absoluteUrl = result.shareUrl.startsWith("http")
+                      ? result.shareUrl
+                      : `${window.location.origin}${result.shareUrl}`;
+                    await navigator.clipboard.writeText(absoluteUrl);
+                    alert("Link criado e copiado!");
+                    setShowCreateForm(false);
+                    setShareData({ patientId: "", expiresAt: "" });
+                    loadExistingLinks(selectedForm.id);
+                  } catch (error) {
+                    alert(error.message);
+                  }
+                }} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-brand-700 mb-1">Vincular a Paciente (Opcional)</label>
+                    <select
+                      className="input"
+                      value={shareData.patientId}
+                      onChange={(e) => setShareData({ ...shareData, patientId: e.target.value })}
+                    >
+                      <option value="">Selecionar paciente...</option>
+                      {patients.map(p => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                    <p className="text-[10px] text-brand-400 mt-1">Respostas serão salvas automaticamente no prontuário.</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-brand-700 mb-1">Data de Expiração (Opcional)</label>
+                    <input
+                      type="date"
+                      className="input"
+                      value={shareData.expiresAt}
+                      onChange={(e) => setShareData({ ...shareData, expiresAt: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button type="submit" className="btn btn-primary flex-1">
+                      Gerar e Copiar Link
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowCreateForm(false)}
+                      className="btn btn-ghost"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
               </div>
             )}
           </div>

@@ -113,7 +113,7 @@ router.get("/:id/stats", async (req, res) => {
     });
     if (!form) return res.status(404).json({ error: "Form not found" });
     const responseCount = await prisma.response.count({ where: { formId: req.params.id } });
-    const shareLinkCount = await prisma.shareLink.count({ where: { formId: req.params.id } });
+    const shareLinkCount = await prisma.shareLink.count({ where: { formId: req.params.id, active: true } });
     const latestResponse = await prisma.response.findFirst({
       where: { formId: req.params.id },
       orderBy: { createdAt: "desc" },

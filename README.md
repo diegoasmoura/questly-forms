@@ -60,9 +60,17 @@ Sistema completo para psicólogos e profissionais de saúde criarem formulários
   - Busca integrada
 
 ### 🔗 Compartilhamento Inteligente
-- Links únicos por paciente
-- Associação automática de respostas ao prontuário
-- Links anônimos também suportados
+- Links únicos com tokens UUID
+- **Fluxo simplificado:**
+  1. Clique "Share" → Veja todos os links existentes
+  2. "Novo Link" → Selecione paciente (opcional) → Copiado automaticamente
+  3. Abra `/share/:token` → Formulário SurveyJS abre direto
+  4. Respostas salvas e vinculadas ao prontuário
+- Lista de links com status (Ativo/Inativo)
+- Revogação de links com atualização em tempo real
+- Contador de links ativos atualizado automaticamente
+- Expiração configurável por link
+- Associação automática de respostas ao paciente (se vinculado)
 
 ## 🏗️ Arquitetura
 
