@@ -23,9 +23,28 @@ model User {
 model Patient {
   id             String      @id @default(uuid())
   name           String
+  cpf            String?
+  rg             String?
   email          String?
   phone          String?
   birthDate      DateTime?
+  gender         String?
+  maritalStatus  String?
+  profession     String?
+  
+  // Endereço
+  cep            String?
+  street         String?
+  number         String?
+  complement     String?
+  neighborhood   String?
+  city           String?
+  state          String?
+
+  // Emergência
+  emergencyName  String?
+  emergencyPhone String?
+
   notes          String?
   psychologistId String
   createdAt      DateTime    @default(now())
@@ -35,6 +54,7 @@ model Patient {
   shareLinks     ShareLink[]
 
   @@unique([email, psychologistId])
+  @@unique([cpf, psychologistId])
 }
 
 model Form {

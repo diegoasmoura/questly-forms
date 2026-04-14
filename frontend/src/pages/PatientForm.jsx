@@ -31,7 +31,7 @@ export default function PatientForm() {
       await api.submitSharedForm(token, survey.data);
       setSubmitted(true);
     } catch (err) {
-      alert("Failed to submit. Please try again.");
+      alert("Falha ao enviar. Tente novamente.");
     }
   };
 
@@ -40,7 +40,7 @@ export default function PatientForm() {
       <div className="min-h-screen bg-brand-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="animate-spin text-brand-400" size={32} />
-          <p className="text-sm text-brand-500">Loading form...</p>
+          <p className="text-sm text-brand-500">Carregando formulário...</p>
         </div>
       </div>
     );
@@ -51,10 +51,10 @@ export default function PatientForm() {
       <div className="min-h-screen bg-brand-50 flex items-center justify-center px-4">
         <div className="card max-w-md w-full p-8 text-center">
           <AlertCircle size={48} className="mx-auto text-red-400 mb-4" />
-          <h1 className="text-xl font-semibold text-brand-950 mb-2">Form Not Available</h1>
+          <h1 className="text-xl font-semibold text-brand-950 mb-2">Formulário Indisponível</h1>
           <p className="text-brand-500 mb-6">{error}</p>
           <button onClick={() => navigate("/")} className="btn btn-primary">
-            Go Home
+            Ir para Início
           </button>
         </div>
       </div>
@@ -68,12 +68,12 @@ export default function PatientForm() {
           <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6">
             <Check size={32} className="text-emerald-600" />
           </div>
-          <h1 className="text-2xl font-semibold text-brand-950 mb-2">Thank You!</h1>
+          <h1 className="text-2xl font-semibold text-brand-950 mb-2">Muito Obrigado!</h1>
           <p className="text-brand-500 mb-6">
-            Your responses have been submitted successfully.
+            Suas respostas foram enviadas com sucesso para seu profissional de saúde.
           </p>
           <div className="text-sm text-brand-400">
-            You can close this window.
+            Você já pode fechar esta janela.
           </div>
         </div>
       </div>

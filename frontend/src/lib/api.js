@@ -20,7 +20,12 @@ async function request(endpoint, options = {}) {
   }
 
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Request failed");
+  if (!res.ok) {
+    const error = new Error(data.error || "Request failed");
+    error.status = res.status;
+    error.details = data;
+    throw error;
+  }
   return data;
 }
 

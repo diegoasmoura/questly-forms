@@ -124,42 +124,45 @@ export default function FormBuilder() {
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-brand-50 flex flex-col">
+    <div className="h-full flex flex-col animate-fade-in overflow-hidden">
       {/* Toolbar */}
-      <header className="bg-white border-b border-brand-100 h-14 shrink-0 z-40">
-        <div className="flex items-center justify-between h-full px-4">
-          <div className="flex items-center gap-3">
-            <Link to="/dashboard" className="p-1.5 rounded-lg hover:bg-brand-100 text-brand-500 transition-colors">
-              <ArrowLeft size={18} />
+      <header className="bg-white border-b border-brand-100 h-16 shrink-0 z-10">
+        <div className="flex items-center justify-between h-full px-6">
+          <div className="flex items-center gap-4">
+            <Link to="/my-forms" className="p-2 rounded-xl hover:bg-brand-50 text-brand-400 hover:text-brand-950 transition-all">
+              <ArrowLeft size={20} />
             </Link>
-            <input
-              ref={titleInputRef}
-              type="text"
-              defaultValue={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Form title..."
-              className="text-base font-medium text-brand-950 bg-transparent border-none focus:outline-none placeholder:text-brand-300 w-64"
-            />
+            <div className="flex flex-col">
+              <input
+                ref={titleInputRef}
+                type="text"
+                defaultValue={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Título do Formulário..."
+                className="text-lg font-bold text-brand-950 bg-transparent border-none focus:outline-none placeholder:text-brand-200 w-80"
+              />
+              <span className="text-[10px] text-brand-400 font-bold uppercase tracking-widest px-0.5">Editor Clínico</span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button onClick={handleExport} className="btn btn-ghost text-sm">
+          <div className="flex items-center gap-3">
+            <button onClick={handleExport} className="btn btn-secondary text-xs px-4">
               <Download size={16} />
-              Export
+              Exportar JSON
             </button>
             <button
               onClick={handleSave}
-              className="btn btn-primary text-sm"
+              className="btn btn-primary text-xs px-6 py-2.5 shadow-lg shadow-brand-950/10"
               disabled={saving}
             >
               {saving ? (
                 <Loader2 className="animate-spin" size={16} />
               ) : savingSuccess ? (
-                "✓ Saved"
+                "✓ Salvo"
               ) : (
                 <>
                   <Save size={16} />
-                  Save
+                  Salvar Alterações
                 </>
               )}
             </button>

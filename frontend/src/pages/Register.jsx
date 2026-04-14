@@ -15,17 +15,17 @@ export default function Register() {
     e.preventDefault();
     setError("");
     if (form.password !== form.confirmPassword) {
-      setError("Passwords don't match");
+      setError("As senhas não coincidem");
       return;
     }
     if (form.password.length < 6) {
-      setError("Password must be at least 6 characters");
+      setError("A senha deve ter pelo menos 6 caracteres");
       return;
     }
     setLoading(true);
     try {
       await register({ name: form.name, email: form.email, password: form.password });
-      navigate("/dashboard");
+      navigate("/home");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -47,12 +47,12 @@ export default function Register() {
             curious
           </Link>
           <h1 className="text-5xl font-light leading-tight mb-6" style={{ letterSpacing: "-0.02em" }}>
-            Start building
+            Comece a criar
             <br />
-            powerful forms.
+            formulários poderosos.
           </h1>
           <p className="text-brand-300 text-lg max-w-md leading-relaxed">
-            Join thousands of healthcare professionals who trust Curious for their data collection needs.
+            Junte-se a profissionais de saúde que confiam na Curious para suas necessidades de coleta de dados.
           </p>
         </div>
       </div>
@@ -65,8 +65,8 @@ export default function Register() {
           </Link>
 
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-brand-950 mb-2">Create your account</h2>
-            <p className="text-brand-500">Get started with Curious in seconds</p>
+            <h2 className="text-2xl font-semibold text-brand-950 mb-2">Crie sua conta</h2>
+            <p className="text-brand-500">Comece a usar o Curious em segundos</p>
           </div>
 
           {error && (
@@ -77,11 +77,11 @@ export default function Register() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-brand-700 mb-1.5">Full Name</label>
+              <label className="block text-sm font-medium text-brand-700 mb-1.5">Nome Completo</label>
               <input
                 type="text"
                 className="input"
-                placeholder="Dr. Jane Smith"
+                placeholder="Ex: Dra. Jane Silva"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
@@ -89,11 +89,11 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-brand-700 mb-1.5">Email</label>
+              <label className="block text-sm font-medium text-brand-700 mb-1.5">E-mail</label>
               <input
                 type="email"
                 className="input"
-                placeholder="you@example.com"
+                placeholder="seu@exemplo.com"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 required
@@ -101,12 +101,12 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-brand-700 mb-1.5">Password</label>
+              <label className="block text-sm font-medium text-brand-700 mb-1.5">Senha</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   className="input pr-10"
-                  placeholder="Min. 6 characters"
+                  placeholder="Mín. 6 caracteres"
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   required
@@ -123,7 +123,7 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-brand-700 mb-1.5">Confirm Password</label>
+              <label className="block text-sm font-medium text-brand-700 mb-1.5">Confirmar Senha</label>
               <input
                 type="password"
                 className="input"
@@ -135,14 +135,14 @@ export default function Register() {
             </div>
 
             <button type="submit" className="btn btn-primary w-full" disabled={loading}>
-              {loading ? <Loader2 className="animate-spin" size={18} /> : "Create Account"}
+              {loading ? <Loader2 className="animate-spin" size={18} /> : "Criar Conta"}
             </button>
           </form>
 
           <p className="mt-8 text-center text-sm text-brand-500">
-            Already have an account?{" "}
+            Já tem uma conta?{" "}
             <Link to="/login" className="text-brand-950 font-medium hover:underline">
-              Sign in
+              Entrar
             </Link>
           </p>
         </div>

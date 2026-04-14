@@ -17,7 +17,7 @@ export default function Login() {
     setLoading(true);
     try {
       await login(form);
-      navigate("/dashboard");
+      navigate("/home");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -39,12 +39,12 @@ export default function Login() {
             curious
           </Link>
           <h1 className="text-5xl font-light leading-tight mb-6" style={{ letterSpacing: "-0.02em" }}>
-            Build better forms.
+            Construa formulários melhores.
             <br />
-            Get better data.
+            Obtenha dados precisos.
           </h1>
           <p className="text-brand-300 text-lg max-w-md leading-relaxed">
-            The modern form builder designed for healthcare professionals who need reliable, evidence-based tools.
+            O construtor de formulários moderno projetado para profissionais de saúde que buscam ferramentas baseadas em evidências.
           </p>
         </div>
       </div>
@@ -57,8 +57,8 @@ export default function Login() {
           </Link>
 
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-brand-950 mb-2">Welcome back</h2>
-            <p className="text-brand-500">Sign in to your account to continue</p>
+            <h2 className="text-2xl font-semibold text-brand-950 mb-2">Bem-vindo de volta</h2>
+            <p className="text-brand-500">Entre na sua conta para continuar</p>
           </div>
 
           {error && (
@@ -69,11 +69,11 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-brand-700 mb-1.5">Email</label>
+              <label className="block text-sm font-medium text-brand-700 mb-1.5">E-mail</label>
               <input
                 type="email"
                 className="input"
-                placeholder="you@example.com"
+                placeholder="seu@exemplo.com"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 required
@@ -81,7 +81,7 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-brand-700 mb-1.5">Password</label>
+              <label className="block text-sm font-medium text-brand-700 mb-1.5">Senha</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -102,14 +102,14 @@ export default function Login() {
             </div>
 
             <button type="submit" className="btn btn-primary w-full" disabled={loading}>
-              {loading ? <Loader2 className="animate-spin" size={18} /> : "Sign In"}
+              {loading ? <Loader2 className="animate-spin" size={18} /> : "Entrar"}
             </button>
           </form>
 
           <p className="mt-8 text-center text-sm text-brand-500">
-            Don&apos;t have an account?{" "}
+            Não tem uma conta?{" "}
             <Link to="/register" className="text-brand-950 font-medium hover:underline">
-              Sign up
+              Cadastre-se
             </Link>
           </p>
         </div>
