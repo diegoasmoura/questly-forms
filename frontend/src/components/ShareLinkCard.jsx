@@ -269,17 +269,17 @@ export function ShareLinkStats({ counts }) {
       <span className="flex items-center gap-1.5">
         <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
         <span className="font-medium text-brand-700">{counts.PENDENTE || 0}</span>
-        <span className="text-brand-400">pendentes</span>
+        <span className="text-brand-400">pendente{(counts.PENDENTE || 0) !== 1 ? 's' : ''}</span>
       </span>
       <span className="flex items-center gap-1.5">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
         <span className="font-medium text-brand-700">{counts.RESPONDIDO || 0}</span>
-        <span className="text-brand-400">respondidos</span>
+        <span className="text-brand-400">resposta{(counts.RESPONDIDO || 0) !== 1 ? 's' : ''}</span>
       </span>
       <span className="flex items-center gap-1.5">
         <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
         <span className="font-medium text-brand-700">{counts.EXPIRADO || 0}</span>
-        <span className="text-brand-400">expirados</span>
+        <span className="text-brand-400">expirado{(counts.EXPIRADO || 0) !== 1 ? 's' : ''}</span>
       </span>
     </div>
   );
