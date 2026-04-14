@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Copy, Trash2, RefreshCw, Check, AlertTriangle, ChevronDown, Calendar } from "lucide-react";
+import { Copy, Trash2, RefreshCw, Check, AlertTriangle, ChevronDown, Calendar, Link2 } from "lucide-react";
 import { getStatusBadge, getDaysRemaining } from "../lib/useShareLinkStatus";
 
 const RENEWAL_OPTIONS = [
@@ -53,7 +53,7 @@ export default function ShareLinkCard({
     setExtending(true);
     setShowRenewalOptions(false);
     try {
-      await onExtend(link.id, days);
+      await onExtend(link.id, days, isAnswered ? "newResponse" : "renewal");
     } finally {
       setExtending(false);
     }
@@ -61,7 +61,7 @@ export default function ShareLinkCard({
 
   const handleCustomExtend = async () => {
     if (customDays > 0 && customDays <= 365) {
-      await handleExtend(customDays);
+      await onExtend(customDays, isAnswered ? "newResponse" : "renewal");
       setShowCustomModal(false);
     }
   };
@@ -73,146 +73,146 @@ export default function ShareLinkCard({
 
   return (
     <>
-      <div className={`p-4 rounded-lg border transition-all ${badge.bg} ${badge.border}`}>
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className={`w-2 h-2 rounded-full ${badge.dot}`} />
-              <span className={`text-xs font-medium ${badge.text}`}>
-                {badge.label}
-              </span>
+      <div className={`rounded-xl border transition-all overflow-visible relative ${badge.bg} ${badge.border}`}>
+        {/* Title + Status */}
+        <div className="px-4 pt-4 pb-2">
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-semibold text-base text-brand-950">{link.form?.title || "Formulário"}</h3>
               {link.responseCount > 1 && (
-                <span className="text-[10px] px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full font-medium">
+                <span className="text-[10px] px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded-full font-medium mt-1 inline-block">
                   v{link.responseCount}
                 </span>
               )}
-              {isExpired && !link.lastResponseAt && (
-                <span className="text-[10px] px-2 py-0.5 bg-red-100 text-red-700 rounded-full font-medium flex items-center gap-1">
-                  <AlertTriangle size={10} /> Sem resposta
-                </span>
-              )}
             </div>
-            <p className="text-xs font-semibold text-brand-950">{link.form?.title || "Formulário"}</p>
-            <p className="text-[10px] text-brand-400 mt-1">
-              Criado em {new Date(link.createdAt).toLocaleDateString('pt-BR')} · {new Date(link.createdAt).toLocaleTimeString('pt-BR')}
-            </p>
-            {link.lastResponseAt && (
-              <p className="text-[10px] text-emerald-600 mt-1">
-                ✓ Respondido em {new Date(link.lastResponseAt).toLocaleDateString('pt-BR')} · {new Date(link.lastResponseAt).toLocaleTimeString('pt-BR')}
-              </p>
-            )}
-            {isPending && daysRemaining !== null && (
-              <p className="text-[10px] text-brand-400 mt-1">
-                {daysRemaining > 0 ? (
-                  <span className="text-amber-600">{daysRemaining} dias restantes</span>
-                ) : (
-                  <span className="text-red-600 flex items-center gap-1">
-                    <AlertTriangle size={10} /> Expirado
-                  </span>
-                )}
-              </p>
-            )}
-            {isExpired && !link.lastResponseAt && (
-              <p className="text-[10px] text-red-500 mt-1 font-medium">Paciente não respondeu</p>
-            )}
+            <span className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium ${badge.bg} ${badge.text}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
+              {badge.label}
+            </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <input
-            readOnly
-            className="input flex-1 bg-white/80 font-mono text-[10px] py-1.5"
-            value={shareUrl}
-          />
-          <button
-            onClick={handleCopy}
-            className="btn btn-secondary text-[10px] py-1.5 px-3"
-            title="Copiar link"
-          >
-            {copied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
-          </button>
-
-          {/* Renewal Dropdown - aparece para PENDENTE e EXPIRADO */}
-          {(isPending || (isExpired && !link.lastResponseAt)) && (
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setShowRenewalOptions(!showRenewalOptions)}
-                disabled={extending || loading}
-                className="btn btn-primary text-[10px] py-1.5 px-3 flex items-center gap-1"
-                title="Renovar link"
-              >
-                <RefreshCw size={14} className={extending ? "animate-spin" : ""} />
-                <span>Renovar</span>
-                <ChevronDown size={12} />
-              </button>
-
-              {showRenewalOptions && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border border-brand-200 rounded-xl shadow-xl z-20 py-2 animate-scale-in">
-                  <div className="px-3 py-2 border-b border-brand-100">
-                    <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">Renovar por</p>
-                  </div>
-                  {RENEWAL_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.days}
-                      onClick={() => handleExtend(opt.days)}
-                      disabled={extending}
-                      className={`w-full px-3 py-2 text-left text-xs font-medium hover:bg-brand-50 flex items-center justify-between transition-colors ${
-                        opt.recommended ? "bg-blue-50 text-blue-700" : "text-brand-700"
-                      }`}
-                    >
-                      <span>{opt.label}</span>
-                      {opt.recommended && (
-                        <span className="text-[8px] bg-blue-600 text-white px-1.5 py-0.5 rounded-full">Padrão</span>
-                      )}
-                    </button>
-                  ))}
-                  <div className="border-t border-brand-100 mt-1 pt-1">
-                    <button
-                      onClick={() => {
-                        setShowRenewalOptions(false);
-                        setShowCustomModal(true);
-                      }}
-                      className="w-full px-3 py-2 text-left text-xs font-medium text-brand-600 hover:bg-brand-50 flex items-center gap-2 transition-colors"
-                    >
-                      <Calendar size={12} />
-                      Personalizado...
-                    </button>
-                  </div>
-                </div>
+        {/* Dates + Link */}
+        <div className="px-4 py-3 bg-white/60 border-t border-black/5">
+          <div className="flex items-center justify-between gap-4 text-xs">
+            <div className="flex items-center gap-4 flex-wrap">
+              <span className="text-brand-500">
+                <span className="font-medium text-brand-700">Criado:</span> {new Date(link.createdAt).toLocaleDateString('pt-BR')}
+              </span>
+              {link.lastResponseAt && (
+                <span className="text-emerald-600">
+                  <span className="font-medium">Respondido:</span> {new Date(link.lastResponseAt).toLocaleDateString('pt-BR')}
+                </span>
+              )}
+              {link.expiresAt && (
+                <span className={`${
+                  isExpired ? "text-red-500" : 
+                  daysRemaining && daysRemaining <= 7 ? "text-amber-600" : "text-brand-500"
+                }`}>
+                  <span className="font-medium">{isExpired ? "Expirou:" : "Expira:"}</span> {new Date(link.expiresAt).toLocaleDateString('pt-BR')}
+                </span>
+              )}
+              {isExpired && !link.lastResponseAt && (
+                <span className="text-red-500 font-medium flex items-center gap-1">
+                  <AlertTriangle size={11} /> Sem resposta
+                </span>
               )}
             </div>
-          )}
+          </div>
 
-          <button
-            onClick={handleRevoke}
-            disabled={loading}
-            className="btn btn-ghost text-[10px] py-1.5 px-3 text-red-600 hover:bg-red-50"
-            title="Excluir link"
-          >
-            <Trash2 size={14} />
-          </button>
+          {/* Link Row */}
+          <div className="flex items-center justify-between gap-4 mt-2 pt-2 border-t border-black/5">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <Link2 size={12} className="text-brand-400 shrink-0" />
+              <span className="text-[10px] font-mono text-brand-500 truncate">{shareUrl}</span>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-1 text-brand-600 hover:text-brand-800 transition-colors bg-brand-100 hover:bg-brand-200 px-2 py-1 rounded-lg text-[10px] font-medium"
+                title="Copiar link"
+              >
+                {copied ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
+                {copied ? "Copiado!" : "Copiar"}
+              </button>
+
+              {(isPending || isAnswered || (isExpired && !link.lastResponseAt)) && (
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setShowRenewalOptions(!showRenewalOptions)}
+                    disabled={extending || loading}
+                    className={`p-1.5 rounded-lg transition-colors ${
+                      isAnswered 
+                        ? "bg-brand-100 text-brand-600 hover:bg-brand-200" 
+                        : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                    }`}
+                    title={isAnswered ? "Solicitar novo" : "Renovar"}
+                  >
+                    <RefreshCw size={14} className={extending ? "animate-spin" : ""} />
+                  </button>
+
+                  {showRenewalOptions && (
+                    <div className="absolute right-0 bottom-full mb-1 w-40 bg-white border border-brand-200 rounded-xl shadow-lg z-20 py-1.5 animate-scale-in">
+                      <p className="px-3 py-1.5 text-[10px] font-bold text-brand-400 uppercase tracking-wider border-b border-brand-100">
+                        {isAnswered ? "Novo preenchimento" : "Renovar por"}
+                      </p>
+                      {RENEWAL_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.days}
+                          onClick={() => handleExtend(opt.days)}
+                          disabled={extending}
+                          className="w-full px-3 py-1.5 text-left text-xs font-medium hover:bg-brand-50 flex items-center justify-between text-brand-700"
+                        >
+                          <span>{opt.label}</span>
+                          {opt.recommended && (
+                            <span className="text-[8px] bg-blue-600 text-white px-1 py-0.5 rounded">Padrão</span>
+                          )}
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => { setShowRenewalOptions(false); setShowCustomModal(true); }}
+                        className="w-full px-3 py-1.5 text-left text-xs font-medium hover:bg-brand-50 flex items-center gap-2 text-brand-600 border-t border-brand-100 mt-1 pt-1.5"
+                      >
+                        <Calendar size={11} />
+                        Personalizado...
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <button
+                onClick={handleRevoke}
+                disabled={loading}
+                className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                title="Excluir"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Custom Renewal Modal */}
       {showCustomModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-950/20 backdrop-blur-sm">
-          <div className="card w-full max-w-sm p-6 animate-scale-in">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
-                <Calendar size={20} />
+          <div className="card w-full max-w-sm p-5 animate-scale-in">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                <Calendar size={18} />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-brand-950">Renovar Link</h3>
+                <h3 className="font-bold text-brand-950">Renovar Link</h3>
                 <p className="text-xs text-brand-500">{link.form?.title}</p>
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-brand-700 mb-2">
-                  Quantos dias deseja adicionar?
-                </label>
+                <label className="block text-xs font-medium text-brand-700 mb-1.5">Quantos dias?</label>
                 <input
                   type="number"
                   min="1"
@@ -227,36 +227,32 @@ export default function ShareLinkCard({
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex gap-1.5">
                 {[7, 15, 30, 60, 90].map((d) => (
                   <button
                     key={d}
                     onClick={() => setCustomDays(d)}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                    className={`flex-1 py-1.5 text-[10px] font-medium rounded-lg transition-all ${
                       customDays === d
                         ? "bg-brand-950 text-white"
                         : "bg-brand-50 text-brand-700 hover:bg-brand-100"
                     }`}
                   >
-                    {d} dias
+                    {d}d
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setShowCustomModal(false)}
-                className="btn btn-secondary flex-1"
-              >
+            <div className="flex gap-2 mt-5">
+              <button onClick={() => setShowCustomModal(false)} className="btn btn-secondary flex-1 text-xs py-2">
                 Cancelar
               </button>
               <button
                 onClick={handleCustomExtend}
                 disabled={customDays < 1 || customDays > 365}
-                className="btn btn-primary flex-1"
+                className="btn btn-primary flex-1 text-xs py-2"
               >
-                <RefreshCw size={14} />
                 Renovar
               </button>
             </div>
@@ -267,26 +263,24 @@ export default function ShareLinkCard({
   );
 }
 
-export function ShareLinkStats({ counts, compliance }) {
+export function ShareLinkStats({ counts }) {
   return (
-    <div className="flex items-center gap-4 p-3 bg-brand-50 rounded-lg border border-brand-100">
-      <div className="flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-amber-500" />
-        <span className="text-[10px] font-bold text-brand-700">{counts.PENDENTE || 0} Pendentes</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-emerald-500" />
-        <span className="text-[10px] font-bold text-brand-700">{counts.RESPONDIDO || 0} Respondidos</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-gray-400" />
-        <span className="text-[10px] font-bold text-brand-700">{counts.EXPIRADO || 0} Expirados</span>
-      </div>
-      <div className="ml-auto">
-        <span className="text-[10px] font-black text-brand-950">
-          {compliance}% compliance
-        </span>
-      </div>
+    <div className="flex items-center gap-4 p-2.5 bg-brand-50 rounded-lg border border-brand-100 text-xs">
+      <span className="flex items-center gap-1.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+        <span className="font-medium text-brand-700">{counts.PENDENTE || 0}</span>
+        <span className="text-brand-400">pendentes</span>
+      </span>
+      <span className="flex items-center gap-1.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+        <span className="font-medium text-brand-700">{counts.RESPONDIDO || 0}</span>
+        <span className="text-brand-400">respondidos</span>
+      </span>
+      <span className="flex items-center gap-1.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+        <span className="font-medium text-brand-700">{counts.EXPIRADO || 0}</span>
+        <span className="text-brand-400">expirados</span>
+      </span>
     </div>
   );
 }

@@ -18,7 +18,15 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Arquitetura de Navegação 360°:** Navegação fluida entre Dashboard, Prontuário do Paciente e Análise Detalhada de Respostas.
 - **Reorganização Clínica:** Hierarquia de informação otimizada (Resumo → Detalhe → Dados Brutos), com resultados críticos sempre no topo.
 - **Vínculo Inteligente:** Sistema aprimorado para diferenciar respostas de pacientes identificados vs. respostas anônimas via link.
-- **Gerenciamento de Links:** Sistema completo de compartilhamento com expiração automática, revogação e exclusão de links.
+- **Sistema de Compartilhamento Avançado:**
+  - **Prevenção de Duplicatas:** Links duplicados são reutilizados automaticamente com confirmação
+  - **Status Visual:** Badges coloridos (Pendente, Respondido, Expirado) com bolinhas indicativas
+  - **Renovação Flexível:** Dropdown com opções de 7, 15, 30, 60, 90 dias ou personalizado
+  - **Badge de Versão:** Indicação de quantas vezes o paciente respondeu (v2, v3...)
+  - **Comparação de Scores:** Delta de pontos entre respostas (↑7 pts, ↓3 pts)
+  - **Compliance Tracker:** Barra de statistics mostrando pendentes/respondidos/expirados
+  - **Hooks Reutilizáveis:** `useShareLinkStatus()` para gerenciamento de estado
+  - **Cards Otimizados:** Layout compacto com datas, link e ações na mesma view
 
 ## 📋 Regras e Fluxos
 
@@ -27,9 +35,11 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 #### Ciclo de Vida de um Link
 - **Criação:** Links são gerados apenas dentro do Prontuário do Paciente (aba "Compartilhamento")
 - **Validade:** Padrão de 30 dias a partir da data de criação (configurável)
-- **Status:** Um link pode estar **Ativo** ou **Inativo**
-  - **Ativo:** Link funciona e aceita respostas
-  - **Inativo:** Link expirado ou revogado manualmente (não aceita mais respostas)
+- **Status:** Um link pode estar **Pendente**, **Respondido** ou **Expirado**
+  - **Pendente:** Link ativo aguardando resposta
+  - **Respondido:** Paciente respondeu o formulário
+  - **Expirado:** Link venceu sem resposta ou foi revogado
+- **Renovação:** Links podem ser renovados por mais 7, 15, 30, 60 ou 90 dias
 - **Exclusão:** Links podem ser deletados completamente a qualquer momento
 
 #### Localização do Compartilhamento
@@ -105,16 +115,23 @@ Cada link compartilhado contém:
 #### Criar Link
 - Requer: Acesso ao formulário + Paciente selecionado
 - Retorna: URL pública + link para compartilhamento
+- Smart Duplicate: Se já existir link ativo, reutiliza e notifica
 
 #### Visualizar Links
-- Mostra todos os links do paciente em três categorias:
-  - **Ativo:** Links válidos (aceita respostas)
-  - **Inativo:** Links expirados ou revogados
-  - **Respondidos:** Links com resposta completa
+- Mostra todos os links do paciente com status:
+  - **Pendente:** Links válidos (aceita respostas)
+  - **Respondido:** Links com resposta completa
+  - **Expirado:** Links vencidos sem resposta
 
 #### Copiar Link
 - Copia URL para clipboard
 - Formato: `http://[host]/form/[token]`
+
+#### Renovar Link
+- Adiciona dias à data de expiração atual
+- Opções: 7, 15, 30, 60, 90 dias ou personalizado
+- Para links respondidos: calcula a partir de agora
+- Para links pendentes/expirados: adiciona aos dias restantes
 
 #### Revogar/Deletar Link
 - Remove link completamente do banco de dados
@@ -231,11 +248,19 @@ docker-compose up -d
 - `DELETE /api/patients/:id` - Deletar paciente
 
 ### Compartilhamento
-- `POST /api/share/create` - Criar link (autenticado)
-- `GET /api/share/patient/:patientId` - Listar links do paciente (autenticado)
+- `POST /api/share/create` - Criar link com smart duplicate check (autenticado)
+- `GET /api/share/patient/:patientId` - Listar links com status agregado (autenticado)
+- `PATCH /api/share/:id/extend` - Renovar link por X dias (autenticado)
 - `PATCH /api/share/:id/revoke` - Deletar link (autenticado)
 - `GET /api/share/:token` - Acessar formulário via token (público)
 - `POST /api/share/:token/submit` - Submeter resposta (público)
+
+### Status de Links
+Os links retornam metadados agregados:
+- `status`: "PENDENTE" | "RESPONDIDO" | "EXPIRADO"
+- `responseCount`: Quantidade de respostas
+- `lastResponseAt`: Data da última resposta
+- `daysRemaining`: Dias até expiração
 
 ### Respostas
 - `GET /api/responses/form/:formId` - Respostas de um formulário

@@ -85,13 +85,13 @@ export default function PatientRecord() {
     }
   };
 
-  const handleExtendLink = async (linkId, days = 30) => {
+  const handleExtendLink = async (linkId, days = 30, type = "renewal") => {
     try {
-      await api.extendShareLink(linkId, days);
-      alert(`Link renovado por ${days} dias!`);
+      const result = await api.extendShareLink(linkId, days, type);
+      alert(result.message || `Link atualizado!`);
       await loadPatientShareLinks();
     } catch (error) {
-      alert("Erro ao renovar link: " + error.message);
+      alert("Erro ao atualizar link: " + error.message);
     }
   };
 
@@ -537,7 +537,7 @@ export default function PatientRecord() {
                     <p className="text-xs text-brand-400 mt-1">Clique no botão acima para começar</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-4 overflow-visible">
                     <ShareLinkStats 
                       counts={{
                         PENDENTE: patientShareLinks.filter(l => l.status === "PENDENTE").length,

@@ -75,9 +75,9 @@ export function useShareLinkStatus(patientId) {
 
 export function getStatusBadge(status) {
   const badges = {
-    PENDENTE: { bg: "bg-amber-50", border: "border-amber-200", dot: "bg-amber-500", text: "text-amber-900", label: "🟡 PENDENTE" },
-    RESPONDIDO: { bg: "bg-emerald-50", border: "border-emerald-200", dot: "bg-emerald-500", text: "text-emerald-900", label: "✅ RESPONDIDO" },
-    EXPIRADO: { bg: "bg-gray-50", border: "border-gray-200", dot: "bg-gray-400", text: "text-gray-600", label: "❌ EXPIRADO" },
+    PENDENTE: { bg: "bg-amber-50", border: "border-amber-200", dot: "bg-amber-500", text: "text-amber-700", label: "Pendente" },
+    RESPONDIDO: { bg: "bg-emerald-50", border: "border-emerald-200", dot: "bg-emerald-500", text: "text-emerald-700", label: "Respondido" },
+    EXPIRADO: { bg: "bg-gray-50", border: "border-gray-200", dot: "bg-gray-400", text: "text-gray-500", label: "Expirado" },
   };
   return badges[status] || badges.EXPIRADO;
 }

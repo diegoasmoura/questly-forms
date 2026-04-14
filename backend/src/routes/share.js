@@ -219,10 +219,10 @@ router.get("/patient/:patientId", async (req, res) => {
 // Extend share link (+30 days by default)
 router.patch("/:id/extend", async (req, res) => {
   try {
-    const { days } = req.body;
+    const { days, type } = req.body;
     const extendDays = days ? parseInt(days) : 30;
 
-    console.log("🔗 Extend request for link ID:", req.params.id, "Days:", extendDays);
+    console.log("🔗 Extend request for link ID:", req.params.id, "Days:", extendDays, "Type:", type);
 
     const link = await prisma.shareLink.findUnique({
       where: { id: req.params.id },
@@ -240,10 +240,16 @@ router.patch("/:id/extend", async (req, res) => {
     const now = new Date();
     let newExpiresAt;
 
-    if (link.expiresAt && new Date(link.expiresAt) > now) {
-      newExpiresAt = new Date(new Date(link.expiresAt).getTime() + extendDays * 24 * 60 * 60 * 1000);
-    } else {
+    // "newResponse" = sempre calcula a partir de agora (para links respondidos)
+    // "renewal" = adiciona aos dias restantes ou a partir de agora se expirado
+    if (type === "newResponse") {
       newExpiresAt = new Date(now.getTime() + extendDays * 24 * 60 * 60 * 1000);
+    } else {
+      if (link.expiresAt && new Date(link.expiresAt) > now) {
+        newExpiresAt = new Date(new Date(link.expiresAt).getTime() + extendDays * 24 * 60 * 60 * 1000);
+      } else {
+        newExpiresAt = new Date(now.getTime() + extendDays * 24 * 60 * 60 * 1000);
+      }
     }
 
     const updated = await prisma.shareLink.update({
@@ -257,7 +263,7 @@ router.patch("/:id/extend", async (req, res) => {
     console.log("✅ Link extended successfully:", updated);
     res.json({
       success: true,
-      message: `Link renovado por ${extendDays} dias`,
+      message: type === "newResponse" ? `Novo link válido por ${extendDays} dias` : `Link renovado por ${extendDays} dias`,
       expiresAt: updated.expiresAt,
     });
   } catch (error) {
