@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../lib/api";
 
-// SurveyJS imports
-import "survey-core/defaultV2.min.css";
+// SurveyJS imports - updated to modern CSS paths
+import "survey-core/survey-core.min.css";
 import "survey-creator-core/survey-creator-core.min.css";
 import { SurveyCreator, SurveyCreatorComponent } from "survey-creator-react";
 
@@ -18,7 +18,7 @@ export default function FormBuilder() {
   const [savingSuccess, setSavingSuccess] = useState(false);
   const titleInputRef = useRef(null);
 
-  // Initialize SurveyJS Creator with options
+  // Initialize SurveyJS Creator with v2.x options
   const creator = useMemo(() => {
     const options = {
       showThemeTab: true,
@@ -27,18 +27,21 @@ export default function FormBuilder() {
       showJSONEditorTab: true,
       showEmbeddedSurveyTab: false,
       isAutoSave: false,
-      // Professional settings to show all options
-      showOneCategoryInPropertyGrid: false,
+      // v2.x property grid settings
+      showSidebar: true,
       propertyGridNavigationMode: "accordion",
-      allowModifyPages: true,
-      showPropertyGrid: true,
+      showOneCategoryInPropertyGrid: false,
     };
-    const c = new SurveyCreator(options);
     
+    const c = new SurveyCreator(options);
+
     // Explicitly ensure visibility of all tabs
     c.showDesignerTab = true;
     c.showPreviewTab = true;
     
+    // Ensure all property categories are visible
+    c.showOneCategoryInPropertyGrid = false;
+
     return c;
   }, []);
 

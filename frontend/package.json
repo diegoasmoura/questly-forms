@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.13.23",
     "clsx": "^2.1.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
@@ -17,11 +19,12 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.0",
-    "survey-core": "^1.9.132",
-    "survey-creator-core": "^1.9.132",
-    "survey-creator-react": "^1.9.132",
-    "survey-pdf": "^1.12.61",
-    "survey-react-ui": "^1.9.132",
+    "recharts": "^3.8.1",
+    "survey-core": "^2.5.19",
+    "survey-creator-core": "^2.5.19",
+    "survey-creator-react": "^2.5.19",
+    "survey-pdf": "^2.5.19",
+    "survey-react-ui": "^2.5.19",
     "tailwind-merge": "^2.2.1"
   },
   "devDependencies": {

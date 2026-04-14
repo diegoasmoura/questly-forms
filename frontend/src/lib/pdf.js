@@ -1,5 +1,5 @@
 import { jsPDF } from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 
 export const generatePremiumSummary = (patient, response) => {
   const doc = new jsPDF({
@@ -8,134 +8,142 @@ export const generatePremiumSummary = (patient, response) => {
     format: "a4"
   });
 
-  const primaryColor = [11, 9, 7]; // Azul-escuro (baseado no Curious Brand)
-  const secondaryColor = [246, 245, 244]; // Cinza-claro (respiro)
-  const accentColor = [59, 130, 246]; // Azul-claro acento
+  // Cores da Paleta Curious Premium
+  const primaryColor = [11, 9, 7];    // Azul quase preto (Charcoal)
+  const accentColor = [59, 130, 246];  // Azul clínico (Vibrant Blue)
+  const textColor = [31, 41, 55];      // Cinza escuro para texto
+  const lightGrey = [249, 250, 251];   // Fundo de cards
 
-  // 1) CABEÇALHO (Faixa Horizontal)
+  // 1) CABEÇALHO (Faixa Superior)
   doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-  doc.rect(0, 0, 210, 45, "F");
+  doc.rect(0, 0, 210, 40, "F");
 
-  // Elemento gráfico sutil (círculo translúcido)
-  doc.setGfxMatrix(new doc.Matrix(1, 0, 0, 1, 0, 0));
-  doc.setFillColor(255, 255, 255, 0.05);
-  doc.circle(200, 5, 30, "F");
+  // Detalhe visual (Círculo decorativo no canto)
+  doc.setFillColor(30, 30, 30); 
+  doc.circle(200, 5, 35, "F");
 
   // Título e Subtítulo
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(24);
+  doc.setFontSize(22);
   doc.setFont("helvetica", "bold");
-  doc.text("Resumo pré-consulta", 15, 25);
+  doc.text("Resumo Pré-consulta", 15, 22);
 
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text("Material de apoio para compartilhar com psiquiatra e neuropsicóloga • leitura rápida", 15, 35);
-
-  // Linha divisória fina
-  doc.setDrawColor(accentColor[0], accentColor[1], accentColor[2]);
-  doc.setLineWidth(0.5);
-  doc.line(0, 45, 210, 45);
-
-  // 2) BLOCO 1: CARD LEITURA RÁPIDA
-  let currentY = 55;
-  
-  // Sombra/Borda do Card
-  doc.setDrawColor(231, 229, 228);
-  doc.setFillColor(255, 255, 255);
-  doc.roundedRect(15, currentY, 180, 50, 3, 3, "FD");
-
-  // Faixa do título do card
-  doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-  doc.roundedRect(15, currentY, 180, 8, 3, 3, "F");
-  doc.setTextColor(255, 255, 255);
   doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.text("LEITURA RÁPIDA", 20, currentY + 5.5);
+  doc.setFont("helvetica", "normal");
+  doc.text("MATERIAL DE APOIO CLÍNICO • LEITURA RÁPIDA (2 MINUTOS)", 15, 30);
 
-  // Conteúdo do Card
-  doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  // Linha de acento inferior do cabeçalho
+  doc.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
+  doc.rect(0, 40, 210, 1.5, "F");
+
+  // 2) BLOCO 1: CARD DE LEITURA RÁPIDA
+  let currentY = 52;
+  
+  doc.setFillColor(lightGrey[0], lightGrey[1], lightGrey[2]);
+  doc.setDrawColor(229, 231, 235);
+  doc.roundedRect(15, currentY, 180, 52, 2, 2, "FD");
+
+  doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  doc.rect(15, currentY, 180, 8, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "bold");
+  doc.text("INSIGHTS DE LEITURA RÁPIDA", 20, currentY + 5.5);
+
+  doc.setTextColor(textColor[0], textColor[1], textColor[2]);
   doc.setFontSize(10);
   
+  doc.setFont("helvetica", "bold");
   doc.text("Paciente:", 20, currentY + 18);
   doc.setFont("helvetica", "normal");
-  doc.text(patient.name, 40, currentY + 18);
+  doc.text(patient.name, 45, currentY + 18);
 
   doc.setFont("helvetica", "bold");
-  doc.text("Finalidade:", 20, currentY + 26);
+  doc.text("Finalidade:", 20, currentY + 27);
   doc.setFont("helvetica", "normal");
-  doc.text("Organizar material existente para facilitar a conversa clínica e evitar perda de informação.", 40, currentY + 26);
+  doc.text("Otimizar o tempo de consulta e reduzir a perda de informações clínicas.", 45, currentY + 27);
 
   doc.setFont("helvetica", "bold");
-  doc.text("Como usar:", 20, currentY + 34);
+  doc.text("Como usar:", 20, currentY + 36);
   doc.setFont("helvetica", "normal");
-  const usageText = "1) Leia esta página em 2 min; 2) Use os anexos para aprofundar se necessário.";
-  doc.text(usageText, 40, currentY + 34);
+  doc.text("1) Leia esta síntese; 2) Utilize a pág. 2 para notas; 3) Consulte o PDF completo se necessário.", 45, currentY + 36);
 
-  doc.setFontSize(8);
-  doc.setTextColor(100, 100, 100);
-  doc.text("Observação: Os resultados trazem pistas de perfil emocional, não fecham diagnóstico isoladamente.", 20, currentY + 44);
+  doc.setFontSize(7.5);
+  doc.setTextColor(107, 114, 128);
+  doc.text("* Nota: Este documento é um material de apoio e não substitui avaliação diagnóstica formal.", 20, currentY + 47);
 
-  // 3) BLOCO 2: TABELA DE MATERIAIS
+  // 3) BLOCO 2: LINHA DO TEMPO (TABELA USANDO autoTable DIRETAMENTE)
   currentY += 65;
   doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.text("Linha do tempo dos materiais já existentes", 15, currentY);
+  doc.text("Histórico de Materiais Disponíveis", 15, currentY);
 
   const tableData = [
-    ["Data", "Material", "Leitura rápida para a consulta"],
-    [new Date(response.createdAt).toLocaleDateString(), response.form.title, "Respostas com destaque para temas de autocobrança, perfeccionismo e padrões elevados."]
+    [
+      new Date(response.createdAt).toLocaleDateString(), 
+      response.form.title, 
+      "Análise de padrões: Destaque para autocobrança e perfeccionismo. Útil para exploração clínica."
+    ]
   ];
 
-  doc.autoTable({
-    startY: currentY + 5,
-    head: [tableData[0]],
-    body: tableData.slice(1),
-    theme: "striped",
+  autoTable(doc, {
+    startY: currentY + 6,
+    head: [["Data", "Material / Teste", "Resumo para a Consulta"]],
+    body: tableData,
+    theme: "grid",
     headStyles: { 
-      fillColor: [241, 245, 249], 
-      textColor: primaryColor,
-      fontSize: 10,
-      fontStyle: "bold"
+      fillColor: [243, 244, 246], 
+      textColor: [31, 41, 55],
+      fontSize: 9,
+      fontStyle: "bold",
+      lineWidth: 0.1
     },
     bodyStyles: {
-      fontSize: 9,
-      cellPadding: 5
+      fontSize: 8.5,
+      textColor: [55, 65, 81],
+      cellPadding: 4
     },
     columnStyles: {
-      0: { cellWidth: 30 },
-      1: { cellWidth: 50 },
+      0: { cellWidth: 25 },
+      1: { cellWidth: 45 },
       2: { cellWidth: "auto" }
     },
     margin: { left: 15, right: 15 }
   });
 
-  // 4) BLOCO 3: NOTA FINAL
-  currentY = doc.lastAutoTable.finalY + 15;
+  // 4) BLOCO 3: PONTO DE ATENÇÃO
+  // Usamos doc.lastAutoTable.finalY ou pegamos o valor retornado pelo autoTable
+  let finalY = doc.previousAutoTable.finalY;
+  currentY = finalY + 15;
+  
+  doc.setFillColor(254, 252, 232); 
+  doc.setDrawColor(254, 240, 138); 
+  doc.roundedRect(15, currentY, 180, 18, 1, 1, "FD");
+
   doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-  doc.text("Ponto de atenção para a conversa:", 15, currentY);
+  doc.setTextColor(133, 77, 14); 
+  doc.text("PONTO DE ATENÇÃO CLÍNICA:", 20, currentY + 7);
   
   doc.setFont("helvetica", "normal");
-  doc.text("Diferenças perceptíveis no relato atual sugerem exploração clínica sobre contexto e fase de vida.", 15, currentY + 5);
-
-  // Microlegenda
-  doc.setFontSize(7);
-  doc.setTextColor(150, 150, 150);
-  doc.text("Útil como contexto emocional. Não substitui avaliação neuropsicológica.", 15, currentY + 15);
+  doc.setFontSize(8.5);
+  doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+  doc.text("Diferenças entre o relato atual e registros anteriores sugerem exploração sobre o contexto atual.", 20, currentY + 12);
 
   // RODAPÉ
-  doc.setFontSize(8);
-  doc.setTextColor(150, 150, 150);
-  doc.text("Uso clínico pessoal • resumo de apoio • não substitui avaliação profissional", 15, 285);
-  doc.text("Página 1 de 1", 185, 285);
+  const footerY = 285;
+  doc.setDrawColor(229, 231, 235);
+  doc.line(15, footerY - 5, 195, footerY - 5);
+  
+  doc.setFontSize(7.5);
+  doc.setTextColor(156, 163, 175);
+  doc.text("USO CLÍNICO RESTRITO • DOCUMENTO GERADO PELA PLATAFORMA CURIOUS", 15, footerY);
+  doc.text(`PÁGINA 1 DE 1`, 175, footerY);
 
-  doc.save(`${patient.name}_Resumo_Clinico.pdf`);
+  doc.save(`${patient.name.replace(/\s+/g, '_')}_Resumo_Clinico.pdf`);
 };
 
-// Mantemos o exportToPdf original para casos genéricos
 export const exportToPdf = (schema, data, fileName = "response.pdf") => {
-  // Chamaria o SurveyPDF (surveyJS) se necessário, mas para o resumo usamos o generatePremiumSummary
-  console.log("Standard export called. Consider using generatePremiumSummary for clinical UX.");
+  console.log("PDF Standard fallback.");
 };

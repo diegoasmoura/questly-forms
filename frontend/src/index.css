@@ -37,27 +37,29 @@
   }
 }
 
-/* SurveyJS custom styles */
+/* SurveyJS theme customizations - light and clean */
 .sd-root {
-  --sjs-primary-backcolor: #0b0907;
-  --sjs-primary-backcolor-light: #f6f5f4;
-  --sjs-primary-backcolor-dark: #292524;
+  --sjs-primary-backcolor: #10b981;
+  --sjs-primary-backcolor-light: color-mix(in srgb, #10b981 16%, white);
+  --sjs-primary-backcolor-dark: color-mix(in srgb, #10b981 80%, black);
   --sjs-base-unit: 8px;
   --sjs-corner-radius: 8px;
   --sjs-shadow-small: 0px 1px 2px 0px rgba(0, 0, 0, 0.06);
   --sjs-shadow-medium: 0px 2px 6px 0px rgba(0, 0, 0, 0.08);
   --sjs-shadow-large: 0px 4px 12px 0px rgba(0, 0, 0, 0.1);
-  --sjs-border-default: #e7e5e4;
-  --sjs-border-light: #f6f5f4;
+  --sjs-border-default: #e5e7eb;
+  --sjs-border-light: #f3f4f6;
   --sjs-general-backcolor: #ffffff;
-  --sjs-general-backcolor-dim: #fafaf9;
-  --sjs-general-backcolor-dim-light: #f6f5f4;
-  --sjs-general-forecolor: #0b0907;
-  --sjs-general-forecolor-light: #57534e;
+  --sjs-general-backcolor-dim: #f9fafb;
+  --sjs-general-backcolor-dim-light: #f3f4f6;
+  --sjs-general-forecolor: #111827;
+  --sjs-general-forecolor-light: #6b7280;
 }
 
+/* Survey Creator theme */
 .sc-root {
-  --sjs-primary-backcolor: #0b0907;
+  --sjs-primary-backcolor: #10b981;
+  --sjs-general-backcolor-dim: #f9fafb;
 }
 
 /* Remove SurveyJS Non-Commercial Banner */
@@ -69,4 +71,16 @@
 .svc-creator-component {
   height: 100% !important;
   width: 100% !important;
+}
+
+/* Property grid styling */
+.svc-property-grid {
+  background: #ffffff !important;
+}
+
+/* Ensure icons are visible in property grid */
+.svc-string-editor,
+.svc-item-value__content,
+.svc-question__content {
+  color: inherit !important;
 }

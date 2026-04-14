@@ -52,10 +52,22 @@ router.get("/form/:formId", async (req, res) => {
       where: { id: req.params.formId, createdBy: req.user.id },
     });
     if (!form) return res.status(404).json({ error: "Form not found" });
+    
     const responses = await prisma.response.findMany({
       where: { formId: req.params.formId },
+      include: {
+        patient: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          }
+        }
+      },
       orderBy: { createdAt: "desc" },
     });
+    
     res.json(responses);
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
@@ -67,11 +79,28 @@ router.get("/:id", async (req, res) => {
   try {
     const response = await prisma.response.findUnique({
       where: { id: req.params.id },
-      include: { form: { where: { createdBy: req.user.id } } },
+      include: { 
+        form: true,
+        patient: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          }
+        }
+      },
     });
-    if (!response || !response.form) return res.status(404).json({ error: "Response not found" });
+    
+    // Check if response exists and user owns the form
+    if (!response) return res.status(404).json({ error: "Response not found" });
+    if (response.form?.createdBy !== req.user.id) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    
     res.json(response);
   } catch (error) {
+    console.error("Error fetching response:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

@@ -4,6 +4,8 @@ import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { generatePremiumSummary } from "../lib/pdf";
 import { scoreTest } from "../lib/scoring";
+import { ClinicalTrendChart, transformResponsesToTrendData } from "../components/ClinicalCharts";
+import DataTable from "../components/DataTable";
 import {
   ArrowLeft,
   Mail,
@@ -23,7 +25,9 @@ import {
   Activity,
   AlertTriangle,
   Search,
-  BookOpen
+  BookOpen,
+  TrendingUp,
+  Table
 } from "lucide-react";
 
 export default function PatientRecord() {
@@ -34,6 +38,7 @@ export default function PatientRecord() {
   const [loading, setLoading] = useState(true);
   const [selectedResponseId, setSelectedResponseId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("timeline"); // 'timeline' or 'trend' or 'table'
 
   useEffect(() => {
     loadPatient();
@@ -167,18 +172,156 @@ export default function PatientRecord() {
 
           {/* Right Column: History */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Tabs */}
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-brand-950">Clinical History</h2>
-              <span className="text-sm text-brand-500">{patient.responses.length} total entries</span>
+              <div>
+                <h2 className="text-xl font-semibold text-brand-950">Histórico Clínico</h2>
+                <p className="text-xs text-brand-500 mt-1">
+                  Exibindo respostas de <span className="font-bold text-brand-950">{patient.name}</span>
+                  {patient.responses.length > 0 && ` • ${patient.responses.length} formulários respondidos`}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setActiveTab("timeline")}
+                  className={`btn text-sm ${activeTab === "timeline" ? "bg-brand-950 text-white" : "btn-ghost"}`}
+                >
+                  <FileText size={14} />
+                  Timeline
+                </button>
+                <button
+                  onClick={() => setActiveTab("trend")}
+                  className={`btn text-sm ${activeTab === "trend" ? "bg-brand-950 text-white" : "btn-ghost"}`}
+                >
+                  <TrendingUp size={14} />
+                  Tendências
+                </button>
+                <button
+                  onClick={() => setActiveTab("table")}
+                  className={`btn text-sm ${activeTab === "table" ? "bg-brand-950 text-white" : "btn-ghost"}`}
+                >
+                  <Table size={14} />
+                  Tabela
+                </button>
+              </div>
             </div>
 
-            {patient.responses.length === 0 ? (
-              <div className="card p-12 text-center">
-                <FileText size={48} className="mx-auto text-brand-200 mb-4" />
-                <h3 className="text-lg font-medium text-brand-950 mb-2">No history yet</h3>
-                <p className="text-brand-500">Send a form to this patient to start building their medical record.</p>
+            {/* Trend Chart Tab */}
+            {activeTab === "trend" && (
+              <div className="space-y-6">
+                <ClinicalTrendChart
+                  data={transformResponsesToTrendData(patient.responses)}
+                  title="Evolução Clínica - PHQ-9 e GAD-7"
+                />
+                
+                {/* Latest Clinical Scores */}
+                {(() => {
+                  const latestResponses = patient.responses
+                    .filter(r => r.data.phq9_items || r.data.gad7_items)
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                    .slice(0, 1);
+                  
+                  if (latestResponses.length === 0) return null;
+                  
+                  const latest = latestResponses[0];
+                  const result = scoreTest(null, latest.data);
+                  
+                  if (!result || result.type !== "clinical") return null;
+                  
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-white rounded-xl border-2 border-brand-100 p-6 shadow-sm">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="font-bold text-sm uppercase tracking-widest text-brand-950">
+                            Última Avaliação
+                          </h3>
+                          <span className="text-xs text-brand-400">
+                            {new Date(latest.createdAt).toLocaleDateString('pt-BR')}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-4 mb-4">
+                          <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold bg-gradient-to-br from-brand-50 to-brand-100 text-brand-950">
+                            {result.score}
+                          </div>
+                          <div>
+                            <p className="text-xs text-brand-500 font-medium">{result.title}</p>
+                            <p className="text-lg font-bold text-brand-950">{result.severity}</p>
+                          </div>
+                        </div>
+                        
+                        {result.alert && (
+                          <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border-2 border-red-200 text-red-700 text-xs font-bold mb-3">
+                            <AlertTriangle size={14} />
+                            {result.alert}
+                          </div>
+                        )}
+                        
+                        <p className="text-xs text-brand-600 leading-relaxed italic">
+                          "{result.interpretation}"
+                        </p>
+                      </div>
+                      
+                      <div className="bg-white rounded-xl border-2 border-brand-100 p-6 shadow-sm">
+                        <h3 className="font-bold text-sm uppercase tracking-widest text-brand-950 mb-4">
+                          Todas as Avaliações
+                        </h3>
+                        <div className="space-y-3 max-h-[200px] overflow-y-auto">
+                          {patient.responses
+                            .filter(r => r.data.phq9_items || r.data.gad7_items)
+                            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                            .map((response, idx) => {
+                              const scoreResult = scoreTest(null, response.data);
+                              if (!scoreResult || scoreResult.type !== "clinical") return null;
+                              
+                              return (
+                                <div key={response.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-brand-50 transition-colors border border-brand-100">
+                                  <div className="text-center min-w-[50px]">
+                                    <p className="text-lg font-bold text-brand-950">{scoreResult.score}</p>
+                                    <p className="text-[10px] text-brand-400">/ {scoreResult.maxScore}</p>
+                                  </div>
+                                  <div className="flex-1">
+                                    <p className="text-xs font-medium text-brand-950">{scoreResult.title}</p>
+                                    <p className="text-[10px] text-brand-400">
+                                      {new Date(response.createdAt).toLocaleDateString('pt-BR')}
+                                    </p>
+                                  </div>
+                                  <span className={`px-2 py-1 rounded text-[10px] font-bold ${scoreResult.color}`}>
+                                    {scoreResult.severity}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
-            ) : (
+            )}
+
+            {/* DataTable Tab */}
+            {activeTab === "table" && patient.responses.length > 0 && (
+              <DataTable
+                data={patient.responses.map(r => ({
+                  ...r.data,
+                  createdAt: r.createdAt,
+                  responseId: r.id,
+                }))}
+                schema={patient.responses[0]?.form?.schema}
+                title="Respostas Detalhadas"
+              />
+            )}
+
+            {/* Timeline Tab (Original) */}
+            {activeTab === "timeline" && (
+              patient.responses.length === 0 ? (
+                <div className="card p-12 text-center">
+                  <FileText size={48} className="mx-auto text-brand-200 mb-4" />
+                  <h3 className="text-lg font-medium text-brand-950 mb-2">Nenhum histórico ainda</h3>
+                  <p className="text-brand-500">Envie um formulário para este paciente para começar a construir seu prontuário.</p>
+                </div>
+              ) : (
               <div className="space-y-4">
                 {patient.responses.map((response) => (
                   <div key={response.id} className="card overflow-hidden">
@@ -195,10 +338,22 @@ export default function PatientRecord() {
                           <p className="text-xs text-brand-400">
                             {new Date(response.createdAt).toLocaleString()}
                           </p>
+                          {response.form.title.toLowerCase().includes('phq') || response.form.title.toLowerCase().includes('gad') ? (
+                            <span className="inline-block mt-1 px-2 py-0.5 bg-brand-100 text-brand-700 text-[10px] font-medium rounded">
+                              Formulário Clínico Validado
+                            </span>
+                          ) : null}
                         </div>
                       </div>
                       
                       <div className="flex items-center gap-2 px-4">
+                        <Link
+                          to={`/responses/${response.id}`}
+                          className="btn btn-secondary py-1.5 px-3 text-[10px] flex items-center gap-2 border-brand-200 hover:border-brand-950 transition-all"
+                        >
+                          <FileText size={14} />
+                          Ver Análise Completa
+                        </Link>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -219,11 +374,58 @@ export default function PatientRecord() {
 
                     {selectedResponseId === response.id && (
                       <div className="p-4 bg-brand-50 border-t border-brand-100 animate-fade-in max-h-[700px] overflow-y-auto">
+                        {/* Clinical Score Summary - AT THE TOP */}
+                        {(() => {
+                          const result = scoreTest(null, response.data);
+                          if (!result || result.type !== "clinical") return null;
+                          
+                          return (
+                            <div className={`mb-4 p-5 rounded-xl border-2 bg-white shadow-sm ${result.color}`}>
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <Activity size={18} className="text-brand-950" />
+                                  <h5 className="font-bold text-xs uppercase tracking-widest text-brand-950">{result.title}</h5>
+                                </div>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleExportPremium(response);
+                                  }}
+                                  className="btn btn-secondary py-1 px-2 text-[9px] flex items-center gap-1"
+                                >
+                                  <BookOpen size={12} />
+                                  Resumo Premium
+                                </button>
+                              </div>
+                              
+                              <div className="flex items-baseline gap-3 mb-3">
+                                <span className="text-4xl font-bold text-brand-950">{result.score}</span>
+                                <span className="text-sm text-brand-400 font-medium">de {result.maxScore} pontos</span>
+                                <span className={`px-3 py-1 rounded text-xs font-bold ${result.color}`}>
+                                  {result.severity}
+                                </span>
+                              </div>
+                              
+                              {result.alert && (
+                                <div className="flex items-center gap-2 p-3 rounded-lg bg-red-600 text-white text-xs font-bold mb-3 shadow-lg shadow-red-200 animate-pulse">
+                                  <AlertTriangle size={16} />
+                                  {result.alert}
+                                </div>
+                              )}
+                              
+                              <div className="p-3 bg-brand-50 rounded-lg border border-brand-100">
+                                <p className="text-sm text-brand-700 leading-relaxed italic">"{result.interpretation}"</p>
+                              </div>
+                            </div>
+                          );
+                        })()}
+
+                        {/* Search Bar */}
                         <div className="sticky top-0 z-10 bg-brand-50 pb-4">
                           <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-400" size={14} />
-                            <input 
-                              type="text" 
+                            <input
+                              type="text"
                               placeholder="Pesquisar nas respostas..."
                               className="input pl-10 text-xs py-2 bg-white"
                               value={searchTerm}
@@ -232,40 +434,6 @@ export default function PatientRecord() {
                             />
                           </div>
                         </div>
-
-                        {/* Clinical Insight Card (Optional) */}
-                        {(() => {
-                          const result = scoreTest(null, response.data);
-                          if (result.type === "clinical" && !searchTerm) {
-                            return (
-                              <div className={`mb-4 p-5 rounded-xl border-2 bg-white shadow-sm`}>
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center gap-2">
-                                    <Activity size={18} className="text-brand-950" />
-                                    <h5 className="font-bold text-xs uppercase tracking-widest text-brand-950">{result.title}</h5>
-                                  </div>
-                                  <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${result.color}`}>
-                                    {result.severity}
-                                  </span>
-                                </div>
-                                <div className="flex items-baseline gap-2 mb-3">
-                                  <span className="text-4xl font-bold text-brand-950">{result.score}</span>
-                                  <span className="text-sm text-brand-400 font-medium">de {result.maxScore} pontos</span>
-                                </div>
-                                {result.alert && (
-                                  <div className="flex items-center gap-2 p-3 rounded-lg bg-red-600 text-white text-xs font-bold mb-4 shadow-lg shadow-red-200 animate-pulse">
-                                    <AlertTriangle size={16} />
-                                    {result.alert}
-                                  </div>
-                                )}
-                                <div className="p-3 bg-brand-50 rounded-lg border border-brand-100">
-                                  <p className="text-sm text-brand-700 leading-relaxed italic">"{result.interpretation}"</p>
-                                </div>
-                              </div>
-                            );
-                          }
-                          return null;
-                        })()}
 
                         <div className="bg-white rounded-lg p-4 border border-brand-100">
                           <h5 className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-4">Detalhamento das Respostas</h5>
@@ -297,11 +465,8 @@ export default function PatientRecord() {
                   </div>
                 ))}
               </div>
-            )}
-                  </div>
-                ))}
-              </div>
-            )}
+            )
+          )}
           </div>
         </div>
       </main>

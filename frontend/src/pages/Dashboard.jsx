@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
 import { clinicalTemplates } from "../lib/templates";
+import { ResponseTrendChart } from "../components/ClinicalCharts";
 import { Plus, FileText, BarChart3, Share2, Trash2, Copy, Clock, ExternalLink, LogOut, LayoutDashboard, Settings, BookTemplate, Users } from "lucide-react";
 
 export default function Dashboard() {
@@ -16,6 +17,7 @@ export default function Dashboard() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedForm, setSelectedForm] = useState(null);
   const [patients, setPatients] = useState([]);
+  const [aggregateData, setAggregateData] = useState({});
   const [shareData, setShareData] = useState({
     patientId: "",
     expiresAt: ""
@@ -42,14 +44,27 @@ export default function Dashboard() {
       const formsData = await api.getForms();
       setForms(formsData);
       const statsMap = {};
+      const aggregateMap = {};
       for (const form of formsData) {
         try {
-          statsMap[form.id] = await api.getFormStats(form.id);
+          const statsData = await api.getFormStats(form.id);
+          statsMap[form.id] = statsData;
+          
+          // Try to get aggregate data for charts
+          try {
+            const aggData = await api.getAggregate(form.id);
+            if (aggData?.dailyCounts && Object.keys(aggData.dailyCounts).length > 0) {
+              aggregateMap[form.id] = aggData.dailyCounts;
+            }
+          } catch (e) {
+            // Ignore if no aggregate data
+          }
         } catch {
           statsMap[form.id] = { responseCount: 0, shareLinkCount: 0 };
         }
       }
       setStats(statsMap);
+      setAggregateData(aggregateMap);
     } catch (error) {
       console.error("Failed to load data:", error);
     } finally {
@@ -160,6 +175,22 @@ export default function Dashboard() {
           <StatCard icon={<Share2 size={20} />} label="Active Links" value={Object.values(stats).reduce((s, st) => s + (st.shareLinkCount || 0), 0)} color="bg-purple-50 text-purple-600" />
         </div>
 
+        {/* Response Trend Chart */}
+        {Object.keys(aggregateData).length > 0 && (
+          <div className="mb-8">
+            <ResponseTrendChart
+              data={Object.values(aggregateData).reduce((acc, curr) => {
+                Object.entries(curr).forEach(([date, count]) => {
+                  acc[date] = (acc[date] || 0) + count;
+                });
+                return acc;
+              }, {})}
+              title="Tendência de Respostas - Todos os Formulários"
+              height={250}
+            />
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
@@ -226,6 +257,7 @@ export default function Dashboard() {
                 key={form.id}
                 form={form}
                 stats={stats[form.id]}
+                aggregateData={aggregateData[form.id]}
                 onDelete={handleDelete}
                 onDuplicate={handleDuplicate}
                 onShare={() => {
@@ -387,7 +419,7 @@ function StatCard({ icon, label, value, color }) {
   );
 }
 
-function FormCard({ form, stats, onDelete, onDuplicate, onShare }) {
+function FormCard({ form, stats, onDelete, onDuplicate, onShare, aggregateData }) {
   const [copied, setCopied] = useState(false);
   const shareUrl = stats?.latestResponse ? `${window.location.origin}/share/${form.id}` : null;
 
@@ -428,6 +460,13 @@ function FormCard({ form, stats, onDelete, onDuplicate, onShare }) {
           </button>
         </div>
       </div>
+
+      {/* Mini trend chart if data available */}
+      {aggregateData && Object.keys(aggregateData).length > 5 && (
+        <div className="mb-4 h-16">
+          <ResponseTrendChart data={aggregateData} title="" height={64} />
+        </div>
+      )}
 
       <div className="flex items-center gap-4 text-xs text-brand-500 mb-4">
         <span className="flex items-center gap-1">

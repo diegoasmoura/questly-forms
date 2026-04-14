@@ -10,6 +10,7 @@ import Patients from "./pages/Patients";
 import PatientRecord from "./pages/PatientRecord";
 import FormBuilder from "./pages/FormBuilder";
 import FormResponses from "./pages/FormResponses";
+import ResponseDetail from "./pages/ResponseDetail";
 import ShareLink from "./pages/ShareLink";
 import PatientForm from "./pages/PatientForm";
 
@@ -50,6 +51,7 @@ export default function App() {
       <Route path="/forms/new" element={<ProtectedRoute><FormBuilder /></ProtectedRoute>} />
       <Route path="/forms/:id/edit" element={<ProtectedRoute><FormBuilder /></ProtectedRoute>} />
       <Route path="/forms/:id/responses" element={<ProtectedRoute><FormResponses /></ProtectedRoute>} />
+      <Route path="/responses/:id" element={<ProtectedRoute><ResponseDetail /></ProtectedRoute>} />
       <Route path="/share/:token" element={<ShareLink />} />
       <Route path="/form/:token" element={<PatientForm />} />
       <Route path="*" element={<Navigate to="/" replace />} />
