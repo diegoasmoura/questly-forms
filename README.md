@@ -18,6 +18,124 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Arquitetura de Navegação 360°:** Navegação fluida entre Dashboard, Prontuário do Paciente e Análise Detalhada de Respostas.
 - **Reorganização Clínica:** Hierarquia de informação otimizada (Resumo → Detalhe → Dados Brutos), com resultados críticos sempre no topo.
 - **Vínculo Inteligente:** Sistema aprimorado para diferenciar respostas de pacientes identificados vs. respostas anônimas via link.
+- **Gerenciamento de Links:** Sistema completo de compartilhamento com expiração automática, revogação e exclusão de links.
+
+## 📋 Regras e Fluxos
+
+### 1. Gestão de Compartilhamento (Share Links)
+
+#### Ciclo de Vida de um Link
+- **Criação:** Links são gerados apenas dentro do Prontuário do Paciente (aba "Compartilhamento")
+- **Validade:** Padrão de 30 dias a partir da data de criação (configurável)
+- **Status:** Um link pode estar **Ativo** ou **Inativo**
+  - **Ativo:** Link funciona e aceita respostas
+  - **Inativo:** Link expirado ou revogado manualmente (não aceita mais respostas)
+- **Exclusão:** Links podem ser deletados completamente a qualquer momento
+
+#### Localização do Compartilhamento
+- ✅ **Permitido:** Within PatientRecord → "Compartilhamento" tab (Professional only)
+- ❌ **Não Permitido:** MyForms page (para evitar mistura de pacientes)
+
+#### Dados do Link
+Cada link compartilhado contém:
+- `id`: Identificador único do link
+- `token`: UUID para URL pública (ex: `/form/a79928b7b2464719b5064feb086433b7`)
+- `formId`: Qual formulário será respondido
+- `patientId`: Paciente vinculado (para rastreamento automático de respostas)
+- `createdAt`: Data e hora de criação
+- `expiresAt`: Data e hora de expiração
+- `active`: Status (true = ativo, false = expirado/revogado)
+
+### 2. Respostas e Rastreamento
+
+#### Vínculo de Respostas
+- Respostas via link compartilhado são automaticamente vinculadas ao paciente
+- Cada resposta registra data/hora e status de conclusão
+- Timeline do paciente mostra: Respondidos (✅) vs Aguardando Resposta (⏳)
+
+#### Status de Resposta
+- **Respondidos:** Link foi respondido (exibe data/hora da resposta)
+- **Aguardando Resposta:** Link enviado mas sem resposta (exibe dias restantes)
+- **Expirado:** Link ultrapassou data de expiração (sem mais aceitar respostas)
+
+### 3. Autenticação e Permissões
+
+#### Autenticação
+- Sistema baseado em JWT (JSON Web Tokens)
+- Login obrigatório para acessar dashboard
+- Tokens armazenados em localStorage
+
+#### Permissões por Recurso
+| Recurso | Proprietário | Visualiza | Edita | Deleta |
+|---------|-------------|-----------|-------|--------|
+| Formulário | Psicólogo criador | ✅ Seus formas | ✅ | ✅ |
+| Paciente | Psicólogo vinculado | ✅ Seus pacientes | ✅ | ✅ |
+| Link de Compartilhamento | Proprietário de forma | ✅ Seus links | ✅ | ✅ |
+| Resposta | Respondente | ✅ Anônimo se via link | ❌ | ❌ |
+
+#### Regras de Acesso
+- Um psicólogo só vê e gerencia seus próprios formulários e pacientes
+- Um paciente só recebe links válidos e ativos
+- Respostas anônimas não mostram dados do paciente
+
+### 4. Fluxo de Trabalho Padrão
+
+```
+1. Psicólogo cria Formulário (MyForms)
+   ↓
+2. Psicólogo acessa Prontuário do Paciente
+   ↓
+3. Clica em "Compartilhamento" → "Enviar Formulário"
+   ↓
+4. Seleciona formulário + data de expiração (padrão 30 dias)
+   ↓
+5. Link gerado automaticamente (copiável)
+   ↓
+6. Link enviado ao paciente (por WhatsApp, email, etc.)
+   ↓
+7. Paciente acessa link e responde formulário
+   ↓
+8. Resposta vinculada automaticamente ao paciente
+   ↓
+9. Psicólogo vê resultado na Timeline do Prontuário
+```
+
+### 5. Operações com Links
+
+#### Criar Link
+- Requer: Acesso ao formulário + Paciente selecionado
+- Retorna: URL pública + link para compartilhamento
+
+#### Visualizar Links
+- Mostra todos os links do paciente em três categorias:
+  - **Ativo:** Links válidos (aceita respostas)
+  - **Inativo:** Links expirados ou revogados
+  - **Respondidos:** Links com resposta completa
+
+#### Copiar Link
+- Copia URL para clipboard
+- Formato: `http://[host]/form/[token]`
+
+#### Revogar/Deletar Link
+- Remove link completamente do banco de dados
+- Link não mais funciona
+- Respostas já coletadas não são afetadas
+
+### 6. Validações
+
+#### Data de Expiração
+- Mínimo: Data atual (não permite datas passadas)
+- Padrão: 30 dias a partir de hoje
+- Máximo: Sem limite (pode ser 1 ano, 10 anos, etc.)
+
+#### Nomes de Pacientes
+- Campo obrigatório no link (para referência)
+- Pode ser diferente do nome no prontuário
+
+#### Segurança
+- Links são UUIDs únicos (não-sequenciais)
+- Sem autenticação necessária para respondent (acesso via token)
+- Cada usuário só vê seus próprios links
 
 ## 🛠️ Tecnologias
 
@@ -25,6 +143,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Backend:** Node.js, Express, Prisma ORM.
 - **Banco de Dados:** PostgreSQL (Supabase/Docker).
 - **Infraestrutura:** Docker & Docker Compose.
+- **Autenticação:** JWT (JSON Web Tokens)
 
 ## 🏁 Como Iniciar
 
@@ -48,7 +167,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
    npm run dev
    ```
    - O Frontend rodará em: `http://localhost:5173`
-   - O Backend rodará em: `http://localhost:3000`
+   - O Backend rodará em: `http://localhost:3001`
 
 4. **Sincronização do Banco (se necessário):**
    ```bash
@@ -56,6 +175,72 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
    npx prisma db push
    npx prisma generate
    ```
+
+### Docker Compose
+
+Para iniciar toda a stack (Frontend, Backend, Banco):
+```bash
+docker-compose up -d
+```
+
+## 📊 Estrutura do Banco de Dados
+
+### Tabelas Principais
+
+#### Users
+- Psicólogos registrados no sistema
+- Autenticação via email/senha
+
+#### Patients
+- Dados demográficos e clínicos
+- Vinculo com psicólogo (psychologistId)
+- Histórico de endereço e contatos
+
+#### Forms
+- Formulários criados por psicólogos
+- Schema JSON (estrutura de perguntas)
+- Propriedade: createdBy (ID do psicólogo)
+
+#### ShareLinks
+- Links de compartilhamento
+- Vinculo com Form + Patient
+- Status (active), expiração e timestamps
+
+#### Responses
+- Respostas coletadas
+- Vinculo com Form + Patient
+- Dados das respostas em JSON
+
+## 🔌 API Endpoints (Principais)
+
+### Autenticação
+- `POST /api/auth/login` - Login
+- `POST /api/auth/register` - Registro
+- `GET /api/auth/me` - Usuário atual
+
+### Formulários
+- `GET /api/forms` - Listar meus formulários
+- `POST /api/forms` - Criar formulário
+- `PUT /api/forms/:id` - Editar formulário
+- `DELETE /api/forms/:id` - Deletar formulário
+
+### Pacientes
+- `GET /api/patients` - Listar meus pacientes
+- `POST /api/patients` - Criar paciente
+- `PUT /api/patients/:id` - Editar paciente
+- `DELETE /api/patients/:id` - Deletar paciente
+
+### Compartilhamento
+- `POST /api/share/create` - Criar link (autenticado)
+- `GET /api/share/patient/:patientId` - Listar links do paciente (autenticado)
+- `PATCH /api/share/:id/revoke` - Deletar link (autenticado)
+- `GET /api/share/:token` - Acessar formulário via token (público)
+- `POST /api/share/:token/submit` - Submeter resposta (público)
+
+### Respostas
+- `GET /api/responses/form/:formId` - Respostas de um formulário
+- `GET /api/responses/:id` - Uma resposta específica
+- `DELETE /api/responses/:id` - Deletar resposta
 
 ## 📄 Licença
 

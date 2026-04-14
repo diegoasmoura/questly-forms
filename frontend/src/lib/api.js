@@ -53,6 +53,7 @@ export const api = {
   // Share
   createShareLink: (data) => request("/share/create", { method: "POST", body: JSON.stringify(data) }),
   getShareLinks: (formId) => request(`/share/form/${formId}`),
+  getShareLinksForPatient: (patientId) => request(`/share/patient/${patientId}`),
   revokeShareLink: (id) => request(`/share/${id}/revoke`, { method: "PATCH" }),
 
   // Public share

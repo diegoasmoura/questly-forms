@@ -117,6 +117,9 @@ router.get("/form/:formId", async (req, res) => {
       include: {
         patient: {
           select: { name: true }
+        },
+        form: {
+          select: { title: true }
         }
       },
       orderBy: { createdAt: "desc" },
@@ -127,23 +130,94 @@ router.get("/form/:formId", async (req, res) => {
   }
 });
 
+// List share links for a patient
+router.get("/patient/:patientId", async (req, res) => {
+  try {
+    const patient = await prisma.patient.findFirst({
+      where: { id: req.params.patientId, psychologistId: req.user.id },
+    });
+    if (!patient) return res.status(404).json({ error: "Patient not found" });
+    
+    const links = await prisma.shareLink.findMany({
+      where: { patientId: req.params.patientId },
+      include: {
+        form: {
+          select: { title: true }
+        },
+        // Get the response if it exists for this form/patient combo
+        patient: {
+          select: {
+            responses: {
+              where: {
+                formId: { equals: "" } // This will be set in the query result
+              }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    
+    // For each link, get the response data
+    const linksWithResponses = await Promise.all(
+      links.map(async (link) => {
+        const response = await prisma.response.findFirst({
+          where: {
+            formId: link.formId,
+            patientId: req.params.patientId,
+          },
+          orderBy: { createdAt: "desc" },
+        });
+        return {
+          ...link,
+          response,
+        };
+      })
+    );
+    
+    res.json(linksWithResponses);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Revoke share link
 router.patch("/:id/revoke", async (req, res) => {
   try {
-    const link = await prisma.shareLink.findFirst({
-      where: {
-        id: req.params.id,
-        form: { createdBy: req.user.id },
-      },
-    });
-    if (!link) return res.status(404).json({ error: "Link not found" });
-    const updated = await prisma.shareLink.update({
+    console.log("🔗 Revoke request for link ID:", req.params.id);
+    console.log("👤 Current user ID:", req.user.id);
+    
+    // First, fetch the link with its form data
+    const link = await prisma.shareLink.findUnique({
       where: { id: req.params.id },
-      data: { active: false },
+      include: { form: true },
     });
-    res.json(updated);
+    
+    console.log("🔍 Found link:", link);
+    
+    if (!link) {
+      console.log("❌ Link not found");
+      return res.status(404).json({ error: "Link not found" });
+    }
+    
+    // Verify that the current user owns the form
+    console.log("🔐 Form owner ID:", link.form.createdBy, "Current user ID:", req.user.id);
+    if (link.form.createdBy !== req.user.id) {
+      console.log("❌ Unauthorized - user does not own the form");
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+    
+    // Delete the link completely
+    console.log("🗑️ Deleting link completely");
+    const deleted = await prisma.shareLink.delete({
+      where: { id: req.params.id },
+    });
+    
+    console.log("✅ Link deleted successfully:", deleted);
+    res.json({ success: true, message: "Link deletado com sucesso" });
   } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
+    console.error("❌ Error revoking share link:", error);
+    res.status(500).json({ error: error.message || "Internal server error" });
   }
 });
 

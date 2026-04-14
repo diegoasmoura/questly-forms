@@ -6,7 +6,7 @@ import {
   Plus, 
   FileText, 
   BarChart3, 
-  Share2, 
+  Eye,
   Trash2, 
   Copy, 
   Search,
@@ -185,13 +185,6 @@ export default function MyForms() {
               aggregateData={aggregateData[form.id]}
               onDelete={handleDelete}
               onDuplicate={handleDuplicate}
-              onShare={() => {
-                setSelectedForm(form);
-                setShareData({ patientId: "", expiresAt: "" });
-                setShowShareModal(true);
-                setShowCreateForm(false);
-                loadExistingLinks(form.id);
-              }}
             />
           ))}
         </div>
@@ -381,7 +374,7 @@ export default function MyForms() {
   );
 }
 
-function FormCard({ form, stats, onDelete, onDuplicate, onShare, aggregateData }) {
+function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
   const [showOptions, setShowOptions] = useState(false);
 
   return (
@@ -459,13 +452,13 @@ function FormCard({ form, stats, onDelete, onDuplicate, onShare, aggregateData }
       </div>
 
       <div className="p-4 bg-brand-50/50 border-t border-brand-50 flex items-center justify-between gap-3">
-        <button 
-          onClick={onShare}
+        <Link 
+          to={`/forms/${form.id}/preview`}
           className="btn btn-secondary text-xs flex-1 font-bold h-10 border-transparent hover:border-brand-200 shadow-sm"
         >
-          <Share2 size={14} />
-          Compartilhar
-        </button>
+          <Eye size={14} />
+          Visualizar
+        </Link>
         <Link 
           to={`/forms/${form.id}/responses`}
           className="btn btn-primary text-xs flex-1 font-bold h-10 shadow-lg shadow-brand-950/10"

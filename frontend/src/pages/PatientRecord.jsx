@@ -28,7 +28,10 @@ import {
   BookOpen,
   TrendingUp,
   Table,
-  Plus
+  Plus,
+  Share2,
+  Copy,
+  Eye
 } from "lucide-react";
 
 export default function PatientRecord() {
@@ -38,14 +41,74 @@ export default function PatientRecord() {
   const [loading, setLoading] = useState(true);
   const [selectedResponseId, setSelectedResponseId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("timeline"); // 'timeline' or 'trend' or 'table'
+  const [activeTab, setActiveTab] = useState("timeline"); // 'timeline' or 'trend' or 'table' or 'share'
   const [showEditModal, setShowEditModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState(null);
+  const [forms, setForms] = useState([]);
+  const [shareData, setShareData] = useState({ formId: "", expiresAt: "" });
+  const [patientShareLinks, setPatientShareLinks] = useState([]);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [loadingForms, setLoadingForms] = useState(false);
+  const [loadingLinks, setLoadingLinks] = useState(false);
 
   useEffect(() => {
     loadPatient();
+    loadForms();
   }, [id]);
+
+  const loadForms = async () => {
+    setLoadingForms(true);
+    try {
+      const formsData = await api.getForms();
+      setForms(formsData);
+    } catch (error) {
+      console.error("Failed to load forms:", error);
+    } finally {
+      setLoadingForms(false);
+    }
+  };
+
+  const loadPatientShareLinks = async () => {
+    setLoadingLinks(true);
+    try {
+      const links = await api.getShareLinksForPatient(id);
+      setPatientShareLinks(links);
+    } catch (error) {
+      console.error("Failed to load share links:", error);
+    } finally {
+      setLoadingLinks(false);
+    }
+  };
+
+  const getDefault30DaysLater = () => {
+    const today = new Date();
+    const thirtyDaysLater = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+    return thirtyDaysLater.toISOString().split('T')[0];
+  };
+
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
+  useEffect(() => {
+    if (activeTab === "share" || activeTab === "timeline") {
+      loadPatientShareLinks();
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (!showShareModal && activeTab === "share") {
+      loadPatientShareLinks();
+    }
+  }, [showShareModal]);
+
+  useEffect(() => {
+    if (showShareModal) {
+      setShareData({ formId: "", expiresAt: getDefault30DaysLater() });
+    }
+  }, [showShareModal]);
 
   useEffect(() => {
     if (patient) {
@@ -284,6 +347,12 @@ export default function PatientRecord() {
                 icon={<Table size={14} />}
                 label="Dados Brutos"
               />
+              <TabButton
+                active={activeTab === "share"}
+                onClick={() => setActiveTab("share")}
+                icon={<Share2 size={14} />}
+                label="Compartilhamento"
+              />
             </div>
           </div>
 
@@ -400,155 +469,332 @@ export default function PatientRecord() {
             </div>
           )}
 
+          {/* Share Tab */}
+          {activeTab === "share" && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="card p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-lg font-bold text-brand-950">Compartilhar Formulários</h3>
+                    <p className="text-sm text-brand-500 mt-1">Envie formulários para que {patient.name} preencha</p>
+                  </div>
+                  <button
+                    onClick={() => setShowShareModal(true)}
+                    className="btn btn-primary"
+                  >
+                    <Plus size={16} />
+                    Enviar Formulário
+                  </button>
+                </div>
+
+                {loadingLinks ? (
+                  <div className="text-center py-8 text-brand-400">
+                    <div className="animate-spin w-6 h-6 border-2 border-brand-950 border-t-transparent rounded-full mx-auto mb-2" />
+                    <p className="text-xs">Carregando links...</p>
+                  </div>
+                ) : patientShareLinks.length === 0 ? (
+                  <div className="text-center py-12 bg-brand-50 rounded-lg border border-brand-100">
+                    <Share2 size={40} className="mx-auto text-brand-300 mb-3" />
+                    <p className="text-sm text-brand-500 font-medium">Nenhum formulário enviado ainda</p>
+                    <p className="text-xs text-brand-400 mt-1">Clique no botão acima para começar</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {patientShareLinks.map(link => {
+                      const shareUrl = `${window.location.origin}/form/${link.token}`;
+                      const isActive = link.active && (!link.expiresAt || new Date(link.expiresAt) > new Date());
+                      
+                      return (
+                        <div key={link.id} className={`p-4 rounded-lg border transition-all ${isActive ? 'bg-white border-brand-100 hover:border-brand-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+                          <div className="flex items-start justify-between gap-3 mb-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+                                <span className="text-xs font-medium text-brand-950">
+                                  {isActive ? "Ativo" : "Inativo"}
+                                </span>
+                                {link.expiresAt && (
+                                  <span className="text-[10px] text-brand-400 ml-auto">
+                                    Expira em {new Date(link.expiresAt).toLocaleDateString('pt-BR')}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs font-semibold text-brand-950">{link.form?.title || "Formulário"}</p>
+                              <p className="text-[10px] text-brand-400 mt-1">
+                                Criado em {new Date(link.createdAt).toLocaleDateString('pt-BR')} · {new Date(link.createdAt).toLocaleTimeString('pt-BR')}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <input
+                              readOnly
+                              className="input flex-1 bg-brand-50 font-mono text-[10px] py-1.5"
+                              value={shareUrl}
+                            />
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(shareUrl);
+                                alert("Link copiado!");
+                              }}
+                              className="btn btn-secondary text-[10px] py-1.5 px-3"
+                              title="Copiar link"
+                            >
+                              <Copy size={14} />
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (!confirm("Excluir este link?")) return;
+                                try {
+                                  await api.revokeShareLink(link.id);
+                                  loadPatientShareLinks();
+                                } catch (error) {
+                                  alert("Erro ao excluir: " + error.message);
+                                }
+                              }}
+                              className="btn btn-ghost text-[10px] py-1.5 px-3 text-red-600 hover:bg-red-50"
+                              title="Excluir link"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Timeline Tab (Original) */}
           {activeTab === "timeline" && (
-            patient.responses.length === 0 ? (
+            loadingLinks ? (
+              <div className="text-center py-12 text-brand-400">
+                <div className="animate-spin w-6 h-6 border-2 border-brand-950 border-t-transparent rounded-full mx-auto mb-2" />
+                <p className="text-xs">Carregando formulários...</p>
+              </div>
+            ) : patientShareLinks.length === 0 ? (
               <div className="card p-20 text-center border-dashed border-2">
                 <FileText size={48} className="mx-auto text-brand-200 mb-6" />
                 <h3 className="text-xl font-bold text-brand-950 mb-2">Nenhum registro ainda</h3>
                 <p className="text-brand-500 max-w-sm mx-auto">Envie um formulário ou escala para este paciente para começar a construir seu prontuário digital.</p>
-                <Link to="/my-forms" className="btn btn-primary mt-8">Enviar Formulário</Link>
+                <Link to="/my-forms" className="btn btn-primary mt-8">Ir para Meus Formulários</Link>
               </div>
             ) : (
-            <div className="space-y-4 animate-fade-in">
-              {patient.responses.map((response) => (
-                <div key={response.id} className="card overflow-hidden group hover:border-brand-300 transition-all duration-300">
-                  <div
-                    className="w-full flex items-center justify-between p-5 cursor-pointer"
-                    onClick={(e) => toggleResponse(e, response.id)}
-                  >
-                    <div className="flex items-center gap-4 flex-1">
-                      <div className="w-12 h-12 rounded-xl bg-brand-50 text-brand-950 flex items-center justify-center group-hover:bg-brand-950 group-hover:text-white transition-colors duration-300 shadow-sm">
-                        <FileText size={20} />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-brand-950 group-hover:text-brand-700 transition-colors">{response.form.title}</h4>
-                        <div className="flex items-center gap-2 mt-1">
-                          <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">
-                            {new Date(response.createdAt).toLocaleString('pt-BR')}
-                          </p>
-                          {response.form.title.toLowerCase().includes('phq') || response.form.title.toLowerCase().includes('gad') ? (
-                            <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 text-[8px] font-bold rounded uppercase tracking-tighter">
-                              Protocolo Validado
-                            </span>
-                          ) : null}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-3">
-                      <div className="hidden md:flex items-center gap-2">
-                        <Link
-                          to={`/responses/${response.id}`}
-                          className="btn btn-secondary py-1.5 px-3 text-[10px] font-bold flex items-center gap-2"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Activity size={14} />
-                          Análise
-                        </Link>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleExportPremium(response);
-                          }}
-                          className="btn btn-secondary py-1.5 px-3 text-[10px] font-bold flex items-center gap-2"
-                        >
-                          <FileDown size={14} />
-                          PDF
-                        </button>
-                      </div>
-                      <ChevronRight
-                        size={20}
-                        className={`text-brand-300 transition-all duration-300 ${selectedResponseId === response.id ? 'rotate-90 text-brand-950 scale-110' : ''}`}
-                      />
-                    </div>
-                  </div>
-
-                  {selectedResponseId === response.id && (
-                    <div className="p-6 bg-brand-50/50 border-t border-brand-50 animate-fade-in">
-                      {/* Clinical Score Summary */}
-                      {(() => {
-                        const result = scoreTest(null, response.data);
-                        if (!result || result.type !== "clinical") return null;
-                        
-                        return (
-                          <div className={`mb-6 p-6 rounded-2xl border bg-white shadow-sm ${result.color}`}>
-                            <div className="flex items-center justify-between mb-4">
-                              <div className="flex items-center gap-2">
-                                <TrendingUp size={18} className="text-brand-950" />
-                                <h5 className="font-bold text-xs uppercase tracking-widest text-brand-950">{result.title}</h5>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center gap-6 mb-4">
-                              <div className="text-5xl font-black text-brand-950">{result.score}</div>
-                              <div>
-                                <span className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-tight ${result.color}`}>
-                                  {result.severity}
-                                </span>
-                                <p className="text-[10px] text-brand-400 font-bold uppercase mt-2">Score total de {result.maxScore} pontos</p>
-                              </div>
-                            </div>
-                            
-                            {result.alert && (
-                              <div className="flex items-center gap-3 p-4 rounded-xl bg-red-600 text-white text-xs font-black mb-4 shadow-xl shadow-red-200">
-                                <AlertTriangle size={18} />
-                                {result.alert}
-                              </div>
-                            )}
-                            
-                            <div className="p-4 bg-brand-50/80 rounded-xl border border-brand-100/50">
-                              <p className="text-sm text-brand-800 leading-relaxed font-medium italic">"{result.interpretation}"</p>
-                            </div>
-                          </div>
-                        );
-                      })()}
-
-                      {/* Search Bar */}
-                      <div className="mb-4">
-                        <div className="relative">
-                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-400" size={14} />
-                          <input
-                            type="text"
-                            placeholder="Pesquisar nestas respostas..."
-                            className="input pl-10 text-xs py-2 bg-white"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="bg-white rounded-xl p-4 border border-brand-100 shadow-sm">
-                        <h5 className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-4 border-b border-brand-50 pb-2">Respostas Individuais</h5>
-                        <div className="space-y-1">
-                          {Object.entries(response.data)
-                            .filter(([key, value]) => 
-                              key.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                              JSON.stringify(value).toLowerCase().includes(searchTerm.toLowerCase())
-                            )
-                            .map(([key, value]) => (
-                              <div key={key} className="flex items-center justify-between p-3 rounded-lg hover:bg-brand-50 transition-colors group/item">
-                                <span className="text-[10px] text-brand-500 font-bold uppercase tracking-tight truncate mr-4">
-                                  {key.replace(/_/g, ' ')}
-                                </span>
-                                <div className="text-sm text-brand-950 font-bold text-right shrink-0">
-                                  {typeof value === "object" 
-                                    ? <pre className="text-[10px] bg-brand-50 p-1 rounded font-normal">{JSON.stringify(value)}</pre>
-                                    : String(value)
-                                  }
+              <div className="space-y-8 animate-fade-in">
+                {/* Respondidos */}
+                {(() => {
+                  const answered = patientShareLinks.filter(link => link.response);
+                  if (answered.length === 0) return null;
+                  
+                  return (
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-4 flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        Respondidos ({answered.length})
+                      </h4>
+                      <div className="space-y-4">
+                        {answered.map(link => {
+                          const response = link.response;
+                          const result = scoreTest(null, response.data);
+                          
+                          return (
+                            <div 
+                              key={response.id}
+                              className="card overflow-hidden group hover:border-brand-300 transition-all duration-300 cursor-pointer"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                toggleResponse(e, response.id);
+                              }}
+                            >
+                              <div className="w-full flex items-center justify-between p-5">
+                                <div className="flex items-center gap-4 flex-1">
+                                  <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center group-hover:bg-emerald-700 group-hover:text-white transition-colors duration-300 shadow-sm">
+                                    <FileText size={20} />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-bold text-brand-950 group-hover:text-brand-700 transition-colors">{link.form?.title}</h4>
+                                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                      <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">
+                                        Enviado em {new Date(link.createdAt).toLocaleDateString('pt-BR')} · {new Date(link.createdAt).toLocaleTimeString('pt-BR')}
+                                      </p>
+                                      <span className="text-[10px] font-bold px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full">
+                                        ✓ Respondido
+                                      </span>
+                                      <p className="text-[10px] font-bold text-emerald-600">
+                                        {new Date(response.createdAt).toLocaleDateString('pt-BR')} · {new Date(response.createdAt).toLocaleTimeString('pt-BR')}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div className="flex items-center gap-3">
+                                  <div className="hidden md:flex items-center gap-2">
+                                    <Link
+                                      to={`/responses/${response.id}`}
+                                      className="btn btn-secondary py-1.5 px-3 text-[10px] font-bold flex items-center gap-2"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <Activity size={14} />
+                                      Análise
+                                    </Link>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleExportPremium(response);
+                                      }}
+                                      className="btn btn-secondary py-1.5 px-3 text-[10px] font-bold flex items-center gap-2"
+                                    >
+                                      <FileDown size={14} />
+                                      PDF
+                                    </button>
+                                  </div>
+                                  <ChevronRight
+                                    size={20}
+                                    className={`text-brand-300 transition-all duration-300 ${selectedResponseId === response.id ? 'rotate-90 text-brand-950 scale-110' : ''}`}
+                                  />
                                 </div>
                               </div>
-                            ))}
-                        </div>
+
+                              {selectedResponseId === response.id && (
+                                <div className="p-6 bg-brand-50/50 border-t border-brand-50 animate-fade-in">
+                                  {/* Clinical Score Summary */}
+                                  {(() => {
+                                    if (!result || result.type !== "clinical") return null;
+                                    
+                                    return (
+                                      <div className={`mb-6 p-6 rounded-2xl border bg-white shadow-sm ${result.color}`}>
+                                        <div className="flex items-center justify-between mb-4">
+                                          <div className="flex items-center gap-2">
+                                            <TrendingUp size={18} className="text-brand-950" />
+                                            <h5 className="font-bold text-xs uppercase tracking-widest text-brand-950">{result.title}</h5>
+                                          </div>
+                                        </div>
+                                        
+                                        <div className="flex items-center gap-6 mb-4">
+                                          <div className="text-5xl font-black text-brand-950">{result.score}</div>
+                                          <div>
+                                            <span className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-tight ${result.color}`}>
+                                              {result.severity}
+                                            </span>
+                                            <p className="text-[10px] text-brand-400 font-bold uppercase mt-2">Score total de {result.maxScore} pontos</p>
+                                          </div>
+                                        </div>
+                                        
+                                        {result.alert && (
+                                          <div className="flex items-center gap-3 p-4 rounded-xl bg-red-600 text-white text-xs font-black mb-4 shadow-xl shadow-red-200">
+                                            <AlertTriangle size={18} />
+                                            {result.alert}
+                                          </div>
+                                        )}
+                                        
+                                        <div className="p-4 bg-brand-50/80 rounded-xl border border-brand-100/50">
+                                          <p className="text-sm text-brand-800 leading-relaxed font-medium italic">"{result.interpretation}"</p>
+                                        </div>
+                                      </div>
+                                    );
+                                  })()}
+
+                                  {/* Search Bar */}
+                                  <div className="mb-4">
+                                    <div className="relative">
+                                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-400" size={14} />
+                                      <input
+                                        type="text"
+                                        placeholder="Pesquisar nestas respostas..."
+                                        className="input pl-10 text-xs py-2 bg-white"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        onClick={(e) => e.stopPropagation()}
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div className="bg-white rounded-xl p-4 border border-brand-100 shadow-sm">
+                                    <h5 className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-4 border-b border-brand-50 pb-2">Respostas Individuais</h5>
+                                    <div className="space-y-1">
+                                      {Object.entries(response.data)
+                                        .filter(([key, value]) => 
+                                          key.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                          JSON.stringify(value).toLowerCase().includes(searchTerm.toLowerCase())
+                                        )
+                                        .map(([key, value]) => (
+                                          <div key={key} className="flex items-center justify-between p-3 rounded-lg hover:bg-brand-50 transition-colors group/item">
+                                            <span className="text-[10px] text-brand-500 font-bold uppercase tracking-tight truncate mr-4">
+                                              {key.replace(/_/g, ' ')}
+                                            </span>
+                                            <div className="text-sm text-brand-950 font-bold text-right shrink-0">
+                                              {typeof value === "object" 
+                                                ? <pre className="text-[10px] bg-brand-50 p-1 rounded font-normal">{JSON.stringify(value)}</pre>
+                                                : String(value)
+                                              }
+                                            </div>
+                                          </div>
+                                        ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )
-        )}
+                  );
+                })()}
+
+                {/* Aguardando Resposta */}
+                {(() => {
+                  const pending = patientShareLinks.filter(link => 
+                    link.active && (!link.expiresAt || new Date(link.expiresAt) > new Date()) && !link.response
+                  );
+                  if (pending.length === 0) return null;
+                  
+                  return (
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-4 flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                        Aguardando Resposta ({pending.length})
+                      </h4>
+                      <div className="space-y-4">
+                        {pending.map(link => {
+                          const daysRemaining = link.expiresAt ? Math.ceil((new Date(link.expiresAt) - new Date()) / (1000 * 60 * 60 * 24)) : null;
+                          
+                          return (
+                            <div key={link.id} className="card p-5 bg-white border-brand-100 hover:border-brand-200 transition-all">
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1 min-w-0">
+                                  <h5 className="font-semibold text-brand-950 mb-1">{link.form?.title}</h5>
+                                  <p className="text-xs text-brand-500 mb-3">
+                                    Enviado em {new Date(link.createdAt).toLocaleDateString('pt-BR')} · {new Date(link.createdAt).toLocaleTimeString('pt-BR')}
+                                  </p>
+                                  
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-[10px] font-bold px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full">
+                                      Pendente
+                                    </span>
+                                    <span className="text-[10px] font-bold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full">
+                                      Enviado
+                                    </span>
+                                    {daysRemaining && (
+                                      <span className="text-[10px] font-bold px-2.5 py-1 bg-brand-50 text-brand-700 rounded-full">
+                                        {daysRemaining} dias restantes
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )
+          )}
         </div>
       </div>
 
@@ -721,6 +967,94 @@ export default function PatientRecord() {
                   ) : (
                     "Salvar Alterações"
                   )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-950/20 backdrop-blur-sm">
+          <div className="card w-full max-w-2xl p-6 animate-scale-in max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-semibold text-brand-950">Enviar Formulário para {patient?.name}</h2>
+                <p className="text-xs text-brand-500 mt-1">Crie um link para que o paciente preencha o formulário</p>
+              </div>
+              <button onClick={() => setShowShareModal(false)} className="text-brand-400 hover:text-brand-600">
+                <Plus size={24} className="rotate-45" />
+              </button>
+            </div>
+
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              if (!shareData.formId) {
+                alert("Selecione um formulário");
+                return;
+              }
+              try {
+                const result = await api.createShareLink({
+                  formId: shareData.formId,
+                  patientId: patient.id,
+                  expiresAt: shareData.expiresAt || null,
+                });
+                const absoluteUrl = result.shareUrl.startsWith("http")
+                  ? result.shareUrl
+                  : `${window.location.origin}${result.shareUrl}`;
+                await navigator.clipboard.writeText(absoluteUrl);
+                alert("Link criado e copiado para a área de transferência!");
+                setShowShareModal(false);
+                loadPatientShareLinks();
+              } catch (error) {
+                alert(error.message);
+              }
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-brand-700 mb-2">Selecione um Formulário *</label>
+                {loadingForms ? (
+                  <div className="text-center py-4 text-brand-400">
+                    <div className="animate-spin w-4 h-4 border-2 border-brand-950 border-t-transparent rounded-full mx-auto" />
+                  </div>
+                ) : (
+                  <select
+                    className="input"
+                    value={shareData.formId}
+                    onChange={(e) => setShareData({ ...shareData, formId: e.target.value })}
+                    required
+                  >
+                    <option value="">Selecionar formulário...</option>
+                    {forms.map(form => (
+                      <option key={form.id} value={form.id}>{form.title}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-brand-700 mb-2">Data de Expiração *</label>
+                <input
+                  type="date"
+                  className="input"
+                  min={getTodayDate()}
+                  value={shareData.expiresAt}
+                  onChange={(e) => setShareData({ ...shareData, expiresAt: e.target.value })}
+                  required
+                />
+                <p className="text-xs text-brand-400 mt-1">O link expirará automaticamente nesta data. Padrão: 30 dias a partir de hoje</p>
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <button type="submit" className="btn btn-primary flex-1">
+                  Gerar e Copiar Link
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowShareModal(false)}
+                  className="btn btn-ghost"
+                >
+                  Cancelar
                 </button>
               </div>
             </form>
