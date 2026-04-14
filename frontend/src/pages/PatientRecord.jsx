@@ -5,6 +5,8 @@ import { useAuth } from "../context/AuthContext";
 import { generatePremiumSummary } from "../lib/pdf";
 import { scoreTest } from "../lib/scoring";
 import { ClinicalTrendChart, transformResponsesToTrendData } from "../components/ClinicalCharts";
+import { useShareLinkStatus, getStatusBadge } from "../lib/useShareLinkStatus";
+import ShareLinkCard, { ShareLinkStats } from "../components/ShareLinkCard";
 import DataTable from "../components/DataTable";
 import {
   ArrowLeft,
@@ -81,6 +83,30 @@ export default function PatientRecord() {
     } finally {
       setLoadingLinks(false);
     }
+  };
+
+  const handleExtendLink = async (linkId, days = 30) => {
+    try {
+      await api.extendShareLink(linkId, days);
+      alert(`Link renovado por ${days} dias!`);
+      await loadPatientShareLinks();
+    } catch (error) {
+      alert("Erro ao renovar link: " + error.message);
+    }
+  };
+
+  const handleRevokeLink = async (linkId) => {
+    if (!confirm("Excluir este link?")) return;
+    try {
+      await api.revokeShareLink(linkId);
+      await loadPatientShareLinks();
+    } catch (error) {
+      alert("Erro ao excluir link: " + error.message);
+    }
+  };
+
+  const handleCopyLink = () => {
+    // Toast feedback could be added here
   };
 
   const getDefault30DaysLater = () => {
@@ -511,93 +537,26 @@ export default function PatientRecord() {
                     <p className="text-xs text-brand-400 mt-1">Clique no botão acima para começar</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    {patientShareLinks.map(link => {
-                      const shareUrl = `${window.location.origin}/form/${link.token}`;
-                      const status = link.status || "EXPIRADO";
-                      const StatusBadge = {
-                        PENDENTE: { bg: "bg-amber-50", border: "border-amber-200", dot: "bg-amber-500", text: "text-amber-900", label: "🟡 PENDENTE" },
-                        RESPONDIDO: { bg: "bg-emerald-50", border: "border-emerald-200", dot: "bg-emerald-500", text: "text-emerald-900", label: "✅ RESPONDIDO" },
-                        EXPIRADO: { bg: "bg-gray-50", border: "border-gray-200", dot: "bg-gray-400", text: "text-gray-600", label: "❌ EXPIRADO" }
-                      }[status];
-                      
-                      return (
-                        <div key={link.id} className={`p-4 rounded-lg border transition-all ${StatusBadge.bg} ${StatusBadge.border}`}>
-                          <div className="flex items-start justify-between gap-3 mb-3">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className={`w-2 h-2 rounded-full ${StatusBadge.dot}`} />
-                                <span className={`text-xs font-medium ${StatusBadge.text}`}>
-                                  {StatusBadge.label}
-                                </span>
-                                {link.expiresAt && (
-                                  <span className="text-[10px] text-brand-400 ml-auto">
-                                    Expira em {new Date(link.expiresAt).toLocaleDateString('pt-BR')}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs font-semibold text-brand-950">{link.form?.title || "Formulário"}</p>
-                              <p className="text-[10px] text-brand-400 mt-1">
-                                Criado em {new Date(link.createdAt).toLocaleDateString('pt-BR')} · {new Date(link.createdAt).toLocaleTimeString('pt-BR')}
-                              </p>
-                              {link.lastResponseAt && (
-                                <p className="text-[10px] text-emerald-600 mt-1">
-                                  ✓ Respondido em {new Date(link.lastResponseAt).toLocaleDateString('pt-BR')} · {new Date(link.lastResponseAt).toLocaleTimeString('pt-BR')}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <input
-                              readOnly
-                              className="input flex-1 bg-brand-50 font-mono text-[10px] py-1.5"
-                              value={shareUrl}
-                            />
-                            <button
-                              onClick={() => {
-                                navigator.clipboard.writeText(shareUrl);
-                                alert("Link copiado!");
-                              }}
-                              className="btn btn-secondary text-[10px] py-1.5 px-3"
-                              title="Copiar link"
-                            >
-                              <Copy size={14} />
-                            </button>
-                            {status === "PENDENTE" && (
-                              <button
-                                onClick={() => {
-                                  setShareData({ 
-                                    formId: link.formId, 
-                                    expiresAt: new Date(link.expiresAt).toISOString().split('T')[0] 
-                                  });
-                                  setShowShareModal(true);
-                                }}
-                                className="btn btn-ghost text-[10px] py-1.5 px-3 text-blue-600 hover:bg-blue-50"
-                                title="Renovar link"
-                              >
-                                ↻ Renovar
-                              </button>
-                            )}
-                            <button
-                              onClick={async () => {
-                                if (!confirm("Excluir este link?")) return;
-                                try {
-                                  await api.revokeShareLink(link.id);
-                                  loadPatientShareLinks();
-                                } catch (error) {
-                                  alert("Erro ao excluir: " + error.message);
-                                }
-                              }}
-                              className="btn btn-ghost text-[10px] py-1.5 px-3 text-red-600 hover:bg-red-50"
-                              title="Excluir link"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
+                  <div className="space-y-4">
+                    <ShareLinkStats 
+                      counts={{
+                        PENDENTE: patientShareLinks.filter(l => l.status === "PENDENTE").length,
+                        RESPONDIDO: patientShareLinks.filter(l => l.status === "RESPONDIDO").length,
+                        EXPIRADO: patientShareLinks.filter(l => l.status === "EXPIRADO").length,
+                      }}
+                      compliance={patientShareLinks.length > 0 
+                        ? Math.round((patientShareLinks.filter(l => l.status === "RESPONDIDO").length / patientShareLinks.length) * 100) 
+                        : 0}
+                    />
+                    {patientShareLinks.map(link => (
+                      <ShareLinkCard
+                        key={link.id}
+                        link={link}
+                        onExtend={handleExtendLink}
+                        onRevoke={handleRevokeLink}
+                        onCopy={handleCopyLink}
+                      />
+                    ))}
                   </div>
                 )}
               </div>
@@ -700,6 +659,20 @@ export default function PatientRecord() {
                                   {(() => {
                                     if (!result || result.type !== "clinical") return null;
                                     
+                                    const previousScore = (() => {
+                                      const otherResponses = patientShareLinks
+                                        .filter(l => l.response && l.response.id !== response.id)
+                                        .map(l => {
+                                          const r = scoreTest(null, l.response?.data);
+                                          return r?.type === "clinical" ? r.score : null;
+                                        })
+                                        .filter(s => s !== null)
+                                        .sort((a, b) => b - a);
+                                      return otherResponses[0] || null;
+                                    })();
+                                    
+                                    const scoreDiff = previousScore !== null ? result.score - previousScore : null;
+                                    
                                     return (
                                       <div className={`mb-6 p-6 rounded-2xl border bg-white shadow-sm ${result.color}`}>
                                         <div className="flex items-center justify-between mb-4">
@@ -707,6 +680,11 @@ export default function PatientRecord() {
                                             <TrendingUp size={18} className="text-brand-950" />
                                             <h5 className="font-bold text-xs uppercase tracking-widest text-brand-950">{result.title}</h5>
                                           </div>
+                                          {link.responseCount > 1 && (
+                                            <span className="text-[10px] font-bold px-2 py-1 bg-purple-100 text-purple-700 rounded-full">
+                                              v{link.responseCount}
+                                            </span>
+                                          )}
                                         </div>
                                         
                                         <div className="flex items-center gap-6 mb-4">
@@ -716,6 +694,11 @@ export default function PatientRecord() {
                                               {result.severity}
                                             </span>
                                             <p className="text-[10px] text-brand-400 font-bold uppercase mt-2">Score total de {result.maxScore} pontos</p>
+                                            {scoreDiff !== null && (
+                                              <p className={`text-[10px] font-black mt-1 ${scoreDiff > 0 ? 'text-red-600' : scoreDiff < 0 ? 'text-emerald-600' : 'text-brand-400'}`}>
+                                                {scoreDiff > 0 ? '↑' : scoreDiff < 0 ? '↓' : ''} {Math.abs(scoreDiff)} pts vs. anterior
+                                              </p>
+                                            )}
                                           </div>
                                         </div>
                                         

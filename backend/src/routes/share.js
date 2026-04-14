@@ -216,13 +216,62 @@ router.get("/patient/:patientId", async (req, res) => {
   }
 });
 
+// Extend share link (+30 days by default)
+router.patch("/:id/extend", async (req, res) => {
+  try {
+    const { days } = req.body;
+    const extendDays = days ? parseInt(days) : 30;
+
+    console.log("🔗 Extend request for link ID:", req.params.id, "Days:", extendDays);
+
+    const link = await prisma.shareLink.findUnique({
+      where: { id: req.params.id },
+      include: { form: true },
+    });
+
+    if (!link) {
+      return res.status(404).json({ error: "Link not found" });
+    }
+
+    if (link.form.createdBy !== req.user.id) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const now = new Date();
+    let newExpiresAt;
+
+    if (link.expiresAt && new Date(link.expiresAt) > now) {
+      newExpiresAt = new Date(new Date(link.expiresAt).getTime() + extendDays * 24 * 60 * 60 * 1000);
+    } else {
+      newExpiresAt = new Date(now.getTime() + extendDays * 24 * 60 * 60 * 1000);
+    }
+
+    const updated = await prisma.shareLink.update({
+      where: { id: req.params.id },
+      data: {
+        expiresAt: newExpiresAt,
+        active: true,
+      },
+    });
+
+    console.log("✅ Link extended successfully:", updated);
+    res.json({
+      success: true,
+      message: `Link renovado por ${extendDays} dias`,
+      expiresAt: updated.expiresAt,
+    });
+  } catch (error) {
+    console.error("❌ Error extending share link:", error);
+    res.status(500).json({ error: error.message || "Internal server error" });
+  }
+});
+
 // Revoke share link
 router.patch("/:id/revoke", async (req, res) => {
   try {
     console.log("🔗 Revoke request for link ID:", req.params.id);
     console.log("👤 Current user ID:", req.user.id);
     
-    // First, fetch the link with its form data
     const link = await prisma.shareLink.findUnique({
       where: { id: req.params.id },
       include: { form: true },
@@ -235,14 +284,12 @@ router.patch("/:id/revoke", async (req, res) => {
       return res.status(404).json({ error: "Link not found" });
     }
     
-    // Verify that the current user owns the form
     console.log("🔐 Form owner ID:", link.form.createdBy, "Current user ID:", req.user.id);
     if (link.form.createdBy !== req.user.id) {
       console.log("❌ Unauthorized - user does not own the form");
       return res.status(403).json({ error: "Unauthorized" });
     }
     
-    // Delete the link completely
     console.log("🗑️ Deleting link completely");
     const deleted = await prisma.shareLink.delete({
       where: { id: req.params.id },
