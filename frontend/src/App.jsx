@@ -14,6 +14,7 @@ import PatientRecord from "./pages/PatientRecord";
 import MyForms from "./pages/MyForms";
 import Library from "./pages/Library";
 import FormBuilder from "./pages/FormBuilder";
+import FormPreview from "./pages/FormPreview";
 import FormResponses from "./pages/FormResponses";
 import ResponseDetail from "./pages/ResponseDetail";
 import ShareLink from "./pages/ShareLink";
@@ -66,6 +67,7 @@ export default function App() {
       {/* Form management routes also protected and in layout */}
       <Route path="/forms/new" element={<ProtectedRoute><FormBuilder /></ProtectedRoute>} />
       <Route path="/forms/:id/edit" element={<ProtectedRoute><FormBuilder /></ProtectedRoute>} />
+      <Route path="/forms/:id/preview" element={<ProtectedRoute><FormPreview /></ProtectedRoute>} />
       <Route path="/forms/:id/responses" element={<ProtectedRoute><FormResponses /></ProtectedRoute>} />
       <Route path="/responses/:id" element={<ProtectedRoute><ResponseDetail /></ProtectedRoute>} />
       
