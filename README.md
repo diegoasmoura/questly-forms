@@ -21,7 +21,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Sistema de Compartilhamento Avançado:**
   - **Prevenção de Duplicatas:** Links duplicados são reutilizados automaticamente com confirmação
   - **Status Visual:** Badges coloridos (Pendente, Respondido, Expirado) com bolinhas indicativas
-  - **Renovação Flexível:** Dropdown com opções de 7, 15, 30, 60, 90 dias ou personalizado
+  - **Renovação Flexível:** Dropdown com opções de 7, 15, 30, 60, 90 dias ou personalizado (mesma UX no modal e nos cards)
   - **Badge de Versão:** Indicação de quantas vezes o paciente respondeu (v2, v3...)
   - **Comparação de Scores:** Delta de pontos entre respostas (↑7 pts, ↓3 pts)
   - **Compliance Tracker:** Barra de statistics mostrando pendentes/respondidos/expirados

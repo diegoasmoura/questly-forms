@@ -1014,11 +1014,15 @@ export default function PatientRecord() {
                 alert("Selecione um formulário");
                 return;
               }
+              if (!shareData.expiresAt) {
+                alert("Selecione a validade do link");
+                return;
+              }
               try {
                 const result = await api.createShareLink({
                   formId: shareData.formId,
                   patientId: patient.id,
-                  expiresAt: shareData.expiresAt || null,
+                  expiresAt: shareData.expiresAt,
                 });
                 const absoluteUrl = result.shareUrl.startsWith("http")
                   ? result.shareUrl
@@ -1027,6 +1031,7 @@ export default function PatientRecord() {
                 const action = result.reused ? "reutilizado" : "criado";
                 alert(`Link ${action} e copiado para a área de transferência!`);
                 setShowShareModal(false);
+                setShareData({ formId: "", expiresAt: "" });
                 loadPatientShareLinks();
               } catch (error) {
                 alert(error.message);
@@ -1069,16 +1074,40 @@ export default function PatientRecord() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-brand-700 mb-2">Data de Expiração *</label>
-                <input
-                  type="date"
-                  className="input"
-                  min={getTodayDate()}
-                  value={shareData.expiresAt}
-                  onChange={(e) => setShareData({ ...shareData, expiresAt: e.target.value })}
-                  required
-                />
-                <p className="text-xs text-brand-400 mt-1">O link expirará automaticamente nesta data. Padrão: 30 dias a partir de hoje</p>
+                <label className="block text-sm font-medium text-brand-700 mb-2">Validade do Link *</label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { days: 7, label: "7 dias" },
+                    { days: 15, label: "15 dias" },
+                    { days: 30, label: "30 dias", recommended: true },
+                    { days: 60, label: "60 dias" },
+                    { days: 90, label: "90 dias" },
+                  ].map((opt) => (
+                    <button
+                      key={opt.days}
+                      type="button"
+                      onClick={() => {
+                        const expiresAt = new Date(Date.now() + opt.days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                        setShareData({ ...shareData, expiresAt });
+                      }}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        shareData.expiresAt === new Date(Date.now() + opt.days * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                          ? "bg-brand-950 text-white shadow-md"
+                          : opt.recommended
+                          ? "bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
+                          : "bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100"
+                      }`}
+                    >
+                      {opt.label}
+                      {opt.recommended && <span className="ml-1 text-[10px] opacity-70">(Padrão)</span>}
+                    </button>
+                  ))}
+                </div>
+                {shareData.expiresAt && (
+                  <p className="text-xs text-brand-500 mt-2">
+                    Expira em: {new Date(shareData.expiresAt + 'T23:59:59').toLocaleDateString('pt-BR')}
+                  </p>
+                )}
               </div>
 
               <div className="flex gap-2 pt-4">
