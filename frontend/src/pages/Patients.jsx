@@ -17,7 +17,9 @@ import {
   Trash2,
   Edit,
   LayoutDashboard,
-  LogOut
+  LogOut,
+  Eye,
+  X
 } from "lucide-react";
 
 export default function Patients() {
@@ -27,6 +29,7 @@ export default function Patients() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editPatient, setEditPatient] = useState(null);
   const [newPatient, setNewPatient] = useState({
     name: "",
     email: "",
@@ -219,6 +222,7 @@ export default function Patients() {
               key={patient.id}
               patient={patient}
               onDelete={handleDeletePatient}
+              onEdit={() => setEditPatient(patient)}
             />
           ))}
         </div>
@@ -495,69 +499,318 @@ export default function Patients() {
           </div>
         </div>
       )}
+
+      {/* Edit Patient Modal */}
+      {editPatient && (
+        <EditPatientModal
+          patient={editPatient}
+          onClose={() => setEditPatient(null)}
+          onSave={() => {
+            setEditPatient(null);
+            loadPatients();
+          }}
+        />
+      )}
     </div>
   );
 }
 
-function PatientCard({ patient, onDelete }) {
+function EditPatientModal({ patient, onClose, onSave }) {
+  const [formData, setFormData] = useState({
+    name: patient.name || "",
+    email: patient.email || "",
+    phone: patient.phone || "",
+    birthDate: patient.birthDate ? patient.birthDate.split('T')[0] : "",
+    cpf: patient.cpf || "",
+    rg: patient.rg || "",
+    gender: patient.gender || "",
+    maritalStatus: patient.maritalStatus || "",
+    profession: patient.profession || "",
+    cep: patient.cep || "",
+    street: patient.street || "",
+    number: patient.number || "",
+    complement: patient.complement || "",
+    neighborhood: patient.neighborhood || "",
+    city: patient.city || "",
+    state: patient.state || "",
+    emergencyName: patient.emergencyName || "",
+    emergencyPhone: patient.emergencyPhone || "",
+    notes: patient.notes || ""
+  });
+  const [saving, setSaving] = useState(false);
+
+  const formatCPF = (value) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})/, "$1-$2")
+      .replace(/(-\d{2})\d+?$/, "$1");
+  };
+
+  const formatPhone = (value) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{2})(\d)/, "($1) $2")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .replace(/(-\d{4})\d+?$/, "$1");
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await api.updatePatient(patient.id, formData);
+      onSave();
+    } catch (error) {
+      alert("Erro ao salvar: " + error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
-    <div className="card p-5 group hover:border-brand-300 transition-all duration-300 flex flex-col h-full overflow-hidden">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center text-brand-700 font-bold text-xl group-hover:bg-brand-950 group-hover:text-white transition-colors duration-300">
-            {patient.name.charAt(0).toUpperCase()}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-950/20 backdrop-blur-sm">
+      <div className="card w-full max-w-3xl p-8 animate-scale-in max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-8 bg-white pb-4 border-b border-brand-50">
+          <div>
+            <h2 className="text-2xl font-bold text-brand-950">Editar Cadastro de Paciente</h2>
+            <p className="text-sm text-brand-500 mt-1">Atualize os dados clínicos do prontuário.</p>
           </div>
-          <div className="min-w-0">
-            <h3 className="font-bold text-brand-950 truncate group-hover:text-brand-700 transition-colors">
-              {patient.name}
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-brand-50 text-brand-400 hover:text-brand-950 transition-all">
+            <Plus size={28} className="rotate-45" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSave} className="space-y-8">
+          {/* Section: Identificação */}
+          <section>
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+              Identificação do Paciente
             </h3>
-            <p className="text-[10px] text-brand-400 uppercase tracking-wider font-semibold">
-              Desde {new Date(patient.createdAt).toLocaleDateString()}
-            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Nome Completo *</label>
+                <input type="text" required className="input" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Nome social ou completo" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">CPF</label>
+                <input type="text" className="input" value={formData.cpf} onChange={e => setFormData({ ...formData, cpf: formatCPF(e.target.value) })} placeholder="000.000.000-00" maxLength={14} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">RG</label>
+                <input type="text" className="input" value={formData.rg} onChange={e => setFormData({ ...formData, rg: e.target.value })} placeholder="Órgão Emissor" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Data de Nascimento</label>
+                <input type="date" className="input" value={formData.birthDate} onChange={e => setFormData({ ...formData, birthDate: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Gênero / Identidade</label>
+                <select className="input" value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })}>
+                  <option value="">Selecionar...</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Feminino">Feminino</option>
+                  <option value="Não-Binário">Não-Binário</option>
+                  <option value="Outro">Outro / Prefiro não dizer</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Estado Civil</label>
+                <select className="input" value={formData.maritalStatus} onChange={e => setFormData({ ...formData, maritalStatus: e.target.value })}>
+                  <option value="">Selecionar...</option>
+                  <option value="Solteiro(a)">Solteiro(a)</option>
+                  <option value="Casado(a)">Casado(a)</option>
+                  <option value="União Estável">União Estável</option>
+                  <option value="Divorciado(a)">Divorciado(a)</option>
+                  <option value="Viúvo(a)">Viúvo(a)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Profissão / Ocupação</label>
+                <input type="text" className="input" value={formData.profession} onChange={e => setFormData({ ...formData, profession: e.target.value })} placeholder="Cargo ou área" />
+              </div>
+            </div>
+          </section>
+
+          {/* Section: Contato */}
+          <section>
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+              Informações de Contato
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">E-mail</label>
+                <input type="email" className="input" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="email@exemplo.com" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Telefone / WhatsApp</label>
+                <input type="tel" className="input" value={formData.phone} onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
+              </div>
+            </div>
+          </section>
+
+          {/* Section: Endereço */}
+          <section>
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+              Localização / Endereço
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">CEP</label>
+                <input type="text" className="input" value={formData.cep} onChange={e => setFormData({ ...formData, cep: e.target.value })} placeholder="00000-000" />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Logradouro (Rua/Av)</label>
+                <input type="text" className="input" value={formData.street} onChange={e => setFormData({ ...formData, street: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Número</label>
+                <input type="text" className="input" value={formData.number} onChange={e => setFormData({ ...formData, number: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Bairro</label>
+                <input type="text" className="input" value={formData.neighborhood} onChange={e => setFormData({ ...formData, neighborhood: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Cidade / UF</label>
+                <div className="flex gap-2">
+                  <input type="text" className="input flex-1" value={formData.city} onChange={e => setFormData({ ...formData, city: e.target.value })} />
+                  <input type="text" className="input w-16" value={formData.state} onChange={e => setFormData({ ...formData, state: e.target.value })} maxLength={2} />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Section: Emergência */}
+          <section>
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+              Contato de Emergência
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Nome do Contato</label>
+                <input type="text" className="input" value={formData.emergencyName} onChange={e => setFormData({ ...formData, emergencyName: e.target.value })} placeholder="Parente, amigo, etc." />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Telefone de Emergência</label>
+                <input type="tel" className="input" value={formData.emergencyPhone} onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
+              </div>
+            </div>
+          </section>
+
+          {/* Section: Observações */}
+          <section>
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+              Observações Gerais
+            </h3>
+            <textarea
+              className="input min-h-[120px] py-4"
+              value={formData.notes}
+              onChange={e => setFormData({ ...formData, notes: e.target.value })}
+              placeholder="Informações relevantes para o acompanhamento..."
+            />
+          </section>
+
+          <div className="flex gap-4 pt-8 bg-white pb-4 border-t border-brand-50">
+            <button type="button" onClick={onClose} className="btn btn-secondary flex-1 py-4 font-bold">
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="btn btn-primary flex-1 py-4 font-bold shadow-xl shadow-brand-950/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {saving ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Salvando...
+                </div>
+              ) : (
+                "Salvar Alterações"
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function PatientCard({ patient, onDelete, onEdit }) {
+  return (
+    <div className="card p-5 card-hover group">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-lg shrink-0">
+              {patient.name.charAt(0).toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-semibold text-brand-950 truncate text-sm">
+                {patient.name}
+              </h3>
+              <p className="text-[10px] text-brand-400">
+                {patient._count?.responses || 0} respostas
+              </p>
+            </div>
           </div>
         </div>
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
           <button
             onClick={() => onDelete(patient.id)}
-            className="p-1.5 rounded-lg text-brand-400 hover:text-red-600 hover:bg-red-50"
+            className="p-1.5 rounded-lg text-brand-400 hover:text-red-600 hover:bg-red-50 transition-colors"
             title="Excluir"
           >
-            <Trash2 size={16} />
+            <Trash2 size={14} />
           </button>
         </div>
       </div>
 
-      <div className="space-y-3 mb-6 flex-1">
+      <div className="space-y-2 mb-4 text-xs text-brand-500">
         {patient.email && (
-          <div className="flex items-center gap-3 text-xs text-brand-500 bg-brand-50/50 p-2 rounded-lg border border-transparent hover:border-brand-100 transition-all">
-            <Mail size={14} className="text-brand-400" />
+          <div className="flex items-center gap-2">
+            <Mail size={12} className="shrink-0" />
             <span className="truncate">{patient.email}</span>
           </div>
         )}
         {patient.phone && (
-          <div className="flex items-center gap-3 text-xs text-brand-500 bg-brand-50/50 p-2 rounded-lg border border-transparent hover:border-brand-100 transition-all">
-            <Phone size={14} className="text-brand-400" />
+          <div className="flex items-center gap-2">
+            <Phone size={12} className="shrink-0" />
             <span>{patient.phone}</span>
           </div>
         )}
-        {patient.cpf && (
-          <div className="flex items-center gap-3 text-[10px] text-brand-400 font-bold px-2">
-            <span>CPF: {patient.cpf}</span>
+        {patient.birthDate && (
+          <div className="flex items-center gap-2">
+            <Calendar size={12} className="shrink-0" />
+            <span>{new Date(patient.birthDate).toLocaleDateString('pt-BR')}</span>
           </div>
         )}
-        <div className="flex items-center gap-3 text-xs text-brand-600 font-medium p-2">
-          <FileText size={14} className="text-brand-400" />
-          <span>{patient._count?.responses || 0} prontuários</span>
-        </div>
       </div>
 
-      <Link
-        to={`/patients/${patient.id}`}
-        className="btn btn-secondary w-full text-xs font-bold justify-between group/btn py-2 hover:bg-brand-950 hover:text-white hover:border-brand-950 transition-all duration-300"
-      >
-        Acessar Prontuário
-        <ChevronRight size={14} className="group-hover/btn:translate-x-0.5 transition-transform" />
-      </Link>
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          onClick={onEdit}
+          className="btn btn-ghost text-[10px] py-1.5 px-2 flex items-center justify-center gap-1"
+          title="Editar Dados"
+        >
+          <Edit size={12} />
+          Editar
+        </button>
+        <Link
+          to={`/patients/${patient.id}`}
+          className="btn btn-primary text-[10px] py-1.5 px-2 flex items-center justify-center gap-1"
+          title="Acessar Prontuário"
+        >
+          <FileText size={12} />
+          Prontuário
+        </Link>
+      </div>
     </div>
   );
 }

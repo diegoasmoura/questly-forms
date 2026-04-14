@@ -27,7 +27,8 @@ import {
   Search,
   BookOpen,
   TrendingUp,
-  Table
+  Table,
+  Plus
 } from "lucide-react";
 
 export default function PatientRecord() {
@@ -37,7 +38,8 @@ export default function PatientRecord() {
   const [loading, setLoading] = useState(true);
   const [selectedResponseId, setSelectedResponseId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("timeline"); // 'timeline' or 'trend' or 'table'
+  const [activeTab, setActiveTab] = useState("timeline"); // 'data', 'timeline', 'trend', 'table'
+  const [showFullDataModal, setShowFullDataModal] = useState(false);
 
   useEffect(() => {
     loadPatient();
@@ -112,19 +114,53 @@ export default function PatientRecord() {
               <p className="text-xs font-bold text-brand-400 mt-1 uppercase tracking-widest">Prontuário #{patient.id.slice(0, 8).toUpperCase()}</p>
             </div>
 
-            <div className="space-y-4 pt-6 border-t border-brand-50">
-              <InfoItem icon={<Mail size={16} />} label="Email" value={patient.email || "Não informado"} />
-              <InfoItem icon={<Phone size={16} />} label="Telefone" value={patient.phone || "Não informado"} />
-              <InfoItem
-                icon={<Calendar size={16} />}
-                label="Nascimento"
-                value={patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : "Não informado"}
-              />
-              <InfoItem
-                icon={<Clock size={16} />}
-                label="Paciente desde"
-                value={new Date(patient.createdAt).toLocaleDateString('pt-BR')}
-              />
+            <div className="space-y-3 pt-6 border-t border-brand-50">
+              {patient.email && (
+                <div className="flex items-center justify-between px-2 py-1.5">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Email</p>
+                    <p className="text-xs text-brand-700 font-medium truncate">{patient.email}</p>
+                  </div>
+                  <a
+                    href={`mailto:${patient.email}`}
+                    className="btn btn-ghost text-[10px] py-1 px-2 shrink-0 ml-2"
+                    title="Enviar Email"
+                  >
+                    Enviar
+                  </a>
+                </div>
+              )}
+              {patient.phone && (
+                <div className="flex items-center justify-between px-2 py-1.5">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Telefone</p>
+                    <p className="text-xs text-brand-700 font-medium truncate">{patient.phone}</p>
+                  </div>
+                  <a
+                    href={`tel:${patient.phone.replace(/\D/g, '')}`}
+                    className="btn btn-ghost text-[10px] py-1 px-2 shrink-0 ml-2"
+                    title="Ligar"
+                  >
+                    Ligar
+                  </a>
+                </div>
+              )}
+              <div className="px-2 py-1.5">
+                <p className="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Nascimento</p>
+                <p className="text-xs text-brand-700 font-medium">{patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : "Não informado"}</p>
+              </div>
+              <div className="px-2 py-1.5">
+                <p className="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Paciente desde</p>
+                <p className="text-xs text-brand-700 font-medium">{new Date(patient.createdAt).toLocaleDateString('pt-BR')}</p>
+              </div>
+              
+              <button
+                onClick={() => setShowFullDataModal(true)}
+                className="w-full mt-4 btn btn-primary text-xs py-3"
+              >
+                <Edit size={14} />
+                Ver Dados Completos
+              </button>
             </div>
           </div>
 
@@ -150,26 +186,88 @@ export default function PatientRecord() {
               </p>
             </div>
             <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-brand-100 shadow-sm">
-              <TabButton 
-                active={activeTab === "timeline"} 
-                onClick={() => setActiveTab("timeline")} 
-                icon={<FileText size={14} />} 
-                label="Linha do Tempo" 
+              <TabButton
+                active={activeTab === "timeline"}
+                onClick={() => setActiveTab("timeline")}
+                icon={<FileText size={14} />}
+                label="Linha do Tempo"
               />
-              <TabButton 
-                active={activeTab === "trend"} 
-                onClick={() => setActiveTab("trend")} 
-                icon={<TrendingUp size={14} />} 
-                label="Tendências" 
+              <TabButton
+                active={activeTab === "trend"}
+                onClick={() => setActiveTab("trend")}
+                icon={<TrendingUp size={14} />}
+                label="Tendências"
               />
-              <TabButton 
-                active={activeTab === "table"} 
-                onClick={() => setActiveTab("table")} 
-                icon={<Table size={14} />} 
-                label="Dados Brutos" 
+              <TabButton
+                active={activeTab === "table"}
+                onClick={() => setActiveTab("table")}
+                icon={<Table size={14} />}
+                label="Dados Brutos"
+              />
+              <TabButton
+                active={activeTab === "data"}
+                onClick={() => setActiveTab("data")}
+                icon={<Edit size={14} />}
+                label="Dados"
               />
             </div>
           </div>
+
+          {/* Dados Tab */}
+          {activeTab === "data" && (
+            <div className="space-y-6 animate-fade-in">
+              {/* Identificação */}
+              <div className="card p-6">
+                <h3 className="text-xs font-bold text-brand-950 uppercase tracking-wider mb-4 pb-2 border-b border-brand-100">Identificação</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div><span className="text-xs text-brand-400 block mb-1">CPF</span><span className="font-medium">{patient.cpf || "-"}</span></div>
+                  <div><span className="text-xs text-brand-400 block mb-1">RG</span><span className="font-medium">{patient.rg || "-"}</span></div>
+                  <div><span className="text-xs text-brand-400 block mb-1">Nascimento</span><span className="font-medium">{patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : "-"}</span></div>
+                  <div><span className="text-xs text-brand-400 block mb-1">Gênero</span><span className="font-medium">{patient.gender || "-"}</span></div>
+                  <div><span className="text-xs text-brand-400 block mb-1">Estado Civil</span><span className="font-medium">{patient.maritalStatus || "-"}</span></div>
+                  <div><span className="text-xs text-brand-400 block mb-1">Profissão</span><span className="font-medium">{patient.profession || "-"}</span></div>
+                </div>
+              </div>
+
+              {/* Contato */}
+              <div className="card p-6">
+                <h3 className="text-xs font-bold text-brand-950 uppercase tracking-wider mb-4 pb-2 border-b border-brand-100">Contato</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div><span className="text-xs text-brand-400 block mb-1">Email</span><span className="font-medium">{patient.email || "-"}</span></div>
+                  <div><span className="text-xs text-brand-400 block mb-1">Telefone</span><span className="font-medium">{patient.phone || "-"}</span></div>
+                </div>
+              </div>
+
+              {/* Endereço */}
+              <div className="card p-6">
+                <h3 className="text-xs font-bold text-brand-950 uppercase tracking-wider mb-4 pb-2 border-b border-brand-100">Endereço</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div><span className="text-xs text-brand-400 block mb-1">CEP</span><span className="font-medium">{patient.cep || "-"}</span></div>
+                  <div className="col-span-2"><span className="text-xs text-brand-400 block mb-1">Logradouro</span><span className="font-medium">{patient.street || "-"}</span></div>
+                  <div><span className="text-xs text-brand-400 block mb-1">Número</span><span className="font-medium">{patient.number || "-"}</span></div>
+                  <div><span className="text-xs text-brand-400 block mb-1">Bairro</span><span className="font-medium">{patient.neighborhood || "-"}</span></div>
+                  <div><span className="text-xs text-brand-400 block mb-1">Cidade/UF</span><span className="font-medium">{patient.city && patient.state ? `${patient.city}/${patient.state}` : "-"}</span></div>
+                </div>
+              </div>
+
+              {/* Emergência */}
+              <div className="card p-6">
+                <h3 className="text-xs font-bold text-brand-950 uppercase tracking-wider mb-4 pb-2 border-b border-brand-100">Emergência</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div><span className="text-xs text-brand-400 block mb-1">Contato</span><span className="font-medium">{patient.emergencyName || "-"}</span></div>
+                  <div><span className="text-xs text-brand-400 block mb-1">Telefone</span><span className="font-medium">{patient.emergencyPhone || "-"}</span></div>
+                </div>
+              </div>
+
+              {/* Notas */}
+              {patient.notes && (
+                <div className="card p-6">
+                  <h3 className="text-xs font-bold text-brand-950 uppercase tracking-wider mb-4 pb-2 border-b border-brand-100">Observações</h3>
+                  <p className="text-sm text-brand-700 whitespace-pre-wrap">{patient.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Trend Chart Tab */}
           {activeTab === "trend" && (
@@ -435,6 +533,109 @@ export default function PatientRecord() {
         )}
         </div>
       </div>
+
+      {/* Full Data Modal */}
+      {showFullDataModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-950/40 backdrop-blur-sm">
+          <div className="card w-full max-w-2xl p-8 animate-scale-in max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-8 bg-white pb-4 border-b border-brand-50">
+              <div>
+                <h2 className="text-2xl font-bold text-brand-950">Dados Completos do Paciente</h2>
+                <p className="text-sm text-brand-500 mt-1">{patient.name}</p>
+              </div>
+              <button onClick={() => setShowFullDataModal(false)} className="p-2 rounded-xl hover:bg-brand-50 text-brand-400 hover:text-brand-950 transition-all">
+                <Plus size={28} className="rotate-45" />
+              </button>
+            </div>
+
+            <div className="space-y-8">
+              {/* Identificação */}
+              <section>
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+                  Identificação do Paciente
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="md:col-span-2">
+                    <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Nome Completo</p>
+                    <p className="text-sm font-bold text-brand-950">{patient.name}</p>
+                  </div>
+                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">CPF</p><p className="text-sm font-medium text-brand-950">{patient.cpf || "-"}</p></div>
+                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">RG</p><p className="text-sm font-medium text-brand-950">{patient.rg || "-"}</p></div>
+                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Nascimento</p><p className="text-sm font-medium text-brand-950">{patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : "-"}</p></div>
+                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Gênero</p><p className="text-sm font-medium text-brand-950">{patient.gender || "-"}</p></div>
+                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Estado Civil</p><p className="text-sm font-medium text-brand-950">{patient.maritalStatus || "-"}</p></div>
+                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Profissão</p><p className="text-sm font-medium text-brand-950">{patient.profession || "-"}</p></div>
+                </div>
+              </section>
+
+              {/* Contato */}
+              <section>
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+                  Informações de Contato
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">E-mail</p><p className="text-sm font-medium text-brand-950">{patient.email || "-"}</p></div>
+                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Telefone</p><p className="text-sm font-medium text-brand-950">{patient.phone || "-"}</p></div>
+                </div>
+              </section>
+
+              {/* Endereço */}
+              <section>
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+                  Localização / Endereço
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">CEP</p><p className="text-sm font-medium text-brand-950">{patient.cep || "-"}</p></div>
+                  <div className="md:col-span-2"><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Logradouro</p><p className="text-sm font-medium text-brand-950">{patient.street || "-"}</p></div>
+                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Número</p><p className="text-sm font-medium text-brand-950">{patient.number || "-"}</p></div>
+                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Bairro</p><p className="text-sm font-medium text-brand-950">{patient.neighborhood || "-"}</p></div>
+                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Cidade / UF</p><p className="text-sm font-medium text-brand-950">{patient.city && patient.state ? `${patient.city}/${patient.state}` : "-"}</p></div>
+                </div>
+              </section>
+
+              {/* Emergência */}
+              <section>
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+                  Contato de Emergência
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Nome do Contato</p><p className="text-sm font-medium text-brand-950">{patient.emergencyName || "-"}</p></div>
+                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Telefone de Emergência</p><p className="text-sm font-medium text-brand-950">{patient.emergencyPhone || "-"}</p></div>
+                </div>
+              </section>
+
+              {/* Notas */}
+              <section>
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+                  Observações Gerais
+                </h3>
+                <div className="bg-brand-50 rounded-lg p-4 border border-brand-100">
+                  <p className="text-sm text-brand-700 whitespace-pre-wrap">{patient.notes || "Nenhuma observação registrada."}</p>
+                </div>
+              </section>
+            </div>
+
+            <div className="flex gap-4 mt-8 pt-6 bg-white border-t border-brand-50">
+              <button onClick={() => setShowFullDataModal(false)} className="btn btn-secondary flex-1 py-4 font-bold">
+                Fechar
+              </button>
+              <Link
+                to={`/patients/${patient.id}`}
+                onClick={() => setShowFullDataModal(false)}
+                className="btn btn-primary flex-1 py-4 font-bold"
+              >
+                <Edit size={16} />
+                Editar Dados
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -427,8 +427,8 @@ function FormCard({ form, stats, onDelete, onDuplicate, onShare, aggregateData }
           </div>
         </div>
 
-        <Link to={`/forms/${form.id}/edit`} className="block mb-2 group/title">
-          <h3 className="text-xl font-bold text-brand-950 group-hover:text-brand-800 transition-colors truncate">
+        <Link to={`/forms/${form.id}/edit`} className="block mb-2 group/title" title={form.title}>
+          <h3 className="text-xl font-bold text-brand-950 group-hover:text-brand-800 transition-colors line-clamp-2 min-h-[3.5rem] leading-tight">
             {form.title}
           </h3>
           <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mt-1">
