@@ -74,14 +74,16 @@ export default function ShareLinkCard({
   return (
     <>
       <div className={`rounded-xl border transition-all overflow-visible relative ${badge.bg} ${badge.border}`}>
-        {/* Title + Status */}
+        {/* Title + Status + Responses Count */}
         <div className="px-4 pt-4 pb-2">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0 flex-1">
               <h3 className="font-semibold text-base text-brand-950">{link.form?.title || "Formulário"}</h3>
-              {link.responseCount > 1 && (
-                <span className="text-[10px] px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded-full font-medium mt-1 inline-block">
-                  v{link.responseCount}
+              {link.responseCount > 0 && (
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium mt-1 inline-block ${
+                  link.responseCount > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-brand-100 text-brand-600'
+                }`}>
+                  {link.responseCount} resposta{link.responseCount !== 1 ? 's' : ''}
                 </span>
               )}
             </div>
@@ -101,7 +103,7 @@ export default function ShareLinkCard({
               </span>
               {link.lastResponseAt && (
                 <span className="text-emerald-600">
-                  <span className="font-medium">Respondido:</span> {new Date(link.lastResponseAt).toLocaleDateString('pt-BR')}
+                  <span className="font-medium">Última:</span> {new Date(link.lastResponseAt).toLocaleDateString('pt-BR')}
                 </span>
               )}
               {link.expiresAt && (

@@ -7,6 +7,7 @@ import { scoreTest } from "../lib/scoring";
 import { ClinicalTrendChart, transformResponsesToTrendData } from "../components/ClinicalCharts";
 import { useShareLinkStatus, getStatusBadge } from "../lib/useShareLinkStatus";
 import ShareLinkCard, { ShareLinkStats } from "../components/ShareLinkCard";
+import FormResponsesView from "../components/FormResponsesView";
 import DataTable from "../components/DataTable";
 import {
   ArrowLeft,
@@ -277,16 +278,16 @@ export default function PatientRecord() {
   }
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto animate-fade-in">
+    <div className="p-8 max-w-[1600px] mx-auto">
       <Link to="/patients" className="inline-flex items-center gap-2 text-sm text-brand-500 hover:text-brand-950 mb-8 group transition-colors">
         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
         Voltar para Lista de Pacientes
       </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Left Column: Patient Profile */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="card p-6 overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+        {/* Left Column: Patient Profile - sticky so it doesn't move when right column expands */}
+        <div className="lg:col-span-1 lg:sticky lg:top-4 space-y-6">
+          <div className="card p-6">
             <div className="flex flex-col items-center text-center mb-8">
               <div className="w-24 h-24 rounded-3xl bg-brand-950 flex items-center justify-center text-white font-bold text-4xl mb-4 shadow-xl shadow-brand-950/20">
                 {patient.name.charAt(0).toUpperCase()}
@@ -396,7 +397,7 @@ export default function PatientRecord() {
 
           {/* Trend Chart Tab */}
           {activeTab === "trend" && (
-            <div className="space-y-8 animate-fade-in">
+            <div className="space-y-8">
               <div className="card p-6">
                 <ClinicalTrendChart
                   data={transformResponsesToTrendData(patient.responses)}
@@ -494,7 +495,7 @@ export default function PatientRecord() {
 
           {/* DataTable Tab */}
           {activeTab === "table" && patient.responses.length > 0 && (
-            <div className="card p-6 animate-fade-in overflow-hidden">
+            <div className="card p-6 overflow-hidden">
               <DataTable
                 data={patient.responses.map(r => ({
                   ...r.data,
@@ -509,7 +510,7 @@ export default function PatientRecord() {
 
           {/* Share Tab */}
           {activeTab === "share" && (
-            <div className="space-y-6 animate-fade-in">
+            <div className="space-y-6">
               <div className="card p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
@@ -577,8 +578,8 @@ export default function PatientRecord() {
                 <p className="text-brand-500 max-w-sm mx-auto">Envie um formulário ou escala para este paciente para começar a construir seu prontuário digital.</p>
                 <Link to="/my-forms" className="btn btn-primary mt-8">Ir para Meus Formulários</Link>
               </div>
-            ) : (
-              <div className="space-y-8 animate-fade-in">
+              ) : (
+              <div className="space-y-8">
                 {/* Respondidos */}
                 {(() => {
                   const answered = patientShareLinks.filter(link => link.response);
@@ -598,15 +599,11 @@ export default function PatientRecord() {
                           return (
                             <div 
                               key={response.id}
-                              className="card overflow-hidden group hover:border-brand-300 transition-all duration-300 cursor-pointer"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                toggleResponse(e, response.id);
-                              }}
+                              className="card overflow-hidden group hover:border-brand-300 transition-all duration-300"
                             >
-                              <div className="w-full flex items-center justify-between p-5">
+                              <div className="w-full flex items-center justify-between p-5 min-h-[88px]">
                                 <div className="flex items-center gap-4 flex-1">
-                                  <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center group-hover:bg-emerald-700 group-hover:text-white transition-colors duration-300 shadow-sm">
+                                  <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center group-hover:bg-emerald-700 group-hover:text-white transition-colors duration-300 shadow-sm shrink-0">
                                     <FileText size={20} />
                                   </div>
                                   <div className="flex-1 min-w-0">
@@ -646,15 +643,24 @@ export default function PatientRecord() {
                                       PDF
                                     </button>
                                   </div>
-                                  <ChevronRight
-                                    size={20}
-                                    className={`text-brand-300 transition-all duration-300 ${selectedResponseId === response.id ? 'rotate-90 text-brand-950 scale-110' : ''}`}
-                                  />
+                                  <button
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      toggleResponse(e, response.id);
+                                    }}
+                                    className="p-2 hover:bg-brand-50 rounded-lg transition-colors"
+                                  >
+                                    <ChevronRight
+                                      size={20}
+                                      className={`text-brand-300 transition-all duration-300 ${selectedResponseId === response.id ? 'rotate-90 text-brand-950 scale-110' : ''}`}
+                                    />
+                                  </button>
                                 </div>
                               </div>
 
                               {selectedResponseId === response.id && (
-                                <div className="p-6 bg-brand-50/50 border-t border-brand-50 animate-fade-in">
+                                <div className="p-6 bg-brand-50/50 border-t border-brand-50">
                                   {/* Clinical Score Summary */}
                                   {(() => {
                                     if (!result || result.type !== "clinical") return null;
@@ -731,29 +737,7 @@ export default function PatientRecord() {
                                     </div>
                                   </div>
 
-                                  <div className="bg-white rounded-xl p-4 border border-brand-100 shadow-sm">
-                                    <h5 className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-4 border-b border-brand-50 pb-2">Respostas Individuais</h5>
-                                    <div className="space-y-1">
-                                      {Object.entries(response.data)
-                                        .filter(([key, value]) => 
-                                          key.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                                          JSON.stringify(value).toLowerCase().includes(searchTerm.toLowerCase())
-                                        )
-                                        .map(([key, value]) => (
-                                          <div key={key} className="flex items-center justify-between p-3 rounded-lg hover:bg-brand-50 transition-colors group/item">
-                                            <span className="text-[10px] text-brand-500 font-bold uppercase tracking-tight truncate mr-4">
-                                              {key.replace(/_/g, ' ')}
-                                            </span>
-                                            <div className="text-sm text-brand-950 font-bold text-right shrink-0">
-                                              {typeof value === "object" 
-                                                ? <pre className="text-[10px] bg-brand-50 p-1 rounded font-normal">{JSON.stringify(value)}</pre>
-                                                : String(value)
-                                              }
-                                            </div>
-                                          </div>
-                                        ))}
-                                    </div>
-                                  </div>
+                                  <FormResponsesView schema={link.form?.schema} data={response.data} />
                                 </div>
                               )}
                             </div>

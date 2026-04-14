@@ -165,7 +165,7 @@ router.get("/patient/:patientId", async (req, res) => {
       where: { patientId: req.params.patientId },
       include: {
         form: {
-          select: { title: true }
+          select: { title: true, schema: true }
         }
       },
       orderBy: { createdAt: "desc" },
@@ -179,6 +179,11 @@ router.get("/patient/:patientId", async (req, res) => {
           where: {
             formId: link.formId,
             patientId: req.params.patientId,
+          },
+          include: {
+            form: {
+              select: { title: true, schema: true }
+            }
           },
           orderBy: { createdAt: "desc" },
         });
