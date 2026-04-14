@@ -793,18 +793,10 @@ function PatientCard({ patient, onDelete, onEdit }) {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        <button
-          onClick={onEdit}
-          className="btn btn-ghost text-[10px] py-1.5 px-2 flex items-center justify-center gap-1"
-          title="Editar Dados"
-        >
-          <Edit size={12} />
-          Editar
-        </button>
+      <div className="flex justify-end">
         <Link
           to={`/patients/${patient.id}`}
-          className="btn btn-primary text-[10px] py-1.5 px-2 flex items-center justify-center gap-1"
+          className="btn btn-primary text-[10px] py-1.5 px-6 flex items-center justify-center gap-1 w-full"
           title="Acessar Prontuário"
         >
           <FileText size={12} />

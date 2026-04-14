@@ -38,12 +38,40 @@ export default function PatientRecord() {
   const [loading, setLoading] = useState(true);
   const [selectedResponseId, setSelectedResponseId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("timeline"); // 'data', 'timeline', 'trend', 'table'
-  const [showFullDataModal, setShowFullDataModal] = useState(false);
+  const [activeTab, setActiveTab] = useState("timeline"); // 'timeline' or 'trend' or 'table'
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState(null);
 
   useEffect(() => {
     loadPatient();
   }, [id]);
+
+  useEffect(() => {
+    if (patient) {
+      setFormData({
+        name: patient.name || "",
+        email: patient.email || "",
+        phone: patient.phone || "",
+        birthDate: patient.birthDate ? patient.birthDate.split('T')[0] : "",
+        cpf: patient.cpf || "",
+        rg: patient.rg || "",
+        gender: patient.gender || "",
+        maritalStatus: patient.maritalStatus || "",
+        profession: patient.profession || "",
+        cep: patient.cep || "",
+        street: patient.street || "",
+        number: patient.number || "",
+        complement: patient.complement || "",
+        neighborhood: patient.neighborhood || "",
+        city: patient.city || "",
+        state: patient.state || "",
+        emergencyName: patient.emergencyName || "",
+        emergencyPhone: patient.emergencyPhone || "",
+        notes: patient.notes || ""
+      });
+    }
+  }, [patient]);
 
   const loadPatient = async () => {
     setLoading(true);
@@ -54,6 +82,58 @@ export default function PatientRecord() {
       console.error("Failed to load patient:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await api.updatePatient(patient.id, formData);
+      await loadPatient();
+      setShowEditModal(false);
+    } catch (error) {
+      alert("Erro ao salvar: " + error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const formatCPF = (value) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})/, "$1-$2")
+      .replace(/(-\d{2})\d+?$/, "$1");
+  };
+
+  const formatPhone = (value) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{2})(\d)/, "($1) $2")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .replace(/(-\d{4})\d+?$/, "$1");
+  };
+
+  const handleCepLookup = async (cep) => {
+    const cleanCep = cep.replace(/\D/g, "");
+    if (cleanCep.length === 8) {
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+        const data = await response.json();
+        if (!data.erro) {
+          setFormData(prev => ({
+            ...prev,
+            street: data.logradouro,
+            neighborhood: data.bairro,
+            city: data.localidade,
+            state: data.uf
+          }));
+        }
+      } catch (error) {
+        console.error("CEP lookup failed:", error);
+      }
     }
   };
 
@@ -155,7 +235,7 @@ export default function PatientRecord() {
               </div>
               
               <button
-                onClick={() => setShowFullDataModal(true)}
+                onClick={() => setShowEditModal(true)}
                 className="w-full mt-4 btn btn-primary text-xs py-3"
               >
                 <Edit size={14} />
@@ -204,70 +284,8 @@ export default function PatientRecord() {
                 icon={<Table size={14} />}
                 label="Dados Brutos"
               />
-              <TabButton
-                active={activeTab === "data"}
-                onClick={() => setActiveTab("data")}
-                icon={<Edit size={14} />}
-                label="Dados"
-              />
             </div>
           </div>
-
-          {/* Dados Tab */}
-          {activeTab === "data" && (
-            <div className="space-y-6 animate-fade-in">
-              {/* Identificação */}
-              <div className="card p-6">
-                <h3 className="text-xs font-bold text-brand-950 uppercase tracking-wider mb-4 pb-2 border-b border-brand-100">Identificação</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><span className="text-xs text-brand-400 block mb-1">CPF</span><span className="font-medium">{patient.cpf || "-"}</span></div>
-                  <div><span className="text-xs text-brand-400 block mb-1">RG</span><span className="font-medium">{patient.rg || "-"}</span></div>
-                  <div><span className="text-xs text-brand-400 block mb-1">Nascimento</span><span className="font-medium">{patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : "-"}</span></div>
-                  <div><span className="text-xs text-brand-400 block mb-1">Gênero</span><span className="font-medium">{patient.gender || "-"}</span></div>
-                  <div><span className="text-xs text-brand-400 block mb-1">Estado Civil</span><span className="font-medium">{patient.maritalStatus || "-"}</span></div>
-                  <div><span className="text-xs text-brand-400 block mb-1">Profissão</span><span className="font-medium">{patient.profession || "-"}</span></div>
-                </div>
-              </div>
-
-              {/* Contato */}
-              <div className="card p-6">
-                <h3 className="text-xs font-bold text-brand-950 uppercase tracking-wider mb-4 pb-2 border-b border-brand-100">Contato</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><span className="text-xs text-brand-400 block mb-1">Email</span><span className="font-medium">{patient.email || "-"}</span></div>
-                  <div><span className="text-xs text-brand-400 block mb-1">Telefone</span><span className="font-medium">{patient.phone || "-"}</span></div>
-                </div>
-              </div>
-
-              {/* Endereço */}
-              <div className="card p-6">
-                <h3 className="text-xs font-bold text-brand-950 uppercase tracking-wider mb-4 pb-2 border-b border-brand-100">Endereço</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><span className="text-xs text-brand-400 block mb-1">CEP</span><span className="font-medium">{patient.cep || "-"}</span></div>
-                  <div className="col-span-2"><span className="text-xs text-brand-400 block mb-1">Logradouro</span><span className="font-medium">{patient.street || "-"}</span></div>
-                  <div><span className="text-xs text-brand-400 block mb-1">Número</span><span className="font-medium">{patient.number || "-"}</span></div>
-                  <div><span className="text-xs text-brand-400 block mb-1">Bairro</span><span className="font-medium">{patient.neighborhood || "-"}</span></div>
-                  <div><span className="text-xs text-brand-400 block mb-1">Cidade/UF</span><span className="font-medium">{patient.city && patient.state ? `${patient.city}/${patient.state}` : "-"}</span></div>
-                </div>
-              </div>
-
-              {/* Emergência */}
-              <div className="card p-6">
-                <h3 className="text-xs font-bold text-brand-950 uppercase tracking-wider mb-4 pb-2 border-b border-brand-100">Emergência</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><span className="text-xs text-brand-400 block mb-1">Contato</span><span className="font-medium">{patient.emergencyName || "-"}</span></div>
-                  <div><span className="text-xs text-brand-400 block mb-1">Telefone</span><span className="font-medium">{patient.emergencyPhone || "-"}</span></div>
-                </div>
-              </div>
-
-              {/* Notas */}
-              {patient.notes && (
-                <div className="card p-6">
-                  <h3 className="text-xs font-bold text-brand-950 uppercase tracking-wider mb-4 pb-2 border-b border-brand-100">Observações</h3>
-                  <p className="text-sm text-brand-700 whitespace-pre-wrap">{patient.notes}</p>
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Trend Chart Tab */}
           {activeTab === "trend" && (
@@ -495,7 +513,7 @@ export default function PatientRecord() {
                             placeholder="Pesquisar nestas respostas..."
                             className="input pl-10 text-xs py-2 bg-white"
                             value={searchTerm}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                             onClick={(e) => e.stopPropagation()}
                           />
                         </div>
@@ -534,22 +552,22 @@ export default function PatientRecord() {
         </div>
       </div>
 
-      {/* Full Data Modal */}
-      {showFullDataModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-950/40 backdrop-blur-sm">
-          <div className="card w-full max-w-2xl p-8 animate-scale-in max-h-[90vh] overflow-y-auto">
+      {/* Edit Patient Modal */}
+      {showEditModal && formData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-950/20 backdrop-blur-sm">
+          <div className="card w-full max-w-3xl p-8 animate-scale-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-8 bg-white pb-4 border-b border-brand-50">
               <div>
-                <h2 className="text-2xl font-bold text-brand-950">Dados Completos do Paciente</h2>
-                <p className="text-sm text-brand-500 mt-1">{patient.name}</p>
+                <h2 className="text-2xl font-bold text-brand-950">Editar Cadastro de Paciente</h2>
+                <p className="text-sm text-brand-500 mt-1">Atualize os dados clínicos do prontuário.</p>
               </div>
-              <button onClick={() => setShowFullDataModal(false)} className="p-2 rounded-xl hover:bg-brand-50 text-brand-400 hover:text-brand-950 transition-all">
+              <button onClick={() => setShowEditModal(false)} className="p-2 rounded-xl hover:bg-brand-50 text-brand-400 hover:text-brand-950 transition-all">
                 <Plus size={28} className="rotate-45" />
               </button>
             </div>
 
-            <div className="space-y-8">
-              {/* Identificação */}
+            <form onSubmit={handleSave} className="space-y-8">
+              {/* Section: Identificação */}
               <section>
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
@@ -557,97 +575,158 @@ export default function PatientRecord() {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="md:col-span-2">
-                    <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Nome Completo</p>
-                    <p className="text-sm font-bold text-brand-950">{patient.name}</p>
+                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Nome Completo *</label>
+                    <input type="text" required className="input" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Nome social ou completo" />
                   </div>
-                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">CPF</p><p className="text-sm font-medium text-brand-950">{patient.cpf || "-"}</p></div>
-                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">RG</p><p className="text-sm font-medium text-brand-950">{patient.rg || "-"}</p></div>
-                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Nascimento</p><p className="text-sm font-medium text-brand-950">{patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : "-"}</p></div>
-                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Gênero</p><p className="text-sm font-medium text-brand-950">{patient.gender || "-"}</p></div>
-                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Estado Civil</p><p className="text-sm font-medium text-brand-950">{patient.maritalStatus || "-"}</p></div>
-                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Profissão</p><p className="text-sm font-medium text-brand-950">{patient.profession || "-"}</p></div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">CPF</label>
+                    <input type="text" className="input" value={formData.cpf} onChange={e => setFormData({ ...formData, cpf: formatCPF(e.target.value) })} placeholder="000.000.000-00" maxLength={14} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">RG</label>
+                    <input type="text" className="input" value={formData.rg} onChange={e => setFormData({ ...formData, rg: e.target.value })} placeholder="Órgão Emissor" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Data de Nascimento</label>
+                    <input type="date" className="input" value={formData.birthDate} onChange={e => setFormData({ ...formData, birthDate: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Gênero / Identidade</label>
+                    <select className="input" value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })}>
+                      <option value="">Selecionar...</option>
+                      <option value="Masculino">Masculino</option>
+                      <option value="Feminino">Feminino</option>
+                      <option value="Não-Binário">Não-Binário</option>
+                      <option value="Outro">Outro / Prefiro não dizer</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Estado Civil</label>
+                    <select className="input" value={formData.maritalStatus} onChange={e => setFormData({ ...formData, maritalStatus: e.target.value })}>
+                      <option value="">Selecionar...</option>
+                      <option value="Solteiro(a)">Solteiro(a)</option>
+                      <option value="Casado(a)">Casado(a)</option>
+                      <option value="União Estável">União Estável</option>
+                      <option value="Divorciado(a)">Divorciado(a)</option>
+                      <option value="Viúvo(a)">Viúvo(a)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Profissão / Ocupação</label>
+                    <input type="text" className="input" value={formData.profession} onChange={e => setFormData({ ...formData, profession: e.target.value })} placeholder="Cargo ou área" />
+                  </div>
                 </div>
               </section>
 
-              {/* Contato */}
+              {/* Section: Contato */}
               <section>
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
                   Informações de Contato
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">E-mail</p><p className="text-sm font-medium text-brand-950">{patient.email || "-"}</p></div>
-                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Telefone</p><p className="text-sm font-medium text-brand-950">{patient.phone || "-"}</p></div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">E-mail</label>
+                    <input type="email" className="input" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="email@exemplo.com" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Telefone / WhatsApp</label>
+                    <input type="tel" className="input" value={formData.phone} onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
+                  </div>
                 </div>
               </section>
 
-              {/* Endereço */}
+              {/* Section: Endereço */}
               <section>
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
                   Localização / Endereço
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">CEP</p><p className="text-sm font-medium text-brand-950">{patient.cep || "-"}</p></div>
-                  <div className="md:col-span-2"><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Logradouro</p><p className="text-sm font-medium text-brand-950">{patient.street || "-"}</p></div>
-                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Número</p><p className="text-sm font-medium text-brand-950">{patient.number || "-"}</p></div>
-                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Bairro</p><p className="text-sm font-medium text-brand-950">{patient.neighborhood || "-"}</p></div>
-                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Cidade / UF</p><p className="text-sm font-medium text-brand-950">{patient.city && patient.state ? `${patient.city}/${patient.state}` : "-"}</p></div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">CEP</label>
+                    <input type="text" className="input" value={formData.cep} onChange={e => {
+                      setFormData({ ...formData, cep: e.target.value });
+                      handleCepLookup(e.target.value);
+                    }} placeholder="00000-000" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Logradouro (Rua/Av)</label>
+                    <input type="text" className="input" value={formData.street} onChange={e => setFormData({ ...formData, street: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Número</label>
+                    <input type="text" className="input" value={formData.number} onChange={e => setFormData({ ...formData, number: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Bairro</label>
+                    <input type="text" className="input" value={formData.neighborhood} onChange={e => setFormData({ ...formData, neighborhood: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Cidade / UF</label>
+                    <div className="flex gap-2">
+                      <input type="text" className="input flex-1" value={formData.city} onChange={e => setFormData({ ...formData, city: e.target.value })} />
+                      <input type="text" className="input w-16" value={formData.state} onChange={e => setFormData({ ...formData, state: e.target.value })} maxLength={2} />
+                    </div>
+                  </div>
                 </div>
               </section>
 
-              {/* Emergência */}
+              {/* Section: Emergência */}
               <section>
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
                   Contato de Emergência
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Nome do Contato</p><p className="text-sm font-medium text-brand-950">{patient.emergencyName || "-"}</p></div>
-                  <div><p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Telefone de Emergência</p><p className="text-sm font-medium text-brand-950">{patient.emergencyPhone || "-"}</p></div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Nome do Contato</label>
+                    <input type="text" className="input" value={formData.emergencyName} onChange={e => setFormData({ ...formData, emergencyName: e.target.value })} placeholder="Parente, amigo, etc." />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Telefone de Emergência</label>
+                    <input type="tel" className="input" value={formData.emergencyPhone} onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
+                  </div>
                 </div>
               </section>
 
-              {/* Notas */}
+              {/* Section: Observações */}
               <section>
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
                   Observações Gerais
                 </h3>
-                <div className="bg-brand-50 rounded-lg p-4 border border-brand-100">
-                  <p className="text-sm text-brand-700 whitespace-pre-wrap">{patient.notes || "Nenhuma observação registrada."}</p>
-                </div>
+                <textarea
+                  className="input min-h-[120px] py-4"
+                  value={formData.notes}
+                  onChange={e => setFormData({ ...formData, notes: e.target.value })}
+                  placeholder="Informações relevantes para o acompanhamento..."
+                />
               </section>
-            </div>
 
-            <div className="flex gap-4 mt-8 pt-6 bg-white border-t border-brand-50">
-              <button onClick={() => setShowFullDataModal(false)} className="btn btn-secondary flex-1 py-4 font-bold">
-                Fechar
-              </button>
-              <Link
-                to={`/patients/${patient.id}`}
-                onClick={() => setShowFullDataModal(false)}
-                className="btn btn-primary flex-1 py-4 font-bold"
-              >
-                <Edit size={16} />
-                Editar Dados
-              </Link>
-            </div>
+              <div className="flex gap-4 pt-8 bg-white pb-4 border-t border-brand-50">
+                <button type="button" onClick={() => setShowEditModal(false)} className="btn btn-secondary flex-1 py-4 font-bold">
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="btn btn-primary flex-1 py-4 font-bold shadow-xl shadow-brand-950/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {saving ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Salvando...
+                    </div>
+                  ) : (
+                    "Salvar Alterações"
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function InfoItem({ icon, label, value }) {
-  return (
-    <div className="flex items-start gap-4">
-      <div className="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center text-brand-400 shrink-0 group-hover:bg-brand-950 group-hover:text-white transition-colors">{icon}</div>
-      <div className="min-w-0">
-        <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">{label}</p>
-        <p className="text-sm text-brand-950 font-bold truncate">{value}</p>
-      </div>
     </div>
   );
 }
