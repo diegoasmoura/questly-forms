@@ -85,6 +85,27 @@ router.post("/create", async (req, res) => {
       if (!patient) return res.status(404).json({ error: "Patient not found" });
     }
 
+    // Check if there's already an active link for this form/patient combo
+    if (patientId && formId) {
+      const existingActiveLink = await prisma.shareLink.findFirst({
+        where: {
+          formId,
+          patientId,
+          active: true,
+        },
+      });
+
+      if (existingActiveLink) {
+        console.log("✅ Link já existe para este formulário/paciente. Retornando existente.");
+        return res.status(200).json({
+          ...existingActiveLink,
+          shareUrl: `${req.protocol}://${req.get("host")}/form/${existingActiveLink.token}`,
+          reused: true,
+          message: "Link já existe para este formulário. Reutilizando.",
+        });
+      }
+    }
+
     const token = uuidv4().replace(/-/g, "");
     const shareLink = await prisma.shareLink.create({
       data: {
@@ -98,9 +119,11 @@ router.post("/create", async (req, res) => {
     });
     res.status(201).json({
       ...shareLink,
-      shareUrl: `${req.protocol}://${req.get("host")}/share/${token}`,
+      shareUrl: `${req.protocol}://${req.get("host")}/form/${token}`,
+      reused: false,
     });
   } catch (error) {
+    console.error("❌ Error creating share link:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -143,40 +166,52 @@ router.get("/patient/:patientId", async (req, res) => {
       include: {
         form: {
           select: { title: true }
-        },
-        // Get the response if it exists for this form/patient combo
-        patient: {
-          select: {
-            responses: {
-              where: {
-                formId: { equals: "" } // This will be set in the query result
-              }
-            }
-          }
         }
       },
       orderBy: { createdAt: "desc" },
     });
     
-    // For each link, get the response data
-    const linksWithResponses = await Promise.all(
+    // For each link, get response data and calculate status
+    const linksWithMetadata = await Promise.all(
       links.map(async (link) => {
-        const response = await prisma.response.findFirst({
+        // Get all responses for this form/patient combo
+        const responses = await prisma.response.findMany({
           where: {
             formId: link.formId,
             patientId: req.params.patientId,
           },
           orderBy: { createdAt: "desc" },
         });
+
+        // Get the most recent response
+        const lastResponse = responses[0] || null;
+        const responseCount = responses.length;
+
+        // Calculate status
+        const now = new Date();
+        const isExpired = link.expiresAt && new Date(link.expiresAt) < now;
+        const isActive = link.active && !isExpired;
+
+        let status = "EXPIRADO";
+        if (isActive && !lastResponse) status = "PENDENTE";
+        if (isActive && lastResponse) status = "RESPONDIDO";
+        if (!isActive && !lastResponse) status = "EXPIRADO";
+        if (!isActive && lastResponse) status = "RESPONDIDO"; // respondido mas expirado
+
         return {
           ...link,
-          response,
+          response: lastResponse, // keep for backwards compatibility
+          responses, // all responses for this link
+          responseCount,
+          lastResponseAt: lastResponse?.createdAt || null,
+          status,
         };
       })
     );
     
-    res.json(linksWithResponses);
+    res.json(linksWithMetadata);
   } catch (error) {
+    console.error("❌ Error fetching patient share links:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

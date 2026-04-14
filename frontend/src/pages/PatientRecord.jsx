@@ -51,6 +51,8 @@ export default function PatientRecord() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [loadingForms, setLoadingForms] = useState(false);
   const [loadingLinks, setLoadingLinks] = useState(false);
+  const [existingLinkForForm, setExistingLinkForForm] = useState(null);
+  const [forceCreateNew, setForceCreateNew] = useState(false);
 
   useEffect(() => {
     loadPatient();
@@ -92,6 +94,14 @@ export default function PatientRecord() {
     return today.toISOString().split('T')[0];
   };
 
+  const checkExistingLinkForForm = (formId) => {
+    if (!formId) return null;
+    const existing = patientShareLinks.find(
+      link => link.formId === formId && link.status === "PENDENTE"
+    );
+    return existing || null;
+  };
+
   useEffect(() => {
     if (activeTab === "share" || activeTab === "timeline") {
       loadPatientShareLinks();
@@ -107,6 +117,8 @@ export default function PatientRecord() {
   useEffect(() => {
     if (showShareModal) {
       setShareData({ formId: "", expiresAt: getDefault30DaysLater() });
+      setExistingLinkForForm(null);
+      setForceCreateNew(false);
     }
   }, [showShareModal]);
 
@@ -502,16 +514,21 @@ export default function PatientRecord() {
                   <div className="space-y-3">
                     {patientShareLinks.map(link => {
                       const shareUrl = `${window.location.origin}/form/${link.token}`;
-                      const isActive = link.active && (!link.expiresAt || new Date(link.expiresAt) > new Date());
+                      const status = link.status || "EXPIRADO";
+                      const StatusBadge = {
+                        PENDENTE: { bg: "bg-amber-50", border: "border-amber-200", dot: "bg-amber-500", text: "text-amber-900", label: "🟡 PENDENTE" },
+                        RESPONDIDO: { bg: "bg-emerald-50", border: "border-emerald-200", dot: "bg-emerald-500", text: "text-emerald-900", label: "✅ RESPONDIDO" },
+                        EXPIRADO: { bg: "bg-gray-50", border: "border-gray-200", dot: "bg-gray-400", text: "text-gray-600", label: "❌ EXPIRADO" }
+                      }[status];
                       
                       return (
-                        <div key={link.id} className={`p-4 rounded-lg border transition-all ${isActive ? 'bg-white border-brand-100 hover:border-brand-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+                        <div key={link.id} className={`p-4 rounded-lg border transition-all ${StatusBadge.bg} ${StatusBadge.border}`}>
                           <div className="flex items-start justify-between gap-3 mb-3">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
-                                <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-gray-400'}`} />
-                                <span className="text-xs font-medium text-brand-950">
-                                  {isActive ? "Ativo" : "Inativo"}
+                                <span className={`w-2 h-2 rounded-full ${StatusBadge.dot}`} />
+                                <span className={`text-xs font-medium ${StatusBadge.text}`}>
+                                  {StatusBadge.label}
                                 </span>
                                 {link.expiresAt && (
                                   <span className="text-[10px] text-brand-400 ml-auto">
@@ -523,6 +540,11 @@ export default function PatientRecord() {
                               <p className="text-[10px] text-brand-400 mt-1">
                                 Criado em {new Date(link.createdAt).toLocaleDateString('pt-BR')} · {new Date(link.createdAt).toLocaleTimeString('pt-BR')}
                               </p>
+                              {link.lastResponseAt && (
+                                <p className="text-[10px] text-emerald-600 mt-1">
+                                  ✓ Respondido em {new Date(link.lastResponseAt).toLocaleDateString('pt-BR')} · {new Date(link.lastResponseAt).toLocaleTimeString('pt-BR')}
+                                </p>
+                              )}
                             </div>
                           </div>
                           
@@ -542,6 +564,21 @@ export default function PatientRecord() {
                             >
                               <Copy size={14} />
                             </button>
+                            {status === "PENDENTE" && (
+                              <button
+                                onClick={() => {
+                                  setShareData({ 
+                                    formId: link.formId, 
+                                    expiresAt: new Date(link.expiresAt).toISOString().split('T')[0] 
+                                  });
+                                  setShowShareModal(true);
+                                }}
+                                className="btn btn-ghost text-[10px] py-1.5 px-3 text-blue-600 hover:bg-blue-50"
+                                title="Renovar link"
+                              >
+                                ↻ Renovar
+                              </button>
+                            )}
                             <button
                               onClick={async () => {
                                 if (!confirm("Excluir este link?")) return;
@@ -1004,7 +1041,8 @@ export default function PatientRecord() {
                   ? result.shareUrl
                   : `${window.location.origin}${result.shareUrl}`;
                 await navigator.clipboard.writeText(absoluteUrl);
-                alert("Link criado e copiado para a área de transferência!");
+                const action = result.reused ? "reutilizado" : "criado";
+                alert(`Link ${action} e copiado para a área de transferência!`);
                 setShowShareModal(false);
                 loadPatientShareLinks();
               } catch (error) {
@@ -1021,7 +1059,12 @@ export default function PatientRecord() {
                   <select
                     className="input"
                     value={shareData.formId}
-                    onChange={(e) => setShareData({ ...shareData, formId: e.target.value })}
+                    onChange={(e) => {
+                      setShareData({ ...shareData, formId: e.target.value });
+                      const existing = checkExistingLinkForForm(e.target.value);
+                      setExistingLinkForForm(existing);
+                      setForceCreateNew(false);
+                    }}
                     required
                   >
                     <option value="">Selecionar formulário...</option>
@@ -1031,6 +1074,16 @@ export default function PatientRecord() {
                   </select>
                 )}
               </div>
+
+              {existingLinkForForm && !forceCreateNew && (
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-sm text-amber-900 font-medium">⏱️ Link já existe para este formulário</p>
+                  <p className="text-xs text-amber-700 mt-1">
+                    Este paciente já tem um link pendente para {forms.find(f => f.id === shareData.formId)?.title}.
+                    Deseja reutilizá-lo ou criar um novo?
+                  </p>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-brand-700 mb-2">Data de Expiração *</label>
@@ -1046,16 +1099,49 @@ export default function PatientRecord() {
               </div>
 
               <div className="flex gap-2 pt-4">
-                <button type="submit" className="btn btn-primary flex-1">
-                  Gerar e Copiar Link
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowShareModal(false)}
-                  className="btn btn-ghost"
-                >
-                  Cancelar
-                </button>
+                {existingLinkForForm && !forceCreateNew ? (
+                  <>
+                    <button type="submit" className="btn btn-secondary flex-1">
+                      ↻ Reutilizar Link Existente
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setForceCreateNew(true)}
+                      className="btn btn-ghost"
+                    >
+                      Criar Novo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowShareModal(false)}
+                      className="btn btn-ghost text-xs"
+                    >
+                      Cancelar
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button type="submit" className="btn btn-primary flex-1">
+                      Gerar e Copiar Link
+                    </button>
+                    {existingLinkForForm && forceCreateNew && (
+                      <button
+                        type="button"
+                        onClick={() => setForceCreateNew(false)}
+                        className="btn btn-ghost"
+                      >
+                        ← Voltar
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setShowShareModal(false)}
+                      className="btn btn-ghost"
+                    >
+                      Cancelar
+                    </button>
+                  </>
+                )}
               </div>
             </form>
           </div>
