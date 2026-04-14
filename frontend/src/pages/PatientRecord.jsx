@@ -660,7 +660,7 @@ export default function PatientRecord() {
                               </div>
 
                               {selectedResponseId === response.id && (
-                                <div className="p-6 bg-brand-50/50 border-t border-brand-50">
+                                <div className="p-6 bg-brand-50/50 border-t border-brand-50 max-h-[70vh] overflow-y-auto">
                                   {/* Clinical Score Summary */}
                                   {(() => {
                                     if (!result || result.type !== "clinical") return null;

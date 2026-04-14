@@ -34,6 +34,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
   - **Hooks Reutilizáveis:** `useShareLinkStatus()` para gerenciamento de estado
   - **Cards Otimizados:** Layout compacto com datas, link e ações na mesma view
   - **Expansão por Botão:** Cards de resposta expandem apenas ao clicar no chevron, não no card inteiro
+  - **Scroll Interno:** Conteúdo expandido com scroll próprio (max-h-[70vh]), evitando deslocamento da página
 
 ## 📋 Regras e Fluxos
 
