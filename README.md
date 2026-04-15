@@ -19,10 +19,12 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Reorganização Clínica:** Hierarquia de informação otimizada (Resumo → Detalhe → Dados Brutos), com resultados críticos sempre no topo.
 - **Vínculo Inteligente:** Sistema aprimorado para diferenciar respostas de pacientes identificados vs. respostas anônimas via link.
 - **Visualização de Respostas (FormResponsesView):**
-  - **Labels em Português:** Extrai títulos das questões do schema JSON do formulário
+  - **Labels em Português:** Extrai títulos das questões do schema JSON do formulário com mapa de tradução para instrumentos clínicos (GAD-7, PHQ-9)
   - **Seções Grouped:** Questões organizadas por página/seção seguindo a ordem do schema
   - **Badges de Resposta:** Sim (verde), Não (amarelo creme), Anormal (verde)
-  - **Matrizes Formatadas:** Questões matrixdropdown/matrixdynamic com formatação zebra
+  - **Grid Visual para Matrizes:** Layout tipo tabela com bolinhas indicando resposta selecionada (estilo instrumento original)
+  - **Estilo Zebra:** Linhas alternadas branco/verde claro para melhor leitura
+  - **Tradução de Colunas:** Valores numéricos mostrados com significado textual (ex: "2 - Mais da metade dos dias")
   - **Campos Vazios:** Tratamento inteligente - objetos vazios não exibem "Não"
 - **Sistema de Compartilhamento Avançado:**
   - **Prevenção de Duplicatas:** Links duplicados são reutilizados automaticamente com confirmação

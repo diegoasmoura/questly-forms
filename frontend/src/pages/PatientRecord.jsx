@@ -622,7 +622,7 @@ export default function PatientRecord() {
                                     </div>
                                   </div>
 
-                                  <FormResponsesView schema={link.form?.schema} data={response.data} />
+                                  <FormResponsesView schema={response.form?.schema || link.form?.schema} data={response.data} />
                                 </div>
                               )}
                             </div>

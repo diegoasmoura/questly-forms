@@ -1,5 +1,38 @@
 import { useState } from "react";
-import { Check, X, ChevronDown, ChevronRight, FileText } from "lucide-react";
+import { Check, X, ChevronDown, ChevronRight, FileText, ClipboardList } from "lucide-react";
+
+const TRANSLATION_MAP = {
+  // GAD-7
+  nervous: "Sentir-se nervoso, ansioso ou muito tenso",
+  control: "Não ser capaz de parar ou controlar a preocupação",
+  worrying: "Preocupar-se demais com diversas coisas",
+  relax: "Dificuldade para relaxar",
+  restless: "Estar tão inquieto que é difícil permanecer sentado",
+  annoyed: "Tornar-se facilmente irritável ou aborrecido",
+  afraid: "Sentir medo, como se algo terrível pudesse acontecer",
+  // PHQ-9
+  interest: "Pouco interesse ou prazer em fazer as coisas",
+  down: "Sentir-se triste, deprimido ou sem esperança",
+  sleep: "Dificuldade para adormecer ou dormir demais",
+  tired: "Sentir-se cansado ou com pouca energia",
+  appetite: "Falta de apetite ou comer demais",
+  fail: "Sentir-se mal consigo mesmo ou que é um fracasso",
+  concentrate: "Dificuldade para concentrar-se nas coisas",
+  moving: "Movimentar-se ou falar tão lentamente que outras pessoas poderiam perceber",
+  thoughts: "Pensamentos de que seria melhor estar morto ou de se machucar",
+};
+
+const COLUMN_TRANSLATION = {
+  0: "Nenhuma vez",
+  1: "Vários dias",
+  2: "Mais da metade dos dias",
+  3: "Quase todos os dias",
+};
+
+function getTranslatedLabel(key) {
+  if (TRANSLATION_MAP[key]) return TRANSLATION_MAP[key];
+  return key.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase());
+}
 
 function buildQuestionMap(schema) {
   const map = {};
@@ -86,6 +119,7 @@ function isEmptyValue(v) {
 }
 
 function formatLabel(key) {
+  if (TRANSLATION_MAP[key]) return TRANSLATION_MAP[key];
   return key
     .replace(/_/g, ' ')
     .replace(/([a-z])([A-Z])/g, '$1 $2')
@@ -100,19 +134,19 @@ function SimpleValue({ value }) {
   
   if (value === "Sim" || isAnormal) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap" style={{ backgroundColor: '#dcfce7', color: '#166534' }}>
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap bg-emerald-50 text-emerald-700 border border-emerald-100">
         <Check size={10} /> {isAnormal && value !== "Sim" ? 'Anormal' : 'Sim'}
       </span>
     );
   }
   if (value === "Não" || isNormal) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap" style={{ backgroundColor: '#fef9c3', color: '#854d0e' }}>
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap bg-amber-50 text-amber-700 border border-amber-100">
         <X size={10} /> {isNormal && value !== "Não" ? 'Não' : 'Não'}
       </span>
     );
   }
-  return <span className="text-xs text-gray-800 font-medium whitespace-nowrap">{String(value)}</span>;
+  return <span className="text-xs text-brand-800 font-medium whitespace-nowrap bg-brand-50 px-2.5 py-1 rounded-lg">{String(value)}</span>;
 }
 
 function ObjectRows({ obj }) {
@@ -123,7 +157,7 @@ function ObjectRows({ obj }) {
   }
   
   return (
-    <div className="flex flex-col gap-0.5">
+    <div className="flex flex-col gap-0.5 bg-brand-50/50 rounded-lg p-2">
       {entries.map(([k, v]) => {
         let displayValue;
         
@@ -134,9 +168,9 @@ function ObjectRows({ obj }) {
         }
         
         return (
-          <div key={k} className="flex items-start justify-between gap-4 py-0.5">
-            <span className="text-xs text-gray-600 flex-1 min-w-0">
-              {formatLabel(k)}:
+          <div key={k} className="flex items-start justify-between gap-3 py-1 px-2 bg-white rounded-lg">
+            <span className="text-[11px] text-brand-600 flex-1 min-w-0">
+              {formatLabel(k)}
             </span>
             <div className="flex-shrink-0">
               <SimpleValue value={displayValue} />
@@ -148,44 +182,84 @@ function ObjectRows({ obj }) {
   );
 }
 
-function MatrixRows({ value, rows }) {
+function MatrixRows({ value, rows, columns }) {
   if (!rows || rows.length === 0) {
     return <ObjectRows obj={value} />;
   }
   
+  const cols = columns && columns.length > 0 ? columns : [];
+  
   return (
-    <div className="flex flex-col gap-0.5">
-      {rows.map((row, idx) => {
+    <div className="bg-white rounded-xl border border-brand-100 overflow-hidden">
+      {/* Header */}
+      <div className="flex bg-brand-100 border-b border-brand-200">
+        <div className="flex-1 px-4 py-2">
+          <span className="text-[10px] font-bold text-brand-700 uppercase tracking-wider">Questão</span>
+        </div>
+        <div className="flex">
+          {cols.map((col, idx) => (
+            <div 
+              key={idx} 
+              className="px-2 py-2 text-center border-l border-brand-200"
+              style={{ width: '70px' }}
+            >
+              <span className="text-[9px] font-medium text-brand-700 leading-tight block">
+                {col.text}
+              </span>
+              <span className="text-[8px] text-brand-500 font-bold">
+                ({col.value})
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      {/* Rows */}
+      {rows.map((row, rowIdx) => {
         const rowKey = row.value || row;
         const rowValue = value[rowKey];
+        const rowLabel = row.text || getTranslatedLabel(String(rowKey));
         
-        if (isEmptyValue(rowValue)) {
-          return (
-            <div key={rowKey} className="flex items-start justify-between gap-4 py-0.5">
-              <span className="text-xs text-gray-600 flex-1 min-w-0">
-                {row.text || formatLabel(String(rowKey))}:
-              </span>
-              <div className="flex-shrink-0">
-                <SimpleValue value="Não" />
-              </div>
-            </div>
-          );
+        let displayValue = null;
+        if (!isEmptyValue(rowValue)) {
+          if (typeof rowValue === 'object') {
+            displayValue = rowValue.valor || rowValue.value || rowValue.resposta || rowValue.teve_tem || Object.values(rowValue)[0];
+          } else {
+            displayValue = rowValue;
+          }
         }
         
-        let displayValue;
-        if (typeof rowValue === 'object') {
-          displayValue = rowValue.valor || rowValue.value || rowValue.resposta || rowValue.teve_tem || Object.values(rowValue)[0];
-        } else {
-          displayValue = String(rowValue);
-        }
+        const bgColor = rowIdx % 2 === 0 ? 'bg-white' : 'bg-emerald-50/50';
         
         return (
-          <div key={rowKey} className="flex items-start justify-between gap-4 py-0.5">
-            <span className="text-xs text-gray-600 flex-1 min-w-0">
-              {row.text || formatLabel(String(rowKey))}:
-            </span>
-            <div className="flex-shrink-0">
-              <SimpleValue value={displayValue} />
+          <div 
+            key={rowKey} 
+            className={`flex border-b border-brand-100 last:border-b-0 ${bgColor}`}
+          >
+            <div className="flex-1 px-4 py-3">
+              <span className="text-xs text-brand-700 leading-relaxed">
+                {rowLabel}
+              </span>
+            </div>
+            <div className="flex items-center">
+              {cols.map((col, colIdx) => {
+                const isSelected = displayValue === col.value;
+                return (
+                  <div 
+                    key={colIdx} 
+                    className="flex items-center justify-center py-3 border-l border-brand-100"
+                    style={{ width: '70px' }}
+                  >
+                    {isSelected ? (
+                      <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center shadow-sm">
+                        <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                      </div>
+                    ) : (
+                      <div className="w-4 h-4 rounded-full border border-brand-300" />
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
@@ -232,8 +306,8 @@ function ValueDisplay({ value, questionType, question }) {
   }
   
   if (typeof value === "object" && value !== null) {
-    if (questionType === 'matrixdropdown') {
-      return <MatrixRows value={value} rows={question?.rows} />;
+    if (questionType === 'matrixdropdown' || questionType === 'matrix') {
+      return <MatrixRows value={value} rows={question?.rows} columns={question?.columns} />;
     }
     return <ObjectRows obj={value} />;
   }
@@ -241,7 +315,7 @@ function ValueDisplay({ value, questionType, question }) {
   return <SimpleValue value={value} />;
 }
 
-function QuestionRow({ title, value, questionType, question }) {
+function QuestionRow({ title, value, questionType, question, isLast }) {
   if (isEmptyValue(value)) {
     return null;
   }
@@ -250,16 +324,16 @@ function QuestionRow({ title, value, questionType, question }) {
   
   if (isComplexValue) {
     return (
-      <div className="py-2 border-b border-gray-100">
-        <div className="text-xs text-gray-700 font-medium mb-2">{title}</div>
+      <div className={`py-3 ${!isLast ? 'border-b border-brand-50' : ''}`}>
+        <div className="text-xs text-brand-600 font-medium mb-2">{title}</div>
         <ValueDisplay value={value} questionType={questionType} question={question} />
       </div>
     );
   }
   
   return (
-    <div className="flex items-start justify-between gap-4 py-2 border-b border-gray-100">
-      <span className="text-xs text-gray-700 font-medium flex-1 min-w-0">{title}</span>
+    <div className={`flex items-start justify-between gap-4 py-3 ${!isLast ? 'border-b border-brand-50' : ''}`}>
+      <span className="text-xs text-brand-700 font-medium flex-1 min-w-0">{title}</span>
       <div className="flex-shrink-0">
         <ValueDisplay value={value} questionType={questionType} question={question} />
       </div>
@@ -278,32 +352,36 @@ function SectionPanel({ title, questions, data }) {
   if (answered.length === 0) return null;
   
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden mb-3">
+    <div className="bg-white rounded-xl border border-brand-100 overflow-hidden shadow-sm">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-2.5 bg-gray-50 hover:bg-gray-100 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 bg-brand-50/50 hover:bg-brand-50 transition-colors"
       >
-        <span className="text-xs font-bold text-gray-800 uppercase tracking-wide">{title}</span>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-            {answered.length}
+          <ClipboardList size={14} className="text-brand-500" />
+          <span className="text-xs font-bold text-brand-800 uppercase tracking-wide">{title}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-medium text-brand-500 bg-brand-100 px-2 py-0.5 rounded-full">
+            {answered.length} respostas
           </span>
           {isOpen ? (
-            <ChevronDown size={16} className="text-gray-500" />
+            <ChevronDown size={16} className="text-brand-400" />
           ) : (
-            <ChevronRight size={16} className="text-gray-500" />
+            <ChevronRight size={16} className="text-brand-400" />
           )}
         </div>
       </button>
       {isOpen && (
-        <div className="px-4 py-2 bg-white">
-          {answered.map(q => (
+        <div className="px-4 py-3">
+          {answered.map((q, idx) => (
             <QuestionRow 
               key={q.name} 
               title={q.title} 
               value={data[q.name]} 
               questionType={q.type}
               question={q}
+              isLast={idx === answered.length - 1}
             />
           ))}
         </div>
@@ -313,9 +391,19 @@ function SectionPanel({ title, questions, data }) {
 }
 
 export default function FormResponsesView({ schema, data }) {
+  if (!schema) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 text-brand-300">
+        <FileText size={32} className="mb-2 opacity-50" />
+        <p className="text-sm">Schema não disponível</p>
+        <p className="text-xs text-brand-400 mt-1">As perguntas não podem ser exibidas sem o schema do formulário.</p>
+      </div>
+    );
+  }
+
   if (!data) {
     return (
-      <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+      <div className="flex flex-col items-center justify-center py-8 text-brand-300">
         <FileText size={32} className="mb-2 opacity-50" />
         <p className="text-sm">Sem dados de resposta</p>
       </div>
@@ -326,7 +414,7 @@ export default function FormResponsesView({ schema, data }) {
   
   if (entries.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+      <div className="flex flex-col items-center justify-center py-8 text-brand-300">
         <FileText size={32} className="mb-2 opacity-50" />
         <p className="text-sm">Nenhuma resposta registrada</p>
       </div>
@@ -338,20 +426,29 @@ export default function FormResponsesView({ schema, data }) {
   if (sections.length === 0) {
     return (
       <div className="space-y-1">
-        <p className="text-xs text-gray-500 mb-3 font-bold">Respostas ({entries.length})</p>
-        {entries.map(([key, value]) => (
-          <QuestionRow
-            key={key}
-            title={key.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())}
-            value={value}
-          />
-        ))}
+        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-brand-100">
+          <ClipboardList size={16} className="text-brand-500" />
+          <p className="text-xs text-brand-600 font-bold uppercase tracking-wide">Respostas ({entries.length})</p>
+        </div>
+        <div className="bg-white rounded-xl border border-brand-100 p-4">
+          {entries.map(([key, value]) => (
+            <QuestionRow
+              key={key}
+              title={key.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())}
+              value={value}
+            />
+          ))}
+        </div>
       </div>
     );
   }
   
   return (
     <div className="space-y-3">
+      <div className="flex items-center gap-2 pb-3 border-b border-brand-100">
+        <ClipboardList size={16} className="text-brand-500" />
+        <p className="text-xs text-brand-600 font-bold uppercase tracking-wide">Respostas do Paciente</p>
+      </div>
       {sections.map((section, i) => (
         <SectionPanel
           key={i}
