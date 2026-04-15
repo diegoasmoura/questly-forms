@@ -4,7 +4,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { generatePremiumSummary } from "../lib/pdf";
 import { scoreTest } from "../lib/scoring";
-import { ClinicalTrendChart, transformResponsesToTrendData } from "../components/ClinicalCharts";
+import { ClinicalTrendChart, transformResponsesToTrendData, WeeklyHeatmap, transformResponsesToHeatmapData } from "../components/ClinicalCharts";
 import { useShareLinkStatus, getStatusBadge } from "../lib/useShareLinkStatus";
 import ShareLinkCard, { ShareLinkStats } from "../components/ShareLinkCard";
 import FormResponsesView from "../components/FormResponsesView";
@@ -329,7 +329,19 @@ export default function PatientRecord() {
               )}
               <div className="px-2 py-1.5">
                 <p className="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Nascimento</p>
-                <p className="text-xs text-brand-700 font-medium">{patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : "Não informado"}</p>
+                <p className="text-xs text-brand-700 font-medium">
+                  {patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : "Não informado"}
+                  {patient.birthDate && (() => {
+                    const today = new Date();
+                    const birth = new Date(patient.birthDate);
+                    let age = today.getFullYear() - birth.getFullYear();
+                    const monthDiff = today.getMonth() - birth.getMonth();
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                      age--;
+                    }
+                    return <span className="ml-1 text-brand-400">({age} anos)</span>;
+                  })()}
+                </p>
               </div>
               <div className="px-2 py-1.5">
                 <p className="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Paciente desde</p>
@@ -377,8 +389,8 @@ export default function PatientRecord() {
               <TabButton
                 active={activeTab === "trend"}
                 onClick={() => setActiveTab("trend")}
-                icon={<TrendingUp size={14} />}
-                label="Tendências"
+                icon={<Calendar size={14} />}
+                label="Respostas"
               />
               <TabButton
                 active={activeTab === "table"}
@@ -397,16 +409,29 @@ export default function PatientRecord() {
 
           {/* Trend Chart Tab */}
           {activeTab === "trend" && (
-            <div className="space-y-8">
+            <div className="flex flex-col gap-8 h-[calc(100vh-300px)]">
+              {patient.responses && patient.responses.length > 0 ? (
+                <WeeklyHeatmap
+                  data={transformResponsesToHeatmapData(patient.responses)}
+                  title="Histórico de Respostas"
+                />
+              ) : (
+                <div className="card p-6 text-center text-brand-400">
+                  <p className="text-sm">Nenhuma resposta registrada</p>
+                </div>
+              )}
+              
               <div className="card p-6">
                 <ClinicalTrendChart
-                  data={transformResponsesToTrendData(patient.responses)}
+                  data={transformResponsesToTrendData(patient.responses || [])}
                   title="Evolução Clínica - PHQ-9 e GAD-7"
                 />
               </div>
               
               {/* Latest Clinical Scores */}
               {(() => {
+                if (!patient.responses || patient.responses.length === 0) return null;
+                
                 const latestResponses = patient.responses
                   .filter(r => r.data.phq9_items || r.data.gad7_items)
                   .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
