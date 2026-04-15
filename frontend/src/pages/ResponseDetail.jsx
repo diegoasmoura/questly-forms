@@ -96,7 +96,7 @@ export default function ResponseDetail() {
   }
 
   return (
-    <div className="p-8 max-w-[1200px] mx-auto animate-fade-in">
+    <div className="p-6 lg:p-8 max-w-[1600px] mx-auto animate-fade-in">
       {/* Back Button */}
       <div className="flex items-center justify-between mb-6">
         <button 
@@ -229,7 +229,7 @@ export default function ResponseDetail() {
               </div>
 
               {response.data.phq9_items && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {Object.entries(response.data.phq9_items).map(([item, value]) => {
                     const itemLabels = {
                       interest: "Pouco interesse ou prazer",
@@ -270,7 +270,7 @@ export default function ResponseDetail() {
               )}
 
               {response.data.gad7_items && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {Object.entries(response.data.gad7_items).map(([item, value]) => {
                     const itemLabels = {
                       nervous: "Sentir-se nervoso/ansioso",
@@ -316,7 +316,7 @@ export default function ResponseDetail() {
                   <TrendingUp size={16} />
                   Contexto Histórico do Paciente
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {patientResponses
                     .filter(r => r.formId === response.formId)
                     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -365,7 +365,7 @@ export default function ResponseDetail() {
             <h3 className="font-black text-xs uppercase tracking-widest text-brand-950 mb-8 border-b border-brand-50 pb-4">
               Respostas Coletadas
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {Object.entries(response.data || {}).map(([key, value]) => (
                 <div key={key} className="p-5 rounded-2xl border border-brand-50 bg-brand-50/20 hover:bg-brand-50 transition-colors">
                   <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-2">
