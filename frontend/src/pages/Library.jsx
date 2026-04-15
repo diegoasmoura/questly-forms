@@ -22,7 +22,12 @@ export default function Library() {
     try {
       await api.createForm({
         title: template.title,
-        schema: template.schema
+        schema: template.schema,
+        source: "template",
+        code: template.code || null,
+        type: template.type || "Avaliação",
+        validated: true,
+        audiences: template.audiences || ["Adulto"]
       });
       alert("Modelo adicionado aos seus formulários!");
       navigate("/my-forms");
@@ -101,7 +106,7 @@ export default function Library() {
 
             <div className="p-4 bg-brand-50/50 border-t border-brand-50 flex items-center justify-between gap-3">
               <button 
-                className="btn btn-ghost text-xs flex-1"
+                className="btn btn-secondary text-xs flex-1"
                 onClick={() => alert("Visualização em breve!")}
               >
                 <Eye size={14} />

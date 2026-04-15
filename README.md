@@ -35,6 +35,14 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
   - **Cards Otimizados:** Layout compacto com datas, link e ações na mesma view
   - **Expansão por Botão:** Cards de resposta expandem apenas ao clicar no chevron, não no card inteiro
   - **Scroll Interno:** Conteúdo expandido com scroll próprio (max-h-[70vh]), evitando deslocamento da página
+- **Sistema de Classificação de Formulários:**
+  - **Convenção de Nomenclatura:** Código automático baseado em tipo e público-alvo (ex: `ANAM-ADULTO`, `AVAL-TODOS`)
+  - **Classificação:** Avaliação, Anamnese, Evolução, Rastreamento
+  - **Público-alvo Múltiplo:** Seleção múltipla com checkboxes (Adulto, Adolesc., Infantil)
+  - **Instrumento Validado:** Flag para identificar instrumentos cientificamente validados
+  - **Origem do Formulário:** Diferencia formulários criados manualmente vs. importados da Biblioteca (ícone e badge Premium)
+  - **Cards Padronizados:** Layout consistente entre My Forms e Library com badges dinâmicos
+  - **Modal de Criação:** Interface para definir classificação, código, público-alvo e validação antes de criar
 
 ## 📋 Regras e Fluxos
 

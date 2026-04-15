@@ -60,6 +60,11 @@ model Patient {
 model Form {
   id         String      @id @default(uuid())
   title      String
+  code       String?
+  type       String?     @default("Avaliação")
+  validated  Boolean     @default(false)
+  audiences  String[]    @default(["Adulto"])
+  source     String?     @default("custom")
   schema     Json
   createdBy  String
   createdAt  DateTime    @default(now())

@@ -37,23 +37,33 @@ router.get("/:id", async (req, res) => {
 // Create form
 router.post("/", async (req, res) => {
   try {
-    const { title, schema } = req.body;
+    const { title, schema, code, type, validated, audiences, source } = req.body;
     if (!title || !schema) {
       return res.status(400).json({ error: "Title and schema required" });
     }
     const form = await prisma.form.create({
-      data: { title, schema, createdBy: req.user.id },
+      data: { 
+        title, 
+        schema, 
+        createdBy: req.user.id,
+        code: code || null,
+        type: type || "Avaliação",
+        validated: validated || false,
+        audiences: audiences && audiences.length > 0 ? audiences : ["Adulto"],
+        source: source || "custom"
+      },
     });
     res.status(201).json(form);
   } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Error creating form:", error);
+    res.status(500).json({ error: "Internal server error", details: error.message });
   }
 });
 
 // Update form
 router.put("/:id", async (req, res) => {
   try {
-    const { title, schema } = req.body;
+    const { title, schema, code, type, validated, audiences } = req.body;
     const form = await prisma.form.findFirst({
       where: { id: req.params.id, createdBy: req.user.id },
     });
@@ -63,6 +73,10 @@ router.put("/:id", async (req, res) => {
       data: {
         ...(title && { title }),
         ...(schema && { schema }),
+        ...(code !== undefined && { code }),
+        ...(type && { type }),
+        ...(validated !== undefined && { validated }),
+        ...(audiences && { audiences }),
       },
     });
     res.json(updated);
