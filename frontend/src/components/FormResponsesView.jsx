@@ -134,19 +134,19 @@ function SimpleValue({ value }) {
   
   if (value === "Sim" || isAnormal) {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap bg-emerald-50 text-emerald-700 border border-emerald-100">
-        <Check size={10} /> {isAnormal && value !== "Sim" ? 'Anormal' : 'Sim'}
+      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold whitespace-nowrap bg-emerald-50 text-emerald-700 border border-emerald-100">
+        <Check size={12} /> {isAnormal && value !== "Sim" ? 'Anormal' : 'Sim'}
       </span>
     );
   }
   if (value === "Não" || isNormal) {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap bg-amber-50 text-amber-700 border border-amber-100">
-        <X size={10} /> {isNormal && value !== "Não" ? 'Não' : 'Não'}
+      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold whitespace-nowrap bg-amber-50 text-amber-700 border border-amber-100">
+        <X size={12} /> {isNormal && value !== "Não" ? 'Não' : 'Não'}
       </span>
     );
   }
-  return <span className="text-xs text-brand-800 font-medium whitespace-nowrap bg-brand-50 px-2.5 py-1 rounded-lg">{String(value)}</span>;
+  return <span className="text-sm text-brand-800 font-medium whitespace-nowrap bg-brand-50 px-3 py-1.5 rounded-lg">{String(value)}</span>;
 }
 
 function ObjectRows({ obj }) {
@@ -193,20 +193,20 @@ function MatrixRows({ value, rows, columns }) {
     <div className="bg-white rounded-xl border border-brand-100 overflow-hidden">
       {/* Header */}
       <div className="flex bg-brand-100 border-b border-brand-200">
-        <div className="flex-1 px-4 py-2">
-          <span className="text-[10px] font-bold text-brand-700 uppercase tracking-wider">Questão</span>
+        <div className="flex-1 px-4 py-3">
+          <span className="text-xs font-bold text-brand-700 uppercase tracking-wider">Questão</span>
         </div>
         <div className="flex">
           {cols.map((col, idx) => (
             <div 
               key={idx} 
-              className="px-2 py-2 text-center border-l border-brand-200"
-              style={{ width: '70px' }}
+              className="px-2 py-3 text-center border-l border-brand-200"
+              style={{ width: '80px' }}
             >
-              <span className="text-[9px] font-medium text-brand-700 leading-tight block">
+              <span className="text-xs font-medium text-brand-700 leading-tight block">
                 {col.text}
               </span>
-              <span className="text-[8px] text-brand-500 font-bold">
+              <span className="text-xs text-brand-500 font-bold">
                 ({col.value})
               </span>
             </div>
@@ -236,8 +236,8 @@ function MatrixRows({ value, rows, columns }) {
             key={rowKey} 
             className={`flex border-b border-brand-100 last:border-b-0 ${bgColor}`}
           >
-            <div className="flex-1 px-4 py-3">
-              <span className="text-xs text-brand-700 leading-relaxed">
+            <div className="flex-1 px-4 py-3.5">
+              <span className="text-sm text-brand-700 leading-relaxed">
                 {rowLabel}
               </span>
             </div>
@@ -247,15 +247,15 @@ function MatrixRows({ value, rows, columns }) {
                 return (
                   <div 
                     key={colIdx} 
-                    className="flex items-center justify-center py-3 border-l border-brand-100"
-                    style={{ width: '70px' }}
+                    className="flex items-center justify-center py-3.5 border-l border-brand-100"
+                    style={{ width: '80px' }}
                   >
                     {isSelected ? (
-                      <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center shadow-sm">
-                        <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                      <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shadow-sm">
+                        <div className="w-2 h-2 rounded-full bg-white" />
                       </div>
                     ) : (
-                      <div className="w-4 h-4 rounded-full border border-brand-300" />
+                      <div className="w-5 h-5 rounded-full border-2 border-brand-300" />
                     )}
                   </div>
                 );
@@ -355,25 +355,25 @@ function SectionPanel({ title, questions, data }) {
     <div className="bg-white rounded-xl border border-brand-100 overflow-hidden shadow-sm">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-brand-50/50 hover:bg-brand-50 transition-colors"
+        className="w-full flex items-center justify-between px-5 py-4 bg-brand-50/50 hover:bg-brand-50 transition-colors"
       >
-        <div className="flex items-center gap-2">
-          <ClipboardList size={14} className="text-brand-500" />
-          <span className="text-xs font-bold text-brand-800 uppercase tracking-wide">{title}</span>
+        <div className="flex items-center gap-3">
+          <ClipboardList size={16} className="text-brand-500" />
+          <span className="text-sm font-bold text-brand-800 uppercase tracking-wide">{title}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-medium text-brand-500 bg-brand-100 px-2 py-0.5 rounded-full">
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-medium text-brand-500 bg-brand-100 px-3 py-1 rounded-full">
             {answered.length} respostas
           </span>
           {isOpen ? (
-            <ChevronDown size={16} className="text-brand-400" />
+            <ChevronDown size={18} className="text-brand-400" />
           ) : (
-            <ChevronRight size={16} className="text-brand-400" />
+            <ChevronRight size={18} className="text-brand-400" />
           )}
         </div>
       </button>
       {isOpen && (
-        <div className="px-4 py-3">
+        <div className="px-5 py-4">
           {answered.map((q, idx) => (
             <QuestionRow 
               key={q.name} 

@@ -474,8 +474,8 @@ export default function PatientRecord() {
                   
                   return (
                     <div>
-                      <h4 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-4 flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      <h4 className="text-sm font-black uppercase tracking-[0.2em] text-brand-400 mb-4 flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500" />
                         Respondidos ({answered.length})
                       </h4>
                       <div className="space-y-4">
@@ -488,21 +488,21 @@ export default function PatientRecord() {
                               key={response.id}
                               className="card overflow-hidden group hover:border-brand-300 transition-all duration-300"
                             >
-                              <div className="w-full flex items-center justify-between p-5 min-h-[88px]">
+                              <div className="w-full flex items-center justify-between p-6 min-h-[100px]">
                                 <div className="flex items-center gap-4 flex-1">
-                                  <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center group-hover:bg-emerald-700 group-hover:text-white transition-colors duration-300 shadow-sm shrink-0">
-                                    <FileText size={20} />
+                                  <div className="w-14 h-14 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center group-hover:bg-emerald-700 group-hover:text-white transition-colors duration-300 shadow-sm shrink-0">
+                                    <FileText size={22} />
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <h4 className="font-bold text-brand-950 group-hover:text-brand-700 transition-colors">{link.form?.title}</h4>
-                                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                      <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">
+                                    <h4 className="font-bold text-base text-brand-950 group-hover:text-brand-700 transition-colors">{link.form?.title}</h4>
+                                    <div className="flex items-center gap-3 mt-2 flex-wrap">
+                                      <p className="text-xs font-bold text-brand-400 uppercase tracking-wide">
                                         Enviado em {new Date(link.createdAt).toLocaleDateString('pt-BR')} · {new Date(link.createdAt).toLocaleTimeString('pt-BR')}
                                       </p>
-                                      <span className="text-[10px] font-bold px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full">
+                                      <span className="text-xs font-bold px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full">
                                         ✓ Respondido
                                       </span>
-                                      <p className="text-[10px] font-bold text-emerald-600">
+                                      <p className="text-xs font-bold text-emerald-600">
                                         {new Date(response.createdAt).toLocaleDateString('pt-BR')} · {new Date(response.createdAt).toLocaleTimeString('pt-BR')}
                                       </p>
                                     </div>
@@ -512,10 +512,10 @@ export default function PatientRecord() {
                                 <div className="flex items-center gap-2">
                                   <Link
                                     to={`/responses/${response.id}`}
-                                    className="btn btn-secondary py-1.5 px-3 text-[10px] font-bold flex items-center gap-1"
+                                    className="btn btn-secondary py-2 px-4 text-xs font-bold flex items-center gap-2"
                                     onClick={(e) => e.stopPropagation()}
                                   >
-                                    <Activity size={12} />
+                                    <Activity size={14} />
                                     Análise
                                   </Link>
                                   <button
@@ -523,9 +523,9 @@ export default function PatientRecord() {
                                       e.stopPropagation();
                                       handleExportPremium(response);
                                     }}
-                                    className="btn btn-secondary py-1.5 px-3 text-[10px] font-bold flex items-center gap-1"
+                                    className="btn btn-secondary py-2 px-4 text-xs font-bold flex items-center gap-2"
                                   >
-                                    <FileDown size={12} />
+                                    <FileDown size={14} />
                                     PDF
                                   </button>
                                   <button
@@ -537,7 +537,7 @@ export default function PatientRecord() {
                                     className="p-2 hover:bg-brand-50 rounded-lg transition-colors"
                                   >
                                     <ChevronRight
-                                      size={20}
+                                      size={22}
                                       className={`text-brand-300 transition-all duration-300 ${selectedResponseId === response.id ? 'rotate-90 text-brand-950 scale-110' : ''}`}
                                     />
                                   </button>
@@ -642,8 +642,8 @@ export default function PatientRecord() {
                   
                   return (
                     <div>
-                      <h4 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-4 flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                      <h4 className="text-sm font-black uppercase tracking-[0.2em] text-brand-400 mb-4 flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-amber-500" />
                         Aguardando Resposta ({pending.length})
                       </h4>
                       <div className="space-y-4">
@@ -651,23 +651,23 @@ export default function PatientRecord() {
                           const daysRemaining = link.expiresAt ? Math.ceil((new Date(link.expiresAt) - new Date()) / (1000 * 60 * 60 * 24)) : null;
                           
                           return (
-                            <div key={link.id} className="card p-5 bg-white border-brand-100 hover:border-brand-200 transition-all">
+                            <div key={link.id} className="card p-6 bg-white border-brand-100 hover:border-brand-200 transition-all">
                               <div className="flex items-start justify-between gap-4">
                                 <div className="flex-1 min-w-0">
-                                  <h5 className="font-semibold text-brand-950 mb-1">{link.form?.title}</h5>
-                                  <p className="text-xs text-brand-500 mb-3">
+                                  <h5 className="font-semibold text-base text-brand-950 mb-2">{link.form?.title}</h5>
+                                  <p className="text-sm text-brand-500 mb-3">
                                     Enviado em {new Date(link.createdAt).toLocaleDateString('pt-BR')} · {new Date(link.createdAt).toLocaleTimeString('pt-BR')}
                                   </p>
                                   
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="text-[10px] font-bold px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full">
+                                  <div className="flex items-center gap-3 flex-wrap">
+                                    <span className="text-xs font-bold px-3 py-1 bg-amber-50 text-amber-700 rounded-full">
                                       Pendente
                                     </span>
-                                    <span className="text-[10px] font-bold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full">
+                                    <span className="text-xs font-bold px-3 py-1 bg-blue-50 text-blue-700 rounded-full">
                                       Enviado
                                     </span>
                                     {daysRemaining && (
-                                      <span className="text-[10px] font-bold px-2.5 py-1 bg-brand-50 text-brand-700 rounded-full">
+                                      <span className="text-xs font-bold px-3 py-1 bg-brand-50 text-brand-700 rounded-full">
                                         {daysRemaining} dias restantes
                                       </span>
                                     )}
