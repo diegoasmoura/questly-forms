@@ -387,151 +387,13 @@ export default function PatientRecord() {
                 label="Linha do Tempo"
               />
               <TabButton
-                active={activeTab === "trend"}
-                onClick={() => setActiveTab("trend")}
-                icon={<Calendar size={14} />}
-                label="Respostas"
-              />
-              <TabButton
-                active={activeTab === "table"}
-                onClick={() => setActiveTab("table")}
-                icon={<Table size={14} />}
-                label="Dados Brutos"
-              />
-              <TabButton
                 active={activeTab === "share"}
                 onClick={() => setActiveTab("share")}
                 icon={<Share2 size={14} />}
-                label="Compartilhamento"
+                label="Enviar Formulário"
               />
             </div>
           </div>
-
-          {/* Trend Chart Tab */}
-          {activeTab === "trend" && (
-            <div className="flex flex-col gap-8 h-[calc(100vh-300px)]">
-              {patient.responses && patient.responses.length > 0 ? (
-                <AttendanceHeatmap
-                  data={transformResponsesToHeatmapData(patient.responses)}
-                  title="Histórico de Respostas"
-                />
-              ) : (
-                <div className="card p-6 text-center text-brand-400">
-                  <p className="text-sm">Nenhuma resposta registrada</p>
-                </div>
-              )}
-              
-              <div className="card p-6">
-                <ClinicalTrendChart
-                  data={transformResponsesToTrendData(patient.responses || [])}
-                  title="Evolução Clínica - PHQ-9 e GAD-7"
-                />
-              </div>
-              
-              {/* Latest Clinical Scores */}
-              {(() => {
-                if (!patient.responses || patient.responses.length === 0) return null;
-                
-                const latestResponses = patient.responses
-                  .filter(r => r.data.phq9_items || r.data.gad7_items)
-                  .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                  .slice(0, 1);
-                
-                if (latestResponses.length === 0) return null;
-                
-                const latest = latestResponses[0];
-                const result = scoreTest(null, latest.data);
-                
-                if (!result || result.type !== "clinical") return null;
-                
-                return (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="card p-6 border-2 border-brand-100 shadow-lg">
-                      <div className="flex items-center justify-between mb-6">
-                        <h3 className="font-bold text-xs uppercase tracking-widest text-brand-950">
-                          Última Avaliação
-                        </h3>
-                        <span className="text-[10px] font-bold bg-brand-50 px-2 py-1 rounded text-brand-400">
-                          {new Date(latest.createdAt).toLocaleDateString('pt-BR')}
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center gap-6 mb-6">
-                        <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold bg-brand-950 text-white shadow-lg">
-                          {result.score}
-                        </div>
-                        <div>
-                          <p className="text-xs text-brand-500 font-bold uppercase tracking-tight mb-1">{result.title}</p>
-                          <p className="text-xl font-bold text-brand-950">{result.severity}</p>
-                        </div>
-                      </div>
-                      
-                      {result.alert && (
-                        <div className="flex items-center gap-3 p-4 rounded-xl bg-red-50 border border-red-100 text-red-700 text-xs font-bold mb-4 animate-pulse">
-                          <AlertTriangle size={16} />
-                          {result.alert}
-                        </div>
-                      )}
-                      
-                      <div className="p-4 bg-brand-50 rounded-xl border border-brand-50">
-                        <p className="text-sm text-brand-700 leading-relaxed italic">
-                          "{result.interpretation}"
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="card p-6 overflow-hidden flex flex-col">
-                      <h3 className="font-bold text-xs uppercase tracking-widest text-brand-950 mb-6">
-                        Histórico de Pontuações
-                      </h3>
-                      <div className="space-y-3 overflow-y-auto pr-2 flex-1">
-                        {patient.responses
-                          .filter(r => r.data.phq9_items || r.data.gad7_items)
-                          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                          .map((response, idx) => {
-                            const scoreResult = scoreTest(null, response.data);
-                            if (!scoreResult || scoreResult.type !== "clinical") return null;
-                            
-                            return (
-                              <div key={response.id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-brand-50 transition-all border border-brand-50 hover:border-brand-200 group">
-                                <div className="text-center min-w-[50px]">
-                                  <p className="text-xl font-bold text-brand-950 group-hover:scale-110 transition-transform">{scoreResult.score}</p>
-                                  <p className="text-[10px] text-brand-400 font-bold">/ {scoreResult.maxScore}</p>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-xs font-bold text-brand-950 truncate">{scoreResult.title}</p>
-                                  <p className="text-[10px] text-brand-400 font-medium">
-                                    {new Date(response.createdAt).toLocaleDateString('pt-BR')}
-                                  </p>
-                                </div>
-                                <span className={`px-2 py-1 rounded-lg text-[10px] font-bold ${scoreResult.color} whitespace-nowrap`}>
-                                  {scoreResult.severity}
-                                </span>
-                              </div>
-                            );
-                          })}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-          )}
-
-          {/* DataTable Tab */}
-          {activeTab === "table" && patient.responses.length > 0 && (
-            <div className="card p-6 overflow-hidden">
-              <DataTable
-                data={patient.responses.map(r => ({
-                  ...r.data,
-                  createdAt: r.createdAt,
-                  responseId: r.id,
-                }))}
-                schema={patient.responses[0]?.form?.schema}
-                title="Respostas Detalhadas"
-              />
-            </div>
-          )}
 
           {/* Share Tab */}
           {activeTab === "share" && (
@@ -647,27 +509,25 @@ export default function PatientRecord() {
                                   </div>
                                 </div>
                                 
-                                <div className="flex items-center gap-3">
-                                  <div className="hidden md:flex items-center gap-2">
-                                    <Link
-                                      to={`/responses/${response.id}`}
-                                      className="btn btn-secondary py-1.5 px-3 text-[10px] font-bold flex items-center gap-2"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      <Activity size={14} />
-                                      Análise
-                                    </Link>
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleExportPremium(response);
-                                      }}
-                                      className="btn btn-secondary py-1.5 px-3 text-[10px] font-bold flex items-center gap-2"
-                                    >
-                                      <FileDown size={14} />
-                                      PDF
-                                    </button>
-                                  </div>
+                                <div className="flex items-center gap-2">
+                                  <Link
+                                    to={`/responses/${response.id}`}
+                                    className="btn btn-secondary py-1.5 px-3 text-[10px] font-bold flex items-center gap-1"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <Activity size={12} />
+                                    Análise
+                                  </Link>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleExportPremium(response);
+                                    }}
+                                    className="btn btn-secondary py-1.5 px-3 text-[10px] font-bold flex items-center gap-1"
+                                  >
+                                    <FileDown size={12} />
+                                    PDF
+                                  </button>
                                   <button
                                     onClick={(e) => {
                                       e.preventDefault();

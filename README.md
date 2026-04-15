@@ -43,7 +43,11 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
   - **Origem do Formulário:** Diferencia formulários criados manualmente vs. importados da Biblioteca (ícone e badge Premium)
   - **Cards Padronizados:** Layout consistente entre My Forms, Library e Patients com badges dinâmicos
 - **Cards de Paciente:** Grid responsivo com stats de Respostas e Links, botões de Prontuário e Editar
-  - **Modal de Criação:** Interface para definir classificação, código, público-alvo e validação antes de criar
+- **Reorganização do Prontuário:**
+  - **Simplificação de Tabs:** Removida aba "Dados Brutos", respostas agora visualizadas via cards
+  - **Ações nos Cards:** Botões "Análise" e "PDF" visíveis diretamente nos cards de resposta
+  - **Linha do Tempo:** Cards com expand/collapse para ver detalhes das respostas
+  - **Enviar Formulário:** Nova nomenclatura para aba de compartilhamento
 
 ## 📋 Regras e Fluxos
 

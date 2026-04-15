@@ -212,7 +212,7 @@ export default function MyForms() {
           <div className="card w-full max-w-2xl p-6 animate-scale-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-xl font-semibold text-brand-950">Links de Compartilhamento</h2>
+                <h2 className="text-xl font-semibold text-brand-950">Links de Envio</h2>
                 <p className="text-xs text-brand-500 mt-1">{selectedForm?.title}</p>
               </div>
               <button onClick={() => setShowShareModal(false)} className="text-brand-400 hover:text-brand-600">
