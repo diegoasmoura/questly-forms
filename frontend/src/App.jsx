@@ -39,6 +39,7 @@ function PublicRoute({ children }) {
 }
 
 function LoadingScreen() {
+  console.log("📍 LoadingScreen renderizado");
   return (
     <div className="min-h-screen flex items-center justify-center bg-brand-50">
       <div className="animate-pulse flex flex-col items-center gap-4">
@@ -50,6 +51,7 @@ function LoadingScreen() {
 }
 
 export default function App() {
+  console.log("🏠 App.jsx renderizado");
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
