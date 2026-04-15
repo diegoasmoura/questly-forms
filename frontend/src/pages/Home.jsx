@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
-import { ResponseTrendChart } from "../components/ClinicalCharts";
+import { ActivityHeatmap } from "../components/ActivityHeatmap";
 import { 
   Users, 
   FileText, 
@@ -11,7 +11,6 @@ import {
   Calendar,
   Clock,
   TrendingUp,
-  Library,
   Settings
 } from "lucide-react";
 
@@ -121,28 +120,11 @@ export default function Home() {
         />
       </div>
 
-      {/* Activity Chart - Full Width */}
-      <section className="card p-5 mb-6 shrink-0">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-base font-bold text-brand-950">Atividade Clínica</h2>
-            <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">Últimos 30 dias</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1 text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
-              <TrendingUp size={10} />
-              CRESCENTE
-            </span>
-          </div>
-        </div>
-        <div className="h-40">
-          <ResponseTrendChart 
-            data={aggregateData} 
-            title="" 
-            height="100%" 
-          />
-        </div>
-      </section>
+      {/* Activity Heatmap - Full Width */}
+      <ActivityHeatmap 
+        data={aggregateData} 
+        title="Atividade Clínica" 
+      />
 
       {/* Patients Section - Full Width */}
       <section className="card flex-1 min-h-0 overflow-hidden">
