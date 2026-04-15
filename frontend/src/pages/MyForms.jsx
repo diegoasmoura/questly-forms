@@ -12,7 +12,9 @@ import {
   Copy, 
   Search,
   BookTemplate,
-  MoreVertical
+  MoreVertical,
+  LayoutGrid,
+  List
 } from "lucide-react";
 
 export default function MyForms() {
@@ -33,6 +35,7 @@ export default function MyForms() {
   const [existingLinks, setExistingLinks] = useState([]);
   const [loadingLinks, setLoadingLinks] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [viewMode, setViewMode] = useState("grid");
 
   useEffect(() => {
     loadData();
@@ -135,7 +138,7 @@ export default function MyForms() {
       </div>
 
       {/* Search and Filters */}
-      <div className="flex items-center gap-4 mb-8">
+      <div className="flex items-center justify-between gap-4 mb-8">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-400" size={18} />
           <input
@@ -146,24 +149,56 @@ export default function MyForms() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+        <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-brand-100">
+          <button
+            onClick={() => setViewMode("grid")}
+            className={`p-2 rounded-md transition-all ${viewMode === "grid" ? "bg-brand-950 text-white" : "text-brand-400 hover:text-brand-700 hover:bg-brand-50"}`}
+            title="Visualização em cards"
+          >
+            <LayoutGrid size={18} />
+          </button>
+          <button
+            onClick={() => setViewMode("list")}
+            className={`p-2 rounded-md transition-all ${viewMode === "list" ? "bg-brand-950 text-white" : "text-brand-400 hover:text-brand-700 hover:bg-brand-50"}`}
+            title="Visualização em lista"
+          >
+            <List size={18} />
+          </button>
+        </div>
       </div>
 
       {/* Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="card p-6 animate-pulse">
-              <div className="h-12 w-12 bg-brand-100 rounded-2xl mb-6" />
-              <div className="h-6 bg-brand-200 rounded w-3/4 mb-2" />
-              <div className="h-4 bg-brand-100 rounded w-1/2 mb-6" />
-              <div className="h-16 bg-brand-50 rounded-xl border border-dashed border-brand-100" />
-              <div className="flex gap-6 mt-6 pt-6 border-t border-brand-50">
-                <div className="h-8 w-12" />
-                <div className="h-8 w-12" />
+        viewMode === "grid" ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="card p-6 animate-pulse">
+                <div className="h-12 w-12 bg-brand-100 rounded-2xl mb-6" />
+                <div className="h-6 bg-brand-200 rounded w-3/4 mb-2" />
+                <div className="h-4 bg-brand-100 rounded w-1/2 mb-6" />
+                <div className="h-16 bg-brand-50 rounded-xl border border-dashed border-brand-100" />
+                <div className="flex gap-6 mt-6 pt-6 border-t border-brand-50">
+                  <div className="h-8 w-12" />
+                  <div className="h-8 w-12" />
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="card p-4 animate-pulse">
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 bg-brand-100 rounded-xl" />
+                  <div className="flex-1">
+                    <div className="h-5 bg-brand-200 rounded w-1/3 mb-2" />
+                    <div className="h-4 bg-brand-100 rounded w-1/4" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
       ) : filteredForms.length === 0 ? (
         <div className="card p-20 text-center border-dashed border-2">
           <FileText size={48} className="mx-auto text-brand-200 mb-6" />
@@ -180,7 +215,7 @@ export default function MyForms() {
             </button>
           )}
         </div>
-      ) : (
+      ) : viewMode === "grid" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {filteredForms.map((form) => (
             <FormCard
@@ -188,6 +223,18 @@ export default function MyForms() {
               form={form}
               stats={stats[form.id]}
               aggregateData={aggregateData[form.id]}
+              onDelete={handleDelete}
+              onDuplicate={handleDuplicate}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredForms.map((form) => (
+            <FormListRow
+              key={form.id}
+              form={form}
+              stats={stats[form.id]}
               onDelete={handleDelete}
               onDuplicate={handleDuplicate}
             />
@@ -317,75 +364,95 @@ export default function MyForms() {
                 </div>
               )}
             </div>
-
-            {/* Create New Link Form */}
-            {showCreateForm && (
-              <div className="border-t border-brand-100 pt-6 animate-fade-in">
-                <h3 className="text-sm font-bold text-brand-950 uppercase tracking-wider mb-4">
-                  Criar Novo Link
-                </h3>
-                <form onSubmit={async (e) => {
-                  e.preventDefault();
-                  try {
-                    const result = await api.createShareLink({
-                      formId: selectedForm.id,
-                      ...shareData,
-                    });
-                    const absoluteUrl = result.shareUrl.startsWith("http")
-                      ? result.shareUrl
-                      : `${window.location.origin}${result.shareUrl}`;
-                    await navigator.clipboard.writeText(absoluteUrl);
-                    alert("Link criado e copiado!");
-                    setShowCreateForm(false);
-                    setShareData({ patientId: "", expiresAt: "" });
-                    loadExistingLinks(selectedForm.id);
-                    loadData();
-                  } catch (error) {
-                    alert(error.message);
-                  }
-                }} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-brand-700 mb-1">Vincular a Paciente (Opcional)</label>
-                    <select
-                      className="input"
-                      value={shareData.patientId}
-                      onChange={(e) => setShareData({ ...shareData, patientId: e.target.value })}
-                    >
-                      <option value="">Selecionar paciente...</option>
-                      {patients.map(p => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-brand-700 mb-1">Data de Expiração (Opcional)</label>
-                    <input
-                      type="date"
-                      className="input"
-                      value={shareData.expiresAt}
-                      onChange={(e) => setShareData({ ...shareData, expiresAt: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="flex gap-2">
-                    <button type="submit" className="btn btn-primary flex-1">
-                      Gerar e Copiar Link
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowCreateForm(false)}
-                      className="btn btn-ghost"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function FormListRow({ form, stats, onDelete, onDuplicate }) {
+  const [showOptions, setShowOptions] = useState(false);
+
+  const typeColors = {
+    "Avaliação": "bg-blue-50 text-blue-600",
+    "Anamnese": "bg-purple-50 text-purple-600",
+    "Evolução": "bg-amber-50 text-amber-600",
+    "Rastreamento": "bg-cyan-50 text-cyan-600"
+  };
+
+  const isTemplate = form.source === "template";
+
+  return (
+    <div className="card p-4 flex items-center gap-4 hover:border-brand-200 transition-all">
+      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${isTemplate ? "bg-amber-50 text-amber-600" : "bg-brand-50 text-brand-950"}`}>
+        {isTemplate ? <BookTemplate size={20} /> : <FileText size={20} />}
+      </div>
+      
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <h4 className="font-bold text-brand-950 truncate">{form.title}</h4>
+          {isTemplate && <span className="text-[10px] font-bold uppercase text-amber-500 bg-amber-50 px-2 py-0.5 rounded">Premium</span>}
+        </div>
+        <div className="flex items-center gap-3">
+          <p className="text-xs text-brand-400">
+            Atualizado em {new Date(form.updatedAt).toLocaleDateString('pt-BR')}
+          </p>
+          {form.type && (
+            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${typeColors[form.type] || 'bg-gray-50 text-gray-600'}`}>
+              {form.type}
+            </span>
+          )}
+          {form.validated && (
+            <span className="text-[10px] font-medium px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full">Validado</span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-6 shrink-0">
+        <div className="flex flex-col items-center">
+          <span className="text-lg font-black text-brand-950">{stats?.responseCount || 0}</span>
+          <span className="text-[10px] font-bold text-brand-400 uppercase">Respostas</span>
+        </div>
+        <div className="flex flex-col items-center">
+          <span className="text-lg font-black text-brand-950">{stats?.shareLinkCount || 0}</span>
+          <span className="text-[10px] font-bold text-brand-400 uppercase">Links</span>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Link to={`/forms/${form.id}/preview`} className="btn btn-secondary py-2 px-3 text-xs">
+          <Eye size={14} />
+        </Link>
+        <Link to={`/forms/${form.id}/edit`} className="btn btn-secondary py-2 px-3 text-xs">
+          <Pencil size={14} />
+        </Link>
+        <Link to={`/forms/${form.id}/responses`} className="btn btn-primary py-2 px-3 text-xs">
+          <BarChart3 size={14} />
+        </Link>
+        <div className="relative">
+          <button
+            onClick={() => setShowOptions(!showOptions)}
+            className="p-2 rounded-lg text-brand-400 hover:text-brand-950 hover:bg-brand-50 transition-colors"
+          >
+            <MoreVertical size={18} />
+          </button>
+          {showOptions && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setShowOptions(false)} />
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-brand-100 rounded-xl shadow-lg z-20 py-2">
+                <button onClick={() => { onDuplicate(form.id); setShowOptions(false); }} className="w-full px-4 py-2 text-left text-sm font-medium text-brand-700 hover:bg-brand-50 flex items-center gap-3">
+                  <Copy size={16} /> Duplicar
+                </button>
+                <div className="my-1 border-t border-brand-50" />
+                <button onClick={() => { onDelete(form.id); setShowOptions(false); }} className="w-full px-4 py-2 text-left text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-3">
+                  <Trash2 size={16} /> Excluir
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

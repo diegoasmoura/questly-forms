@@ -9,13 +9,16 @@ import {
   Eye, 
   CheckCircle2,
   Filter,
-  ArrowLeft
+  ArrowLeft,
+  LayoutGrid,
+  List
 } from "lucide-react";
 
 export default function Library() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [importing, setImporting] = useState(null);
+  const [viewMode, setViewMode] = useState("grid");
 
   const handleImportTemplate = async (template) => {
     setImporting(template.id);
@@ -54,8 +57,8 @@ export default function Library() {
       </div>
 
       {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row items-center gap-4 mb-10">
-        <div className="relative flex-1">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-10">
+        <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-400" size={18} />
           <input
             type="text"
@@ -65,80 +68,153 @@ export default function Library() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-2">
-          <button className="btn btn-secondary text-xs">
-            <Filter size={14} />
-            Categorias
+        <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-brand-100">
+          <button
+            onClick={() => setViewMode("grid")}
+            className={`p-2 rounded-md transition-all ${viewMode === "grid" ? "bg-brand-950 text-white" : "text-brand-400 hover:text-brand-700 hover:bg-brand-50"}`}
+            title="Visualização em cards"
+          >
+            <LayoutGrid size={18} />
+          </button>
+          <button
+            onClick={() => setViewMode("list")}
+            className={`p-2 rounded-md transition-all ${viewMode === "list" ? "bg-brand-950 text-white" : "text-brand-400 hover:text-brand-700 hover:bg-brand-50"}`}
+            title="Visualização em lista"
+          >
+            <List size={18} />
           </button>
         </div>
       </div>
 
       {/* Template Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        {filteredTemplates.map((template) => (
-          <div 
-            key={template.id} 
-            className="card group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full bg-white overflow-hidden border-brand-100/50"
-          >
-            <div className="p-6 flex-1">
-              <div className="flex items-start justify-between mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-950 group-hover:bg-brand-950 group-hover:text-white transition-colors duration-300">
-                  <BookTemplate size={24} />
+      {viewMode === "grid" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+          {filteredTemplates.map((template) => (
+            <div 
+              key={template.id} 
+              className="card group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full bg-white overflow-hidden border-brand-100/50"
+            >
+              <div className="p-6 flex-1">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="w-12 h-12 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-950 group-hover:bg-brand-950 group-hover:text-white transition-colors duration-300">
+                    <BookTemplate size={24} />
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-brand-400 bg-brand-50 px-2 py-1 rounded-md">
+                    Premium
+                  </span>
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-brand-400 bg-brand-50 px-2 py-1 rounded-md">
-                  Premium
-                </span>
+
+                <h3 className="text-xl font-bold text-brand-950 mb-2 group-hover:text-brand-800 transition-colors">
+                  {template.title}
+                </h3>
+                <p className="text-sm text-brand-500 leading-relaxed line-clamp-3">
+                  {template.description}
+                </p>
+
+                <div className="mt-6 flex flex-wrap gap-2">
+                  <span className="text-[10px] font-medium px-2 py-1 bg-blue-50 text-blue-600 rounded-full">Avaliação</span>
+                  <span className="text-[10px] font-medium px-2 py-1 bg-emerald-50 text-emerald-600 rounded-full">Validado</span>
+                  <span className="text-[10px] font-medium px-2 py-1 bg-purple-50 text-purple-600 rounded-full">Adulto</span>
+                </div>
               </div>
 
-              <h3 className="text-xl font-bold text-brand-950 mb-2 group-hover:text-brand-800 transition-colors">
-                {template.title}
-              </h3>
-              <p className="text-sm text-brand-500 leading-relaxed line-clamp-3">
-                {template.description}
-              </p>
-
-              <div className="mt-6 flex flex-wrap gap-2">
-                <span className="text-[10px] font-medium px-2 py-1 bg-blue-50 text-blue-600 rounded-full">Avaliação</span>
-                <span className="text-[10px] font-medium px-2 py-1 bg-emerald-50 text-emerald-600 rounded-full">Validado</span>
-                <span className="text-[10px] font-medium px-2 py-1 bg-purple-50 text-purple-600 rounded-full">Adulto</span>
+              <div className="p-4 bg-brand-50/50 border-t border-brand-50 flex items-center justify-between gap-3">
+                <button 
+                  className="btn btn-secondary text-xs flex-1"
+                  onClick={() => alert("Visualização em breve!")}
+                >
+                  <Eye size={14} />
+                  Visualizar
+                </button>
+                <button 
+                  onClick={() => handleImportTemplate(template)}
+                  disabled={importing === template.id}
+                  className="btn btn-primary text-xs flex-1"
+                >
+                  {importing === template.id ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Plus size={14} />
+                      Adicionar
+                    </>
+                  )}
+                </button>
               </div>
             </div>
+          ))}
 
-            <div className="p-4 bg-brand-50/50 border-t border-brand-50 flex items-center justify-between gap-3">
-              <button 
-                className="btn btn-secondary text-xs flex-1"
-                onClick={() => alert("Visualização em breve!")}
-              >
-                <Eye size={14} />
-                Visualizar
-              </button>
-              <button 
-                onClick={() => handleImportTemplate(template)}
-                disabled={importing === template.id}
-                className="btn btn-primary text-xs flex-1"
-              >
-                {importing === template.id ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <Plus size={14} />
-                    Adicionar
-                  </>
-                )}
-              </button>
-            </div>
+          {/* Suggestion Card */}
+          <div className="card border-dashed border-2 border-brand-200 bg-transparent flex flex-col justify-center items-center p-10 text-center opacity-70 hover:opacity-100 transition-opacity">
+            <CheckCircle2 size={32} className="text-brand-300 mb-4" />
+            <h3 className="font-bold text-brand-950">Precisa de outro modelo?</h3>
+            <p className="text-xs text-brand-500 mt-2">
+              Estamos sempre adicionando novos protocolos. Entre em contato para sugerir um formulário específico.
+            </p>
+            <button className="btn btn-secondary text-xs mt-6">Sugerir Protocolo</button>
           </div>
-        ))}
-
-        {/* Suggestion Card */}
-        <div className="card border-dashed border-2 border-brand-200 bg-transparent flex flex-col justify-center items-center p-10 text-center opacity-70 hover:opacity-100 transition-opacity">
-          <CheckCircle2 size={32} className="text-brand-300 mb-4" />
-          <h3 className="font-bold text-brand-950">Precisa de outro modelo?</h3>
-          <p className="text-xs text-brand-500 mt-2">
-            Estamos sempre adicionando novos protocolos. Entre em contato para sugerir um formulário específico.
-          </p>
-          <button className="btn btn-secondary text-xs mt-6">Sugerir Protocolo</button>
         </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredTemplates.map((template) => (
+            <LibraryListRow
+              key={template.id}
+              template={template}
+              importing={importing}
+              onImport={handleImportTemplate}
+              onPreview={() => alert("Visualização em breve!")}
+            />
+          ))}
+          <div className="card border-dashed border-2 border-brand-200 bg-transparent flex items-center justify-center p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
+            <CheckCircle2 size={20} className="text-brand-300 mr-3" />
+            <span className="text-sm text-brand-500">
+              Precisa de outro modelo? Entre em contato para sugerir um formulário específico.
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LibraryListRow({ template, importing, onImport, onPreview }) {
+  return (
+    <div className="card p-4 flex items-center gap-4 hover:border-brand-200 transition-all">
+      <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-brand-50 text-brand-950">
+        <BookTemplate size={20} />
+      </div>
+      
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <h4 className="font-bold text-brand-950 truncate">{template.title}</h4>
+          <span className="text-[10px] font-bold uppercase text-amber-500 bg-amber-50 px-2 py-0.5 rounded">Premium</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <p className="text-xs text-brand-400 line-clamp-1">{template.description}</p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 shrink-0">
+        <button 
+          onClick={onPreview}
+          className="btn btn-secondary py-2 px-3 text-xs"
+        >
+          <Eye size={14} />
+        </button>
+        <button 
+          onClick={() => onImport(template)}
+          disabled={importing === template.id}
+          className="btn btn-primary py-2 px-3 text-xs"
+        >
+          {importing === template.id ? (
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              <Plus size={14} />
+              Adicionar
+            </>
+          )}
+        </button>
       </div>
     </div>
   );

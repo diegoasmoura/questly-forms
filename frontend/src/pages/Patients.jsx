@@ -19,7 +19,9 @@ import {
   LayoutDashboard,
   LogOut,
   Eye,
-  X
+  X,
+  LayoutGrid,
+  List
 } from "lucide-react";
 
 export default function Patients() {
@@ -28,6 +30,7 @@ export default function Patients() {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState("grid");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editPatient, setEditPatient] = useState(null);
   const [newPatient, setNewPatient] = useState({
@@ -165,7 +168,7 @@ export default function Patients() {
       </div>
 
       {/* Search & Filters */}
-      <div className="flex items-center gap-4 mb-8">
+      <div className="flex items-center justify-between gap-4 mb-8">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-400" size={18} />
           <input
@@ -175,6 +178,22 @@ export default function Patients() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+        </div>
+        <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-brand-100">
+          <button
+            onClick={() => setViewMode("grid")}
+            className={`p-2 rounded-md transition-all ${viewMode === "grid" ? "bg-brand-950 text-white" : "text-brand-400 hover:text-brand-700 hover:bg-brand-50"}`}
+            title="Visualização em cards"
+          >
+            <LayoutGrid size={18} />
+          </button>
+          <button
+            onClick={() => setViewMode("list")}
+            className={`p-2 rounded-md transition-all ${viewMode === "list" ? "bg-brand-950 text-white" : "text-brand-400 hover:text-brand-700 hover:bg-brand-50"}`}
+            title="Visualização em lista"
+          >
+            <List size={18} />
+          </button>
         </div>
       </div>
 
@@ -215,10 +234,21 @@ export default function Patients() {
             </button>
           )}
         </div>
-      ) : (
+      ) : viewMode === "grid" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {filteredPatients.map((patient) => (
             <PatientCard
+              key={patient.id}
+              patient={patient}
+              onDelete={handleDeletePatient}
+              onEdit={() => setEditPatient(patient)}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredPatients.map((patient) => (
+            <PatientListRow
               key={patient.id}
               patient={patient}
               onDelete={handleDeletePatient}
@@ -816,6 +846,76 @@ function PatientCard({ patient, onDelete, onEdit }) {
         >
           <Pencil size={14} />
           Editar
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PatientListRow({ patient, onDelete, onEdit }) {
+  const responseCount = patient._count?.responses || 0;
+  const shareLinkCount = patient._count?.shareLinks || 0;
+
+  return (
+    <div className="card p-4 flex items-center gap-4 hover:border-brand-200 transition-all">
+      <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-lg shrink-0">
+        {patient.name.charAt(0).toUpperCase()}
+      </div>
+      
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-3 mb-1">
+          <h4 className="font-bold text-brand-950 truncate">{patient.name}</h4>
+          {patient.birthDate && (
+            <span className="text-xs text-brand-400">
+              ({(() => {
+                const today = new Date();
+                const birth = new Date(patient.birthDate);
+                let age = today.getFullYear() - birth.getFullYear();
+                const monthDiff = today.getMonth() - birth.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                  age--;
+                }
+                return `${age} anos`;
+              })()})
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-4">
+          {patient.email && (
+            <div className="flex items-center gap-1 text-xs text-brand-500">
+              <Mail size={12} className="shrink-0" />
+              <span className="truncate">{patient.email}</span>
+            </div>
+          )}
+          {patient.phone && (
+            <div className="flex items-center gap-1 text-xs text-brand-500">
+              <Phone size={12} className="shrink-0" />
+              <span>{patient.phone}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-6 shrink-0">
+        <div className="flex flex-col items-center">
+          <span className="text-lg font-black text-brand-950">{responseCount}</span>
+          <span className="text-[10px] font-bold text-brand-400 uppercase">Respostas</span>
+        </div>
+        <div className="flex flex-col items-center">
+          <span className="text-lg font-black text-brand-950">{shareLinkCount}</span>
+          <span className="text-[10px] font-bold text-brand-400 uppercase">Links</span>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Link to={`/patients/${patient.id}`} className="btn btn-secondary py-2 px-3 text-xs">
+          <FileText size={14} />
+        </Link>
+        <button onClick={() => onEdit(patient)} className="btn btn-secondary py-2 px-3 text-xs">
+          <Pencil size={14} />
+        </button>
+        <button onClick={() => onDelete(patient.id)} className="btn btn-secondary py-2 px-3 text-xs text-red-500 hover:text-red-700">
+          <Trash2 size={14} />
         </button>
       </div>
     </div>
