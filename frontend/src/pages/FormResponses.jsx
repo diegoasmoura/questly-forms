@@ -281,23 +281,15 @@ export default function FormResponses() {
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <div className="flex gap-1">
-                      {response.patient && (
-                        <Link
-                          to={`/patients/${response.patient.id}`}
-                          className="btn btn-secondary text-[10px] font-bold py-2"
-                        >
-                          Prontuário
-                        </Link>
-                      )}
+                    {response.patient && (
                       <Link
-                        to={`/responses/${response.id}`}
+                        to={`/patients/${response.patient.id}`}
                         state={{ fromResponses: true }}
-                        className="btn btn-primary text-[10px] font-bold py-2"
+                        className="btn btn-secondary text-[10px] font-bold py-2"
                       >
-                        Análise Clínica
+                        Prontuário
                       </Link>
-                    </div>
+                    )}
                     
                     <div className="h-8 w-px bg-brand-50 mx-1" />
                     
