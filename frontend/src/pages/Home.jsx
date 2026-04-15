@@ -121,10 +121,12 @@ export default function Home() {
       </div>
 
       {/* Activity Heatmap - Full Width */}
-      <ActivityHeatmap 
-        data={aggregateData} 
-        title="Atividade Clínica" 
-      />
+      <div className="min-h-[200px]">
+        <ActivityHeatmap 
+          data={aggregateData} 
+          title="Atividade Clínica" 
+        />
+      </div>
 
       {/* Patients Section - Full Width */}
       <section className="card flex-1 min-h-0 overflow-hidden">
