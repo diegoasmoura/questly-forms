@@ -512,6 +512,7 @@ export default function PatientRecord() {
                                 <div className="flex items-center gap-2">
                                   <Link
                                     to={`/responses/${response.id}`}
+                                    state={{ fromPatient: true }}
                                     className="btn btn-secondary py-2 px-4 text-xs font-bold flex items-center gap-2"
                                     onClick={(e) => e.stopPropagation()}
                                   >

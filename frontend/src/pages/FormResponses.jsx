@@ -292,6 +292,7 @@ export default function FormResponses() {
                       )}
                       <Link
                         to={`/responses/${response.id}`}
+                        state={{ fromResponses: true }}
                         className="btn btn-primary text-[10px] font-bold py-2"
                       >
                         Análise Clínica

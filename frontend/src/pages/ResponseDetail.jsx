@@ -1,18 +1,24 @@
 import { useState, useEffect, useMemo } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { api } from "../lib/api";
 import { scoreTest } from "../lib/scoring";
 import {
   ArrowLeft, Calendar, FileText, Activity, AlertTriangle,
-  BookOpen, Users, Download, ChevronRight, TrendingUp
+  BookOpen, Users, Download, ChevronRight, TrendingUp,
+  FileDown, Home
 } from "lucide-react";
 
 export default function ResponseDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [patientResponses, setPatientResponses] = useState([]);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
+
+  const cameFromPatient = location.state?.fromPatient;
+  const cameFromResponses = location.state?.fromResponses;
 
   useEffect(() => {
     loadResponse();
@@ -46,6 +52,27 @@ export default function ResponseDetail() {
 
   const isClinical = clinicalResult?.type === "clinical";
 
+  const handleBack = () => {
+    if (cameFromPatient && response?.patientId) {
+      navigate(`/patients/${response.patientId}`);
+    } else if (cameFromResponses && response?.formId) {
+      navigate(`/forms/${response.formId}/responses`);
+    } else {
+      navigate(-1);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    setGeneratingPdf(true);
+    try {
+      alert("Exportação de PDF em desenvolvimento");
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+    } finally {
+      setGeneratingPdf(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center p-20">
@@ -70,34 +97,70 @@ export default function ResponseDetail() {
 
   return (
     <div className="p-8 max-w-[1200px] mx-auto animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-xl hover:bg-brand-50 text-brand-400 hover:text-brand-950 transition-all">
+      {/* Breadcrumb & Navigation */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={handleBack} 
+            className="p-2 rounded-xl hover:bg-brand-50 text-brand-400 hover:text-brand-950 transition-all"
+          >
             <ArrowLeft size={20} />
           </button>
-          <div>
-            <h1 className="text-3xl font-display font-bold text-brand-950">{response.form?.title || "Análise Clínica"}</h1>
-            <p className="text-brand-500 mt-1">
-              Coletado em {new Date(response.createdAt).toLocaleString("pt-BR")}
-            </p>
+          <div className="flex items-center gap-1 text-xs text-brand-400">
+            <Link to="/" className="hover:text-brand-950 transition-colors flex items-center gap-1">
+              <Home size={14} />
+              Home
+            </Link>
+            <ChevronRight size={12} />
+            <Link to="/my-forms" className="hover:text-brand-950 transition-colors">
+              Formulários
+            </Link>
+            <ChevronRight size={12} />
+            <Link to={`/forms/${response.formId}/responses`} className="hover:text-brand-950 transition-colors">
+              Respostas
+            </Link>
+            <ChevronRight size={12} />
+            <span className="text-brand-950 font-bold truncate max-w-[200px]">
+              {response.form?.title || "Análise"}
+            </span>
           </div>
         </div>
+        
         <div className="flex items-center gap-2">
           {response.patient && (
-            <Link to={`/patients/${response.patient.id}`} className="btn btn-secondary text-xs">
+            <Link 
+              to={`/patients/${response.patient.id}`} 
+              state={{ fromResponse: true }}
+              className="btn btn-secondary text-xs"
+            >
               <Users size={16} />
-              Ver Prontuário
+              Prontuário
             </Link>
           )}
           <button
-            onClick={() => navigate(`/forms/${response.formId}/responses`)}
-            className="btn btn-ghost text-xs font-bold"
+            onClick={handleDownloadPdf}
+            disabled={generatingPdf}
+            className="btn btn-secondary text-xs"
           >
-            <TrendingUp size={16} />
-            Todas as Respostas
+            {generatingPdf ? (
+              <div className="w-4 h-4 border-2 border-brand-950 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <>
+                <FileDown size={16} />
+                PDF
+              </>
+            )}
           </button>
         </div>
+      </div>
+
+      {/* Title */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-display font-bold text-brand-950">{response.form?.title || "Análise Clínica"}</h1>
+        <p className="text-brand-500 mt-1 flex items-center gap-2">
+          <Calendar size={14} />
+          Coletado em {new Date(response.createdAt).toLocaleString("pt-BR")}
+        </p>
       </div>
 
       <div className="space-y-8">
@@ -284,10 +347,11 @@ export default function ResponseDetail() {
                       return (
                         <div
                           key={resp.id}
-                          className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${
+                          onClick={() => !isCurrent && navigate(`/responses/${resp.id}`, { state: { fromPatient: true } })}
+                          className={`flex items-center gap-4 p-4 rounded-2xl border transition-all cursor-pointer ${
                             isCurrent
                               ? "bg-white border-brand-950 shadow-xl shadow-brand-950/5 scale-[1.02] z-10"
-                              : "bg-white border-brand-50 opacity-60 hover:opacity-100"
+                              : "bg-white border-brand-50 hover:border-brand-200 hover:shadow-md"
                           }`}
                         >
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg ${isCurrent ? 'bg-brand-950 text-white' : 'bg-brand-50 text-brand-950'}`}>
@@ -304,6 +368,9 @@ export default function ResponseDetail() {
                           <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter ${result.color}`}>
                             {result.severity}
                           </span>
+                          {!isCurrent && (
+                            <ChevronRight size={16} className="text-brand-300" />
+                          )}
                         </div>
                       );
                     })}
