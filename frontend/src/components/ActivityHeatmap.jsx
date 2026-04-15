@@ -64,21 +64,23 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
   
   const monthLabels = useMemo(() => {
     const labels = [];
-    let lastMonth = -1;
+    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
     
-    weeks.forEach((week, weekIndex) => {
-      const firstDay = week[0];
-      if (firstDay && !firstDay.isFuture) {
-        const month = new Date(firstDay.date).getMonth();
-        if (month !== lastMonth) {
-          labels.push({ 
-            month: new Date(firstDay.date).toLocaleDateString('pt-BR', { month: 'short' }), 
-            weekIndex 
-          });
-          lastMonth = month;
-        }
+    // Always show all 12 months
+    months.forEach((month, idx) => {
+      // Find the first week that contains this month
+      const weekIdx = weeks.findIndex(week => 
+        week.some(day => {
+          const dayMonth = new Date(day.date).getMonth();
+          return dayMonth === idx && !day.isFuture;
+        })
+      );
+      
+      if (weekIdx !== -1) {
+        labels.push({ month, weekIndex: weekIdx });
       }
     });
+    
     return labels;
   }, [weeks]);
 
@@ -187,9 +189,6 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
             <p className="text-[10px] font-bold text-brand-400 uppercase">Dias Ativos</p>
           </div>
         </div>
-        <span className="text-xs text-brand-400">
-          {today => new Date(today).toLocaleDateString('pt-BR')}
-        </span>
       </div>
     </div>
   );
