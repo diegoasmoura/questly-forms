@@ -3,9 +3,6 @@ import {
   Legend, ResponsiveContainer, ReferenceLine, Area, AreaChart, Cell
 } from 'recharts';
 
-// Import do novo WeeklyHeatmap
-export { WeeklyHeatmap } from './WeeklyHeatmap';
-
 // Clinical thresholds for PHQ-9 and GAD-7
 export const CLINICAL_THRESHOLDS = {
   phq9: [

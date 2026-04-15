@@ -4,7 +4,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { generatePremiumSummary } from "../lib/pdf";
 import { scoreTest } from "../lib/scoring";
-import { ClinicalTrendChart, transformResponsesToTrendData, WeeklyHeatmap, transformResponsesToHeatmapData } from "../components/ClinicalCharts";
+import { ClinicalTrendChart, transformResponsesToTrendData, AttendanceHeatmap, transformResponsesToHeatmapData } from "../components/ClinicalCharts";
 import { useShareLinkStatus, getStatusBadge } from "../lib/useShareLinkStatus";
 import ShareLinkCard, { ShareLinkStats } from "../components/ShareLinkCard";
 import FormResponsesView from "../components/FormResponsesView";
@@ -411,7 +411,7 @@ export default function PatientRecord() {
           {activeTab === "trend" && (
             <div className="flex flex-col gap-8 h-[calc(100vh-300px)]">
               {patient.responses && patient.responses.length > 0 ? (
-                <WeeklyHeatmap
+                <AttendanceHeatmap
                   data={transformResponsesToHeatmapData(patient.responses)}
                   title="Histórico de Respostas"
                 />
