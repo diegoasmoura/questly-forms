@@ -4,8 +4,8 @@ import { api } from "../lib/api";
 import { scoreTest } from "../lib/scoring";
 import {
   ArrowLeft, Calendar, FileText, Activity, AlertTriangle,
-  BookOpen, Users, Download, ChevronRight, TrendingUp,
-  FileDown, Home
+  BookOpen, Users, Download, TrendingUp,
+  FileDown
 } from "lucide-react";
 
 export default function ResponseDetail() {
@@ -97,34 +97,15 @@ export default function ResponseDetail() {
 
   return (
     <div className="p-8 max-w-[1200px] mx-auto animate-fade-in">
-      {/* Breadcrumb & Navigation */}
+      {/* Back Button */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={handleBack} 
-            className="p-2 rounded-xl hover:bg-brand-50 text-brand-400 hover:text-brand-950 transition-all"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          <div className="flex items-center gap-1 text-xs text-brand-400">
-            <Link to="/" className="hover:text-brand-950 transition-colors flex items-center gap-1">
-              <Home size={14} />
-              Home
-            </Link>
-            <ChevronRight size={12} />
-            <Link to="/my-forms" className="hover:text-brand-950 transition-colors">
-              Formulários
-            </Link>
-            <ChevronRight size={12} />
-            <Link to={`/forms/${response.formId}/responses`} className="hover:text-brand-950 transition-colors">
-              Respostas
-            </Link>
-            <ChevronRight size={12} />
-            <span className="text-brand-950 font-bold truncate max-w-[200px]">
-              {response.form?.title || "Análise"}
-            </span>
-          </div>
-        </div>
+        <button 
+          onClick={handleBack} 
+          className="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-brand-50 text-brand-400 hover:text-brand-950 transition-all"
+        >
+          <ArrowLeft size={20} />
+          <span className="text-sm font-medium">Voltar</span>
+        </button>
         
         <div className="flex items-center gap-2">
           {response.patient && (
