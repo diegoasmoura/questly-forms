@@ -65,19 +65,22 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
   const monthLabels = useMemo(() => {
     const labels = [];
     const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const today = new Date();
     
-    // Always show all 12 months
+    // Get the first day of the year
+    const firstDay = new Date(today.getFullYear(), 0, 1);
+    // Adjust to Sunday start
+    const startOfFirstWeek = new Date(firstDay);
+    startOfFirstWeek.setDate(startOfFirstWeek.getDate() - firstDay.getDay());
+    
+    // Calculate week index for each month
     months.forEach((month, idx) => {
-      // Find the first week that contains this month
-      const weekIdx = weeks.findIndex(week => 
-        week.some(day => {
-          const dayMonth = new Date(day.date).getMonth();
-          return dayMonth === idx && !day.isFuture;
-        })
-      );
+      const firstOfMonth = new Date(today.getFullYear(), idx, 1);
+      const weekIndex = Math.floor((firstOfMonth - startOfFirstWeek) / (7 * 24 * 60 * 60 * 1000));
       
-      if (weekIdx !== -1) {
-        labels.push({ month, weekIndex: weekIdx });
+      // Only show if this week is within our data
+      if (weekIndex >= 0 && weekIndex < weeks.length) {
+        labels.push({ month, weekIndex });
       }
     });
     
