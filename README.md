@@ -41,7 +41,8 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
   - **Público-alvo Múltiplo:** Seleção múltipla com checkboxes (Adulto, Adolesc., Infantil)
   - **Instrumento Validado:** Flag para identificar instrumentos cientificamente validados
   - **Origem do Formulário:** Diferencia formulários criados manualmente vs. importados da Biblioteca (ícone e badge Premium)
-  - **Cards Padronizados:** Layout consistente entre My Forms e Library com badges dinâmicos
+  - **Cards Padronizados:** Layout consistente entre My Forms, Library e Patients com badges dinâmicos
+- **Cards de Paciente:** Grid responsivo com stats de Respostas e Links, botões de Prontuário e Editar
   - **Modal de Criação:** Interface para definir classificação, código, público-alvo e validação antes de criar
 
 ## 📋 Regras e Fluxos

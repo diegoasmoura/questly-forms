@@ -15,7 +15,7 @@ import {
   UserPlus,
   ArrowLeft,
   Trash2,
-  Edit,
+  Pencil,
   LayoutDashboard,
   LogOut,
   Eye,
@@ -216,7 +216,7 @@ export default function Patients() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {filteredPatients.map((patient) => (
             <PatientCard
               key={patient.id}
@@ -743,65 +743,80 @@ function EditPatientModal({ patient, onClose, onSave }) {
 }
 
 function PatientCard({ patient, onDelete, onEdit }) {
+  const responseCount = patient._count?.responses || 0;
+  const shareLinkCount = patient._count?.shareLinks || 0;
+
   return (
-    <div className="card p-5 card-hover group">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-lg shrink-0">
-              {patient.name.charAt(0).toUpperCase()}
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="font-semibold text-brand-950 truncate text-sm">
-                {patient.name}
-              </h3>
-              <p className="text-[10px] text-brand-400">
-                {patient._count?.responses || 0} respostas
-              </p>
-            </div>
+    <div className="card group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full bg-white overflow-hidden border-brand-100/50">
+      <div className="p-6 flex-1">
+        <div className="flex items-start justify-between mb-6">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-lg group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
+            {patient.name.charAt(0).toUpperCase()}
+          </div>
+          <div className="relative">
+            <button
+              onClick={() => onDelete(patient.id)}
+              className="p-2 rounded-xl text-brand-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+              title="Excluir"
+            >
+              <Trash2 size={18} />
+            </button>
           </div>
         </div>
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-          <button
-            onClick={() => onDelete(patient.id)}
-            className="p-1.5 rounded-lg text-brand-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-            title="Excluir"
-          >
-            <Trash2 size={14} />
-          </button>
+
+        <Link to={`/patients/${patient.id}`} className="block mb-2 group/title" title={patient.name}>
+          <h3 className="text-xl font-bold text-brand-950 group-hover:text-brand-800 transition-colors truncate">
+            {patient.name}
+          </h3>
+          {patient.birthDate && (
+            <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mt-1">
+              {new Date(patient.birthDate).toLocaleDateString('pt-BR')}
+            </p>
+          )}
+        </Link>
+
+        <div className="mt-6 space-y-2 text-xs text-brand-500">
+          {patient.email && (
+            <div className="flex items-center gap-2">
+              <Mail size={12} className="shrink-0 text-brand-300" />
+              <span className="truncate">{patient.email}</span>
+            </div>
+          )}
+          {patient.phone && (
+            <div className="flex items-center gap-2">
+              <Phone size={12} className="shrink-0 text-brand-300" />
+              <span>{patient.phone}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-6 mt-6 pt-6 border-t border-brand-50">
+          <div className="flex flex-col">
+            <span className="text-lg font-black text-brand-950 leading-none">{responseCount}</span>
+            <span className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mt-1">Respostas</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-lg font-black text-brand-950 leading-none">{shareLinkCount}</span>
+            <span className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mt-1">Links</span>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-2 mb-4 text-xs text-brand-500">
-        {patient.email && (
-          <div className="flex items-center gap-2">
-            <Mail size={12} className="shrink-0" />
-            <span className="truncate">{patient.email}</span>
-          </div>
-        )}
-        {patient.phone && (
-          <div className="flex items-center gap-2">
-            <Phone size={12} className="shrink-0" />
-            <span>{patient.phone}</span>
-          </div>
-        )}
-        {patient.birthDate && (
-          <div className="flex items-center gap-2">
-            <Calendar size={12} className="shrink-0" />
-            <span>{new Date(patient.birthDate).toLocaleDateString('pt-BR')}</span>
-          </div>
-        )}
-      </div>
-
-      <div className="flex justify-end">
+      <div className="p-4 bg-brand-50/50 border-t border-brand-50 flex items-center justify-between gap-2">
         <Link
           to={`/patients/${patient.id}`}
-          className="btn btn-primary text-[10px] py-1.5 px-6 flex items-center justify-center gap-1 w-full"
-          title="Acessar Prontuário"
+          className="btn btn-secondary text-xs flex-1"
         >
-          <FileText size={12} />
+          <FileText size={14} />
           Prontuário
         </Link>
+        <button
+          onClick={() => onEdit(patient)}
+          className="btn btn-secondary text-xs flex-1"
+        >
+          <Pencil size={14} />
+          Editar
+        </button>
       </div>
     </div>
   );
