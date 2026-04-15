@@ -30,7 +30,12 @@ export default function Patients() {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState("grid");
+  const [viewMode, setViewMode] = useState(() => localStorage.getItem("patients-view") || "grid");
+
+  const handleViewMode = (mode) => {
+    setViewMode(mode);
+    localStorage.setItem("patients-view", mode);
+  };
   const [showAddModal, setShowAddModal] = useState(false);
   const [editPatient, setEditPatient] = useState(null);
   const [newPatient, setNewPatient] = useState({
@@ -181,14 +186,14 @@ export default function Patients() {
         </div>
         <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-brand-100">
           <button
-            onClick={() => setViewMode("grid")}
+            onClick={() => handleViewMode("grid")}
             className={`p-2 rounded-md transition-all ${viewMode === "grid" ? "bg-brand-950 text-white" : "text-brand-400 hover:text-brand-700 hover:bg-brand-50"}`}
             title="Visualização em cards"
           >
             <LayoutGrid size={18} />
           </button>
           <button
-            onClick={() => setViewMode("list")}
+            onClick={() => handleViewMode("list")}
             className={`p-2 rounded-md transition-all ${viewMode === "list" ? "bg-brand-950 text-white" : "text-brand-400 hover:text-brand-700 hover:bg-brand-50"}`}
             title="Visualização em lista"
           >
