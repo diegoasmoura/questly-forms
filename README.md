@@ -96,6 +96,14 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Layout Component:** Grid adicionado ao `Layout.jsx` para consistência
 - **Efeito:** Adiciona profundidade visual sem competir com o conteúdo
 
+### Mapa de Calor Aprimorado (v2.6)
+- **Seleção de dia:** Clique em qualquer dia para ver os detalhes
+- **Tooltip informativo:** Mostra data completa + quantidade de respostas formatada em português
+- **Dias da semana:** Todos os 7 dias exibidos (Dom, Seg, Ter, Qua, Qui, Sex, Sáb)
+- **Visual:** Anel azul indica dia selecionado, X para fechar
+- **Intensidade simplificada:** Apenas 2 cores (slate-200 para vazio, emerald-500 para com resposta)
+- **Dias futuros:** Exibidos em slate-200 com opacidade reduzida
+
 ### Rebranding Visual (v2.0)
 - **Novo Nome:** Curious → Questly Form
 - **Nova Identidade Visual:** Design profissional com cores slate e verde brand

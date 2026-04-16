@@ -3,6 +3,7 @@ import { useMemo, useState, useEffect, useRef } from "react";
 export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
   const containerRef = useRef(null);
   const [containerWidth, setContainerWidth] = useState(1000);
+  const [selectedDay, setSelectedDay] = useState(null);
   
   useEffect(() => {
     const updateWidth = () => {
@@ -25,7 +26,6 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
     let maxValue = 0;
     let total = 0;
 
-    // Calculate weeks from start of year to end of year
     const startOfFirstWeek = new Date(yearStartDate);
     const dayOfWeek = startOfFirstWeek.getDay();
     startOfFirstWeek.setDate(startOfFirstWeek.getDate() - dayOfWeek);
@@ -89,19 +89,14 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
     return { weeks, maxValue, total };
   }, [data]);
 
-  // Calculate cell size based on container width
-  const labelWidth = 40; // Width for day labels
+  const labelWidth = 40;
   const gap = 4;
-  const availableWidth = containerWidth - labelWidth - 48; // 48px for padding
+  const availableWidth = containerWidth - labelWidth - 48;
   const cellSize = Math.max(12, Math.floor((availableWidth - (weeks.length * gap)) / weeks.length));
 
   const getColor = (count) => {
-    if (count === 0) return "bg-slate-100";
-    if (count === 1) return "bg-emerald-200";
-    if (count === 2) return "bg-emerald-300";
-    if (count === 3) return "bg-emerald-400";
-    if (count === 4) return "bg-emerald-500";
-    return "bg-emerald-600";
+    if (count === 0) return "bg-slate-200";
+    return "bg-emerald-500";
   };
 
   const dayLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -120,8 +115,23 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
     });
   }, []);
 
+  const handleDayClick = (day) => {
+    if (day.date && !day.isFuture) {
+      setSelectedDay(day);
+    }
+  };
+
+  const dayNames = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+  const formatSelectedDate = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr + 'T00:00:00');
+    return `${dayNames[date.getDay()]}, ${date.getDate()} de ${monthNames[date.getMonth()]} de ${date.getFullYear()}`;
+  };
+
   return (
-    <div className="card p-6" ref={containerRef}>
+    <div className="card p-6 relative" ref={containerRef}>
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-lg font-bold text-slate-800">{title}</h2>
@@ -133,12 +143,8 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-500">Intensidade</span>
             <div className="flex gap-1">
-              <div className="w-4 h-4 rounded-sm bg-slate-100" title="0 respostas" />
-              <div className="w-4 h-4 rounded-sm bg-emerald-200" title="1 resposta" />
-              <div className="w-4 h-4 rounded-sm bg-emerald-300" title="2 respostas" />
-              <div className="w-4 h-4 rounded-sm bg-emerald-400" title="3 respostas" />
-              <div className="w-4 h-4 rounded-sm bg-emerald-500" title="4 respostas" />
-              <div className="w-4 h-4 rounded-sm bg-emerald-600" title="5+ respostas" />
+              <div className="w-4 h-4 rounded-sm bg-slate-200" title="Sem resposta" />
+              <div className="w-4 h-4 rounded-sm bg-emerald-500" title="Com resposta" />
             </div>
           </div>
         </div>
@@ -165,7 +171,7 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
       </div>
 
       <div className="flex">
-        {/* Day labels */}
+        {/* Day labels - show all days */}
         <div className="flex flex-col gap-[4px] mr-3 w-10">
           {dayLabels.map((label, i) => (
             <div 
@@ -173,12 +179,12 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
               className="text-xs text-slate-500 font-medium flex items-center"
               style={{ height: `${cellSize}px` }}
             >
-              {i % 2 === 1 ? label : ''}
+              {label}
             </div>
           ))}
         </div>
 
-        {/* Heatmap grid - fills available width */}
+        {/* Heatmap grid */}
         <div className="flex gap-[4px]">
           {weeks.map((week, weekIndex) => {
             return (
@@ -187,11 +193,13 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
                   <div
                     key={`${weekIndex}-${dayIndex}`}
                     title={day.date ? `${new Date(day.date).toLocaleDateString('pt-BR')}: ${day.count} resposta${day.count !== 1 ? 's' : ''}` : ''}
+                    onClick={() => handleDayClick(day)}
                     className={`
                       rounded-sm transition-all cursor-pointer
-                      ${!day.date ? 'bg-transparent' : day.isFuture ? 'bg-slate-50' : getColor(day.count)}
+                      ${!day.date ? 'bg-transparent cursor-default' : day.isFuture ? 'bg-slate-200 cursor-not-allowed opacity-50' : getColor(day.count)}
                       ${day.isToday ? 'ring-2 ring-emerald-500 ring-offset-1' : ''}
-                      hover:ring-2 hover:ring-emerald-400
+                      ${selectedDay?.date === day.date ? 'ring-2 ring-blue-500 ring-offset-1' : ''}
+                      ${!day.isFuture && day.date ? 'hover:ring-2 hover:ring-emerald-400' : ''}
                     `}
                     style={{ 
                       width: `${cellSize}px`, 
@@ -204,6 +212,26 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
           })}
         </div>
       </div>
+
+      {/* Selected day tooltip */}
+      {selectedDay && (
+        <div className="absolute left-6 bottom-6 bg-white rounded-lg shadow-lg border border-slate-200 p-4 z-20 min-w-[200px]">
+          <button 
+            onClick={() => setSelectedDay(null)}
+            className="absolute top-2 right-2 text-slate-400 hover:text-slate-600"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <p className="text-sm font-semibold text-slate-800 mb-1">
+            {formatSelectedDate(selectedDay.date)}
+          </p>
+          <p className="text-2xl font-bold text-emerald-600">
+            {selectedDay.count} {selectedDay.count === 1 ? 'resposta' : 'respostas'}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
