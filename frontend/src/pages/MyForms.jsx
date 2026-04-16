@@ -428,19 +428,20 @@ function FormListRow({ form, stats, onDelete, onDuplicate }) {
       </div>
 
       <div className="flex items-center gap-2">
-        <Link to={`/forms/${form.id}/preview`} className="btn btn-secondary py-2 px-3 text-xs">
+        <Link to={`/forms/${form.id}/preview`} className="btn btn-secondary py-2 px-3 text-xs" title="Visualizar">
           <Eye size={14} />
         </Link>
-        <Link to={`/forms/${form.id}/edit`} className="btn btn-secondary py-2 px-3 text-xs">
+        <Link to={`/forms/${form.id}/edit`} className="btn btn-secondary py-2 px-3 text-xs" title="Editar">
           <Pencil size={14} />
         </Link>
-        <Link to={`/forms/${form.id}/responses`} className="btn btn-primary py-2 px-3 text-xs">
+        <Link to={`/forms/${form.id}/responses`} className="btn btn-primary py-2 px-3 text-xs" title="Ver Resultados">
           <BarChart3 size={14} />
         </Link>
         <div className="relative">
           <button
             onClick={() => setShowOptions(!showOptions)}
             className="p-2 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-emerald-50 transition-colors"
+            title="Mais opções"
           >
             <MoreVertical size={18} />
           </button>
@@ -560,8 +561,8 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
             <ResponseTrendChart data={aggregateData} title="" height={64} />
           </div>
         ) : (
-          <div className="mt-6 h-16 flex items-center justify-center border border-dashed border-emerald-100 rounded-xl bg-emerald-50/30">
-            <p className="text-[10px] font-bold text-emerald-300 uppercase tracking-tighter">Sem atividade recente</p>
+          <div className="mt-6 h-16 flex items-center justify-center border border-dashed border-emerald-200 rounded-xl bg-emerald-50/50">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Sem atividade recente</p>
           </div>
         )}
       </div>

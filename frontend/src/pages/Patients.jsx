@@ -879,13 +879,13 @@ function PatientListRow({ patient, onDelete, onEdit }) {
       </div>
 
       <div className="flex items-center gap-2">
-        <Link to={`/patients/${patient.id}`} className="btn btn-secondary py-2 px-3 text-xs">
+        <Link to={`/patients/${patient.id}`} className="btn btn-secondary py-2 px-3 text-xs" title="Ver Paciente">
           <FileText size={14} />
         </Link>
-        <button onClick={() => onEdit(patient)} className="btn btn-secondary py-2 px-3 text-xs">
+        <button onClick={() => onEdit(patient)} className="btn btn-secondary py-2 px-3 text-xs" title="Editar Paciente">
           <Pencil size={14} />
         </button>
-        <button onClick={() => onDelete(patient.id)} className="btn btn-secondary py-2 px-3 text-xs text-red-500 hover:text-red-700">
+        <button onClick={() => onDelete(patient.id)} className="btn btn-secondary py-2 px-3 text-xs text-red-500 hover:text-red-700" title="Excluir Paciente">
           <Trash2 size={14} />
         </button>
       </div>
