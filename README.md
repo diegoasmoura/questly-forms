@@ -78,6 +78,15 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 
 ## Novidades Recentes
 
+### Segurança (v2.10)
+- **CORS Restrito:** Apenas origens permitidas configuradas
+- **Rate Limiting:** 5 tentativas de login por 15 minutos por IP
+- **Security Headers:** X-Frame-Options, X-XSS-Protection, HSTS
+- **JWT:** Expiração reduzida para 24h
+- **Mensagens de Erro:** Genéricas em produção (não expõe stack traces)
+- **Validação:** Email com regex, senha mínima 6 caracteres
+- **Backend:** .gitignore e .env.example criados
+
 ### Correções de Bugs e Refatoração (v2.8)
 - **App.jsx:** Bug crítico corrigido - LoadingScreen movido para antes dos componentes de rota
 - **AuthContext.jsx:** JSON.parse envolvido em try-catch para evitar crash com dados corrompidos

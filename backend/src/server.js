@@ -12,16 +12,36 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS 
-  ? process.env.ALLOWED_ORIGINS.split(',')
-  : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:3005', 'http://127.0.0.1:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:3005'];
+const allowedOrigins = [
+  'http://localhost:5173', 
+  'http://localhost:3000', 
+  'http://localhost:3002',
+  'http://localhost:3005',
+  'http://127.0.0.1:5173', 
+  'http://127.0.0.1:3000', 
+  'http://127.0.0.1:3002',
+  'http://127.0.0.1:3005'
+];
+
+if (process.env.ALLOWED_ORIGINS) {
+  process.env.ALLOWED_ORIGINS.split(',').forEach(origin => {
+    if (!allowedOrigins.includes(origin.trim())) {
+      allowedOrigins.push(origin.trim());
+    }
+  });
+}
 
 app.use(cors({
   origin: function (origin, callback) {
+    if (process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+      return;
+    }
+    
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error('Origem não permitida'));
     }
   },
   credentials: true
@@ -48,7 +68,7 @@ app.use("/api/share", shareRoutes);
 app.use("/api/patients", patientRoutes);
 
 app.use((err, req, res, next) => {
-  if (err.message === 'Not allowed by CORS') {
+  if (err.message === 'Origem não permitida') {
     return res.status(403).json({ error: 'Acesso não permitido' });
   }
   console.error('Server error:', err.message);
