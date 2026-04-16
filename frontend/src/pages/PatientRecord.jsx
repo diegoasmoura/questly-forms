@@ -257,8 +257,8 @@ export default function PatientRecord() {
     return (
       <div className="h-full flex items-center justify-center p-20">
         <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-10 h-10 rounded-full border-2 border-brand-950 border-t-transparent animate-spin" />
-          <p className="text-sm text-brand-500 font-medium">Carregando prontuário...</p>
+          <div className="w-10 h-10 rounded-full border-2 border-emerald-900 border-t-transparent animate-spin" />
+          <p className="text-sm text-slate-600 font-medium">Carregando prontuário...</p>
         </div>
       </div>
     );
@@ -269,8 +269,8 @@ export default function PatientRecord() {
       <div className="h-full flex items-center justify-center p-20">
         <div className="text-center card p-10 max-w-md">
           <AlertCircle size={48} className="mx-auto text-red-500 mb-4" />
-          <h2 className="text-xl font-bold text-brand-950">Paciente não encontrado</h2>
-          <p className="text-brand-500 mt-2">O registro que você está procurando não existe ou foi removido.</p>
+          <h2 className="text-xl font-bold text-slate-900">Paciente não encontrado</h2>
+          <p className="text-slate-600 mt-2">O registro que você está procurando não existe ou foi removido.</p>
           <Link to="/patients" className="btn btn-primary mt-6">Voltar para Pacientes</Link>
         </div>
       </div>
@@ -278,8 +278,8 @@ export default function PatientRecord() {
   }
 
   return (
-    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in bg-brand-50/30">
-      <Link to="/patients" className="inline-flex items-center gap-2 text-sm text-brand-500 hover:text-brand-950 mb-4 group transition-colors shrink-0">
+    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in bg-emerald-50/30">
+      <Link to="/patients" className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-4 group transition-colors shrink-0">
         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
         Voltar para Lista de Pacientes
       </Link>
@@ -290,19 +290,19 @@ export default function PatientRecord() {
           <div className="lg:col-span-1">
             <div className="card p-6">
               <div className="flex flex-col items-center text-center mb-6">
-                <div className="w-20 h-20 rounded-2xl bg-brand-950 flex items-center justify-center text-white font-bold text-3xl mb-3 shadow-xl shadow-brand-950/20">
+                <div className="w-20 h-20 rounded-2xl bg-emerald-900 flex items-center justify-center text-white font-bold text-3xl mb-3 shadow-xl shadow-emerald-900/20">
                   {patient.name.charAt(0).toUpperCase()}
                 </div>
-                <h1 className="text-xl font-bold text-brand-950">{patient.name}</h1>
-                <p className="text-[10px] font-bold text-brand-400 mt-1 uppercase tracking-widest">Prontuário #{patient.id.slice(0, 8).toUpperCase()}</p>
+                <h1 className="text-xl font-bold text-slate-900">{patient.name}</h1>
+                <p className="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-widest">Prontuário #{patient.id.slice(0, 8).toUpperCase()}</p>
               </div>
 
-              <div className="space-y-3 pt-4 border-t border-brand-50">
+              <div className="space-y-3 pt-4 border-t border-emerald-50">
                 {patient.email && (
                   <div className="flex items-center justify-between px-2 py-1.5">
                     <div className="min-w-0 flex-1">
-                      <p className="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Email</p>
-                      <p className="text-xs text-brand-700 font-medium truncate">{patient.email}</p>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Email</p>
+                      <p className="text-xs text-emerald-700 font-medium truncate">{patient.email}</p>
                     </div>
                     <a
                       href={`mailto:${patient.email}`}
@@ -316,8 +316,8 @@ export default function PatientRecord() {
               {patient.phone && (
                 <div className="flex items-center justify-between px-2 py-1.5">
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Telefone</p>
-                    <p className="text-xs text-brand-700 font-medium truncate">{patient.phone}</p>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Telefone</p>
+                    <p className="text-xs text-emerald-700 font-medium truncate">{patient.phone}</p>
                   </div>
                   <a
                     href={`tel:${patient.phone.replace(/\D/g, '')}`}
@@ -329,8 +329,8 @@ export default function PatientRecord() {
                 </div>
               )}
               <div className="px-2 py-1.5">
-                <p className="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Nascimento</p>
-                <p className="text-xs text-brand-700 font-medium">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nascimento</p>
+                <p className="text-xs text-emerald-700 font-medium">
                   {patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : "Não informado"}
                   {patient.birthDate && (() => {
                     const today = new Date();
@@ -340,13 +340,13 @@ export default function PatientRecord() {
                     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
                       age--;
                     }
-                    return <span className="ml-1 text-brand-400">({age} anos)</span>;
+                    return <span className="ml-1 text-slate-500">({age} anos)</span>;
                   })()}
                 </p>
               </div>
               <div className="px-2 py-1.5">
-                <p className="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Paciente desde</p>
-                <p className="text-xs text-brand-700 font-medium">{new Date(patient.createdAt).toLocaleDateString('pt-BR')}</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Paciente desde</p>
+                <p className="text-xs text-emerald-700 font-medium">{new Date(patient.createdAt).toLocaleDateString('pt-BR')}</p>
               </div>
               
               <button
@@ -359,12 +359,12 @@ export default function PatientRecord() {
             </div>
           </div>
 
-          <div className="card p-6 bg-brand-50/50 border-brand-100">
-            <h3 className="font-bold text-brand-950 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
+          <div className="card p-6 bg-emerald-50/50 border-emerald-100">
+            <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
               <Edit size={16} />
               Notas Clínicas
             </h3>
-            <p className="text-sm text-brand-600 whitespace-pre-wrap leading-relaxed">
+            <p className="text-sm text-emerald-600 whitespace-pre-wrap leading-relaxed">
               {patient.notes || "Nenhuma observação clínica registrada para este paciente."}
             </p>
           </div>
@@ -375,12 +375,12 @@ export default function PatientRecord() {
           {/* Tabs */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-brand-950">Histórico Clínico</h2>
-              <p className="text-sm text-brand-500 mt-1">
+              <h2 className="text-2xl font-bold text-slate-900">Histórico Clínico</h2>
+              <p className="text-sm text-slate-600 mt-1">
                 Acompanhe a evolução e todas as respostas coletadas.
               </p>
             </div>
-            <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-brand-100 shadow-sm">
+            <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-emerald-100 shadow-sm">
               <TabButton
                 active={activeTab === "timeline"}
                 onClick={() => setActiveTab("timeline")}
@@ -402,8 +402,8 @@ export default function PatientRecord() {
               <div className="card p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h3 className="text-lg font-bold text-brand-950">Compartilhar Formulários</h3>
-                    <p className="text-sm text-brand-500 mt-1">Envie formulários para que {patient.name} preencha</p>
+                    <h3 className="text-lg font-bold text-slate-900">Compartilhar Formulários</h3>
+                    <p className="text-sm text-slate-600 mt-1">Envie formulários para que {patient.name} preencha</p>
                   </div>
                   <button
                     onClick={() => setShowShareModal(true)}
@@ -415,15 +415,15 @@ export default function PatientRecord() {
                 </div>
 
                 {loadingLinks ? (
-                  <div className="text-center py-8 text-brand-400">
-                    <div className="animate-spin w-6 h-6 border-2 border-brand-950 border-t-transparent rounded-full mx-auto mb-2" />
+                  <div className="text-center py-8 text-slate-500">
+                    <div className="animate-spin w-6 h-6 border-2 border-emerald-900 border-t-transparent rounded-full mx-auto mb-2" />
                     <p className="text-xs">Carregando links...</p>
                   </div>
                 ) : patientShareLinks.length === 0 ? (
-                  <div className="text-center py-12 bg-brand-50 rounded-lg border border-brand-100">
-                    <Share2 size={40} className="mx-auto text-brand-300 mb-3" />
-                    <p className="text-sm text-brand-500 font-medium">Nenhum formulário enviado ainda</p>
-                    <p className="text-xs text-brand-400 mt-1">Clique no botão acima para começar</p>
+                  <div className="text-center py-12 bg-emerald-50 rounded-lg border border-emerald-100">
+                    <Share2 size={40} className="mx-auto text-emerald-400 mb-3" />
+                    <p className="text-sm text-slate-600 font-medium">Nenhum formulário enviado ainda</p>
+                    <p className="text-xs text-slate-500 mt-1">Clique no botão acima para começar</p>
                   </div>
                 ) : (
                   <div className="space-y-4 overflow-visible">
@@ -455,15 +455,15 @@ export default function PatientRecord() {
           {/* Timeline Tab (Original) */}
           {activeTab === "timeline" && (
             loadingLinks ? (
-              <div className="text-center py-12 text-brand-400">
-                <div className="animate-spin w-6 h-6 border-2 border-brand-950 border-t-transparent rounded-full mx-auto mb-2" />
+              <div className="text-center py-12 text-slate-500">
+                <div className="animate-spin w-6 h-6 border-2 border-emerald-900 border-t-transparent rounded-full mx-auto mb-2" />
                 <p className="text-xs">Carregando formulários...</p>
               </div>
             ) : patientShareLinks.length === 0 ? (
               <div className="card p-20 text-center border-dashed border-2">
-                <FileText size={48} className="mx-auto text-brand-200 mb-6" />
-                <h3 className="text-xl font-bold text-brand-950 mb-2">Nenhum registro ainda</h3>
-                <p className="text-brand-500 max-w-sm mx-auto">Envie um formulário ou escala para este paciente para começar a construir seu prontuário digital.</p>
+                <FileText size={48} className="mx-auto text-emerald-200 mb-6" />
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Nenhum registro ainda</h3>
+                <p className="text-slate-600 max-w-sm mx-auto">Envie um formulário ou escala para este paciente para começar a construir seu prontuário digital.</p>
                 <Link to="/my-forms" className="btn btn-primary mt-8">Ir para Meus Formulários</Link>
               </div>
               ) : (
@@ -475,7 +475,7 @@ export default function PatientRecord() {
                   
                   return (
                     <div>
-                      <h4 className="text-sm font-black uppercase tracking-[0.2em] text-brand-400 mb-4 flex items-center gap-2">
+                      <h4 className="text-sm font-black uppercase tracking-[0.2em] text-slate-500 mb-4 flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-emerald-500" />
                         Respondidos ({answered.length})
                       </h4>
@@ -487,7 +487,7 @@ export default function PatientRecord() {
                           return (
                             <div 
                               key={response.id}
-                              className="card overflow-hidden group hover:border-brand-300 transition-all duration-300"
+                              className="card overflow-hidden group hover:border-emerald-300 transition-all duration-300"
                             >
                               <div className="w-full flex items-center justify-between p-6 min-h-[100px]">
                                 <div className="flex items-center gap-4 flex-1">
@@ -495,9 +495,9 @@ export default function PatientRecord() {
                                     <FileText size={22} />
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <h4 className="font-bold text-base text-brand-950 group-hover:text-brand-700 transition-colors">{link.form?.title}</h4>
+                                    <h4 className="font-bold text-base text-slate-900 group-hover:text-emerald-700 transition-colors">{link.form?.title}</h4>
                                     <div className="flex items-center gap-3 mt-2 flex-wrap">
-                                      <p className="text-xs font-bold text-brand-400 uppercase tracking-wide">
+                                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">
                                         Enviado em {new Date(link.createdAt).toLocaleDateString('pt-BR')} · {new Date(link.createdAt).toLocaleTimeString('pt-BR')}
                                       </p>
                                       <span className="text-xs font-bold px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full">
@@ -536,18 +536,18 @@ export default function PatientRecord() {
                                       e.stopPropagation();
                                       toggleResponse(e, response.id);
                                     }}
-                                    className="p-2 hover:bg-brand-50 rounded-lg transition-colors"
+                                    className="p-2 hover:bg-emerald-50 rounded-lg transition-colors"
                                   >
                                     <ChevronRight
                                       size={22}
-                                      className={`text-brand-300 transition-all duration-300 ${selectedResponseId === response.id ? 'rotate-90 text-brand-950 scale-110' : ''}`}
+                                      className={`text-emerald-400 transition-all duration-300 ${selectedResponseId === response.id ? 'rotate-90 text-slate-900 scale-110' : ''}`}
                                     />
                                   </button>
                                 </div>
                               </div>
 
                               {selectedResponseId === response.id && (
-                                <div className="p-6 bg-brand-50/50 border-t border-brand-50 max-h-[70vh] overflow-y-auto">
+                                <div className="p-6 bg-emerald-50/50 border-t border-emerald-50 max-h-[70vh] overflow-y-auto">
                                   {/* Clinical Score Summary */}
                                   {(() => {
                                     if (!result || result.type !== "clinical") return null;
@@ -570,8 +570,8 @@ export default function PatientRecord() {
                                       <div className={`mb-6 p-6 rounded-2xl border bg-white shadow-sm ${result.color}`}>
                                         <div className="flex items-center justify-between mb-4">
                                           <div className="flex items-center gap-2">
-                                            <TrendingUp size={18} className="text-brand-950" />
-                                            <h5 className="font-bold text-xs uppercase tracking-widest text-brand-950">{result.title}</h5>
+                                            <TrendingUp size={18} className="text-slate-900" />
+                                            <h5 className="font-bold text-xs uppercase tracking-widest text-slate-900">{result.title}</h5>
                                           </div>
                                           {link.responseCount > 1 && (
                                             <span className="text-[10px] font-bold px-2 py-1 bg-purple-100 text-purple-700 rounded-full">
@@ -581,14 +581,14 @@ export default function PatientRecord() {
                                         </div>
                                         
                                         <div className="flex items-center gap-6 mb-4">
-                                          <div className="text-5xl font-black text-brand-950">{result.score}</div>
+                                          <div className="text-5xl font-black text-slate-900">{result.score}</div>
                                           <div>
                                             <span className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-tight ${result.color}`}>
                                               {result.severity}
                                             </span>
-                                            <p className="text-[10px] text-brand-400 font-bold uppercase mt-2">Score total de {result.maxScore} pontos</p>
+                                            <p className="text-[10px] text-slate-500 font-bold uppercase mt-2">Score total de {result.maxScore} pontos</p>
                                             {scoreDiff !== null && (
-                                              <p className={`text-[10px] font-black mt-1 ${scoreDiff > 0 ? 'text-red-600' : scoreDiff < 0 ? 'text-emerald-600' : 'text-brand-400'}`}>
+                                              <p className={`text-[10px] font-black mt-1 ${scoreDiff > 0 ? 'text-red-600' : scoreDiff < 0 ? 'text-emerald-600' : 'text-slate-500'}`}>
                                                 {scoreDiff > 0 ? '↑' : scoreDiff < 0 ? '↓' : ''} {Math.abs(scoreDiff)} pts vs. anterior
                                               </p>
                                             )}
@@ -602,8 +602,8 @@ export default function PatientRecord() {
                                           </div>
                                         )}
                                         
-                                        <div className="p-4 bg-brand-50/80 rounded-xl border border-brand-100/50">
-                                          <p className="text-sm text-brand-800 leading-relaxed font-medium italic">"{result.interpretation}"</p>
+                                        <div className="p-4 bg-emerald-50/80 rounded-xl border border-emerald-100/50">
+                                          <p className="text-sm text-slate-800 leading-relaxed font-medium italic">"{result.interpretation}"</p>
                                         </div>
                                       </div>
                                     );
@@ -612,7 +612,7 @@ export default function PatientRecord() {
                                   {/* Search Bar */}
                                   <div className="mb-4">
                                     <div className="relative">
-                                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-400" size={14} />
+                                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
                                       <input
                                         type="text"
                                         placeholder="Pesquisar nestas respostas..."
@@ -644,7 +644,7 @@ export default function PatientRecord() {
                   
                   return (
                     <div>
-                      <h4 className="text-sm font-black uppercase tracking-[0.2em] text-brand-400 mb-4 flex items-center gap-2">
+                      <h4 className="text-sm font-black uppercase tracking-[0.2em] text-slate-500 mb-4 flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-amber-500" />
                         Aguardando Resposta ({pending.length})
                       </h4>
@@ -653,11 +653,11 @@ export default function PatientRecord() {
                           const daysRemaining = link.expiresAt ? Math.ceil((new Date(link.expiresAt) - new Date()) / (1000 * 60 * 60 * 24)) : null;
                           
                           return (
-                            <div key={link.id} className="card p-6 bg-white border-brand-100 hover:border-brand-200 transition-all">
+                            <div key={link.id} className="card p-6 bg-white border-emerald-100 hover:border-emerald-200 transition-all">
                               <div className="flex items-start justify-between gap-4">
                                 <div className="flex-1 min-w-0">
-                                  <h5 className="font-semibold text-base text-brand-950 mb-2">{link.form?.title}</h5>
-                                  <p className="text-sm text-brand-500 mb-3">
+                                  <h5 className="font-semibold text-base text-slate-900 mb-2">{link.form?.title}</h5>
+                                  <p className="text-sm text-slate-600 mb-3">
                                     Enviado em {new Date(link.createdAt).toLocaleDateString('pt-BR')} · {new Date(link.createdAt).toLocaleTimeString('pt-BR')}
                                   </p>
                                   
@@ -669,7 +669,7 @@ export default function PatientRecord() {
                                       Enviado
                                     </span>
                                     {daysRemaining && (
-                                      <span className="text-xs font-bold px-3 py-1 bg-brand-50 text-brand-700 rounded-full">
+                                      <span className="text-xs font-bold px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full">
                                         {daysRemaining} dias restantes
                                       </span>
                                     )}
@@ -691,14 +691,14 @@ export default function PatientRecord() {
 
       {/* Edit Patient Modal */}
       {showEditModal && formData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-950/20 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-900/20 backdrop-blur-sm">
           <div className="card w-full max-w-3xl p-8 animate-scale-in max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-8 bg-white pb-4 border-b border-brand-50">
+            <div className="flex items-center justify-between mb-8 bg-white pb-4 border-b border-emerald-50">
               <div>
-                <h2 className="text-2xl font-bold text-brand-950">Editar Cadastro de Paciente</h2>
-                <p className="text-sm text-brand-500 mt-1">Atualize os dados clínicos do prontuário.</p>
+                <h2 className="text-2xl font-bold text-slate-900">Editar Cadastro de Paciente</h2>
+                <p className="text-sm text-slate-600 mt-1">Atualize os dados clínicos do prontuário.</p>
               </div>
-              <button onClick={() => setShowEditModal(false)} className="p-2 rounded-xl hover:bg-brand-50 text-brand-400 hover:text-brand-950 transition-all">
+              <button onClick={() => setShowEditModal(false)} className="p-2 rounded-xl hover:bg-emerald-50 text-slate-500 hover:text-slate-900 transition-all">
                 <Plus size={28} className="rotate-45" />
               </button>
             </div>
@@ -706,29 +706,29 @@ export default function PatientRecord() {
             <form onSubmit={handleSave} className="space-y-8">
               {/* Section: Identificação */}
               <section>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-900" />
                   Identificação do Paciente
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Nome Completo *</label>
+                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Nome Completo *</label>
                     <input type="text" required className="input" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Nome social ou completo" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">CPF</label>
+                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">CPF</label>
                     <input type="text" className="input" value={formData.cpf} onChange={e => setFormData({ ...formData, cpf: formatCPF(e.target.value) })} placeholder="000.000.000-00" maxLength={14} />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">RG</label>
+                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">RG</label>
                     <input type="text" className="input" value={formData.rg} onChange={e => setFormData({ ...formData, rg: e.target.value })} placeholder="Órgão Emissor" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Data de Nascimento</label>
+                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Data de Nascimento</label>
                     <input type="date" className="input" value={formData.birthDate} onChange={e => setFormData({ ...formData, birthDate: e.target.value })} />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Gênero / Identidade</label>
+                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Gênero / Identidade</label>
                     <select className="input" value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })}>
                       <option value="">Selecionar...</option>
                       <option value="Masculino">Masculino</option>
@@ -738,7 +738,7 @@ export default function PatientRecord() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Estado Civil</label>
+                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Estado Civil</label>
                     <select className="input" value={formData.maritalStatus} onChange={e => setFormData({ ...formData, maritalStatus: e.target.value })}>
                       <option value="">Selecionar...</option>
                       <option value="Solteiro(a)">Solteiro(a)</option>
@@ -749,7 +749,7 @@ export default function PatientRecord() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Profissão / Ocupação</label>
+                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Profissão / Ocupação</label>
                     <input type="text" className="input" value={formData.profession} onChange={e => setFormData({ ...formData, profession: e.target.value })} placeholder="Cargo ou área" />
                   </div>
                 </div>
@@ -757,17 +757,17 @@ export default function PatientRecord() {
 
               {/* Section: Contato */}
               <section>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-900" />
                   Informações de Contato
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">E-mail</label>
+                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">E-mail</label>
                     <input type="email" className="input" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="email@exemplo.com" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Telefone / WhatsApp</label>
+                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Telefone / WhatsApp</label>
                     <input type="tel" className="input" value={formData.phone} onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
                   </div>
                 </div>
@@ -775,32 +775,32 @@ export default function PatientRecord() {
 
               {/* Section: Endereço */}
               <section>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-900" />
                   Localização / Endereço
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">CEP</label>
+                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">CEP</label>
                     <input type="text" className="input" value={formData.cep} onChange={e => {
                       setFormData({ ...formData, cep: e.target.value });
                       handleCepLookup(e.target.value);
                     }} placeholder="00000-000" />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Logradouro (Rua/Av)</label>
+                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Logradouro (Rua/Av)</label>
                     <input type="text" className="input" value={formData.street} onChange={e => setFormData({ ...formData, street: e.target.value })} />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Número</label>
+                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Número</label>
                     <input type="text" className="input" value={formData.number} onChange={e => setFormData({ ...formData, number: e.target.value })} />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Bairro</label>
+                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Bairro</label>
                     <input type="text" className="input" value={formData.neighborhood} onChange={e => setFormData({ ...formData, neighborhood: e.target.value })} />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Cidade / UF</label>
+                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Cidade / UF</label>
                     <div className="flex gap-2">
                       <input type="text" className="input flex-1" value={formData.city} onChange={e => setFormData({ ...formData, city: e.target.value })} />
                       <input type="text" className="input w-16" value={formData.state} onChange={e => setFormData({ ...formData, state: e.target.value })} maxLength={2} />
@@ -811,17 +811,17 @@ export default function PatientRecord() {
 
               {/* Section: Emergência */}
               <section>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-900" />
                   Contato de Emergência
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Nome do Contato</label>
+                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Nome do Contato</label>
                     <input type="text" className="input" value={formData.emergencyName} onChange={e => setFormData({ ...formData, emergencyName: e.target.value })} placeholder="Parente, amigo, etc." />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Telefone de Emergência</label>
+                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Telefone de Emergência</label>
                     <input type="tel" className="input" value={formData.emergencyPhone} onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
                   </div>
                 </div>
@@ -829,8 +829,8 @@ export default function PatientRecord() {
 
               {/* Section: Observações */}
               <section>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-900" />
                   Observações Gerais
                 </h3>
                 <textarea
@@ -841,14 +841,14 @@ export default function PatientRecord() {
                 />
               </section>
 
-              <div className="flex gap-4 pt-8 bg-white pb-4 border-t border-brand-50">
+              <div className="flex gap-4 pt-8 bg-white pb-4 border-t border-emerald-50">
                 <button type="button" onClick={() => setShowEditModal(false)} className="btn btn-secondary flex-1 py-4 font-bold">
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="btn btn-primary flex-1 py-4 font-bold shadow-xl shadow-brand-950/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn btn-primary flex-1 py-4 font-bold shadow-xl shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? (
                     <div className="flex items-center justify-center gap-2">
@@ -867,14 +867,14 @@ export default function PatientRecord() {
 
       {/* Share Modal */}
       {showShareModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-950/20 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-900/20 backdrop-blur-sm">
           <div className="card w-full max-w-2xl p-6 animate-scale-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-xl font-semibold text-brand-950">Enviar Formulário para {patient?.name}</h2>
-                <p className="text-xs text-brand-500 mt-1">Crie um link para que o paciente preencha o formulário</p>
+                <h2 className="text-xl font-semibold text-slate-900">Enviar Formulário para {patient?.name}</h2>
+                <p className="text-xs text-slate-600 mt-1">Crie um link para que o paciente preencha o formulário</p>
               </div>
-              <button onClick={() => setShowShareModal(false)} className="text-brand-400 hover:text-brand-600">
+              <button onClick={() => setShowShareModal(false)} className="text-slate-500 hover:text-emerald-600">
                 <Plus size={24} className="rotate-45" />
               </button>
             </div>
@@ -909,10 +909,10 @@ export default function PatientRecord() {
               }
             }} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-brand-700 mb-2">Selecione um Formulário *</label>
+                <label className="block text-sm font-medium text-emerald-700 mb-2">Selecione um Formulário *</label>
                 {loadingForms ? (
-                  <div className="text-center py-4 text-brand-400">
-                    <div className="animate-spin w-4 h-4 border-2 border-brand-950 border-t-transparent rounded-full mx-auto" />
+                  <div className="text-center py-4 text-slate-500">
+                    <div className="animate-spin w-4 h-4 border-2 border-emerald-900 border-t-transparent rounded-full mx-auto" />
                   </div>
                 ) : (
                   <select
@@ -945,7 +945,7 @@ export default function PatientRecord() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-brand-700 mb-2">Validade do Link *</label>
+                <label className="block text-sm font-medium text-emerald-700 mb-2">Validade do Link *</label>
                 <div className="flex flex-wrap gap-2">
                   {[
                     { days: 7, label: "7 dias" },
@@ -963,10 +963,10 @@ export default function PatientRecord() {
                       }}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         shareData.expiresAt === new Date(Date.now() + opt.days * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-                          ? "bg-brand-950 text-white shadow-md"
+                          ? "bg-emerald-900 text-white shadow-md"
                           : opt.recommended
                           ? "bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
-                          : "bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100"
+                          : "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
                       }`}
                     >
                       {opt.label}
@@ -975,7 +975,7 @@ export default function PatientRecord() {
                   ))}
                 </div>
                 {shareData.expiresAt && (
-                  <p className="text-xs text-brand-500 mt-2">
+                  <p className="text-xs text-slate-600 mt-2">
                     Expira em: {new Date(shareData.expiresAt + 'T23:59:59').toLocaleDateString('pt-BR')}
                   </p>
                 )}
@@ -1041,8 +1041,8 @@ function TabButton({ active, onClick, icon, label }) {
       onClick={onClick}
       className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
         active 
-          ? "bg-brand-950 text-white shadow-md" 
-          : "text-brand-500 hover:text-brand-950 hover:bg-brand-50"
+          ? "bg-emerald-900 text-white shadow-md" 
+          : "text-slate-600 hover:text-slate-900 hover:bg-emerald-50"
       }`}
     >
       {icon}

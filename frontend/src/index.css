@@ -34,7 +34,7 @@
 
 @layer base {
   body {
-    @apply bg-slate-100 text-slate-900 font-sans antialiased;
+    @apply bg-slate-100 text-slate-700 font-sans antialiased;
   }
 }
 
@@ -43,31 +43,31 @@
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
   }
   .btn-primary {
-    @apply bg-brand-800 text-white hover:bg-brand-700 focus:ring-brand-700;
+    @apply bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500 shadow-sm;
   }
   .btn-secondary {
-    @apply bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 focus:ring-slate-300;
+    @apply bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 focus:ring-slate-300;
   }
   .btn-ghost {
-    @apply text-slate-600 hover:text-slate-900 hover:bg-slate-200;
+    @apply text-slate-600 hover:text-slate-800 hover:bg-slate-200;
   }
   .btn-danger {
     @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-600;
   }
   .input {
-    @apply w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent transition-all duration-200;
+    @apply w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200;
   }
   .card {
     @apply bg-white rounded-xl border border-slate-200 shadow-sm;
-    transition: box-shadow 0.2s ease, border-color 0.2s ease, max-height 0.3s ease;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease, max-height 0.3s ease, background-color 0.2s ease;
   }
   
   .card-expandable {
-    transition: max-height 0.3s ease-out, box-shadow 0.2s ease, border-color 0.2s ease;
+    transition: max-height 0.3s ease-out, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
     overflow: hidden;
   }
   .card-hover {
-    @apply hover:shadow-md hover:border-slate-300 transition-all duration-200;
+    @apply hover:shadow-md hover:border-slate-300 hover:bg-white transition-all duration-200;
   }
 }
 

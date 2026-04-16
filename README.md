@@ -2,13 +2,69 @@
 
 Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criarem formulários clínicos baseados em evidências e acompanharem a evolução terapêutica através de dados.
 
-## Rebranding e Visual
+## Sistema de Design Visual
 
-O projeto passou por um rebranding completo de "Curious" para "Questly" com um novo sistema visual profissional:
+### Paleta de Cores
 
-- **Paleta de Cores:** Fundo slate-100 (#f1f5f9) para reduzir fadiga ocular, sidebar escura slate-900, cards brancos com bordas slate-200
-- **Tipografia:** Fonte Inter para legibilidade
-- **Hierarquia Visual:** Contraste adequado WCAG AA, cores semânticas para status
+| Elemento | Cor | Hex |
+|----------|-----|-----|
+| **Background** | slate-100 | `#f1f5f9` |
+| **Cards** | white | `#ffffff` |
+| **Bordas Cards** | slate-200 | `#e2e8f0` |
+| **Sidebar** | slate-900 | `#0f172a` |
+| **Accent Primário** | emerald-600 | `#059669` |
+| **Accent Hover** | emerald-700 | `#047857` |
+| **Texto Principal** | slate-800 | `#1e293b` |
+| **Texto Secundário** | slate-500 | `#64748b` |
+| **Texto Labels** | slate-400 | `#94a3b8` |
+
+### Sistema de Cores Funcionais
+
+| Status | Cor | Uso |
+|--------|-----|-----|
+| **Sucesso** | emerald | confirmações, positivos |
+| **Info** | blue | informativos |
+| **Alerta** | amber | avisos |
+| **Erro** | red | erros, perigo |
+| **Neutro** | slate | elementos secundários |
+
+### Cores de Heatmap e Gráficos
+
+| Intensidade | Cor Emerald |
+|-------------|-------------|
+| 0 | `#e5e7eb` (slate-200) |
+| 1 | `#a7f3d0` (emerald-200) |
+| 2 | `#6ee7b7` (emerald-300) |
+| 3 | `#34d399` (emerald-400) |
+| 4+ | `#10b981` (emerald-500) |
+
+## Componentes UI
+
+### Botões
+
+| Tipo | Classe | Descrição |
+|------|--------|-----------|
+| **Primário** | `.btn-primary` | Ações principais, fundo emerald-600 |
+| **Secundário** | `.btn-secondary` | Ações secundárias, fundo slate-100 |
+| **Ghost** | `.btn-ghost` | Ações mínimas, hover com slate-200 |
+| **Perigo** | `.btn-danger` | Ações destrutivas, fundo red-600 |
+
+### Cards
+
+- **Classe:** `.card`
+- **Fundo:** branco com transparência
+- **Borda:** `1px solid slate-200`
+- **Sombra:** `shadow-sm`
+- **Radius:** `rounded-xl`
+- **Hover:** `shadow-md` com borda slate-300
+
+### Inputs
+
+- **Classe:** `.input`
+- **Fundo:** branco
+- **Borda:** `slate-200`
+- **Focus:** ring `emerald-500`
+- **Placeholder:** `slate-400`
 
 ## Funcionalidades Principais
 

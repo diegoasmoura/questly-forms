@@ -39,7 +39,7 @@ export default function Register() {
       <div className="hidden lg:flex lg:w-1/2 bg-slate-900 items-center justify-center p-16">
         <div className="max-w-md text-white">
           <div className="flex items-center gap-3 mb-12">
-            <div className="w-12 h-12 rounded-lg bg-brand-700 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-lg bg-emerald-700 flex items-center justify-center">
               <span className="text-xl font-bold">Q</span>
             </div>
             <span className="text-2xl font-semibold">Questly</span>
@@ -57,7 +57,7 @@ export default function Register() {
       <div className="flex-1 flex items-center justify-center px-8 py-12">
         <div className="w-full max-w-md">
           <Link to="/" className="flex items-center gap-2 lg:hidden mb-12">
-            <div className="w-10 h-10 rounded-lg bg-brand-700 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-emerald-700 flex items-center justify-center">
               <span className="text-white font-semibold">Q</span>
             </div>
             <span className="text-xl font-semibold text-slate-900">Questly</span>
@@ -140,7 +140,7 @@ export default function Register() {
 
           <p className="mt-8 text-center text-sm text-slate-600">
             Já tem uma conta?{" "}
-            <Link to="/login" className="font-medium text-brand-700 hover:underline">
+            <Link to="/login" className="font-medium text-emerald-700 hover:underline">
               Entrar
             </Link>
           </p>

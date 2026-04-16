@@ -96,13 +96,13 @@ export default function Home() {
   };
 
   return (
-    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in bg-brand-50/30">
+    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in">
       {/* Header */}
       <header className="mb-6 shrink-0">
-        <h1 className="text-2xl font-display font-bold text-brand-950">
+        <h1 className="text-2xl font-display font-bold text-slate-800">
           Painel Clínico
         </h1>
-        <p className="text-sm text-brand-500">Visão geral da sua clínica.</p>
+        <p className="text-sm text-slate-500">Visão geral da sua clínica.</p>
       </header>
 
       {/* Quick Stats */}
@@ -142,7 +142,7 @@ export default function Home() {
       </div>
 
       {/* Activity Heatmap - Full Width */}
-      <div className="min-h-[200px]">
+      <div className="min-h-[200px] mb-6">
         <ActivityHeatmap 
           data={aggregateData} 
           title="Atividade Clínica" 
@@ -151,37 +151,30 @@ export default function Home() {
 
       {/* Recent Activity Section */}
       <section className="card flex-1 min-h-0 overflow-hidden">
-        <div className="p-5 border-b border-brand-50 flex items-center justify-between">
+        <div className="p-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Activity size={18} className="text-emerald-600" />
-            <h2 className="text-base font-bold text-brand-950">Pacientes Atendidos Recentemente</h2>
+            <h2 className="text-base font-bold text-slate-800">Pacientes Atendidos Recentemente</h2>
           </div>
-          <Link 
-            to="/patients" 
-            className="btn btn-secondary text-[10px] font-bold uppercase flex items-center gap-2"
-          >
-            <Settings size={12} />
-            Gerenciar
-          </Link>
         </div>
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           {loading ? (
             <div className="p-5 space-y-4">
               {[1, 2, 3, 4].map(i => (
                 <div key={i} className="flex items-center gap-3 animate-pulse">
-                  <div className="w-10 h-10 rounded-xl bg-brand-100" />
+                  <div className="w-10 h-10 rounded-xl bg-slate-200" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-3 bg-brand-100 rounded w-1/2" />
-                    <div className="h-2 bg-brand-50 rounded w-1/3" />
+                    <div className="h-3 bg-slate-200 rounded w-1/2" />
+                    <div className="h-2 bg-slate-100 rounded w-1/3" />
                   </div>
                 </div>
               ))}
             </div>
           ) : recentResponses.length === 0 ? (
             <div className="p-10 text-center">
-              <Calendar size={32} className="mx-auto text-brand-200 mb-3" />
-              <p className="text-xs text-brand-500 font-bold uppercase tracking-tight">Nenhum atendimento registrado</p>
-              <p className="text-[10px] text-brand-400 mt-1">Pacientes que responderam formulários aparecerão aqui</p>
+              <Calendar size={32} className="mx-auto text-slate-300 mb-3" />
+              <p className="text-xs text-slate-500 font-bold uppercase tracking-tight">Nenhum atendimento registrado</p>
+              <p className="text-[10px] text-slate-400 mt-1">Pacientes que responderam formulários aparecerão aqui</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-5">
@@ -189,10 +182,10 @@ export default function Home() {
                 <Link 
                   key={response.id} 
                   to={`/patients/${response.patient.id}`}
-                  className="flex items-center gap-4 p-4 bg-brand-50/30 hover:bg-brand-50 rounded-2xl transition-all group border border-brand-100/50 hover:border-brand-200 hover:shadow-md"
+                  className="flex items-center gap-4 p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all group border border-slate-200 hover:border-slate-300 hover:shadow-sm"
                 >
                   <div className="relative">
-                    <div className="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center text-brand-700 font-black shrink-0 group-hover:bg-brand-950 group-hover:text-white transition-colors duration-300">
+                    <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 font-black shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
                       {response.patient.name.charAt(0)}
                     </div>
                     <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white text-[8px] font-black flex items-center justify-center">
@@ -200,14 +193,14 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-brand-950 truncate group-hover:text-brand-700 transition-colors">{response.patient.name}</p>
-                    <p className="text-[10px] text-brand-500 truncate mt-0.5">{response.formTitle}</p>
-                    <div className="flex items-center gap-2 text-[10px] font-bold text-brand-400 mt-1">
+                    <p className="text-sm font-bold text-slate-700 truncate group-hover:text-slate-900 transition-colors">{response.patient.name}</p>
+                    <p className="text-[10px] text-slate-500 truncate mt-0.5">{response.formTitle}</p>
+                    <div className="flex items-center gap-2 text-[10px] font-medium text-slate-400 mt-1">
                       <Clock size={10} />
                       <span>{new Date(response.createdAt).toLocaleDateString('pt-BR')} · {new Date(response.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                   </div>
-                  <ArrowRight size={14} className="text-brand-200 group-hover:text-brand-950 group-hover:translate-x-1 transition-all shrink-0" />
+                  <ArrowRight size={14} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all shrink-0" />
                 </Link>
               ))}
             </div>
@@ -225,11 +218,11 @@ function StatCard({ icon, label, value, trend, color, link }) {
         {icon}
       </div>
       <div className="min-w-0">
-        <p className="text-[10px] font-black uppercase tracking-widest text-brand-400 leading-none mb-1.5">{label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 leading-none mb-1.5">{label}</p>
         <div className="flex items-baseline gap-2">
-          <h3 className="text-xl font-black text-brand-950 leading-none">{value}</h3>
+          <h3 className="text-xl font-bold text-slate-800 leading-none">{value}</h3>
           {trend && (
-            <span className="text-[9px] font-bold text-brand-400 truncate">
+            <span className="text-[9px] font-medium text-slate-400 truncate">
               {trend}
             </span>
           )}
@@ -240,14 +233,14 @@ function StatCard({ icon, label, value, trend, color, link }) {
 
   if (link) {
     return (
-      <Link to={link} className="card p-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 border-brand-100/50">
+      <Link to={link} className="card p-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
         {content}
       </Link>
     );
   }
 
   return (
-    <div className="card p-4 border-brand-100/50">
+    <div className="card p-4">
       {content}
     </div>
   );

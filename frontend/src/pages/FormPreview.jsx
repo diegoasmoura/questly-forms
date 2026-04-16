@@ -27,10 +27,10 @@ export default function FormPreview() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-brand-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="animate-spin text-brand-400" size={32} />
-          <p className="text-sm text-brand-500">Carregando...</p>
+          <Loader2 className="animate-spin text-emerald-500" size={32} />
+          <p className="text-sm text-emerald-600">Carregando...</p>
         </div>
       </div>
     );
@@ -38,11 +38,11 @@ export default function FormPreview() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-brand-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
         <div className="card max-w-md w-full p-8 text-center">
           <AlertCircle size={48} className="mx-auto text-red-400 mb-4" />
-          <h1 className="text-xl font-semibold text-brand-950 mb-2">Erro ao Carregar</h1>
-          <p className="text-brand-500 mb-6">{error}</p>
+          <h1 className="text-xl font-semibold text-slate-900 mb-2">Erro ao Carregar</h1>
+          <p className="text-slate-600 mb-6">{error}</p>
           <button onClick={() => navigate(-1)} className="btn btn-primary">
             Voltar
           </button>
@@ -57,22 +57,22 @@ export default function FormPreview() {
   survey.mode = "edit";
 
   return (
-    <div className="min-h-screen bg-brand-50 flex flex-col overflow-hidden">
+    <div className="min-h-screen bg-slate-50 flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="bg-white border-b border-brand-100 shrink-0">
+      <header className="bg-white border-b border-slate-200 shrink-0">
         <div className="px-4 py-4">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
-              className="p-2 hover:bg-brand-50 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
             >
-              <ArrowLeft size={20} className="text-brand-500" />
+              <ArrowLeft size={20} className="text-slate-500" />
             </button>
             <div>
-              <h1 className="text-lg font-semibold text-brand-950">
+              <h1 className="text-lg font-semibold text-slate-900">
                 {form.title}
               </h1>
-              <p className="text-xs text-brand-400">Modo de Teste</p>
+              <p className="text-xs text-slate-500">Modo de Teste</p>
             </div>
           </div>
         </div>
@@ -80,7 +80,7 @@ export default function FormPreview() {
 
       {/* Survey Container */}
       <div className="flex-1 overflow-auto p-4 md:p-6">
-        <div className="bg-white rounded-xl border border-brand-100 min-h-full" style={{ maxWidth: '100%' }}>
+        <div className="bg-white rounded-xl border border-slate-200 min-h-full" style={{ maxWidth: '100%' }}>
           <Survey model={survey} ref={surveyRef} />
         </div>
       </div>

@@ -62,10 +62,10 @@ export function ClinicalTrendChart({ data, title = 'Evolução Clínica', showPh
     }
 
     return (
-      <div className="bg-white rounded-xl border-2 border-brand-100 p-5 shadow-sm">
+      <div className="card p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-sm uppercase tracking-widest text-brand-950">{title}</h3>
-          <span className="text-xs text-brand-400">n={data.length} avaliações</span>
+          <h3 className="font-bold text-sm uppercase tracking-wider text-slate-800">{title}</h3>
+          <span className="text-xs text-slate-500">n={data.length} avaliações</span>
         </div>
         <ResponsiveContainer width="100%" height={height}>
           <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -83,7 +83,7 @@ export function ClinicalTrendChart({ data, title = 'Evolução Clínica', showPh
             <Tooltip
               contentStyle={{
                 backgroundColor: 'white',
-                border: '2px solid #e5e7eb',
+                border: '1px solid #e5e7eb',
                 borderRadius: '8px',
                 boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
               }}
@@ -160,9 +160,9 @@ export function SeverityBarChart({ data, title = 'Distribuição de Severidade',
   if (!data || data.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-xl border-2 border-brand-100 p-5 shadow-sm">
+    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-sm uppercase tracking-widest text-brand-950">{title}</h3>
+        <h3 className="font-bold text-sm uppercase tracking-widest text-slate-800">{title}</h3>
       </div>
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -207,9 +207,9 @@ export function ResponseTrendChart({ data, title = 'Tendência de Respostas', he
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
   return (
-    <div className="bg-white rounded-xl border-2 border-brand-100 p-5 shadow-sm">
+    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-sm uppercase tracking-widest text-brand-950">{title}</h3>
+        <h3 className="font-bold text-sm uppercase tracking-widest text-slate-800">{title}</h3>
       </div>
       <ResponsiveContainer width="100%" height={height}>
         <AreaChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -291,8 +291,8 @@ export function AttendanceHeatmap({ data = [], title = 'Calendário de Atendimen
     if (!data || data.length === 0) {
       return (
         <div className="card p-6">
-          <h3 className="font-bold text-sm uppercase tracking-widest text-brand-950 mb-4">{title}</h3>
-          <div className="text-center py-8 text-brand-400 text-sm">
+          <h3 className="font-bold text-sm uppercase tracking-wider text-slate-800 mb-4">{title}</h3>
+          <div className="text-center py-8 text-slate-400 text-sm">
             Nenhum atendimento registrado
           </div>
         </div>
@@ -339,13 +339,13 @@ export function AttendanceHeatmap({ data = [], title = 'Calendário de Atendimen
       weeks.push(currentWeek);
     }
 
-    // Color scale
+    // Color scale - emerald tones
     const getColor = (count) => {
-      if (count === 0) return '#ebedf0';
-      if (count === 1) return '#9be9a8';
-      if (count === 2) return '#40c463';
-      if (count === 3) return '#30a14e';
-      return '#216e39';
+      if (count === 0) return '#e5e7eb';
+      if (count === 1) return '#a7f3d0';
+      if (count === 2) return '#6ee7b7';
+      if (count === 3) return '#34d399';
+      return '#10b981';
     };
 
     const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
@@ -370,8 +370,8 @@ export function AttendanceHeatmap({ data = [], title = 'Calendário de Atendimen
     return (
       <div className="card p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-sm uppercase tracking-widest text-brand-950">{title}</h3>
-          <div className="flex items-center gap-4 text-xs text-brand-500">
+          <h3 className="font-bold text-sm uppercase tracking-wider text-slate-700">{title}</h3>
+          <div className="flex items-center gap-4 text-xs text-slate-500">
             <span>{totalResponses} respostas</span>
             <span>·</span>
             <span>{uniqueDays} dias</span>
@@ -385,7 +385,7 @@ export function AttendanceHeatmap({ data = [], title = 'Calendário de Atendimen
               {monthLabels.map((label, i) => (
                 <div 
                   key={i} 
-                  className="text-[10px] text-brand-400"
+                  className="text-[10px] text-slate-500"
                   style={{ marginLeft: i === 0 ? `${label.position * 14}px` : `${(label.position - (monthLabels[i-1]?.position || 0)) * 14}px` }}
                 >
                   {label.month}
@@ -399,7 +399,7 @@ export function AttendanceHeatmap({ data = [], title = 'Calendário de Atendimen
                 {daysOfWeek.map((day, i) => (
                   <div 
                     key={i} 
-                    className="h-[12px] text-[10px] text-brand-400 flex items-center"
+                    className="h-[12px] text-[10px] text-slate-500 flex items-center"
                     style={{ visibility: i === 0 || i === 6 ? 'hidden' : 'visible' }}
                   >
                     {day}
@@ -414,7 +414,7 @@ export function AttendanceHeatmap({ data = [], title = 'Calendário de Atendimen
                     {week.map((day, dayIndex) => (
                       <div
                         key={`${weekIndex}-${dayIndex}`}
-                        className="w-[12px] h-[12px] rounded-sm cursor-pointer transition-all hover:ring-2 hover:ring-brand-400"
+                        className="w-[12px] h-[12px] rounded-sm cursor-pointer transition-all hover:ring-2 hover:ring-emerald-400"
                         style={{ backgroundColor: getColor(day.count) }}
                         title={`${day.date.toLocaleDateString('pt-BR')}: ${day.count > 0 ? `${day.count} resposta(s)` : 'Sem atendimento'}`}
                       />
@@ -425,21 +425,21 @@ export function AttendanceHeatmap({ data = [], title = 'Calendário de Atendimen
             </div>
             
             {/* Legend */}
-            <div className="flex items-center justify-end gap-2 mt-4 text-[10px] text-brand-400">
+            <div className="flex items-center justify-end gap-2 mt-4 text-[10px] text-slate-500">
               <span>Menos</span>
               <div className="flex gap-[2px]">
-                <div className="w-[12px] h-[12px] rounded-sm" style={{ backgroundColor: '#ebedf0' }} />
-                <div className="w-[12px] h-[12px] rounded-sm" style={{ backgroundColor: '#9be9a8' }} />
-                <div className="w-[12px] h-[12px] rounded-sm" style={{ backgroundColor: '#40c463' }} />
-                <div className="w-[12px] h-[12px] rounded-sm" style={{ backgroundColor: '#30a14e' }} />
-                <div className="w-[12px] h-[12px] rounded-sm" style={{ backgroundColor: '#216e39' }} />
+                <div className="w-[12px] h-[12px] rounded-sm" style={{ backgroundColor: '#e5e7eb' }} />
+                <div className="w-[12px] h-[12px] rounded-sm" style={{ backgroundColor: '#a7f3d0' }} />
+                <div className="w-[12px] h-[12px] rounded-sm" style={{ backgroundColor: '#6ee7b7' }} />
+                <div className="w-[12px] h-[12px] rounded-sm" style={{ backgroundColor: '#34d399' }} />
+                <div className="w-[12px] h-[12px] rounded-sm" style={{ backgroundColor: '#10b981' }} />
               </div>
               <span>Mais</span>
             </div>
           </div>
         </div>
         
-        <div className="mt-4 pt-4 border-t border-brand-100 flex items-center justify-between text-xs text-brand-500">
+        <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
           <span>Último atendimento: {lastResponse}</span>
           <span>Período: {sixMonthsAgo.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })} - {today.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })}</span>
         </div>

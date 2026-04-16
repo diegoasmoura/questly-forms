@@ -74,7 +74,7 @@ export default function Library() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Biblioteca Clínica</h1>
+          <h1 className="text-2xl font-semibold text-slate-800">Biblioteca Clínica</h1>
           <p className="text-sm text-slate-500">Explore e utilize modelos validados por especialistas.</p>
         </div>
       </div>
@@ -91,17 +91,17 @@ export default function Library() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
           <button
             onClick={() => handleViewMode("grid")}
-            className={`p-2 rounded-md transition-all ${viewMode === "grid" ? "bg-slate-900 text-white" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"}`}
+            className={`p-2 rounded-md transition-all ${viewMode === "grid" ? "bg-emerald-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
             title="Visualização em cards"
           >
             <LayoutGrid size={18} />
           </button>
           <button
             onClick={() => handleViewMode("list")}
-            className={`p-2 rounded-md transition-all ${viewMode === "list" ? "bg-slate-900 text-white" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"}`}
+            className={`p-2 rounded-md transition-all ${viewMode === "list" ? "bg-emerald-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
             title="Visualização em lista"
           >
             <List size={18} />
@@ -116,19 +116,19 @@ export default function Library() {
             {filteredTemplates.map((template) => (
               <div 
                 key={template.id} 
-                className="card group hover:shadow-lg hover:-translate-y-1 transition-all duration-200 flex flex-col bg-white overflow-hidden border-slate-200"
+                className="card group hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col overflow-hidden"
               >
                 <div className="p-6 flex-1">
                   <div className="flex items-start justify-between mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center text-brand-700 group-hover:bg-brand-700 group-hover:text-white transition-colors duration-200">
+                    <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-200">
                       <BookTemplate size={24} />
                     </div>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-700 bg-brand-50 px-2 py-1 rounded-md">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">
                       Premium
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2 group-hover:text-brand-700 transition-colors">
+                  <h3 className="text-lg font-semibold text-slate-700 mb-2 group-hover:text-emerald-600 transition-colors">
                     {template.title}
                   </h3>
                   <p className="text-sm text-slate-500 leading-relaxed line-clamp-3">
@@ -174,9 +174,9 @@ export default function Library() {
             ))}
 
             {/* Suggestion Card */}
-            <div className="card border-dashed border-2 border-slate-300 bg-transparent flex flex-col justify-center items-center p-8 text-center opacity-70 hover:opacity-100 transition-opacity min-h-[200px]">
-              <CheckCircle2 size={32} className="text-slate-300 mb-4" />
-              <h3 className="font-semibold text-slate-700">Precisa de outro modelo?</h3>
+            <div className="card border-dashed border-2 border-slate-200 bg-slate-50 flex flex-col justify-center items-center p-8 text-center opacity-70 hover:opacity-100 transition-opacity min-h-[200px]">
+              <CheckCircle2 size={32} className="text-slate-400 mb-4" />
+              <h3 className="font-semibold text-slate-600">Precisa de outro modelo?</h3>
               <p className="text-xs text-slate-400 mt-2">
                 Estamos sempre adicionando novos protocolos.
               </p>
@@ -211,7 +211,7 @@ export default function Library() {
 function LibraryListRow({ template, importing, previewing, onImport, onPreview }) {
   return (
     <div className="card p-4 flex items-center gap-4 hover:border-slate-300 transition-all">
-      <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-brand-50 text-brand-700">
+      <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-emerald-50 text-emerald-700">
         <BookTemplate size={20} />
       </div>
       

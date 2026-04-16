@@ -36,10 +36,10 @@ export default function ShareLink() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-brand-50 flex items-center justify-center">
+      <div className="min-h-screen bg-emerald-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="animate-spin text-brand-400" size={32} />
-          <p className="text-sm text-brand-500">Carregando formulário...</p>
+          <Loader2 className="animate-spin text-slate-500" size={32} />
+          <p className="text-sm text-slate-600">Carregando formulário...</p>
         </div>
       </div>
     );
@@ -47,11 +47,11 @@ export default function ShareLink() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-brand-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-emerald-50 flex items-center justify-center px-4">
         <div className="card max-w-md w-full p-8 text-center">
           <AlertCircle size={48} className="mx-auto text-red-400 mb-4" />
-          <h1 className="text-xl font-semibold text-brand-950 mb-2">Formulário Indisponível</h1>
-          <p className="text-brand-500 mb-6">{error}</p>
+          <h1 className="text-xl font-semibold text-slate-900 mb-2">Formulário Indisponível</h1>
+          <p className="text-slate-600 mb-6">{error}</p>
           <button onClick={() => window.history.back()} className="btn btn-primary">
             Voltar
           </button>
@@ -62,16 +62,16 @@ export default function ShareLink() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-brand-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-emerald-50 flex items-center justify-center px-4">
         <div className="card max-w-md w-full p-8 text-center animate-fade-in">
           <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6">
             <Check size={32} className="text-emerald-600" />
           </div>
-          <h1 className="text-2xl font-semibold text-brand-950 mb-2">Obrigado!</h1>
-          <p className="text-brand-500 mb-6">
+          <h1 className="text-2xl font-semibold text-slate-900 mb-2">Obrigado!</h1>
+          <p className="text-slate-600 mb-6">
             Suas respostas foram enviadas com sucesso.
           </p>
-          <div className="text-sm text-brand-400">
+          <div className="text-sm text-slate-500">
             Você pode fechar esta janela.
           </div>
         </div>
@@ -82,22 +82,22 @@ export default function ShareLink() {
   if (!form) return null;
 
   return (
-    <div className="min-h-screen bg-brand-50">
-      <header className="bg-white border-b border-brand-100">
+    <div className="min-h-screen bg-emerald-50">
+      <header className="bg-white border-b border-emerald-100">
         <div className="max-w-3xl mx-auto px-4 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-brand-950 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-emerald-900 flex items-center justify-center">
               <svg width="16" height="16" viewBox="0 0 140 31" fill="white">
                 <path d="M64.062 26.378v3.771H77.96v-3.771h-4.386V9.652h-9.1v3.73h4.303v12.996h-4.714Z" />
               </svg>
             </div>
-            <span className="text-sm font-medium text-brand-950">Curious</span>
+            <span className="text-sm font-medium text-slate-900">Curious</span>
           </div>
         </div>
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-semibold text-brand-950 mb-6">{form.title}</h1>
+        <h1 className="text-2xl font-semibold text-slate-900 mb-6">{form.title}</h1>
         <div className="card p-6">
           <Survey
             ref={surveyRef}

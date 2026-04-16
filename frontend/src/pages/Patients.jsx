@@ -163,7 +163,7 @@ export default function Patients() {
     <div className="p-6 h-full flex flex-col overflow-hidden animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Pacientes</h1>
+          <h1 className="text-2xl font-semibold text-slate-800">Pacientes</h1>
           <p className="text-sm text-slate-500">Gerencie seus pacientes e seus históricos clínicos.</p>
         </div>
         <button onClick={() => setShowAddModal(true)} className="btn btn-primary px-4">
@@ -184,17 +184,17 @@ export default function Patients() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
           <button
             onClick={() => handleViewMode("grid")}
-            className={`p-2 rounded-md transition-all ${viewMode === "grid" ? "bg-slate-900 text-white" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"}`}
+            className={`p-2 rounded-md transition-all ${viewMode === "grid" ? "bg-emerald-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
             title="Visualização em cards"
           >
             <LayoutGrid size={18} />
           </button>
           <button
             onClick={() => handleViewMode("list")}
-            className={`p-2 rounded-md transition-all ${viewMode === "list" ? "bg-slate-900 text-white" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"}`}
+            className={`p-2 rounded-md transition-all ${viewMode === "list" ? "bg-emerald-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
             title="Visualização em lista"
           >
             <List size={18} />
@@ -202,35 +202,35 @@ export default function Patients() {
         </div>
       </div>
 
-      {/* Patients List */}
+      {/* patients List */}
       <div className="flex-1 overflow-y-auto">
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="card p-6 animate-pulse">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-brand-100" />
+                  <div className="w-12 h-12 rounded-full bg-slate-200" />
                   <div className="flex-1">
-                    <div className="h-4 bg-brand-200 rounded w-3/4 mb-2" />
-                    <div className="h-3 bg-brand-100 rounded w-1/2" />
+                    <div className="h-4 bg-slate-200 rounded w-3/4 mb-2" />
+                    <div className="h-3 bg-slate-100 rounded w-1/2" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="h-3 bg-brand-50 rounded w-full" />
-                  <div className="h-3 bg-brand-50 rounded w-full" />
+                  <div className="h-3 bg-slate-100 rounded w-full" />
+                  <div className="h-3 bg-slate-100 rounded w-full" />
                 </div>
               </div>
             ))}
           </div>
         ) : filteredPatients.length === 0 ? (
-          <div className="card p-20 text-center border-dashed border-2">
-            <div className="w-20 h-20 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Users size={40} className="text-brand-200" />
+          <div className="card p-20 text-center border-dashed border-2 border-slate-200">
+            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Users size={40} className="text-slate-400" />
             </div>
-            <h3 className="text-xl font-semibold text-brand-950 mb-2">
+            <h3 className="text-xl font-semibold text-slate-700 mb-2">
               {searchQuery ? "Nenhum paciente encontrado" : "Nenhum paciente cadastrado"}
             </h3>
-            <p className="text-brand-500 mb-8 max-w-sm mx-auto">
+            <p className="text-slate-500 mb-8 max-w-sm mx-auto">
               {searchQuery ? "Tente um termo de busca diferente" : "Comece cadastrando seu primeiro paciente para acompanhar sua evolução clínica."}
             </p>
             {!searchQuery && (
@@ -267,14 +267,14 @@ export default function Patients() {
 
       {/* Add Patient Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-950/20 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
           <div className="card w-full max-w-3xl p-8 animate-scale-in max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-8 bg-white pb-4 border-b border-brand-50">
+            <div className="flex items-center justify-between mb-8 bg-white/50 pb-4 border-b border-amber-100/50">
               <div>
-                <h2 className="text-2xl font-bold text-brand-950">Novo Cadastro de Paciente</h2>
-                <p className="text-sm text-brand-500 mt-1">Preencha os dados clínicos para o prontuário.</p>
+                <h2 className="text-2xl font-bold text-slate-800">Novo Cadastro de Paciente</h2>
+                <p className="text-sm text-amber-600/80 mt-1">Preencha os dados clínicos para o prontuário.</p>
               </div>
-              <button onClick={() => setShowAddModal(false)} className="p-2 rounded-xl hover:bg-brand-50 text-brand-400 hover:text-brand-950 transition-all">
+              <button onClick={() => setShowAddModal(false)} className="p-2 rounded-xl hover:bg-amber-100/50 text-amber-500 hover:text-amber-700 transition-all">
                 <Plus size={28} className="rotate-45" />
               </button>
             </div>
@@ -282,13 +282,13 @@ export default function Patients() {
             <form onSubmit={handleAddPatient} className="space-y-8">
               {/* Section: Identificação */}
               <section>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-amber-600/70 mb-6 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-600" />
                   Identificação do Paciente
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Nome Completo *</label>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">Nome Completo *</label>
                     <input
                       type="text"
                       required
@@ -299,7 +299,7 @@ export default function Patients() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">CPF</label>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">CPF</label>
                     <input
                       type="text"
                       className="input"
@@ -310,7 +310,7 @@ export default function Patients() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">RG</label>
+                    <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">RG</label>
                     <input
                       type="text"
                       className="input"
@@ -320,7 +320,7 @@ export default function Patients() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Data de Nascimento</label>
+                    <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Data de Nascimento</label>
                     <input
                       type="date"
                       className="input"
@@ -329,7 +329,7 @@ export default function Patients() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Gênero / Identidade</label>
+                    <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Gênero / Identidade</label>
                     <select
                       className="input"
                       value={newPatient.gender}
@@ -343,7 +343,7 @@ export default function Patients() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Estado Civil</label>
+                    <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Estado Civil</label>
                     <select
                       className="input"
                       value={newPatient.maritalStatus}
@@ -358,7 +358,7 @@ export default function Patients() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Profissão / Ocupação</label>
+                    <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Profissão / Ocupação</label>
                     <input
                       type="text"
                       className="input"
@@ -372,13 +372,13 @@ export default function Patients() {
 
               {/* Section: Contato */}
               <section>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-800" />
                   Informações de Contato
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">E-mail</label>
+                    <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">E-mail</label>
                     <input
                       type="email"
                       className="input"
@@ -388,7 +388,7 @@ export default function Patients() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Telefone / WhatsApp</label>
+                    <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Telefone / WhatsApp</label>
                     <input
                       type="tel"
                       className="input"
@@ -403,13 +403,13 @@ export default function Patients() {
 
               {/* Section: Endereço */}
               <section>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-800" />
                   Localização / Endereço
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">CEP</label>
+                    <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">CEP</label>
                     <input
                       type="text"
                       className="input"
@@ -422,7 +422,7 @@ export default function Patients() {
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Logradouro (Rua/Av)</label>
+                    <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Logradouro (Rua/Av)</label>
                     <input
                       type="text"
                       className="input"
@@ -431,7 +431,7 @@ export default function Patients() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Número</label>
+                    <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Número</label>
                     <input
                       type="text"
                       className="input"
@@ -440,7 +440,7 @@ export default function Patients() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Bairro</label>
+                    <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Bairro</label>
                     <input
                       type="text"
                       className="input"
@@ -449,7 +449,7 @@ export default function Patients() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Cidade / UF</label>
+                    <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Cidade / UF</label>
                     <div className="flex gap-2">
                       <input
                         type="text"
@@ -471,13 +471,13 @@ export default function Patients() {
 
               {/* Section: Emergência */}
               <section>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-800" />
                   Contato de Emergência
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Nome do Contato</label>
+                    <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Nome do Contato</label>
                     <input
                       type="text"
                       className="input"
@@ -487,7 +487,7 @@ export default function Patients() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Telefone de Emergência</label>
+                    <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Telefone de Emergência</label>
                     <input
                       type="tel"
                       className="input"
@@ -501,8 +501,8 @@ export default function Patients() {
               </section>
 
               <section>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-800" />
                   Observações Gerais
                 </h3>
                 <textarea
@@ -513,14 +513,14 @@ export default function Patients() {
                 />
               </section>
 
-              <div className="flex gap-4 pt-8 bg-white pb-4 border-t border-brand-50">
+              <div className="flex gap-4 pt-8 bg-white pb-4 border-t border-emerald-50">
                 <button type="button" onClick={() => setShowAddModal(false)} className="btn btn-secondary flex-1 py-4 font-bold">
                   Cancelar
                 </button>
                 <button 
                   type="submit" 
                   disabled={saving}
-                  className="btn btn-primary flex-1 py-4 font-bold shadow-xl shadow-brand-950/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn btn-primary flex-1 py-4 font-bold shadow-xl shadow-emerald-800/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? (
                     <div className="flex items-center justify-center gap-2">
@@ -607,14 +607,14 @@ function EditPatientModal({ patient, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-950/20 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-800/20 backdrop-blur-sm">
       <div className="card w-full max-w-3xl p-8 animate-scale-in max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-8 bg-white pb-4 border-b border-brand-50">
+        <div className="flex items-center justify-between mb-8 bg-white pb-4 border-b border-emerald-50">
           <div>
-            <h2 className="text-2xl font-bold text-brand-950">Editar Cadastro de Paciente</h2>
-            <p className="text-sm text-brand-500 mt-1">Atualize os dados clínicos do prontuário.</p>
+            <h2 className="text-2xl font-bold text-slate-800">Editar Cadastro de Paciente</h2>
+            <p className="text-sm text-slate-600 mt-1">Atualize os dados clínicos do prontuário.</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-brand-50 text-brand-400 hover:text-brand-950 transition-all">
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-emerald-50 text-slate-500 hover:text-slate-800 transition-all">
             <Plus size={28} className="rotate-45" />
           </button>
         </div>
@@ -622,29 +622,29 @@ function EditPatientModal({ patient, onClose, onSave }) {
         <form onSubmit={handleSave} className="space-y-8">
           {/* Section: Identificação */}
           <section>
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-800" />
               Identificação do Paciente
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Nome Completo *</label>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Nome Completo *</label>
                 <input type="text" required className="input" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Nome social ou completo" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">CPF</label>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">CPF</label>
                 <input type="text" className="input" value={formData.cpf} onChange={e => setFormData({ ...formData, cpf: formatCPF(e.target.value) })} placeholder="000.000.000-00" maxLength={14} />
               </div>
               <div>
-                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">RG</label>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">RG</label>
                 <input type="text" className="input" value={formData.rg} onChange={e => setFormData({ ...formData, rg: e.target.value })} placeholder="Órgão Emissor" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Data de Nascimento</label>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Data de Nascimento</label>
                 <input type="date" className="input" value={formData.birthDate} onChange={e => setFormData({ ...formData, birthDate: e.target.value })} />
               </div>
               <div>
-                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Gênero / Identidade</label>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Gênero / Identidade</label>
                 <select className="input" value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })}>
                   <option value="">Selecionar...</option>
                   <option value="Masculino">Masculino</option>
@@ -654,7 +654,7 @@ function EditPatientModal({ patient, onClose, onSave }) {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Estado Civil</label>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Estado Civil</label>
                 <select className="input" value={formData.maritalStatus} onChange={e => setFormData({ ...formData, maritalStatus: e.target.value })}>
                   <option value="">Selecionar...</option>
                   <option value="Solteiro(a)">Solteiro(a)</option>
@@ -665,7 +665,7 @@ function EditPatientModal({ patient, onClose, onSave }) {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Profissão / Ocupação</label>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Profissão / Ocupação</label>
                 <input type="text" className="input" value={formData.profession} onChange={e => setFormData({ ...formData, profession: e.target.value })} placeholder="Cargo ou área" />
               </div>
             </div>
@@ -673,17 +673,17 @@ function EditPatientModal({ patient, onClose, onSave }) {
 
           {/* Section: Contato */}
           <section>
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-800" />
               Informações de Contato
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">E-mail</label>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">E-mail</label>
                 <input type="email" className="input" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="email@exemplo.com" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Telefone / WhatsApp</label>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Telefone / WhatsApp</label>
                 <input type="tel" className="input" value={formData.phone} onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
               </div>
             </div>
@@ -691,29 +691,29 @@ function EditPatientModal({ patient, onClose, onSave }) {
 
           {/* Section: Endereço */}
           <section>
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-800" />
               Localização / Endereço
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">CEP</label>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">CEP</label>
                 <input type="text" className="input" value={formData.cep} onChange={e => setFormData({ ...formData, cep: e.target.value })} placeholder="00000-000" />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Logradouro (Rua/Av)</label>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Logradouro (Rua/Av)</label>
                 <input type="text" className="input" value={formData.street} onChange={e => setFormData({ ...formData, street: e.target.value })} />
               </div>
               <div>
-                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Número</label>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Número</label>
                 <input type="text" className="input" value={formData.number} onChange={e => setFormData({ ...formData, number: e.target.value })} />
               </div>
               <div>
-                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Bairro</label>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Bairro</label>
                 <input type="text" className="input" value={formData.neighborhood} onChange={e => setFormData({ ...formData, neighborhood: e.target.value })} />
               </div>
               <div>
-                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Cidade / UF</label>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Cidade / UF</label>
                 <div className="flex gap-2">
                   <input type="text" className="input flex-1" value={formData.city} onChange={e => setFormData({ ...formData, city: e.target.value })} />
                   <input type="text" className="input w-16" value={formData.state} onChange={e => setFormData({ ...formData, state: e.target.value })} maxLength={2} />
@@ -724,17 +724,17 @@ function EditPatientModal({ patient, onClose, onSave }) {
 
           {/* Section: Emergência */}
           <section>
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-800" />
               Contato de Emergência
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Nome do Contato</label>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Nome do Contato</label>
                 <input type="text" className="input" value={formData.emergencyName} onChange={e => setFormData({ ...formData, emergencyName: e.target.value })} placeholder="Parente, amigo, etc." />
               </div>
               <div>
-                <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">Telefone de Emergência</label>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-widest mb-2">Telefone de Emergência</label>
                 <input type="tel" className="input" value={formData.emergencyPhone} onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
               </div>
             </div>
@@ -742,8 +742,8 @@ function EditPatientModal({ patient, onClose, onSave }) {
 
           {/* Section: Observações */}
           <section>
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-brand-400 mb-6 flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-brand-950" />
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-800" />
               Observações Gerais
             </h3>
             <textarea
@@ -754,14 +754,14 @@ function EditPatientModal({ patient, onClose, onSave }) {
             />
           </section>
 
-          <div className="flex gap-4 pt-8 bg-white pb-4 border-t border-brand-50">
+          <div className="flex gap-4 pt-8 bg-white pb-4 border-t border-emerald-50">
             <button type="button" onClick={onClose} className="btn btn-secondary flex-1 py-4 font-bold">
               Cancelar
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="btn btn-primary flex-1 py-4 font-bold shadow-xl shadow-brand-950/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn btn-primary flex-1 py-4 font-bold shadow-xl shadow-emerald-800/20 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? (
                 <div className="flex items-center justify-center gap-2">
@@ -784,7 +784,7 @@ function PatientCard({ patient, onDelete, onEdit }) {
   const shareLinkCount = patient._count?.shareLinks || 0;
 
   return (
-    <div className="card group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full bg-white overflow-hidden border-brand-100/50">
+    <div className="card group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full bg-white overflow-hidden border-emerald-100/50">
       <div className="p-6 flex-1">
         <div className="flex items-start justify-between mb-6">
           <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-lg group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
@@ -793,7 +793,7 @@ function PatientCard({ patient, onDelete, onEdit }) {
           <div className="relative">
             <button
               onClick={() => onDelete(patient.id)}
-              className="p-2 rounded-xl text-brand-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+              className="p-2 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors"
               title="Excluir"
             >
               <Trash2 size={18} />
@@ -802,44 +802,44 @@ function PatientCard({ patient, onDelete, onEdit }) {
         </div>
 
         <Link to={`/patients/${patient.id}`} className="block mb-2 group/title" title={patient.name}>
-          <h3 className="text-xl font-bold text-brand-950 group-hover:text-brand-800 transition-colors truncate">
+          <h3 className="text-xl font-bold text-slate-800 group-hover:text-slate-800 transition-colors truncate">
             {patient.name}
           </h3>
           {patient.birthDate && (
-            <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mt-1">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">
               {new Date(patient.birthDate).toLocaleDateString('pt-BR')}
             </p>
           )}
         </Link>
 
-        <div className="mt-6 space-y-2 text-xs text-brand-500">
+        <div className="mt-6 space-y-2 text-xs text-slate-600">
           {patient.email && (
             <div className="flex items-center gap-2">
-              <Mail size={12} className="shrink-0 text-brand-300" />
+              <Mail size={12} className="shrink-0 text-emerald-400" />
               <span className="truncate">{patient.email}</span>
             </div>
           )}
           {patient.phone && (
             <div className="flex items-center gap-2">
-              <Phone size={12} className="shrink-0 text-brand-300" />
+              <Phone size={12} className="shrink-0 text-emerald-400" />
               <span>{patient.phone}</span>
             </div>
           )}
         </div>
 
-        <div className="flex items-center gap-6 mt-6 pt-6 border-t border-brand-50">
+        <div className="flex items-center gap-6 mt-6 pt-6 border-t border-emerald-50">
           <div className="flex flex-col">
-            <span className="text-lg font-black text-brand-950 leading-none">{responseCount}</span>
-            <span className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mt-1">Respostas</span>
+            <span className="text-lg font-black text-slate-800 leading-none">{responseCount}</span>
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Respostas</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg font-black text-brand-950 leading-none">{shareLinkCount}</span>
-            <span className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mt-1">Links</span>
+            <span className="text-lg font-black text-slate-800 leading-none">{shareLinkCount}</span>
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Links</span>
           </div>
         </div>
       </div>
 
-      <div className="p-4 bg-brand-50/50 border-t border-brand-50 flex items-center justify-between gap-2">
+      <div className="p-4 bg-emerald-50/50 border-t border-emerald-50 flex items-center justify-between gap-2">
         <Link
           to={`/patients/${patient.id}`}
           className="btn btn-secondary text-xs flex-1"
@@ -864,16 +864,16 @@ function PatientListRow({ patient, onDelete, onEdit }) {
   const shareLinkCount = patient._count?.shareLinks || 0;
 
   return (
-    <div className="card p-4 flex items-center gap-4 hover:border-brand-200 transition-all">
+    <div className="card p-4 flex items-center gap-4 hover:border-emerald-200 transition-all">
       <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-lg shrink-0">
         {patient.name.charAt(0).toUpperCase()}
       </div>
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-3 mb-1">
-          <h4 className="font-bold text-brand-950 truncate">{patient.name}</h4>
+          <h4 className="font-bold text-slate-800 truncate">{patient.name}</h4>
           {patient.birthDate && (
-            <span className="text-xs text-brand-400">
+            <span className="text-xs text-slate-500">
               ({(() => {
                 const today = new Date();
                 const birth = new Date(patient.birthDate);
@@ -889,13 +889,13 @@ function PatientListRow({ patient, onDelete, onEdit }) {
         </div>
         <div className="flex items-center gap-4">
           {patient.email && (
-            <div className="flex items-center gap-1 text-xs text-brand-500">
+            <div className="flex items-center gap-1 text-xs text-slate-600">
               <Mail size={12} className="shrink-0" />
               <span className="truncate">{patient.email}</span>
             </div>
           )}
           {patient.phone && (
-            <div className="flex items-center gap-1 text-xs text-brand-500">
+            <div className="flex items-center gap-1 text-xs text-slate-600">
               <Phone size={12} className="shrink-0" />
               <span>{patient.phone}</span>
             </div>
@@ -905,12 +905,12 @@ function PatientListRow({ patient, onDelete, onEdit }) {
 
       <div className="flex items-center gap-6 shrink-0">
         <div className="flex flex-col items-center">
-          <span className="text-lg font-black text-brand-950">{responseCount}</span>
-          <span className="text-[10px] font-bold text-brand-400 uppercase">Respostas</span>
+          <span className="text-lg font-black text-slate-800">{responseCount}</span>
+          <span className="text-[10px] font-bold text-slate-500 uppercase">Respostas</span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-lg font-black text-brand-950">{shareLinkCount}</span>
-          <span className="text-[10px] font-bold text-brand-400 uppercase">Links</span>
+          <span className="text-lg font-black text-slate-800">{shareLinkCount}</span>
+          <span className="text-[10px] font-bold text-slate-500 uppercase">Links</span>
         </div>
       </div>
 

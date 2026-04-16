@@ -127,7 +127,7 @@ export default function MyForms() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Meus Formulários</h1>
+          <h1 className="text-2xl font-semibold text-slate-800">Meus Formulários</h1>
           <p className="text-sm text-slate-500">Gerencie seus modelos personalizados.</p>
         </div>
         <div className="flex items-center gap-2">
@@ -154,17 +154,17 @@ export default function MyForms() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
           <button
             onClick={() => handleViewMode("grid")}
-            className={`p-2 rounded-md transition-all ${viewMode === "grid" ? "bg-slate-900 text-white" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"}`}
+            className={`p-2 rounded-md transition-all ${viewMode === "grid" ? "bg-emerald-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
             title="Visualização em cards"
           >
             <LayoutGrid size={18} />
           </button>
           <button
             onClick={() => handleViewMode("list")}
-            className={`p-2 rounded-md transition-all ${viewMode === "list" ? "bg-slate-900 text-white" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"}`}
+            className={`p-2 rounded-md transition-all ${viewMode === "list" ? "bg-emerald-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
             title="Visualização em lista"
           >
             <List size={18} />
@@ -179,11 +179,11 @@ export default function MyForms() {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="card p-6 animate-pulse">
-                  <div className="h-12 w-12 bg-brand-100 rounded-2xl mb-6" />
-                  <div className="h-6 bg-brand-200 rounded w-3/4 mb-2" />
-                  <div className="h-4 bg-brand-100 rounded w-1/2 mb-6" />
-                  <div className="h-16 bg-brand-50 rounded-xl border border-dashed border-brand-100" />
-                  <div className="flex gap-6 mt-6 pt-6 border-t border-brand-50">
+                  <div className="h-12 w-12 bg-slate-200 rounded-2xl mb-6" />
+                  <div className="h-6 bg-slate-200 rounded w-3/4 mb-2" />
+                  <div className="h-4 bg-slate-100 rounded w-1/2 mb-6" />
+                  <div className="h-16 bg-slate-50 rounded-xl border border-dashed border-slate-200" />
+                  <div className="flex gap-6 mt-6 pt-6 border-t border-slate-100">
                     <div className="h-8 w-12" />
                     <div className="h-8 w-12" />
                   </div>
@@ -195,10 +195,10 @@ export default function MyForms() {
               {[1, 2, 3].map((i) => (
                 <div key={i} className="card p-4 animate-pulse">
                   <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 bg-brand-100 rounded-xl" />
+                    <div className="h-10 w-10 bg-emerald-50 rounded-xl" />
                     <div className="flex-1">
-                      <div className="h-5 bg-brand-200 rounded w-1/3 mb-2" />
-                      <div className="h-4 bg-brand-100 rounded w-1/4" />
+                      <div className="h-5 bg-emerald-100 rounded w-1/3 mb-2" />
+                      <div className="h-4 bg-emerald-50 rounded w-1/4" />
                     </div>
                   </div>
                 </div>
@@ -206,12 +206,12 @@ export default function MyForms() {
           </div>
         )
       ) : filteredForms.length === 0 ? (
-        <div className="card p-20 text-center border-dashed border-2">
-          <FileText size={48} className="mx-auto text-brand-200 mb-6" />
-          <h3 className="text-xl font-semibold text-brand-950 mb-2">
+        <div className="card p-20 text-center border-dashed border-2 border-slate-200">
+          <FileText size={48} className="mx-auto text-slate-300 mb-6" />
+          <h3 className="text-xl font-semibold text-slate-700 mb-2">
             {searchQuery ? "Nenhum formulário encontrado" : "Nenhum formulário criado"}
           </h3>
-          <p className="text-brand-500 mb-8 max-w-sm mx-auto">
+          <p className="text-slate-500 mb-8 max-w-sm mx-auto">
             {searchQuery ? "Tente um termo de busca diferente" : "Comece criando seu primeiro formulário clínico personalizado."}
           </p>
           {!searchQuery && (
@@ -262,14 +262,14 @@ export default function MyForms() {
 
       {/* Share Modal - Reuse existing logic */}
       {showShareModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-950/20 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-900/20 backdrop-blur-sm">
           <div className="card w-full max-w-2xl p-6 animate-scale-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-xl font-semibold text-brand-950">Links de Envio</h2>
-                <p className="text-xs text-brand-500 mt-1">{selectedForm?.title}</p>
+                <h2 className="text-xl font-semibold text-slate-900">Links de Envio</h2>
+                <p className="text-xs text-emerald-600 mt-1">{selectedForm?.title}</p>
               </div>
-              <button onClick={() => setShowShareModal(false)} className="text-brand-400 hover:text-brand-600">
+              <button onClick={() => setShowShareModal(false)} className="text-slate-400 hover:text-emerald-600">
                 <Plus size={24} className="rotate-45" />
               </button>
             </div>
@@ -277,7 +277,7 @@ export default function MyForms() {
             {/* Existing Links */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-bold text-brand-950 uppercase tracking-wider">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
                   Links Existentes ({existingLinks.length})
                 </h3>
                 <button
@@ -290,15 +290,15 @@ export default function MyForms() {
               </div>
 
               {loadingLinks ? (
-                <div className="text-center py-8 text-brand-400">
-                  <div className="animate-spin w-6 h-6 border-2 border-brand-950 border-t-transparent rounded-full mx-auto mb-2" />
+                <div className="text-center py-8 text-slate-400">
+                  <div className="animate-spin w-6 h-6 border-2 border-emerald-900 border-t-transparent rounded-full mx-auto mb-2" />
                   <p className="text-xs">Carregando links...</p>
                 </div>
               ) : existingLinks.length === 0 ? (
-                <div className="text-center py-8 bg-brand-50 rounded-lg border border-brand-100">
-                  <Share2 size={32} className="mx-auto text-brand-300 mb-2" />
-                  <p className="text-sm text-brand-500">Nenhum link criado ainda</p>
-                  <p className="text-xs text-brand-400 mt-1">Clique em "Novo Link" para começar</p>
+                <div className="text-center py-8 bg-emerald-50 rounded-lg border border-emerald-100">
+                  <Share2 size={32} className="mx-auto text-emerald-300 mb-2" />
+                  <p className="text-sm text-emerald-600">Nenhum link criado ainda</p>
+                  <p className="text-xs text-slate-400 mt-1">Clique em "Novo Link" para começar</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -307,26 +307,26 @@ export default function MyForms() {
                     const isActive = link.active && (!link.expiresAt || new Date(link.expiresAt) > new Date());
                     
                     return (
-                      <div key={link.id} className={`p-4 rounded-lg border transition-all ${isActive ? 'bg-white border-brand-100 hover:border-brand-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+                      <div key={link.id} className={`p-4 rounded-lg border transition-all ${isActive ? 'bg-white border-emerald-100 hover:border-emerald-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
                         <div className="flex items-start justify-between gap-3 mb-3">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-gray-400'}`} />
-                              <span className="text-xs font-medium text-brand-950">
+                              <span className="text-xs font-medium text-slate-900">
                                 {isActive ? "Ativo" : "Inativo"}
                               </span>
                               {link.patient && (
-                                <span className="text-[10px] px-2 py-0.5 bg-brand-100 text-brand-700 rounded-full font-medium">
+                                <span className="text-[10px] px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full font-medium">
                                   {link.patient.name}
                                 </span>
                               )}
                               {link.expiresAt && (
-                                <span className="text-[10px] text-brand-400 ml-auto">
+                                <span className="text-[10px] text-slate-400 ml-auto">
                                   Expira em {new Date(link.expiresAt).toLocaleDateString('pt-BR')}
                                 </span>
                               )}
                             </div>
-                            <p className="text-[10px] text-brand-400">
+                            <p className="text-[10px] text-slate-400">
                               Criado em {new Date(link.createdAt).toLocaleDateString('pt-BR')}
                             </p>
                           </div>
@@ -335,7 +335,7 @@ export default function MyForms() {
                         <div className="flex items-center gap-2">
                           <input
                             readOnly
-                            className="input flex-1 bg-brand-50 font-mono text-[10px] py-1.5"
+                            className="input flex-1 bg-emerald-50 font-mono text-[10px] py-1.5"
                             value={shareUrl}
                           />
                           <button
@@ -391,18 +391,18 @@ function FormListRow({ form, stats, onDelete, onDuplicate }) {
   const isTemplate = form.source === "template";
 
   return (
-    <div className="card p-4 flex items-center gap-4 hover:border-brand-200 transition-all">
-      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${isTemplate ? "bg-amber-50 text-amber-600" : "bg-brand-50 text-brand-950"}`}>
+    <div className="card p-4 flex items-center gap-4 hover:border-emerald-200 transition-all">
+      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${isTemplate ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-slate-900"}`}>
         {isTemplate ? <BookTemplate size={20} /> : <FileText size={20} />}
       </div>
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <h4 className="font-bold text-brand-950 truncate">{form.title}</h4>
+          <h4 className="font-bold text-slate-900 truncate">{form.title}</h4>
           {isTemplate && <span className="text-[10px] font-bold uppercase text-amber-500 bg-amber-50 px-2 py-0.5 rounded">Premium</span>}
         </div>
         <div className="flex items-center gap-3">
-          <p className="text-xs text-brand-400">
+          <p className="text-xs text-slate-400">
             Atualizado em {new Date(form.updatedAt).toLocaleDateString('pt-BR')}
           </p>
           {form.type && (
@@ -418,12 +418,12 @@ function FormListRow({ form, stats, onDelete, onDuplicate }) {
 
       <div className="flex items-center gap-6 shrink-0">
         <div className="flex flex-col items-center">
-          <span className="text-lg font-black text-brand-950">{stats?.responseCount || 0}</span>
-          <span className="text-[10px] font-bold text-brand-400 uppercase">Respostas</span>
+          <span className="text-lg font-black text-slate-900">{stats?.responseCount || 0}</span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase">Respostas</span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-lg font-black text-brand-950">{stats?.shareLinkCount || 0}</span>
-          <span className="text-[10px] font-bold text-brand-400 uppercase">Links</span>
+          <span className="text-lg font-black text-slate-900">{stats?.shareLinkCount || 0}</span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase">Links</span>
         </div>
       </div>
 
@@ -440,18 +440,18 @@ function FormListRow({ form, stats, onDelete, onDuplicate }) {
         <div className="relative">
           <button
             onClick={() => setShowOptions(!showOptions)}
-            className="p-2 rounded-lg text-brand-400 hover:text-brand-950 hover:bg-brand-50 transition-colors"
+            className="p-2 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-emerald-50 transition-colors"
           >
             <MoreVertical size={18} />
           </button>
           {showOptions && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShowOptions(false)} />
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-brand-100 rounded-xl shadow-lg z-20 py-2">
-                <button onClick={() => { onDuplicate(form.id); setShowOptions(false); }} className="w-full px-4 py-2 text-left text-sm font-medium text-brand-700 hover:bg-brand-50 flex items-center gap-3">
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-emerald-100 rounded-xl shadow-lg z-20 py-2">
+                <button onClick={() => { onDuplicate(form.id); setShowOptions(false); }} className="w-full px-4 py-2 text-left text-sm font-medium text-emerald-700 hover:bg-emerald-50 flex items-center gap-3">
                   <Copy size={16} /> Duplicar
                 </button>
-                <div className="my-1 border-t border-brand-50" />
+                <div className="my-1 border-t border-emerald-50" />
                 <button onClick={() => { onDelete(form.id); setShowOptions(false); }} className="w-full px-4 py-2 text-left text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-3">
                   <Trash2 size={16} /> Excluir
                 </button>
@@ -477,14 +477,14 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
   const isTemplate = form.source === "template";
 
   return (
-    <div className="card group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full bg-white overflow-hidden border-brand-100/50">
+    <div className="card group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full bg-white overflow-hidden border-emerald-100/50">
       <div className="p-6 flex-1">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors duration-300 ${
               isTemplate 
                 ? "bg-amber-50 text-amber-600 group-hover:bg-amber-500 group-hover:text-white" 
-                : "bg-brand-50 text-brand-950 group-hover:bg-brand-950 group-hover:text-white"
+                : "bg-emerald-50 text-slate-900 group-hover:bg-emerald-900 group-hover:text-white"
             }`}>
               {isTemplate ? <BookTemplate size={24} /> : <FileText size={24} />}
             </div>
@@ -497,7 +497,7 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
           <div className="relative">
             <button 
               onClick={() => setShowOptions(!showOptions)}
-              className="p-2 rounded-xl text-brand-400 hover:text-brand-950 hover:bg-brand-50 transition-colors"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-900 hover:bg-emerald-50 transition-colors"
             >
               <MoreVertical size={18} />
             </button>
@@ -508,15 +508,15 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
                   className="fixed inset-0 z-10" 
                   onClick={() => setShowOptions(false)}
                 />
-                <div className="absolute right-0 mt-2 w-48 bg-white border border-brand-100 rounded-2xl shadow-xl z-20 py-2 animate-scale-in">
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-emerald-100 rounded-2xl shadow-xl z-20 py-2 animate-scale-in">
                   <button 
                     onClick={() => { onDuplicate(form.id); setShowOptions(false); }}
-                    className="w-full px-4 py-2 text-left text-sm font-medium text-brand-700 hover:bg-brand-50 flex items-center gap-3 transition-colors"
+                    className="w-full px-4 py-2 text-left text-sm font-medium text-emerald-700 hover:bg-emerald-50 flex items-center gap-3 transition-colors"
                   >
                     <Copy size={16} />
                     Duplicar
                   </button>
-                  <div className="my-1 border-t border-brand-50" />
+                  <div className="my-1 border-t border-emerald-50" />
                   <button 
                     onClick={() => { onDelete(form.id); setShowOptions(false); }}
                     className="w-full px-4 py-2 text-left text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
@@ -531,10 +531,10 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
         </div>
 
         <Link to={`/forms/${form.id}/edit`} className="block mb-2 group/title" title={form.title}>
-          <h3 className="text-xl font-bold text-brand-950 group-hover:text-brand-800 transition-colors">
+          <h3 className="text-xl font-bold text-slate-900 group-hover:text-slate-800 transition-colors">
             {form.title}
           </h3>
-          <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mt-1">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
             Atualizado em {new Date(form.updatedAt).toLocaleDateString('pt-BR')}
           </p>
         </Link>
@@ -560,13 +560,13 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
             <ResponseTrendChart data={aggregateData} title="" height={64} />
           </div>
         ) : (
-          <div className="mt-6 h-16 flex items-center justify-center border border-dashed border-brand-100 rounded-xl bg-brand-50/30">
-            <p className="text-[10px] font-bold text-brand-300 uppercase tracking-tighter">Sem atividade recente</p>
+          <div className="mt-6 h-16 flex items-center justify-center border border-dashed border-emerald-100 rounded-xl bg-emerald-50/30">
+            <p className="text-[10px] font-bold text-emerald-300 uppercase tracking-tighter">Sem atividade recente</p>
           </div>
         )}
       </div>
 
-      <div className="p-4 bg-brand-50/50 border-t border-brand-50 flex items-center justify-between gap-2">
+      <div className="p-4 bg-emerald-50/50 border-t border-emerald-50 flex items-center justify-between gap-2">
         <Link 
           to={`/forms/${form.id}/preview`}
           className="btn btn-secondary text-xs flex-1"
@@ -716,21 +716,21 @@ function CreateFormModal({ onClose, onCreated }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-950/20 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-900/20 backdrop-blur-sm">
       <div className="card w-full max-w-xl p-8 animate-scale-in">
-        <div className="flex items-center justify-between mb-8 bg-white pb-4 border-b border-brand-50">
+        <div className="flex items-center justify-between mb-8 bg-white pb-4 border-b border-emerald-50">
           <div>
-            <h2 className="text-2xl font-bold text-brand-950">Novo Formulário</h2>
-            <p className="text-sm text-brand-500 mt-1">Defina as informações básicas do seu instrumento.</p>
+            <h2 className="text-2xl font-bold text-slate-900">Novo Formulário</h2>
+            <p className="text-sm text-emerald-600 mt-1">Defina as informações básicas do seu instrumento.</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-brand-50 text-brand-400 hover:text-brand-950 transition-all">
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-emerald-50 text-slate-400 hover:text-slate-900 transition-all">
             <Plus size={28} className="rotate-45" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-3">
+            <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-3">
               Classificação *
             </label>
             <div className="flex flex-wrap gap-2">
@@ -783,7 +783,7 @@ function CreateFormModal({ onClose, onCreated }) {
 
           <div className="grid grid-cols-[1fr_200px] gap-6">
             <div>
-              <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-3">
+              <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-3">
                 Público-alvo
               </label>
               <div className="flex gap-2">
@@ -823,12 +823,12 @@ function CreateFormModal({ onClose, onCreated }) {
                   </label>
                 ))}
               </div>
-              <p className="text-[10px] text-brand-400 mt-1">
+              <p className="text-[10px] text-slate-400 mt-1">
                 {formData.audiences.length === 3 ? "Todos selecionados" : `${formData.audiences.length} de 3 selecionados`}
               </p>
             </div>
             <div>
-              <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">
+              <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">
                 Código (Sigla)
               </label>
               <input
@@ -847,14 +847,14 @@ function CreateFormModal({ onClose, onCreated }) {
                 type="checkbox"
                 checked={formData.validated}
                 onChange={(e) => setFormData(prev => ({ ...prev, validated: e.target.checked }))}
-                className="w-4 h-4 rounded border-brand-300 text-emerald-500 focus:ring-emerald-500"
+                className="w-4 h-4 rounded border-emerald-300 text-emerald-500 focus:ring-emerald-500"
               />
-              <span className="text-sm font-medium text-brand-700">Instrumento validado cientificamente</span>
+              <span className="text-sm font-medium text-emerald-700">Instrumento validado cientificamente</span>
             </label>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-brand-950 uppercase tracking-widest mb-2">
+            <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">
               Nome do Formulário *
             </label>
             <input
@@ -867,7 +867,7 @@ function CreateFormModal({ onClose, onCreated }) {
             />
           </div>
 
-          <div className="flex gap-4 pt-4 bg-white pb-4 border-t border-brand-50">
+          <div className="flex gap-4 pt-4 bg-white pb-4 border-t border-emerald-50">
             <button
               type="button"
               onClick={onClose}
@@ -878,7 +878,7 @@ function CreateFormModal({ onClose, onCreated }) {
             <button
               type="submit"
               disabled={saving}
-              className="btn btn-primary flex-1 py-4 font-bold shadow-xl shadow-brand-950/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn btn-primary flex-1 py-4 font-bold shadow-xl shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? (
                 <div className="flex items-center justify-center gap-2">

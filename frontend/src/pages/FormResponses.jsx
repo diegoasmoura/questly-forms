@@ -99,24 +99,24 @@ export default function FormResponses() {
     return (
       <div className="h-full flex items-center justify-center p-20">
         <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-10 h-10 rounded-full border-2 border-brand-950 border-t-transparent animate-spin" />
-          <p className="text-sm text-brand-500 font-medium">Carregando respostas...</p>
+          <div className="w-10 h-10 rounded-full border-2 border-emerald-900 border-t-transparent animate-spin" />
+          <p className="text-sm text-slate-600 font-medium">Carregando respostas...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in bg-brand-50/30">
+    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in bg-emerald-50/30">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div className="flex items-center gap-4">
-          <Link to="/my-forms" className="p-2 rounded-xl hover:bg-brand-50 text-brand-400 hover:text-brand-950 transition-all">
+          <Link to="/my-forms" className="p-2 rounded-xl hover:bg-emerald-50 text-slate-500 hover:text-emerald-900 transition-all">
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <h1 className="text-2xl font-display font-bold text-brand-950">{form?.title}</h1>
-            <p className="text-sm text-brand-500">
+            <h1 className="text-2xl font-display font-bold text-slate-900">{form?.title}</h1>
+            <p className="text-sm text-slate-600">
               Resultados e análise das respostas coletadas.
               {aggregate && ` • ${aggregate.total} respostas totais`}
             </p>
@@ -142,7 +142,7 @@ export default function FormResponses() {
 
       {/* Tabs */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-brand-100 shadow-sm">
+        <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-emerald-100 shadow-sm">
           <TabButton 
             active={activeTab === "list"} 
             onClick={() => setActiveTab("list")} 
@@ -168,16 +168,16 @@ export default function FormResponses() {
       <div className="flex-1 overflow-y-auto">
         {/* Patient Filter */}
         {uniquePatients.length > 0 && (
-          <div className="card p-4 mb-4 bg-brand-50/50 border-brand-100">
+          <div className="card p-4 mb-4 bg-emerald-50/50 border-emerald-100">
             <div className="flex flex-col md:flex-row md:items-center gap-4">
-              <span className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">Filtrar por Paciente:</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Filtrar por Paciente:</span>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setSelectedPatient("all")}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                     selectedPatient === "all"
-                      ? "bg-brand-950 text-white shadow-md shadow-brand-950/10"
-                      : "bg-white text-brand-600 hover:text-brand-950 border border-brand-100"
+                      ? "bg-emerald-900 text-white shadow-md shadow-emerald-900/10"
+                      : "bg-white text-emerald-600 hover:text-emerald-900 border border-emerald-100"
                   }`}
                 >
                   Todos ({responses.length})
@@ -190,8 +190,8 @@ export default function FormResponses() {
                       onClick={() => setSelectedPatient(patient.id)}
                       className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                         selectedPatient === patient.id
-                          ? "bg-brand-950 text-white shadow-md shadow-brand-950/10"
-                          : "bg-white text-brand-600 hover:text-brand-950 border border-brand-100"
+                          ? "bg-emerald-900 text-white shadow-md shadow-emerald-900/10"
+                          : "bg-white text-emerald-600 hover:text-emerald-900 border border-emerald-100"
                       }`}
                     >
                       <div className="w-5 h-5 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 text-[8px] font-black">
@@ -231,11 +231,11 @@ export default function FormResponses() {
         {activeTab === "list" && (
           filteredResponses.length === 0 ? (
           <div className="card p-20 text-center border-dashed border-2">
-            <Filter size={48} className="mx-auto text-brand-200 mb-6" />
-            <h3 className="text-xl font-bold text-brand-950 mb-2">
+            <Filter size={48} className="mx-auto text-emerald-200 mb-6" />
+            <h3 className="text-xl font-bold text-slate-900 mb-2">
               {selectedPatient !== "all" ? "Nenhuma resposta deste paciente" : "Nenhuma resposta coletada"}
             </h3>
-            <p className="text-brand-500 max-w-sm mx-auto">
+            <p className="text-slate-600 max-w-sm mx-auto">
               {selectedPatient !== "all"
                 ? "Este paciente ainda não respondeu este formulário específico."
                 : "Compartilhe este formulário com seus pacientes para começar a coletar dados clínicos."}
@@ -244,37 +244,37 @@ export default function FormResponses() {
         ) : (
           <div className="grid grid-cols-1 gap-4">
             {filteredResponses.map((response) => (
-              <div key={response.id} className="card group hover:border-brand-300 transition-all duration-300 overflow-hidden">
+              <div key={response.id} className="card group hover:border-emerald-300 transition-all duration-300 overflow-hidden">
                 <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-6">
                   <div className="flex items-center gap-4 flex-1">
                     {/* Patient Info */}
                     {response.patient ? (
                       <div className="flex items-center gap-3 px-4 py-2 bg-emerald-50/50 rounded-xl border border-emerald-100">
-                        <div className="w-10 h-10 rounded-lg bg-brand-950 text-white flex items-center justify-center text-xs font-bold">
+                        <div className="w-10 h-10 rounded-lg bg-emerald-900 text-white flex items-center justify-center text-xs font-bold">
                           {response.patient.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-brand-950">{response.patient.name}</p>
+                          <p className="text-sm font-bold text-slate-900">{response.patient.name}</p>
                           <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-tighter">Paciente Vinculado</p>
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-3 px-4 py-2 bg-brand-50 rounded-xl border border-brand-100">
-                        <div className="w-10 h-10 rounded-lg bg-brand-200 flex items-center justify-center text-brand-500 text-xs">
+                      <div className="flex items-center gap-3 px-4 py-2 bg-emerald-50 rounded-xl border border-emerald-100">
+                        <div className="w-10 h-10 rounded-lg bg-emerald-200 flex items-center justify-center text-slate-600 text-xs">
                           ?
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-brand-600">Resposta Anônima</p>
-                          <p className="text-[10px] text-brand-400 font-bold uppercase tracking-tighter">Link Público</p>
+                          <p className="text-sm font-bold text-emerald-600">Resposta Anônima</p>
+                          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">Link Público</p>
                         </div>
                       </div>
                     )}
                     
-                    <div className="hidden lg:block h-10 w-px bg-brand-50 mx-2" />
+                    <div className="hidden lg:block h-10 w-px bg-emerald-50 mx-2" />
                     
                     <div className="flex flex-col">
-                      <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">Coletado em</p>
-                      <span className="text-sm text-brand-950 font-bold mt-0.5">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Coletado em</p>
+                      <span className="text-sm text-slate-900 font-bold mt-0.5">
                         {new Date(response.createdAt).toLocaleString("pt-BR", {
                           day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"
                         })}
@@ -293,26 +293,26 @@ export default function FormResponses() {
                       </Link>
                     )}
                     
-                    <div className="h-8 w-px bg-brand-50 mx-1" />
+                    <div className="h-8 w-px bg-emerald-50 mx-1" />
                     
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => setSelectedResponse(selectedResponse?.id === response.id ? null : response)}
-                        className={`p-2 rounded-lg transition-all ${selectedResponse?.id === response.id ? 'bg-brand-950 text-white' : 'hover:bg-brand-50 text-brand-400'}`}
+                        className={`p-2 rounded-lg transition-all ${selectedResponse?.id === response.id ? 'bg-emerald-900 text-white' : 'hover:bg-emerald-50 text-slate-500'}`}
                         title="Ver dados brutos"
                       >
                         <Eye size={18} />
                       </button>
                       <button
                         onClick={() => handleExportPdf(response)}
-                        className="p-2 rounded-lg hover:bg-brand-50 text-brand-400 hover:text-brand-950 transition-all"
+                        className="p-2 rounded-lg hover:bg-emerald-50 text-slate-500 hover:text-emerald-900 transition-all"
                         title="Exportar PDF"
                       >
                         <FileDown size={18} />
                       </button>
                       <button
                         onClick={() => handleDelete(response.id)}
-                        className="p-2 rounded-lg hover:bg-red-50 text-brand-400 hover:text-red-600 transition-all"
+                        className="p-2 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-600 transition-all"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -323,7 +323,7 @@ export default function FormResponses() {
                 {/* Expanded view (Raw Data) */}
                 {selectedResponse?.id === response.id && (
                   <div className="px-5 pb-5 animate-fade-in">
-                    <div className="p-4 bg-brand-950 text-brand-300 rounded-xl overflow-auto max-h-96 font-mono text-[11px] leading-relaxed shadow-inner">
+                    <div className="p-4 bg-emerald-900 text-emerald-400 rounded-xl overflow-auto max-h-96 font-mono text-[11px] leading-relaxed shadow-inner">
                       {JSON.stringify(response.data, null, 2)}
                     </div>
                   </div>
@@ -341,10 +341,10 @@ export default function FormResponses() {
 
 function StatBox({ label, value, color }) {
   return (
-    <div className="card p-6 flex items-center justify-between group hover:border-brand-300 transition-all duration-300">
+    <div className="card p-6 flex items-center justify-between group hover:border-emerald-300 transition-all duration-300">
       <div>
-        <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">{label}</p>
-        <p className="text-3xl font-black text-brand-950">{value}</p>
+        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{label}</p>
+        <p className="text-3xl font-black text-slate-900">{value}</p>
       </div>
       <div className={`p-3 rounded-2xl ${color} opacity-80 group-hover:scale-110 transition-transform duration-300`}>
         <TrendingUp size={24} />
@@ -359,8 +359,8 @@ function TabButton({ active, onClick, icon, label }) {
       onClick={onClick}
       className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
         active 
-          ? "bg-brand-950 text-white shadow-md" 
-          : "text-brand-500 hover:text-brand-950 hover:bg-brand-50"
+          ? "bg-emerald-900 text-white shadow-md" 
+          : "text-slate-600 hover:text-emerald-900 hover:bg-emerald-50"
       }`}
     >
       {icon}

@@ -77,8 +77,8 @@ export default function ResponseDetail() {
     return (
       <div className="h-full flex items-center justify-center p-20">
         <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-10 h-10 rounded-full border-2 border-brand-950 border-t-transparent animate-spin" />
-          <p className="text-sm text-brand-500 font-medium">Carregando análise...</p>
+          <div className="w-10 h-10 rounded-full border-2 border-emerald-900 border-t-transparent animate-spin" />
+          <p className="text-sm text-slate-600 font-medium">Carregando análise...</p>
         </div>
       </div>
     );
@@ -88,7 +88,7 @@ export default function ResponseDetail() {
     return (
       <div className="h-full flex items-center justify-center p-20">
         <div className="text-center card p-10 max-w-md">
-          <h2 className="text-xl font-bold text-brand-950 mb-4">Resposta não encontrada</h2>
+          <h2 className="text-xl font-bold text-slate-900 mb-4">Resposta não encontrada</h2>
           <Link to="/my-forms" className="btn btn-primary">Voltar para Meus Formulários</Link>
         </div>
       </div>
@@ -101,7 +101,7 @@ export default function ResponseDetail() {
       <div className="flex items-center justify-between mb-6">
         <button 
           onClick={handleBack} 
-          className="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-brand-50 text-brand-400 hover:text-brand-950 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-emerald-50 text-slate-500 hover:text-slate-900 transition-all"
         >
           <ArrowLeft size={20} />
           <span className="text-sm font-medium">Voltar</span>
@@ -124,7 +124,7 @@ export default function ResponseDetail() {
             className="btn btn-secondary text-xs"
           >
             {generatingPdf ? (
-              <div className="w-4 h-4 border-2 border-brand-950 border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-emerald-900 border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
                 <FileDown size={16} />
@@ -137,8 +137,8 @@ export default function ResponseDetail() {
 
       {/* Title */}
       <div className="mb-8">
-        <h1 className="text-3xl font-display font-bold text-brand-950">{response.form?.title || "Análise Clínica"}</h1>
-        <p className="text-brand-500 mt-1 flex items-center gap-2">
+        <h1 className="text-3xl font-display font-bold text-slate-900">{response.form?.title || "Análise Clínica"}</h1>
+        <p className="text-slate-600 mt-1 flex items-center gap-2">
           <Calendar size={14} />
           Coletado em {new Date(response.createdAt).toLocaleString("pt-BR")}
         </p>
@@ -149,13 +149,13 @@ export default function ResponseDetail() {
         {response.patient && (
           <div className="card p-6 border-2 border-emerald-100/50 bg-emerald-50/20 shadow-sm">
             <div className="flex items-center gap-6">
-              <div className="w-16 h-16 rounded-2xl bg-brand-950 flex items-center justify-center text-white text-2xl font-black shadow-lg">
+              <div className="w-16 h-16 rounded-2xl bg-emerald-900 flex items-center justify-center text-white text-2xl font-black shadow-lg">
                 {response.patient.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-lg font-black text-brand-950 truncate">{response.patient.name}</p>
+                <p className="text-lg font-black text-slate-900 truncate">{response.patient.name}</p>
                 {response.patient.email && (
-                  <p className="text-sm text-brand-500 font-medium">{response.patient.email}</p>
+                  <p className="text-sm text-slate-600 font-medium">{response.patient.email}</p>
                 )}
                 <div className="mt-2 flex items-center gap-3">
                   <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded">Vínculo Ativo</span>
@@ -163,9 +163,9 @@ export default function ResponseDetail() {
               </div>
               {patientResponses.length > 1 && (
                 <div className="hidden sm:block text-right">
-                  <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">Histórico do Paciente</p>
-                  <p className="text-2xl font-black text-brand-950 mt-1">{patientResponses.length}</p>
-                  <p className="text-[10px] text-brand-500 font-bold">respostas totais</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Histórico do Paciente</p>
+                  <p className="text-2xl font-black text-slate-900 mt-1">{patientResponses.length}</p>
+                  <p className="text-[10px] text-slate-600 font-bold">respostas totais</p>
                 </div>
               )}
             </div>
@@ -176,7 +176,7 @@ export default function ResponseDetail() {
         {isClinical ? (
           <div className="space-y-8">
             {/* Main Score Card */}
-            <div className={`card p-8 border-2 shadow-xl shadow-brand-950/5 relative overflow-hidden group ${clinicalResult.color}`}>
+            <div className={`card p-8 border-2 shadow-xl shadow-emerald-900/5 relative overflow-hidden group ${clinicalResult.color}`}>
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
                 <Activity size={120} />
               </div>
@@ -184,10 +184,10 @@ export default function ResponseDetail() {
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-brand-950 text-white">
+                    <div className="p-2 rounded-lg bg-emerald-900 text-white">
                       <Activity size={20} />
                     </div>
-                    <h2 className="font-black text-xs uppercase tracking-widest text-brand-950">
+                    <h2 className="font-black text-xs uppercase tracking-widest text-slate-900">
                       Análise de {clinicalResult.title}
                     </h2>
                   </div>
@@ -197,14 +197,14 @@ export default function ResponseDetail() {
                 </div>
 
                 <div className="flex flex-col md:flex-row md:items-center gap-8 mb-8">
-                  <div className="w-28 h-28 rounded-3xl bg-brand-950 text-white flex flex-col items-center justify-center shadow-2xl shadow-brand-950/20">
+                  <div className="w-28 h-28 rounded-3xl bg-emerald-900 text-white flex flex-col items-center justify-center shadow-2xl shadow-emerald-900/20">
                     <span className="text-4xl font-black leading-none">{clinicalResult.score}</span>
                     <span className="text-[10px] font-bold uppercase tracking-tighter opacity-60 mt-1">pontos</span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-1">Interpretação Clínica</p>
-                    <p className="text-xl font-bold text-brand-950 leading-snug">{clinicalResult.interpretation}</p>
-                    <p className="text-sm text-brand-500 mt-2 font-medium italic">Máximo possível: {clinicalResult.maxScore} pontos</p>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Interpretação Clínica</p>
+                    <p className="text-xl font-bold text-slate-900 leading-snug">{clinicalResult.interpretation}</p>
+                    <p className="text-sm text-slate-600 mt-2 font-medium italic">Máximo possível: {clinicalResult.maxScore} pontos</p>
                   </div>
                 </div>
 
@@ -220,10 +220,10 @@ export default function ResponseDetail() {
             </div>
 
             {/* Item-by-Item Analysis */}
-            <div className="card p-8 bg-white shadow-sm border-brand-100/50">
+            <div className="card p-8 bg-white shadow-sm border-emerald-100/50">
               <div className="flex items-center justify-between mb-8">
-                <h3 className="font-black text-xs uppercase tracking-widest text-brand-950 flex items-center gap-3">
-                  <div className="w-1 h-4 bg-brand-950 rounded-full" />
+                <h3 className="font-black text-xs uppercase tracking-widest text-slate-900 flex items-center gap-3">
+                  <div className="w-1 h-4 bg-emerald-900 rounded-full" />
                   Detalhamento de Itens
                 </h3>
               </div>
@@ -250,14 +250,14 @@ export default function ResponseDetail() {
                     };
 
                     return (
-                      <div key={item} className="p-4 rounded-xl border border-brand-50 hover:border-brand-100 hover:bg-brand-50/30 transition-all group">
+                      <div key={item} className="p-4 rounded-xl border border-emerald-50 hover:border-emerald-100 hover:bg-emerald-50/30 transition-all group">
                         <div className="flex items-start justify-between mb-3 gap-4">
-                          <p className="text-xs font-bold text-brand-950 leading-relaxed group-hover:text-brand-800 transition-colors">
+                          <p className="text-xs font-bold text-slate-900 leading-relaxed group-hover:text-slate-800 transition-colors">
                             {itemLabels[item] || item}
                           </p>
-                          <span className="text-lg font-black text-brand-950 shrink-0">{value}</span>
+                          <span className="text-lg font-black text-slate-900 shrink-0">{value}</span>
                         </div>
-                        <div className="w-full bg-brand-100 rounded-full h-1.5 overflow-hidden">
+                        <div className="w-full bg-emerald-100 rounded-full h-1.5 overflow-hidden">
                           <div
                             className={`h-full rounded-full transition-all duration-1000 ${colorMap[severity]}`}
                             style={{ width: `${(value / 3) * 100}%` }}
@@ -289,14 +289,14 @@ export default function ResponseDetail() {
                     };
 
                     return (
-                      <div key={item} className="p-4 rounded-xl border border-brand-50 hover:border-brand-100 hover:bg-brand-50/30 transition-all group">
+                      <div key={item} className="p-4 rounded-xl border border-emerald-50 hover:border-emerald-100 hover:bg-emerald-50/30 transition-all group">
                         <div className="flex items-start justify-between mb-3 gap-4">
-                          <p className="text-xs font-bold text-brand-950 leading-relaxed group-hover:text-brand-800 transition-colors">
+                          <p className="text-xs font-bold text-slate-900 leading-relaxed group-hover:text-slate-800 transition-colors">
                             {itemLabels[item] || item}
                           </p>
-                          <span className="text-lg font-black text-brand-950 shrink-0">{value}</span>
+                          <span className="text-lg font-black text-slate-900 shrink-0">{value}</span>
                         </div>
-                        <div className="w-full bg-brand-100 rounded-full h-1.5 overflow-hidden">
+                        <div className="w-full bg-emerald-100 rounded-full h-1.5 overflow-hidden">
                           <div
                             className={`h-full rounded-full transition-all duration-1000 ${colorMap[severity]}`}
                             style={{ width: `${(value / 3) * 100}%` }}
@@ -311,8 +311,8 @@ export default function ResponseDetail() {
 
             {/* Historical Context Card */}
             {patientResponses.length > 1 && (
-              <div className="card p-8 bg-brand-50/50 border-brand-100 shadow-sm">
-                <h3 className="font-black text-xs uppercase tracking-widest text-brand-950 mb-8 flex items-center gap-3">
+              <div className="card p-8 bg-emerald-50/50 border-emerald-100 shadow-sm">
+                <h3 className="font-black text-xs uppercase tracking-widest text-slate-900 mb-8 flex items-center gap-3">
                   <TrendingUp size={16} />
                   Contexto Histórico do Paciente
                 </h3>
@@ -331,18 +331,18 @@ export default function ResponseDetail() {
                           onClick={() => !isCurrent && navigate(`/responses/${resp.id}`, { state: { fromPatient: true } })}
                           className={`flex items-center gap-4 p-4 rounded-2xl border transition-all cursor-pointer ${
                             isCurrent
-                              ? "bg-white border-brand-950 shadow-xl shadow-brand-950/5 scale-[1.02] z-10"
-                              : "bg-white border-brand-50 hover:border-brand-200 hover:shadow-md"
+                              ? "bg-white border-emerald-900 shadow-xl shadow-emerald-900/5 scale-[1.02] z-10"
+                              : "bg-white border-emerald-50 hover:border-emerald-200 hover:shadow-md"
                           }`}
                         >
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg ${isCurrent ? 'bg-brand-950 text-white' : 'bg-brand-50 text-brand-950'}`}>
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg ${isCurrent ? 'bg-emerald-900 text-white' : 'bg-emerald-50 text-slate-900'}`}>
                             {result.score}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                               {new Date(resp.createdAt).toLocaleDateString("pt-BR", { day: 'numeric', month: 'short', year: 'numeric' })}
                             </p>
-                            <p className={`text-xs font-bold truncate ${isCurrent ? 'text-brand-950' : 'text-brand-600'}`}>
+                            <p className={`text-xs font-bold truncate ${isCurrent ? 'text-slate-900' : 'text-emerald-600'}`}>
                               {isCurrent ? "Esta Resposta" : result.severity}
                             </p>
                           </div>
@@ -350,7 +350,7 @@ export default function ResponseDetail() {
                             {result.severity}
                           </span>
                           {!isCurrent && (
-                            <ChevronRight size={16} className="text-brand-300" />
+                            <ChevronRight size={16} className="text-emerald-400" />
                           )}
                         </div>
                       );
@@ -361,19 +361,19 @@ export default function ResponseDetail() {
           </div>
         ) : (
           /* General Form Analysis */
-          <div className="card p-8 bg-white shadow-sm border-brand-100/50">
-            <h3 className="font-black text-xs uppercase tracking-widest text-brand-950 mb-8 border-b border-brand-50 pb-4">
+          <div className="card p-8 bg-white shadow-sm border-emerald-100/50">
+            <h3 className="font-black text-xs uppercase tracking-widest text-slate-900 mb-8 border-b border-emerald-50 pb-4">
               Respostas Coletadas
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {Object.entries(response.data || {}).map(([key, value]) => (
-                <div key={key} className="p-5 rounded-2xl border border-brand-50 bg-brand-50/20 hover:bg-brand-50 transition-colors">
-                  <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mb-2">
+                <div key={key} className="p-5 rounded-2xl border border-emerald-50 bg-emerald-50/20 hover:bg-emerald-50 transition-colors">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
                     {key.replace(/_/g, " ")}
                   </p>
-                  <p className="text-sm text-brand-950 font-bold leading-relaxed">
+                  <p className="text-sm text-slate-900 font-bold leading-relaxed">
                     {typeof value === "object" ? (
-                      <pre className="text-[10px] font-mono mt-2 bg-white p-3 rounded-lg border border-brand-50 overflow-auto max-h-40">
+                      <pre className="text-[10px] font-mono mt-2 bg-white p-3 rounded-lg border border-emerald-50 overflow-auto max-h-40">
                         {JSON.stringify(value, null, 2)}
                       </pre>
                     ) : String(value)}

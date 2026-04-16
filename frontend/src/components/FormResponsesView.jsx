@@ -146,7 +146,7 @@ function SimpleValue({ value }) {
       </span>
     );
   }
-  return <span className="text-sm text-brand-800 font-medium whitespace-nowrap bg-brand-50 px-3 py-1.5 rounded-lg">{String(value)}</span>;
+  return <span className="text-sm text-slate-800 font-medium whitespace-nowrap bg-emerald-50 px-3 py-1.5 rounded-lg">{String(value)}</span>;
 }
 
 function ObjectRows({ obj }) {
@@ -157,7 +157,7 @@ function ObjectRows({ obj }) {
   }
   
   return (
-    <div className="flex flex-col gap-0.5 bg-brand-50/50 rounded-lg p-2">
+    <div className="flex flex-col gap-0.5 bg-emerald-50/50 rounded-lg p-2">
       {entries.map(([k, v]) => {
         let displayValue;
         
@@ -169,7 +169,7 @@ function ObjectRows({ obj }) {
         
         return (
           <div key={k} className="flex items-start justify-between gap-3 py-1 px-2 bg-white rounded-lg">
-            <span className="text-[11px] text-brand-600 flex-1 min-w-0">
+            <span className="text-[11px] text-emerald-600 flex-1 min-w-0">
               {formatLabel(k)}
             </span>
             <div className="flex-shrink-0">
@@ -190,23 +190,23 @@ function MatrixRows({ value, rows, columns }) {
   const cols = columns && columns.length > 0 ? columns : [];
   
   return (
-    <div className="bg-white rounded-xl border border-brand-100 overflow-hidden">
+    <div className="bg-white rounded-xl border border-emerald-100 overflow-hidden">
       {/* Header */}
-      <div className="flex bg-brand-100 border-b border-brand-200">
+      <div className="flex bg-emerald-100 border-b border-emerald-200">
         <div className="flex-1 px-4 py-3">
-          <span className="text-xs font-bold text-brand-700 uppercase tracking-wider">Questão</span>
+          <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Questão</span>
         </div>
         <div className="flex">
           {cols.map((col, idx) => (
             <div 
               key={idx} 
-              className="px-2 py-3 text-center border-l border-brand-200"
+              className="px-2 py-3 text-center border-l border-emerald-200"
               style={{ width: '80px' }}
             >
-              <span className="text-xs font-medium text-brand-700 leading-tight block">
+              <span className="text-xs font-medium text-emerald-700 leading-tight block">
                 {col.text}
               </span>
-              <span className="text-xs text-brand-500 font-bold">
+              <span className="text-xs text-slate-600 font-bold">
                 ({col.value})
               </span>
             </div>
@@ -234,10 +234,10 @@ function MatrixRows({ value, rows, columns }) {
         return (
           <div 
             key={rowKey} 
-            className={`flex border-b border-brand-100 last:border-b-0 ${bgColor}`}
+            className={`flex border-b border-emerald-100 last:border-b-0 ${bgColor}`}
           >
             <div className="flex-1 px-4 py-3.5">
-              <span className="text-sm text-brand-700 leading-relaxed">
+              <span className="text-sm text-emerald-700 leading-relaxed">
                 {rowLabel}
               </span>
             </div>
@@ -247,7 +247,7 @@ function MatrixRows({ value, rows, columns }) {
                 return (
                   <div 
                     key={colIdx} 
-                    className="flex items-center justify-center py-3.5 border-l border-brand-100"
+                    className="flex items-center justify-center py-3.5 border-l border-emerald-100"
                     style={{ width: '80px' }}
                   >
                     {isSelected ? (
@@ -255,7 +255,7 @@ function MatrixRows({ value, rows, columns }) {
                         <div className="w-2 h-2 rounded-full bg-white" />
                       </div>
                     ) : (
-                      <div className="w-5 h-5 rounded-full border-2 border-brand-300" />
+                      <div className="w-5 h-5 rounded-full border-2 border-emerald-300" />
                     )}
                   </div>
                 );
@@ -324,16 +324,16 @@ function QuestionRow({ title, value, questionType, question, isLast }) {
   
   if (isComplexValue) {
     return (
-      <div className={`py-3 ${!isLast ? 'border-b border-brand-50' : ''}`}>
-        <div className="text-xs text-brand-600 font-medium mb-2">{title}</div>
+      <div className={`py-3 ${!isLast ? 'border-b border-emerald-50' : ''}`}>
+        <div className="text-xs text-emerald-600 font-medium mb-2">{title}</div>
         <ValueDisplay value={value} questionType={questionType} question={question} />
       </div>
     );
   }
   
   return (
-    <div className={`flex items-start justify-between gap-4 py-3 ${!isLast ? 'border-b border-brand-50' : ''}`}>
-      <span className="text-xs text-brand-700 font-medium flex-1 min-w-0">{title}</span>
+    <div className={`flex items-start justify-between gap-4 py-3 ${!isLast ? 'border-b border-emerald-50' : ''}`}>
+      <span className="text-xs text-emerald-700 font-medium flex-1 min-w-0">{title}</span>
       <div className="flex-shrink-0">
         <ValueDisplay value={value} questionType={questionType} question={question} />
       </div>
@@ -352,23 +352,23 @@ function SectionPanel({ title, questions, data }) {
   if (answered.length === 0) return null;
   
   return (
-    <div className="bg-white rounded-xl border border-brand-100 overflow-hidden shadow-sm">
+    <div className="bg-white rounded-xl border border-emerald-100 overflow-hidden shadow-sm">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-5 py-4 bg-brand-50/50 hover:bg-brand-50 transition-colors"
+        className="w-full flex items-center justify-between px-5 py-4 bg-emerald-50/50 hover:bg-emerald-50 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <ClipboardList size={16} className="text-brand-500" />
-          <span className="text-sm font-bold text-brand-800 uppercase tracking-wide">{title}</span>
+          <ClipboardList size={16} className="text-slate-600" />
+          <span className="text-sm font-bold text-slate-800 uppercase tracking-wide">{title}</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-xs font-medium text-brand-500 bg-brand-100 px-3 py-1 rounded-full">
+          <span className="text-xs font-medium text-slate-600 bg-emerald-100 px-3 py-1 rounded-full">
             {answered.length} respostas
           </span>
           {isOpen ? (
-            <ChevronDown size={18} className="text-brand-400" />
+            <ChevronDown size={18} className="text-slate-500" />
           ) : (
-            <ChevronRight size={18} className="text-brand-400" />
+            <ChevronRight size={18} className="text-slate-500" />
           )}
         </div>
       </button>
@@ -393,17 +393,17 @@ function SectionPanel({ title, questions, data }) {
 export default function FormResponsesView({ schema, data }) {
   if (!schema) {
     return (
-      <div className="flex flex-col items-center justify-center py-8 text-brand-300">
+      <div className="flex flex-col items-center justify-center py-8 text-emerald-400">
         <FileText size={32} className="mb-2 opacity-50" />
         <p className="text-sm">Schema não disponível</p>
-        <p className="text-xs text-brand-400 mt-1">As perguntas não podem ser exibidas sem o schema do formulário.</p>
+        <p className="text-xs text-slate-500 mt-1">As perguntas não podem ser exibidas sem o schema do formulário.</p>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="flex flex-col items-center justify-center py-8 text-brand-300">
+      <div className="flex flex-col items-center justify-center py-8 text-emerald-400">
         <FileText size={32} className="mb-2 opacity-50" />
         <p className="text-sm">Sem dados de resposta</p>
       </div>
@@ -414,7 +414,7 @@ export default function FormResponsesView({ schema, data }) {
   
   if (entries.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-8 text-brand-300">
+      <div className="flex flex-col items-center justify-center py-8 text-emerald-400">
         <FileText size={32} className="mb-2 opacity-50" />
         <p className="text-sm">Nenhuma resposta registrada</p>
       </div>
@@ -426,11 +426,11 @@ export default function FormResponsesView({ schema, data }) {
   if (sections.length === 0) {
     return (
       <div className="space-y-1">
-        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-brand-100">
-          <ClipboardList size={16} className="text-brand-500" />
-          <p className="text-xs text-brand-600 font-bold uppercase tracking-wide">Respostas ({entries.length})</p>
+        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-emerald-100">
+          <ClipboardList size={16} className="text-slate-600" />
+          <p className="text-xs text-emerald-600 font-bold uppercase tracking-wide">Respostas ({entries.length})</p>
         </div>
-        <div className="bg-white rounded-xl border border-brand-100 p-4">
+        <div className="bg-white rounded-xl border border-emerald-100 p-4">
           {entries.map(([key, value]) => (
             <QuestionRow
               key={key}
@@ -445,9 +445,9 @@ export default function FormResponsesView({ schema, data }) {
   
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 pb-3 border-b border-brand-100">
-        <ClipboardList size={16} className="text-brand-500" />
-        <p className="text-xs text-brand-600 font-bold uppercase tracking-wide">Respostas do Paciente</p>
+      <div className="flex items-center gap-2 pb-3 border-b border-emerald-100">
+        <ClipboardList size={16} className="text-slate-600" />
+        <p className="text-xs text-emerald-600 font-bold uppercase tracking-wide">Respostas do Paciente</p>
       </div>
       {sections.map((section, i) => (
         <SectionPanel

@@ -174,7 +174,7 @@ export default function Sidebar() {
               to={item.path}
               className={`flex items-center rounded-lg transition-colors duration-200 ${
                 isActive 
-                  ? "bg-brand-700/80 text-white" 
+                  ? "bg-emerald-600 text-white" 
                   : "text-slate-400 hover:text-white hover:bg-slate-800/50"
               } ${collapsed ? "justify-center py-2.5" : "py-2.5 px-3"}`}
               title={collapsed ? item.label : ""}

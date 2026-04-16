@@ -96,7 +96,7 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
   const cellSize = Math.max(12, Math.floor((availableWidth - (weeks.length * gap)) / weeks.length));
 
   const getColor = (count) => {
-    if (count === 0) return "bg-brand-100";
+    if (count === 0) return "bg-slate-100";
     if (count === 1) return "bg-emerald-200";
     if (count === 2) return "bg-emerald-300";
     if (count === 3) return "bg-emerald-400";
@@ -124,16 +124,16 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
     <div className="card p-6" ref={containerRef}>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-bold text-brand-950">{title}</h2>
-          <p className="text-xs font-bold text-brand-400 uppercase tracking-widest">
+          <h2 className="text-lg font-bold text-slate-800">{title}</h2>
+          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
             {total} respostas · Ano de {new Date().getFullYear()}
           </p>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-brand-400">Intensidade</span>
+            <span className="text-xs text-slate-500">Intensidade</span>
             <div className="flex gap-1">
-              <div className="w-4 h-4 rounded-sm bg-brand-100" title="0 respostas" />
+              <div className="w-4 h-4 rounded-sm bg-slate-100" title="0 respostas" />
               <div className="w-4 h-4 rounded-sm bg-emerald-200" title="1 resposta" />
               <div className="w-4 h-4 rounded-sm bg-emerald-300" title="2 respostas" />
               <div className="w-4 h-4 rounded-sm bg-emerald-400" title="3 respostas" />
@@ -155,7 +155,7 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
           return (
             <span 
               key={`${month}-${weekIndex}`} 
-              className="text-xs text-brand-500 capitalize font-medium"
+              className="text-xs text-slate-500 capitalize font-medium"
               style={{ width: `${width}px` }}
             >
               {month}
@@ -170,7 +170,7 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
           {dayLabels.map((label, i) => (
             <div 
               key={i} 
-              className="text-xs text-brand-400 font-medium flex items-center"
+              className="text-xs text-slate-500 font-medium flex items-center"
               style={{ height: `${cellSize}px` }}
             >
               {i % 2 === 1 ? label : ''}
@@ -189,9 +189,9 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
                     title={day.date ? `${new Date(day.date).toLocaleDateString('pt-BR')}: ${day.count} resposta${day.count !== 1 ? 's' : ''}` : ''}
                     className={`
                       rounded-sm transition-all cursor-pointer
-                      ${!day.date ? 'bg-transparent' : day.isFuture ? 'bg-brand-50' : getColor(day.count)}
-                      ${day.isToday ? 'ring-2 ring-brand-600 ring-offset-1' : ''}
-                      hover:ring-2 hover:ring-brand-400
+                      ${!day.date ? 'bg-transparent' : day.isFuture ? 'bg-slate-50' : getColor(day.count)}
+                      ${day.isToday ? 'ring-2 ring-emerald-500 ring-offset-1' : ''}
+                      hover:ring-2 hover:ring-emerald-400
                     `}
                     style={{ 
                       width: `${cellSize}px`, 

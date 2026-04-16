@@ -126,10 +126,10 @@ export default function FormBuilder() {
   return (
     <div className="h-full flex flex-col animate-fade-in overflow-hidden">
       {/* Toolbar */}
-      <header className="bg-white border-b border-brand-100 h-16 shrink-0 z-10">
+      <header className="bg-white border-b border-emerald-100 h-16 shrink-0 z-10">
         <div className="flex items-center justify-between h-full px-6">
           <div className="flex items-center gap-4">
-            <Link to="/my-forms" className="p-2 rounded-xl hover:bg-brand-50 text-brand-400 hover:text-brand-950 transition-all">
+            <Link to="/my-forms" className="p-2 rounded-xl hover:bg-emerald-50 text-slate-500 hover:text-emerald-900 transition-all">
               <ArrowLeft size={20} />
             </Link>
             <div className="flex flex-col">
@@ -139,9 +139,9 @@ export default function FormBuilder() {
                 defaultValue={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Título do Formulário..."
-                className="text-lg font-bold text-brand-950 bg-transparent border-none focus:outline-none placeholder:text-brand-200 w-80"
+                className="text-lg font-bold text-slate-900 bg-transparent border-none focus:outline-none placeholder:text-emerald-200 w-80"
               />
-              <span className="text-[10px] text-brand-400 font-bold uppercase tracking-widest px-0.5">Editor Clínico</span>
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest px-0.5">Editor Clínico</span>
             </div>
           </div>
 
@@ -152,7 +152,7 @@ export default function FormBuilder() {
             </button>
             <button
               onClick={handleSave}
-              className="btn btn-primary text-xs px-6 py-2.5 shadow-lg shadow-brand-950/10"
+              className="btn btn-primary text-xs px-6 py-2.5 shadow-lg shadow-emerald-900/10"
               disabled={saving}
             >
               {saving ? (
