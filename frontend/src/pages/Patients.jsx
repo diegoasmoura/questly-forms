@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { api } from "../lib/api";
+import { formatCPF, formatPhone } from "../lib/utils";
 import { useAuth } from "../context/AuthContext";
 import {
   Users,
@@ -66,23 +67,6 @@ export default function Patients() {
       setShowAddModal(true);
     }
   }, [location.state]);
-
-  const formatCPF = (value) => {
-    return value
-      .replace(/\D/g, "")
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d{1,2})/, "$1-$2")
-      .replace(/(-\d{2})\d+?$/, "$1");
-  };
-
-  const formatPhone = (value) => {
-    return value
-      .replace(/\D/g, "")
-      .replace(/(\d{2})(\d)/, "($1) $2")
-      .replace(/(\d{5})(\d)/, "$1-$2")
-      .replace(/(-\d{4})\d+?$/, "$1");
-  };
 
   const handleCepLookup = async (cep) => {
     const cleanCep = cep.replace(/\D/g, "");
@@ -572,23 +556,6 @@ function EditPatientModal({ patient, onClose, onSave }) {
     notes: patient.notes || ""
   });
   const [saving, setSaving] = useState(false);
-
-  const formatCPF = (value) => {
-    return value
-      .replace(/\D/g, "")
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d{1,2})/, "$1-$2")
-      .replace(/(-\d{2})\d+?$/, "$1");
-  };
-
-  const formatPhone = (value) => {
-    return value
-      .replace(/\D/g, "")
-      .replace(/(\d{2})(\d)/, "($1) $2")
-      .replace(/(\d{5})(\d)/, "$1-$2")
-      .replace(/(-\d{4})\d+?$/, "$1");
-  };
 
   const handleSave = async (e) => {
     e.preventDefault();

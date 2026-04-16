@@ -3,6 +3,7 @@ import { useAuth } from "./context/AuthContext";
 
 // Components
 import Layout from "./components/Layout";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 // Pages
 import Landing from "./pages/Landing";
@@ -50,28 +51,30 @@ function PublicRoute({ children }) {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-      
-      <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-      <Route path="/dashboard" element={<Navigate to="/home" replace />} />
-      <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
-      <Route path="/patients/:id" element={<ProtectedRoute><PatientRecord /></ProtectedRoute>} />
-      <Route path="/my-forms" element={<ProtectedRoute><MyForms /></ProtectedRoute>} />
-      <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
-      
-      <Route path="/forms/new" element={<ProtectedRoute><FormBuilder /></ProtectedRoute>} />
-      <Route path="/forms/:id/edit" element={<ProtectedRoute><FormBuilder /></ProtectedRoute>} />
-      <Route path="/forms/:id/preview" element={<ProtectedRoute><FormPreview /></ProtectedRoute>} />
-      <Route path="/forms/:id/responses" element={<ProtectedRoute><FormResponses /></ProtectedRoute>} />
-      <Route path="/responses/:id" element={<ProtectedRoute><ResponseDetail /></ProtectedRoute>} />
-      
-      <Route path="/share/:token" element={<ShareLink />} />
-      <Route path="/form/:token" element={<PatientForm />} />
-      
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <ErrorBoundary>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+        
+        <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/dashboard" element={<Navigate to="/home" replace />} />
+        <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
+        <Route path="/patients/:id" element={<ProtectedRoute><PatientRecord /></ProtectedRoute>} />
+        <Route path="/my-forms" element={<ProtectedRoute><MyForms /></ProtectedRoute>} />
+        <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
+        
+        <Route path="/forms/new" element={<ProtectedRoute><FormBuilder /></ProtectedRoute>} />
+        <Route path="/forms/:id/edit" element={<ProtectedRoute><FormBuilder /></ProtectedRoute>} />
+        <Route path="/forms/:id/preview" element={<ProtectedRoute><FormPreview /></ProtectedRoute>} />
+        <Route path="/forms/:id/responses" element={<ProtectedRoute><FormResponses /></ProtectedRoute>} />
+        <Route path="/responses/:id" element={<ProtectedRoute><ResponseDetail /></ProtectedRoute>} />
+        
+        <Route path="/share/:token" element={<ShareLink />} />
+        <Route path="/form/:token" element={<PatientForm />} />
+        
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </ErrorBoundary>
   );
 }
