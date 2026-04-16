@@ -34,7 +34,7 @@
 
 @layer base {
   body {
-    @apply bg-brand-50 text-brand-950 font-sans antialiased;
+    @apply bg-slate-100 text-slate-900 font-sans antialiased;
   }
 }
 
@@ -43,22 +43,22 @@
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
   }
   .btn-primary {
-    @apply bg-brand-950 text-white hover:bg-brand-900 focus:ring-brand-950;
+    @apply bg-brand-800 text-white hover:bg-brand-700 focus:ring-brand-700;
   }
   .btn-secondary {
-    @apply bg-white text-brand-950 border border-brand-200 hover:bg-brand-100 focus:ring-brand-300;
+    @apply bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 focus:ring-slate-300;
   }
   .btn-ghost {
-    @apply text-brand-600 hover:text-brand-950 hover:bg-brand-100;
+    @apply text-slate-600 hover:text-slate-900 hover:bg-slate-200;
   }
   .btn-danger {
     @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-600;
   }
   .input {
-    @apply w-full rounded-lg border border-brand-200 bg-white px-3 py-2.5 text-sm text-brand-950 placeholder:text-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-950 focus:border-transparent transition-all duration-200;
+    @apply w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent transition-all duration-200;
   }
   .card {
-    @apply bg-white rounded-xl border border-brand-100 shadow-sm;
+    @apply bg-white rounded-xl border border-slate-200 shadow-sm;
     transition: box-shadow 0.2s ease, border-color 0.2s ease, max-height 0.3s ease;
   }
   
@@ -67,33 +67,33 @@
     overflow: hidden;
   }
   .card-hover {
-    @apply hover:shadow-md hover:border-brand-200 transition-all duration-200;
+    @apply hover:shadow-md hover:border-slate-300 transition-all duration-200;
   }
 }
 
-/* SurveyJS theme customizations - light and clean */
+/* SurveyJS theme customizations */
 .sd-root {
-  --sjs-primary-backcolor: #10b981;
-  --sjs-primary-backcolor-light: color-mix(in srgb, #10b981 16%, white);
-  --sjs-primary-backcolor-dark: color-mix(in srgb, #10b981 80%, black);
+  --sjs-primary-backcolor: #166534;
+  --sjs-primary-backcolor-light: #dcfce7;
+  --sjs-primary-backcolor-dark: #14532d;
   --sjs-base-unit: 8px;
   --sjs-corner-radius: 8px;
-  --sjs-shadow-small: 0px 1px 2px 0px rgba(0, 0, 0, 0.06);
-  --sjs-shadow-medium: 0px 2px 6px 0px rgba(0, 0, 0, 0.08);
-  --sjs-shadow-large: 0px 4px 12px 0px rgba(0, 0, 0, 0.1);
-  --sjs-border-default: #e5e7eb;
-  --sjs-border-light: #f3f4f6;
+  --sjs-shadow-small: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  --sjs-shadow-medium: 0px 2px 6px 0px rgba(0, 0, 0, 0.07);
+  --sjs-shadow-large: 0px 4px 12px 0px rgba(0, 0, 0, 0.08);
+  --sjs-border-default: #e2e8f0;
+  --sjs-border-light: #f1f5f9;
   --sjs-general-backcolor: #ffffff;
-  --sjs-general-backcolor-dim: #f9fafb;
-  --sjs-general-backcolor-dim-light: #f3f4f6;
-  --sjs-general-forecolor: #111827;
-  --sjs-general-forecolor-light: #6b7280;
+  --sjs-general-backcolor-dim: #f8fafc;
+  --sjs-general-backcolor-dim-light: #f1f5f9;
+  --sjs-general-forecolor: #0f172a;
+  --sjs-general-forecolor-light: #64748b;
 }
 
 /* Survey Creator theme */
 .sc-root {
-  --sjs-primary-backcolor: #10b981;
-  --sjs-general-backcolor-dim: #f9fafb;
+  --sjs-primary-backcolor: #166534;
+  --sjs-general-backcolor-dim: #f8fafc;
 }
 
 /* Remove SurveyJS Non-Commercial Banner */

@@ -123,12 +123,12 @@ export default function MyForms() {
   );
 
   return (
-    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in bg-brand-50/30">
+    <div className="p-6 h-full flex flex-col overflow-hidden animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div>
-          <h1 className="text-2xl font-display font-bold text-brand-950">Meus Formulários</h1>
-          <p className="text-sm text-brand-500">Gerencie seus modelos personalizados.</p>
+          <h1 className="text-2xl font-semibold text-slate-900">Meus Formulários</h1>
+          <p className="text-sm text-slate-500">Gerencie seus modelos personalizados.</p>
         </div>
         <div className="flex items-center gap-2">
           <Link to="/library" className="btn btn-secondary text-xs">
@@ -143,28 +143,28 @@ export default function MyForms() {
       </div>
 
       {/* Search and Filters */}
-      <div className="flex items-center justify-between gap-4 mb-8">
+      <div className="flex items-center justify-between gap-4 mb-6">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-400" size={18} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input
             type="text"
             placeholder="Buscar formulários..."
-            className="input pl-10 bg-white border-brand-100 focus:border-brand-950"
+            className="input pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-brand-100">
+        <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200">
           <button
             onClick={() => handleViewMode("grid")}
-            className={`p-2 rounded-md transition-all ${viewMode === "grid" ? "bg-brand-950 text-white" : "text-brand-400 hover:text-brand-700 hover:bg-brand-50"}`}
+            className={`p-2 rounded-md transition-all ${viewMode === "grid" ? "bg-slate-900 text-white" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"}`}
             title="Visualização em cards"
           >
             <LayoutGrid size={18} />
           </button>
           <button
             onClick={() => handleViewMode("list")}
-            className={`p-2 rounded-md transition-all ${viewMode === "list" ? "bg-brand-950 text-white" : "text-brand-400 hover:text-brand-700 hover:bg-brand-50"}`}
+            className={`p-2 rounded-md transition-all ${viewMode === "list" ? "bg-slate-900 text-white" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"}`}
             title="Visualização em lista"
           >
             <List size={18} />

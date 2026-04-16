@@ -2,7 +2,7 @@ import Sidebar from "./Sidebar";
 
 export default function Layout({ children }) {
   return (
-    <div className="flex min-h-screen bg-brand-50 font-sans selection:bg-brand-950 selection:text-white">
+    <div className="flex min-h-screen bg-slate-100 font-sans">
       {/* Fixed Sidebar */}
       <Sidebar />
 

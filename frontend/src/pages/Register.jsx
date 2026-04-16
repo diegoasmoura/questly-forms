@@ -34,54 +34,53 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-brand-50 flex">
+    <div className="min-h-screen bg-slate-100 flex">
       {/* Left - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-brand-950 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-brand-950 via-brand-900 to-brand-800" />
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-1/3 left-1/4 w-64 h-64 bg-brand-400 rounded-full blur-3xl" />
-        </div>
-        <div className="relative z-10 flex flex-col justify-center px-16 text-white">
-          <Link to="/" className="text-3xl font-bold tracking-tight mb-12">
-            curious
-          </Link>
-          <h1 className="text-5xl font-light leading-tight mb-6" style={{ letterSpacing: "-0.02em" }}>
-            Comece a criar
-            <br />
-            formulários poderosos.
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 items-center justify-center p-16">
+        <div className="max-w-md text-white">
+          <div className="flex items-center gap-3 mb-12">
+            <div className="w-12 h-12 rounded-lg bg-brand-700 flex items-center justify-center">
+              <span className="text-xl font-bold">Q</span>
+            </div>
+            <span className="text-2xl font-semibold">Questly</span>
+          </div>
+          <h1 className="text-4xl font-semibold leading-tight mb-4">
+            Comece a criar formulários clínicos hoje
           </h1>
-          <p className="text-brand-300 text-lg max-w-md leading-relaxed">
-            Junte-se a profissionais de saúde que confiam na Curious para suas necessidades de coleta de dados.
+          <p className="text-lg text-slate-400 leading-relaxed">
+            Junte-se a profissionais de saúde mental que já usam o Questly para otimizar sua prática.
           </p>
         </div>
       </div>
 
       {/* Right - Form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md animate-fade-in">
-          <Link to="/" className="text-2xl font-bold text-brand-950 tracking-tight lg:hidden block mb-12">
-            curious
+      <div className="flex-1 flex items-center justify-center px-8 py-12">
+        <div className="w-full max-w-md">
+          <Link to="/" className="flex items-center gap-2 lg:hidden mb-12">
+            <div className="w-10 h-10 rounded-lg bg-brand-700 flex items-center justify-center">
+              <span className="text-white font-semibold">Q</span>
+            </div>
+            <span className="text-xl font-semibold text-slate-900">Questly</span>
           </Link>
 
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-brand-950 mb-2">Crie sua conta</h2>
-            <p className="text-brand-500">Comece a usar o Curious em segundos</p>
+            <h2 className="text-2xl font-semibold text-slate-900 mb-2">Criar conta</h2>
+            <p className="text-slate-600">É rápido e gratuito</p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm animate-fade-in">
+            <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-brand-700 mb-1.5">Nome Completo</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Nome completo</label>
               <input
                 type="text"
                 className="input"
-                placeholder="Ex: Dra. Jane Silva"
+                placeholder="Ex: Dra. Maria Silva"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
@@ -89,7 +88,7 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-brand-700 mb-1.5">E-mail</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">E-mail</label>
               <input
                 type="email"
                 className="input"
@@ -101,7 +100,7 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-brand-700 mb-1.5">Senha</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Senha</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -114,7 +113,7 @@ export default function Register() {
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-400 hover:text-brand-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -123,7 +122,7 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-brand-700 mb-1.5">Confirmar Senha</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Confirmar senha</label>
               <input
                 type="password"
                 className="input"
@@ -134,14 +133,14 @@ export default function Register() {
               />
             </div>
 
-            <button type="submit" className="btn btn-primary w-full" disabled={loading}>
-              {loading ? <Loader2 className="animate-spin" size={18} /> : "Criar Conta"}
+            <button type="submit" className="btn btn-primary w-full py-3" disabled={loading}>
+              {loading ? <Loader2 className="animate-spin" size={18} /> : "Criar conta"}
             </button>
           </form>
 
-          <p className="mt-8 text-center text-sm text-brand-500">
+          <p className="mt-8 text-center text-sm text-slate-600">
             Já tem uma conta?{" "}
-            <Link to="/login" className="text-brand-950 font-medium hover:underline">
+            <Link to="/login" className="font-medium text-brand-700 hover:underline">
               Entrar
             </Link>
           </p>

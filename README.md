@@ -1,122 +1,67 @@
-# Curious - Gestão Clínica para Psicólogos
+# Questly - Gestão Clínica para Psicólogos
 
 Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criarem formulários clínicos baseados em evidências e acompanharem a evolução terapêutica através de dados.
 
-## 🚀 Funcionalidades Principais
+## Rebranding e Visual
 
-- **📊 Home (Visão Geral):** Resumo dinâmico de atividades, estatísticas de pacientes e gráficos de tendências clínicas (PHQ-9, GAD-7).
-- **👥 Gestão de Pacientes:** Cadastro completo com prontuário digital, histórico de respostas e análise de evolução detalhada.
-- **📚 Biblioteca Clínica:** Modelos validados prontos para uso (Anamneses, Escalas de Depressão, Ansiedade, etc.).
-- **📝 Construtor de Formulários (SurveyJS v2):** Construtor visual avançado com abas de Lógica, Temas, Tradução e Editor JSON.
-- **🔗 Compartilhamento Seguro:** Gere links únicos para pacientes com vinculação automática ou respostas anônimas.
-- **📈 Análise Clínica Avançada:** Visualização item-a-item, scores automáticos, alertas de risco (ex: ideação suicida) e comparação temporal (deltas).
-- **📄 Relatórios PDF:** Exporte resumos clínicos e prontuários profissionais em PDF com um clique.
+O projeto passou por um rebranding completo de "Curious" para "Questly" com um novo sistema visual profissional:
 
-## 🌟 Novidades Recentes
+- **Paleta de Cores:** Fundo slate-100 (#f1f5f9) para reduzir fadiga ocular, sidebar escura slate-900, cards brancos com bordas slate-200
+- **Tipografia:** Fonte Inter para legibilidade
+- **Hierarquia Visual:** Contraste adequado WCAG AA, cores semânticas para status
 
-- **SurveyJS v2.5.19:** Upgrade completo do motor de formulários para a versão mais recente, garantindo estabilidade, novos recursos e UI aprimorada.
-- **Toggle Grid/List:** Visualização em cards ou lista nas páginas Meus Formulários, Pacientes e Biblioteca. Preferência salva em localStorage.
-- **Mapa de Calor (Activity Heatmap):** Visualização estilo GitHub da atividade clínica no Home. Ano completo com células dinâmicas que se adaptam ao espaço disponível.
-- **Pacientes Atendidos Recentemente:** Seção no Home mostrando pacientes ordenados pelo último atendimento, com ranking e detalhes do formulário respondido.
-- **Layout Consistente:** Todas as páginas principais (Home, Biblioteca, Pacientes, Meus Formulários, Respostas, Prontuário) agora usam o mesmo padrão de layout ocupando 100% da altura da tela.
-- **Visualização de Formulários:** FormPreview agora abre direto no modo de teste para permitir preenchimento e validação do formulário antes de enviar aos pacientes.
-- **Navegação Inteligente:** Botão voltar contextualizado nas telas de análise, retorna para o contexto de origem (Prontuário ou Lista de Respostas).
-- **Visualização de Templates:** Botão "Visualizar" na Biblioteca importa o template temporariamente e abre no modo de teste para validação antes de adicionar oficialmente.
-- **Responsividade Aprimorada:** Formulários no preview expandem dinamicamente para ocupar todo o espaço disponível.
-- **Visualização de Respostas (FormResponsesView):**
-  - **Labels em Português:** Extrai títulos das questões do schema JSON do formulário com mapa de tradução para instrumentos clínicos (GAD-7, PHQ-9)
-  - **Seções Grouped:** Questões organizadas por página/seção seguindo a ordem do schema
-  - **Badges de Resposta:** Sim (verde), Não (amarelo creme), Anormal (verde)
-  - **Grid Visual para Matrizes:** Layout tipo tabela com bolinhas indicando resposta selecionada (estilo instrumento original)
-  - **Estilo Zebra:** Linhas alternadas branco/verde claro para melhor leitura
-  - **Tradução de Colunas:** Valores numéricos mostrados com significado textual (ex: "2 - Mais da metade dos dias")
-  - **Campos Vazios:** Tratamento inteligente - objetos vazios não exibem "Não"
-- **Sistema de Compartilhamento Avançado:**
-  - **Prevenção de Duplicatas:** Links duplicados são reutilizados automaticamente com confirmação
-  - **Status Visual:** Badges coloridos (Pendente, Respondido, Expirado) com bolinhas indicativas
-  - **Renovação Flexível:** Dropdown com opções de 7, 15, 30, 60, 90 dias ou personalizado (mesma UX no modal e nos cards)
-  - **Badge de Versão:** Indicação de quantas vezes o paciente respondeu (v2, v3...)
-  - **Comparação de Scores:** Delta de pontos entre respostas (↑7 pts, ↓3 pts)
-  - **Compliance Tracker:** Barra de statistics mostrando pendentes/respondidos/expirados
-  - **Hooks Reutilizáveis:** `useShareLinkStatus()` para gerenciamento de estado
-  - **Cards Otimizados:** Layout compacto com datas, link e ações na mesma view
-  - **Expansão por Botão:** Cards de resposta expandem apenas ao clicar no chevron, não no card inteiro
-  - **Scroll Interno:** Conteúdo expandido com scroll próprio (max-h-[70vh]), evitando deslocamento da página
-- **Sistema de Classificação de Formulários:**
-  - **Convenção de Nomenclatura:** Código automático baseado em tipo e público-alvo (ex: `ANAM-ADULTO`, `AVAL-TODOS`)
-  - **Classificação:** Avaliação, Anamnese, Evolução, Rastreamento
-  - **Público-alvo Múltiplo:** Seleção múltipla com checkboxes (Adulto, Adolesc., Infantil)
-  - **Instrumento Validado:** Flag para identificar instrumentos cientificamente validados
-  - **Origem do Formulário:** Diferencia formulários criados manualmente vs. importados da Biblioteca (ícone e badge Premium)
-  - **Cards Padronizados:** Layout consistente entre My Forms, Library e Patients com badges dinâmicos
-- **Cards de Paciente:** Grid responsivo com stats de Respostas e Links, botões de Prontuário e Editar
-- **Reorganização do Prontuário:**
-  - **Simplificação de Tabs:** Removida aba "Dados Brutos", respostas agora visualizadas via cards
-  - **Ações nos Cards:** Botões "Análise" e "PDF" visíveis diretamente nos cards de resposta
-  - **Linha do Tempo:** Cards com expand/collapse para ver detalhes das respostas
-  - **Enviar Formulário:** Nova nomenclatura para aba de compartilhamento
+## Funcionalidades Principais
 
-## 📋 Regras e Fluxos
+- **Home (Visão Geral):** Resumo dinâmico de atividades, estatísticas de pacientes e gráficos de tendências clínicas (PHQ-9, GAD-7).
+- **Gestão de Pacientes:** Cadastro completo com prontuário digital, histórico de respostas e análise de evolução detalhada.
+- **Biblioteca Clínica:** Modelos validados prontos para uso (Anamneses, Escalas de Depressão, Ansiedade, etc.).
+- **Construtor de Formulários (SurveyJS v2):** Construtor visual avançado com abas de Lógica, Temas, Tradução e Editor JSON.
+- **Compartilhamento Seguro:** Gere links únicos para pacientes com vinculação automática ou respostas anônimas.
+- **Análise Clínica Avançada:** Visualização item-a-item, scores automáticos, alertas de risco (ex: ideação suicida) e comparação temporal (deltas).
+- **Relatórios PDF:** Exporte resumos clínicos e prontuários profissionais em PDF com um clique.
 
-### 1. Gestão de Compartilhamento (Share Links)
+## Novidades Recentes
 
-#### Ciclo de Vida de um Link
-- **Criação:** Links são gerados apenas dentro do Prontuário do Paciente (aba "Compartilhamento")
-- **Validade:** Padrão de 30 dias a partir da data de criação (configurável)
-- **Status:** Um link pode estar **Pendente**, **Respondido** ou **Expirado**
-  - **Pendente:** Link ativo aguardando resposta
-  - **Respondido:** Paciente respondeu o formulário
-  - **Expirado:** Link venceu sem resposta ou foi revogado
-- **Renovação:** Links podem ser renovados por mais 7, 15, 30, 60 ou 90 dias
-- **Exclusão:** Links podem ser deletados completamente a qualquer momento
+### Rebranding Visual (v2.0)
+- **Novo Nome:** Curious → Questly
+- **Nova Identidade Visual:** Design profissional com cores slate e verde brand
+- **Sidebar Escura:** slate-900 para navegação clara e moderna
+- **Background Suave:** slate-100 (#f1f5f9) em vez de branco puro
+- **Cards Consolidados:** Fundo branco com bordas slate-200
+- **UX Research:** Cores baseadas em benchmarks de dashboards clínicos
 
-#### Localização do Compartilhamento
-- ✅ **Permitido:** Within PatientRecord → "Compartilhamento" tab (Professional only)
-- ❌ **Não Permitido:** MyForms page (para evitar mistura de pacientes)
+### Toggle Grid/List
+- Visualização em cards ou lista nas páginas Meus Formulários, Pacientes e Biblioteca
+- Preferência salva em localStorage
 
-#### Dados do Link
-Cada link compartilhado contém:
-- `id`: Identificador único do link
-- `token`: UUID para URL pública (ex: `/form/a79928b7b2464719b5064feb086433b7`)
-- `formId`: Qual formulário será respondido
-- `patientId`: Paciente vinculado (para rastreamento automático de respostas)
-- `createdAt`: Data e hora de criação
-- `expiresAt`: Data e hora de expiração
-- `active`: Status (true = ativo, false = expirado/revogado)
+### Mapa de Calor (Activity Heatmap)
+- Visualização estilo GitHub da atividade clínica no Home
+- Ano completo com células dinâmicas que se adaptam ao espaço disponível
 
-### 2. Respostas e Rastreamento
+### Pacientes Atendidos Recentemente
+- Seção no Home mostrando pacientes ordenados pelo último atendimento
+- Ranking e detalhes do formulário respondido
 
-#### Vínculo de Respostas
-- Respostas via link compartilhado são automaticamente vinculadas ao paciente
-- Cada resposta registra data/hora e status de conclusão
-- Timeline do paciente mostra: Respondidos (✅) vs Aguardando Resposta (⏳)
+### Layout Consistente
+- Todas as páginas principais (Home, Biblioteca, Pacientes, Meus Formulários, Respostas, Prontuário) usam o mesmo padrão de layout ocupando 100% da altura da tela
 
-#### Status de Resposta
-- **Respondidos:** Link foi respondido (exibe data/hora da resposta)
-- **Aguardando Resposta:** Link enviado mas sem resposta (exibe dias restantes)
-- **Expirado:** Link ultrapassou data de expiração (sem mais aceitar respostas)
+### Visualização de Formulários
+- FormPreview agora abre direto no modo de teste para permitir preenchimento e validação do formulário antes de enviar aos pacientes
 
-### 3. Autenticação e Permissões
+### Navegação Inteligente
+- Botão voltar contextualizado nas telas de análise, retorna para o contexto de origem (Prontuário ou Lista de Respostas)
 
-#### Autenticação
-- Sistema baseado em JWT (JSON Web Tokens)
-- Login obrigatório para acessar dashboard
-- Tokens armazenados em localStorage
+### Visualização de Templates
+- Botão "Visualizar" na Biblioteca importa o template temporariamente e abre no modo de teste para validação antes de adicionar oficialmente
 
-#### Permissões por Recurso
-| Recurso | Proprietário | Visualiza | Edita | Deleta |
-|---------|-------------|-----------|-------|--------|
-| Formulário | Psicólogo criador | ✅ Seus formas | ✅ | ✅ |
-| Paciente | Psicólogo vinculado | ✅ Seus pacientes | ✅ | ✅ |
-| Link de Compartilhamento | Proprietário de forma | ✅ Seus links | ✅ | ✅ |
-| Resposta | Respondente | ✅ Anônimo se via link | ❌ | ❌ |
+### Sistema de Compartilhamento Avançado
+- **Prevenção de Duplicatas:** Links duplicados são reutilizados automaticamente com confirmação
+- **Status Visual:** Badges coloridos (Pendente, Respondido, Expirado) com bolinhas indicativas
+- **Renovação Flexível:** Dropdown com opções de 7, 15, 30, 60, 90 dias ou personalizado
+- **Badge de Versão:** Indicação de quantas vezes o paciente respondeu (v2, v3...)
+- **Comparação de Scores:** Delta de pontos entre respostas (↑7 pts, ↓3 pts)
 
-#### Regras de Acesso
-- Um psicólogo só vê e gerencia seus próprios formulários e pacientes
-- Um paciente só recebe links válidos e ativos
-- Respostas anônimas não mostram dados do paciente
-
-### 4. Fluxo de Trabalho Padrão
+## Fluxo de Trabalho Padrão
 
 ```
 1. Psicólogo cria Formulário (MyForms)
@@ -138,59 +83,15 @@ Cada link compartilhado contém:
 9. Psicólogo vê resultado na Timeline do Prontuário
 ```
 
-### 5. Operações com Links
+## Tecnologias
 
-#### Criar Link
-- Requer: Acesso ao formulário + Paciente selecionado
-- Retorna: URL pública + link para compartilhamento
-- Smart Duplicate: Se já existir link ativo, reutiliza e notifica
-
-#### Visualizar Links
-- Mostra todos os links do paciente com status:
-  - **Pendente:** Links válidos (aceita respostas)
-  - **Respondido:** Links com resposta completa
-  - **Expirado:** Links vencidos sem resposta
-
-#### Copiar Link
-- Copia URL para clipboard
-- Formato: `http://[host]/form/[token]`
-
-#### Renovar Link
-- Adiciona dias à data de expiração atual
-- Opções: 7, 15, 30, 60, 90 dias ou personalizado
-- Para links respondidos: calcula a partir de agora
-- Para links pendentes/expirados: adiciona aos dias restantes
-
-#### Revogar/Deletar Link
-- Remove link completamente do banco de dados
-- Link não mais funciona
-- Respostas já coletadas não são afetadas
-
-### 6. Validações
-
-#### Data de Expiração
-- Mínimo: Data atual (não permite datas passadas)
-- Padrão: 30 dias a partir de hoje
-- Máximo: Sem limite (pode ser 1 ano, 10 anos, etc.)
-
-#### Nomes de Pacientes
-- Campo obrigatório no link (para referência)
-- Pode ser diferente do nome no prontuário
-
-#### Segurança
-- Links são UUIDs únicos (não-sequenciais)
-- Sem autenticação necessária para respondent (acesso via token)
-- Cada usuário só vê seus próprios links
-
-## 🛠️ Tecnologias
-
-- **Frontend:** React, Tailwind CSS, Lucide React, SurveyJS v2, Recharts, TanStack Table.
-- **Backend:** Node.js, Express, Prisma ORM.
-- **Banco de Dados:** PostgreSQL (Supabase/Docker).
-- **Infraestrutura:** Docker & Docker Compose.
+- **Frontend:** React, Tailwind CSS, Lucide React, Motion, SurveyJS v2, Recharts
+- **Backend:** Node.js, Express, Prisma ORM
+- **Banco de Dados:** PostgreSQL (Docker)
+- **Infraestrutura:** Docker & Docker Compose
 - **Autenticação:** JWT (JSON Web Tokens)
 
-## 🏁 Como Iniciar
+## Como Iniciar
 
 ### Pré-requisitos
 - Node.js (v18+)
@@ -205,13 +106,13 @@ Cada link compartilhado contém:
 
 2. **Configure o Banco de Dados:**
    - Certifique-se que o Docker está aberto.
-   - O banco de dados iniciará automaticamente no modo desenvolvimento.
+   - O banco de dados PostgreSQL iniciará automaticamente.
 
 3. **Inicie o Ambiente de Desenvolvimento:**
    ```bash
    npm run dev
    ```
-   - O Frontend rodará em: `http://localhost:5173`
+   - O Frontend rodará em: `http://localhost:3002`
    - O Backend rodará em: `http://localhost:3001`
 
 4. **Sincronização do Banco (se necessário):**
@@ -228,7 +129,7 @@ Para iniciar toda a stack (Frontend, Backend, Banco):
 docker-compose up -d
 ```
 
-## 📊 Estrutura do Banco de Dados
+## Estrutura do Banco de Dados
 
 ### Tabelas Principais
 
@@ -256,7 +157,7 @@ docker-compose up -d
 - Vinculo com Form + Patient
 - Dados das respostas em JSON
 
-## 🔌 API Endpoints (Principais)
+## API Endpoints
 
 ### Autenticação
 - `POST /api/auth/login` - Login
@@ -276,25 +177,18 @@ docker-compose up -d
 - `DELETE /api/patients/:id` - Deletar paciente
 
 ### Compartilhamento
-- `POST /api/share/create` - Criar link com smart duplicate check (autenticado)
-- `GET /api/share/patient/:patientId` - Listar links com status agregado (autenticado)
-- `PATCH /api/share/:id/extend` - Renovar link por X dias (autenticado)
-- `PATCH /api/share/:id/revoke` - Deletar link (autenticado)
+- `POST /api/share/create` - Criar link com smart duplicate check
+- `GET /api/share/patient/:patientId` - Listar links do paciente
+- `PATCH /api/share/:id/extend` - Renovar link por X dias
+- `PATCH /api/share/:id/revoke` - Revogar link
 - `GET /api/share/:token` - Acessar formulário via token (público)
 - `POST /api/share/:token/submit` - Submeter resposta (público)
-
-### Status de Links
-Os links retornam metadados agregados:
-- `status`: "PENDENTE" | "RESPONDIDO" | "EXPIRADO"
-- `responseCount`: Quantidade de respostas
-- `lastResponseAt`: Data da última resposta
-- `daysRemaining`: Dias até expiração
 
 ### Respostas
 - `GET /api/responses/form/:formId` - Respostas de um formulário
 - `GET /api/responses/:id` - Uma resposta específica
 - `DELETE /api/responses/:id` - Deletar resposta
 
-## 📄 Licença
+## Licença
 
 Este projeto é de uso privado para profissionais de saúde.
