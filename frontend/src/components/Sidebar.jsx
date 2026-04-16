@@ -199,7 +199,9 @@ export default function Sidebar() {
       {/* Menu Items */}
       <nav className={`flex-1 space-y-0.5 overflow-hidden ${collapsed ? "px-2" : "px-3"}`}>
         {menuItems.map((item) => {
-          const isActive = location.pathname === item.path || (item.path !== "/home" && location.pathname.startsWith(item.path));
+          const isActive = location.pathname === item.path 
+            || (item.path !== "/home" && location.pathname.startsWith(item.path))
+            || (item.path === "/my-forms" && location.pathname.startsWith("/forms"));
           return (
             <Link
               key={item.path}

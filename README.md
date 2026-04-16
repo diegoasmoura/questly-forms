@@ -78,6 +78,14 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 
 ## Novidades Recentes
 
+### Aprimoramentos de UX (v2.7)
+- **Sidebar Inteligente:** "My Forms" permanece selecionado ao criar/editar formulários
+- **Scrollbar Estilizado:** Cor slate para combinar com o tema
+- **Transições de Página:** Login/Register deslizam suavemente da direita com fade
+- **Loading Overlay:** Tela de carregamento animada ao submeter formulários (framer-motion)
+- **Botão Cadastrar:** Animação de escala no hover/tap
+- **Links de Navegação:** "Voltar ao início" nas páginas de Login/Register
+
 ### Transições Suaves de Página (v2.3)
 - **Animações Fade + Slide:** Navegação suave entre todas as páginas principais
 - **Framer Motion:** Transições elegantes com `AnimatePresence`

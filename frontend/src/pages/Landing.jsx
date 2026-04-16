@@ -18,10 +18,10 @@ const BackgroundGrid = ({ color = '#10b981', cellSize = '40px', strokeWidth = '1
         backgroundRepeat: 'repeat',
         backgroundSize: cellSize,
         maskImage: fade
-          ? `radial-gradient(ellipse at top, white, transparent 70%)`
+          ? `radial-gradient(ellipse 80% 80% at 50% 50%, white 0%, transparent 100%)`
           : undefined,
         WebkitMaskImage: fade
-          ? `radial-gradient(ellipse at top, white, transparent 70%)`
+          ? `radial-gradient(ellipse 80% 80% at 50% 50%, white 0%, transparent 100%)`
           : undefined,
       }}
     />
@@ -97,7 +97,7 @@ const SkewedInfiniteScroll = () => {
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-slate-50 relative overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-slate-50 relative flex flex-col">
       {/* Grid Background */}
       <BackgroundGrid color="#10b981" cellSize="40px" strokeWidth="1" fade={true} />
 
@@ -105,7 +105,7 @@ export default function Landing() {
       <motion.nav
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.3 }}
         className="w-full px-6 py-4 shrink-0"
       >
         <div className="max-w-5xl mx-auto flex justify-between items-center">
@@ -122,12 +122,14 @@ export default function Landing() {
             >
               Entrar
             </Link>
-            <Link
-              to="/register"
-              className="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
-            >
-              Cadastrar
-            </Link>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link
+                to="/register"
+                className="inline-block px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
+              >
+                Cadastrar
+              </Link>
+            </motion.div>
           </div>
         </div>
       </motion.nav>
