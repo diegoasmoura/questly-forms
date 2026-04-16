@@ -1,6 +1,33 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
+const BackgroundGrid = ({ color = '#10b981', cellSize = '40px', strokeWidth = '1', fade = true, className = '' }) => {
+  const svg = `
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' stroke='${color}' stroke-width='${strokeWidth}' fill-opacity='0.3' fill='none'>
+      <path d='M 100 0 L 100 200'/>
+      <path d='M 0 100 L 200 100'/>
+    </svg>
+  `;
+  const svgDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+
+  return (
+    <div
+      className={`pointer-events-none absolute inset-0 ${className}`}
+      style={{
+        backgroundImage: `url("${svgDataUrl}")`,
+        backgroundRepeat: 'repeat',
+        backgroundSize: cellSize,
+        maskImage: fade
+          ? `radial-gradient(ellipse at top, white, transparent 70%)`
+          : undefined,
+        WebkitMaskImage: fade
+          ? `radial-gradient(ellipse at top, white, transparent 70%)`
+          : undefined,
+      }}
+    />
+  );
+};
+
 const SkewedInfiniteScroll = () => {
   const responses = [
     { id: "1", text: "Não, de forma alguma" },
@@ -32,7 +59,7 @@ const SkewedInfiniteScroll = () => {
   const duplicatedResponses = [...responses, ...responses, ...responses, ...responses, ...responses];
 
   return (
-    <div className="flex items-center justify-center py-20 overflow-hidden">
+    <div className="flex items-center justify-center py-16 overflow-hidden">
       <div
         className="relative w-full max-w-screen-xl overflow-hidden"
         style={{
@@ -70,118 +97,123 @@ const SkewedInfiniteScroll = () => {
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-slate-50 relative overflow-hidden">
-      {/* Dot grid background */}
-      <div
-        className="fixed inset-0 pointer-events-none"
-        style={{
-          backgroundImage: `radial-gradient(circle, rgba(16, 185, 129, 0.15) 1px, transparent 1px)`,
-          backgroundSize: "28px 28px",
-        }}
-      />
+    <div className="min-h-screen bg-slate-50 relative overflow-hidden flex flex-col">
+      {/* Grid Background */}
+      <BackgroundGrid color="#10b981" cellSize="40px" strokeWidth="1" fade={true} />
 
-      <div className="relative z-10 min-h-screen flex flex-col">
-        {/* Nav */}
-        <motion.nav
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.6 }}
-          className="w-full px-6 py-4"
-        >
-          <div className="max-w-5xl mx-auto flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">Q</span>
-              </div>
-              <span className="text-lg font-semibold text-slate-900">Questly Form</span>
+      {/* Nav */}
+      <motion.nav
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="w-full px-6 py-4 shrink-0"
+      >
+        <div className="max-w-5xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
+              <span className="text-white font-bold text-sm">Q</span>
             </div>
-            <div className="flex items-center gap-3">
-              <Link
-                to="/login"
-                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                Entrar
-              </Link>
-              <Link
-                to="/register"
-                className="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
-              >
-                Começar
-              </Link>
-            </div>
+            <span className="text-lg font-semibold text-slate-900">Questly Form</span>
           </div>
-        </motion.nav>
-
-        {/* Hero - Centered */}
-        <main className="flex-1 flex items-center justify-center">
-          <div className="w-full max-w-2xl mx-auto px-6 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="space-y-8"
+          <div className="flex items-center gap-3">
+            <Link
+              to="/login"
+              className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
             >
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.6 }}
-                className="text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-[1.1] tracking-tight"
-              >
-                Avalie.
-                <br />
-                <span className="text-emerald-600">Acompanhe.</span>
-                <br />
-                Evolua.
-              </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.6 }}
-                className="text-lg text-slate-500 leading-relaxed max-w-lg mx-auto"
-              >
-                Formulários clínicos que entendem seus pacientes.
-                Escalas validadas, scoring automático e gráficos de evolução — tudo em um só lugar.
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.6 }}
-                className="flex flex-col sm:flex-row gap-3 justify-center"
-              >
-                <Link
-                  to="/register"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-lg shadow-emerald-600/20"
-                >
-                  Começar agora
-                </Link>
-                <Link
-                  to="/login"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-medium text-slate-600 hover:text-slate-900 transition-colors"
-                >
-                  Já tenho conta
-                </Link>
-              </motion.div>
-            </motion.div>
+              Entrar
+            </Link>
+            <Link
+              to="/register"
+              className="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
+            >
+              Cadastrar
+            </Link>
           </div>
-        </main>
+        </div>
+      </motion.nav>
 
-        {/* Skewed Scroll Animation */}
-        <SkewedInfiniteScroll />
+      {/* Hero - Centered */}
+      <main className="flex-1 flex items-center justify-center">
+        <div className="w-full max-w-2xl mx-auto px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="space-y-6"
+          >
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight"
+            >
+              Formulários clínicos,
+              <br />
+              <span className="text-emerald-600">sem fricção</span>
+            </motion.h1>
 
-        {/* Footer */}
-        <motion.footer
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-          className="w-full py-8 mt-auto"
-        >
-          <p className="text-xs text-slate-400 text-center">
-            Questly Form 2025. Todos os direitos reservados.
-          </p>
-        </motion.footer>
-      </div>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+              className="text-lg text-slate-500 max-w-xl mx-auto"
+            >
+              Chega de papéis confusos e respostas difíceis de interpretar.
+            </motion.p>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="text-base text-slate-600 max-w-xl mx-auto"
+            >
+              O Questly Form transforma seus formulários em experiências digitais organizadas, padronizadas e prontas para análise.
+            </motion.p>
+          </motion.div>
+        </div>
+      </main>
+
+      {/* Skewed Scroll Animation - 3 columns */}
+      <SkewedInfiniteScroll />
+
+      {/* Benefits */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6, duration: 0.6 }}
+        className="flex flex-col sm:flex-row gap-3 sm:gap-8 justify-center py-12 px-6 relative z-10"
+      >
+        <span className="text-sm text-slate-600 flex items-center justify-center gap-2">
+          <svg className="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+          </svg>
+          Mais agilidade no atendimento
+        </span>
+        <span className="text-sm text-slate-600 flex items-center justify-center gap-2">
+          <svg className="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+          </svg>
+          Mais clareza nas respostas
+        </span>
+        <span className="text-sm text-slate-600 flex items-center justify-center gap-2">
+          <svg className="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+          </svg>
+          Mais tempo para seus pacientes
+        </span>
+      </motion.div>
+
+      {/* Footer */}
+      <motion.footer
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+        className="w-full py-6 shrink-0"
+      >
+        <p className="text-xs text-slate-400 text-center">
+          Questly Form 2025. Todos os direitos reservados.
+        </p>
+      </motion.footer>
     </div>
   );
 }

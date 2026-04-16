@@ -90,6 +90,12 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Paleta Azul Profissional:** Avatar com gradientes em tons de azul que combinam com o tema escuro
 - **Typewriter Animation:** Nome "Questly Form" aparece letra por letra ao expandir
 
+### Grid Pattern em Todas as Telas (v2.5)
+- **Background Grid Verde:** Padrão sutil de linhas emerald (#10b981) com 20% de opacidade
+- **Presente em:** Landing Page, Login, Register e todas as telas autenticadas
+- **Layout Component:** Grid adicionado ao `Layout.jsx` para consistência
+- **Efeito:** Adiciona profundidade visual sem competir com o conteúdo
+
 ### Rebranding Visual (v2.0)
 - **Novo Nome:** Curious → Questly Form
 - **Nova Identidade Visual:** Design profissional com cores slate e verde brand

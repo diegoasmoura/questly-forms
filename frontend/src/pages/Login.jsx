@@ -3,6 +3,33 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 
+const BackgroundGrid = ({ color = '#10b981', cellSize = '40px', strokeWidth = '1', fade = true, className = '' }) => {
+  const svg = `
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' stroke='${color}' stroke-width='${strokeWidth}' fill-opacity='0.3' fill='none'>
+      <path d='M 100 0 L 100 200'/>
+      <path d='M 0 100 L 200 100'/>
+    </svg>
+  `;
+  const svgDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+
+  return (
+    <div
+      className={`pointer-events-none absolute inset-0 ${className}`}
+      style={{
+        backgroundImage: `url("${svgDataUrl}")`,
+        backgroundRepeat: 'repeat',
+        backgroundSize: cellSize,
+        maskImage: fade
+          ? `radial-gradient(ellipse at top, white, transparent 70%)`
+          : undefined,
+        WebkitMaskImage: fade
+          ? `radial-gradient(ellipse at top, white, transparent 70%)`
+          : undefined,
+      }}
+    />
+  );
+};
+
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -46,8 +73,9 @@ export default function Login() {
       </div>
 
       {/* Right - Form */}
-      <div className="flex-1 flex items-center justify-center px-8 py-12">
-        <div className="w-full max-w-md">
+      <div className="flex-1 flex items-center justify-center px-8 py-12 relative overflow-hidden">
+        <BackgroundGrid color="#10b981" cellSize="40px" strokeWidth="1" fade={true} />
+        <div className="w-full max-w-md relative z-10">
           <Link to="/" className="flex items-center gap-2 lg:hidden mb-12">
             <div className="w-10 h-10 rounded-lg bg-emerald-700 flex items-center justify-center">
               <span className="text-white font-semibold">Q</span>
