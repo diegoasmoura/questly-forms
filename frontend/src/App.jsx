@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "./context/AuthContext";
 
 // Components
@@ -20,6 +21,29 @@ import ResponseDetail from "./pages/ResponseDetail";
 import ShareLink from "./pages/ShareLink";
 import PatientForm from "./pages/PatientForm";
 
+const pageVariants = {
+  initial: {
+    opacity: 0,
+    x: 20,
+  },
+  animate: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.25,
+      ease: "easeOut",
+    },
+  },
+  exit: {
+    opacity: 0,
+    x: -20,
+    transition: {
+      duration: 0.15,
+      ease: "easeIn",
+    },
+  },
+};
+
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
@@ -27,7 +51,6 @@ function ProtectedRoute({ children }) {
   if (loading) return <LoadingScreen />;
   if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
   
-  // Wrap with Layout for protected routes
   return <Layout>{children}</Layout>;
 }
 
@@ -36,6 +59,20 @@ function PublicRoute({ children }) {
   if (loading) return <LoadingScreen />;
   if (user) return <Navigate to="/home" replace />;
   return children;
+}
+
+function AnimatedPage({ children }) {
+  return (
+    <motion.div
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      className="h-full"
+    >
+      {children}
+    </motion.div>
+  );
 }
 
 function LoadingScreen() {
@@ -51,33 +88,33 @@ function LoadingScreen() {
 }
 
 export default function App() {
-  console.log("🏠 App.jsx renderizado");
+  const location = useLocation();
+  
   return (
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-      
-      {/* Protected Routes wrapped in Layout via ProtectedRoute */}
-      <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-      <Route path="/dashboard" element={<Navigate to="/home" replace />} />
-      <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
-      <Route path="/patients/:id" element={<ProtectedRoute><PatientRecord /></ProtectedRoute>} />
-      <Route path="/my-forms" element={<ProtectedRoute><MyForms /></ProtectedRoute>} />
-      <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
-      
-      {/* Form management routes also protected and in layout */}
-      <Route path="/forms/new" element={<ProtectedRoute><FormBuilder /></ProtectedRoute>} />
-      <Route path="/forms/:id/edit" element={<ProtectedRoute><FormBuilder /></ProtectedRoute>} />
-      <Route path="/forms/:id/preview" element={<ProtectedRoute><FormPreview /></ProtectedRoute>} />
-      <Route path="/forms/:id/responses" element={<ProtectedRoute><FormResponses /></ProtectedRoute>} />
-      <Route path="/responses/:id" element={<ProtectedRoute><ResponseDetail /></ProtectedRoute>} />
-      
-      {/* Publicly accessible routes (sharing/filling forms) */}
-      <Route path="/share/:token" element={<ShareLink />} />
-      <Route path="/form/:token" element={<PatientForm />} />
-      
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+        
+        <Route path="/home" element={<ProtectedRoute><AnimatedPage><Home /></AnimatedPage></ProtectedRoute>} />
+        <Route path="/dashboard" element={<Navigate to="/home" replace />} />
+        <Route path="/patients" element={<ProtectedRoute><AnimatedPage><Patients /></AnimatedPage></ProtectedRoute>} />
+        <Route path="/patients/:id" element={<ProtectedRoute><AnimatedPage><PatientRecord /></AnimatedPage></ProtectedRoute>} />
+        <Route path="/my-forms" element={<ProtectedRoute><AnimatedPage><MyForms /></AnimatedPage></ProtectedRoute>} />
+        <Route path="/library" element={<ProtectedRoute><AnimatedPage><Library /></AnimatedPage></ProtectedRoute>} />
+        
+        <Route path="/forms/new" element={<ProtectedRoute><AnimatedPage><FormBuilder /></AnimatedPage></ProtectedRoute>} />
+        <Route path="/forms/:id/edit" element={<ProtectedRoute><AnimatedPage><FormBuilder /></AnimatedPage></ProtectedRoute>} />
+        <Route path="/forms/:id/preview" element={<ProtectedRoute><AnimatedPage><FormPreview /></AnimatedPage></ProtectedRoute>} />
+        <Route path="/forms/:id/responses" element={<ProtectedRoute><AnimatedPage><FormResponses /></AnimatedPage></ProtectedRoute>} />
+        <Route path="/responses/:id" element={<ProtectedRoute><AnimatedPage><ResponseDetail /></AnimatedPage></ProtectedRoute>} />
+        
+        <Route path="/share/:token" element={<ShareLink />} />
+        <Route path="/form/:token" element={<PatientForm />} />
+        
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AnimatePresence>
   );
 }
