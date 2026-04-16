@@ -126,13 +126,7 @@ export default function Sidebar() {
           </motion.div>
         ) : (
           <div className="flex items-center rounded-xl bg-slate-800/50 p-1.5">
-            <motion.div
-              className={`rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold shadow-md w-[40px] h-[40px]`}
-              whileHover={{ scale: 1.05 }}
-            >
-              {initials}
-            </motion.div>
-            <span className="ml-3 text-sm font-semibold text-white truncate">
+            <span className="text-sm font-semibold text-white truncate">
               {user?.name}
             </span>
           </div>
