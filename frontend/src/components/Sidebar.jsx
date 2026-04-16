@@ -132,6 +132,38 @@ export default function Sidebar() {
                 >
                   y
                 </motion.span>
+                <motion.span
+                  className="inline-block ml-1"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.56, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
+                >
+                  F
+                </motion.span>
+                <motion.span
+                  className="inline-block"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.64, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
+                >
+                  o
+                </motion.span>
+                <motion.span
+                  className="inline-block"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.72, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
+                >
+                  r
+                </motion.span>
+                <motion.span
+                  className="inline-block"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.80, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
+                >
+                  m
+                </motion.span>
               </motion.span>
             </div>
           )}

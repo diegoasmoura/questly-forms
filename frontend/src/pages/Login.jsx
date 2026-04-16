@@ -34,7 +34,7 @@ export default function Login() {
             <div className="w-12 h-12 rounded-lg bg-emerald-700 flex items-center justify-center">
               <span className="text-xl font-bold">Q</span>
             </div>
-            <span className="text-2xl font-semibold">Questly</span>
+            <span className="text-2xl font-semibold">Questly Form</span>
           </div>
           <h1 className="text-4xl font-semibold leading-tight mb-4">
             Gerencie seus formulários clínicos com facilidade
@@ -52,7 +52,7 @@ export default function Login() {
             <div className="w-10 h-10 rounded-lg bg-emerald-700 flex items-center justify-center">
               <span className="text-white font-semibold">Q</span>
             </div>
-            <span className="text-xl font-semibold text-slate-900">Questly</span>
+            <span className="text-xl font-semibold text-slate-900">Questly Form</span>
           </Link>
 
           <div className="mb-8">

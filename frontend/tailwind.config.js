@@ -43,10 +43,21 @@ export default {
           "0%": { opacity: "0", transform: "translateX(-10px)" },
           "100%": { opacity: "1", transform: "translateX(0)" },
         },
+        "skew-scroll": {
+          "0%": {
+            transform:
+              "rotatex(20deg) rotatez(-15deg) skewx(15deg) translatez(0) translatey(0)",
+          },
+          "100%": {
+            transform:
+              "rotatex(20deg) rotatez(-15deg) skewx(15deg) translatez(0) translatey(-50%)",
+          },
+        },
       },
       animation: {
         "fade-in": "fade-in 0.3s ease-out",
         "slide-in": "slide-in 0.3s ease-out",
+        "skew-scroll": "skew-scroll 20s linear infinite",
       },
     },
   },

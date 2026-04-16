@@ -32,9 +32,32 @@
   animation: slideDown 0.25s ease-out forwards;
 }
 
+/* Skew Scroll Animation */
+@keyframes skew-scroll {
+  0% {
+    transform:
+      rotatex(20deg) rotatez(-15deg) skewx(15deg) translatez(0) translatey(0);
+  }
+  100% {
+    transform:
+      rotatex(20deg) rotatez(-15deg) skewx(15deg) translatez(0) translatey(-50%);
+  }
+}
+
+.animate-skew-scroll {
+  animation: skew-scroll 20s linear infinite;
+  will-change: transform;
+}
+
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     @apply bg-slate-100 text-slate-700 font-sans antialiased;
+  }
+  ::selection {
+    @apply bg-emerald-200 text-emerald-900;
   }
 }
 

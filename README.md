@@ -1,4 +1,4 @@
-# Questly - Gestão Clínica para Psicólogos
+# Questly Form - Gestão Clínica para Psicólogos
 
 Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criarem formulários clínicos baseados em evidências e acompanharem a evolução terapêutica através de dados.
 
@@ -88,15 +88,111 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Ícones Centralizados:** Todos os ícones centralizados quando retraído
 - **Avatar do Usuário:** Siglas (DM) aparecem apenas quando sidebar retraído
 - **Paleta Azul Profissional:** Avatar com gradientes em tons de azul que combinam com o tema escuro
-- **Typewriter Animation:** Nome "Questly" aparece letra por letra ao expandir
+- **Typewriter Animation:** Nome "Questly Form" aparece letra por letra ao expandir
 
 ### Rebranding Visual (v2.0)
-- **Novo Nome:** Curious → Questly
+- **Novo Nome:** Curious → Questly Form
 - **Nova Identidade Visual:** Design profissional com cores slate e verde brand
 - **Sidebar Escura:** slate-900 para navegação clara e moderna
 - **Background Suave:** slate-100 (#f1f5f9) em vez de branco puro
 - **Cards Consolidados:** Fundo branco com bordas slate-200
 - **UX Research:** Cores baseadas em benchmarks de dashboards clínicos
+
+### Landing Page com Animações (v2.4)
+
+A página inicial é uma landing page minimalista com animações 3D que demonstram visualmente o conceito de formulários clínicos.
+
+#### Estrutura da Página
+
+```
+┌─────────────────────────────────────────┐
+│  [Logo Q] Questly Form   [Entrar] [Começar]│
+├─────────────────────────────────────────┤
+│                                         │
+│        Avalie.                          │
+│        Acompanhe.                       │
+│        Evolua.                          │
+│                                         │
+│  Formulários clínicos que entendem      │
+│  seus pacientes. Escalas validadas,     │
+│  scoring automático e gráficos...        │
+│                                         │
+│  [Começar agora]  [Já tenho conta]     │
+│                                         │
+├─────────────────────────────────────────┤
+│     ╔═══════════════════════════╗       │
+│     ║  ○ Não, de forma alguma  ║       │  ← Skew Scroll
+│     ║  ○ Sim, alguns dias      ║       │    Animation
+│     ║  ○ Sim, mais da metade   ║       │
+│     ╚═══════════════════════════╝       │
+├─────────────────────────────────────────┤
+│      Questly Form 2025. Todos os       │
+│           direitos reservados.           │
+└─────────────────────────────────────────┘
+```
+
+#### Background Pattern
+- **Grid de pontos:** Padrão sutil de pontos emerald (#10b981) com 15% de opacidade
+- **Tamanho:** 28px de espaçamento entre pontos
+
+#### Animação Skew Scroll
+- **Efeito 3D:** Rotação inclinada (20° no eixo X, 15° no eixo Z)
+- **Velocidade:** 20 segundos por ciclo
+- **Loop:** Infinitas com 120 itens duplicados (24 respostas × 5)
+- **Máscara:** Gradiente de fade nas bordas para suavizar entrada/saída
+- **Direção:** Scroll diagonal de cima para baixo
+
+#### Cartões de Respostas
+- **Estilo:** Radio button não marcado com borda cinza fina
+- **Layout:** Grid responsivo (1 coluna mobile → 3 colunas desktop)
+- **Respostas incluídas:** Respostas típicas de escalas clínicas (PHQ-9, GAD-7, etc.)
+  - Frequência: "Nunca", "Raramente", "Às vezes", "Frequentemente", "Sempre"
+  - Intensidade: "Pouco ou nada", "Um pouco", "Bastante", "Extremamente"
+  - Dias: "1 a 2 dias", "3 a 4 dias", "5 a 7 dias", "Quase todos os dias", "Todo dia"
+  - Problema: "Não me incomoda", "É um pouco problemático", "É bastante problemático", "É extremamente problemático"
+
+#### Implementação Técnica
+
+**CSS (src/index.css):**
+```css
+@keyframes skew-scroll {
+  0% {
+    transform: rotatex(20deg) rotatez(-15deg) skewx(15deg) translatez(0) translatey(0);
+  }
+  100% {
+    transform: rotatex(20deg) rotatez(-15deg) skewx(15deg) translatez(0) translatey(-50%);
+  }
+}
+
+.animate-skew-scroll {
+  animation: skew-scroll 20s linear infinite;
+  will-change: transform;
+}
+```
+
+**Tailwind Config (tailwind.config.js):**
+```js
+keyframes: {
+  "skew-scroll": {
+    "0%": { transform: "rotatex(20deg) rotatez(-15deg) skewx(15deg) translatez(0) translatey(0)" },
+    "100%": { transform: "rotatex(20deg) rotatez(-15deg) skewx(15deg) translatez(0) translatey(-50%)" },
+  },
+},
+animation: {
+  "skew-scroll": "skew-scroll 20s linear infinite",
+},
+```
+
+#### Personalização
+
+| Parâmetro | Valor Padrão | Descrição |
+|-----------|--------------|-----------|
+| Velocidade | 20s | Tempo para completar um ciclo |
+| Itens duplicados | 5x | Quantidade de repetições para loop longo |
+| Colunas desktop | 3 | Grid columns em telas grandes |
+| Colunas mobile | 1 | Grid columns em telas pequenas |
+| Tamanho do grid | 300px altura | Altura visível do container |
+
 
 ### Toggle Grid/List
 - Visualização em cards ou lista nas páginas Meus Formulários, Pacientes e Biblioteca

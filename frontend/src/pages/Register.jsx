@@ -42,13 +42,13 @@ export default function Register() {
             <div className="w-12 h-12 rounded-lg bg-emerald-700 flex items-center justify-center">
               <span className="text-xl font-bold">Q</span>
             </div>
-            <span className="text-2xl font-semibold">Questly</span>
+            <span className="text-2xl font-semibold">Questly Form</span>
           </div>
           <h1 className="text-4xl font-semibold leading-tight mb-4">
             Comece a criar formulários clínicos hoje
           </h1>
           <p className="text-lg text-slate-400 leading-relaxed">
-            Junte-se a profissionais de saúde mental que já usam o Questly para otimizar sua prática.
+            Junte-se a profissionais de saúde mental que já usam o Questly Form para otimizar sua prática.
           </p>
         </div>
       </div>
@@ -60,7 +60,7 @@ export default function Register() {
             <div className="w-10 h-10 rounded-lg bg-emerald-700 flex items-center justify-center">
               <span className="text-white font-semibold">Q</span>
             </div>
-            <span className="text-xl font-semibold text-slate-900">Questly</span>
+            <span className="text-xl font-semibold text-slate-900">Questly Form</span>
           </Link>
 
           <div className="mb-8">
