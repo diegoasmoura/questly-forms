@@ -114,26 +114,29 @@ export default function Sidebar() {
       </div>
 
       {/* User Profile */}
-      <div className="px-3 py-4 shrink-0">
-        <div className={`flex items-center rounded-xl bg-slate-800/50 transition-all duration-300 ${collapsed ? "justify-start pl-1" : "justify-start p-1.5"}`}>
+      <div className={`px-3 py-4 shrink-0 transition-all duration-300 ${collapsed ? "pl-1" : ""}`}>
+        {collapsed ? (
           <motion.div
-            className={`rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold shadow-md shrink-0`}
-            style={{ width: 40, height: 40 }}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className={`rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold shadow-md w-[32px] h-[32px]`}
             whileHover={{ scale: 1.05 }}
           >
             {initials}
           </motion.div>
-          <span 
-            className="text-sm font-semibold text-white truncate transition-all duration-300 overflow-hidden whitespace-nowrap"
-            style={{ 
-              opacity: collapsed ? 0 : 1,
-              width: collapsed ? 0 : "auto",
-              marginLeft: collapsed ? 0 : 12
-            }}
-          >
-            {user?.name}
-          </span>
-        </div>
+        ) : (
+          <div className="flex items-center rounded-xl bg-slate-800/50 p-1.5">
+            <motion.div
+              className={`rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold shadow-md w-[40px] h-[40px]`}
+              whileHover={{ scale: 1.05 }}
+            >
+              {initials}
+            </motion.div>
+            <span className="ml-3 text-sm font-semibold text-white truncate">
+              {user?.name}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Menu Items */}
