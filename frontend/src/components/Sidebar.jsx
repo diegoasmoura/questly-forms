@@ -63,17 +63,77 @@ export default function Sidebar() {
       {/* Header */}
       <div className="h-16 flex items-center justify-between px-3 border-b border-slate-800 shrink-0">
         <div className="flex items-center justify-start min-w-0">
-          {collapsed ? (
-            <div className="w-10" />
-          ) : (
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2, delay: 0.1 }}
-              className="text-xl font-bold text-white tracking-tight whitespace-nowrap"
-            >
-              Questly
-            </motion.span>
+          {!collapsed && (
+            <div className="overflow-hidden">
+              <motion.span
+                className="text-xl font-bold text-white tracking-tight whitespace-nowrap inline-block"
+                initial={{ width: 0 }}
+                animate={{ width: "auto" }}
+                transition={{ 
+                  width: { duration: 0.4, ease: "easeOut" }
+                }}
+              >
+                <motion.span
+                  className="inline-block"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    opacity: { duration: 0.1 },
+                    y: { duration: 0.2 }
+                  }}
+                >
+                  Q
+                </motion.span>
+                <motion.span
+                  className="inline-block"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.08, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
+                >
+                  u
+                </motion.span>
+                <motion.span
+                  className="inline-block"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.16, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
+                >
+                  e
+                </motion.span>
+                <motion.span
+                  className="inline-block"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.24, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
+                >
+                  s
+                </motion.span>
+                <motion.span
+                  className="inline-block"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.32, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
+                >
+                  t
+                </motion.span>
+                <motion.span
+                  className="inline-block"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.40, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
+                >
+                  l
+                </motion.span>
+                <motion.span
+                  className="inline-block"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.48, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
+                >
+                  y
+                </motion.span>
+              </motion.span>
+            </div>
           )}
         </div>
         <button 
