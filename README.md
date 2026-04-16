@@ -22,6 +22,18 @@ O projeto passou por um rebranding completo de "Curious" para "Questly" com um n
 
 ## Novidades Recentes
 
+### Transições Suaves de Página (v2.3)
+- **Animações Fade + Slide:** Navegação suave entre todas as páginas principais
+- **Framer Motion:** Transições elegantes com `AnimatePresence`
+- **Direção do Fluxo:** Pages deslizam da direita para esquerda ao navegar
+
+### Sidebar com Animação de Colapso (v2.2)
+- **Sidebar Retraível:** Largura de 256px expandida para 72px retraída
+- **Ícones Centralizados:** Todos os ícones centralizados quando retraído
+- **Avatar do Usuário:** Siglas (DM) aparecem apenas quando sidebar retraído
+- **Paleta Azul Profissional:** Avatar com gradientes em tons de azul que combinam com o tema escuro
+- **Typewriter Animation:** Nome "Questly" aparece letra por letra ao expandir
+
 ### Rebranding Visual (v2.0)
 - **Novo Nome:** Curious → Questly
 - **Nova Identidade Visual:** Design profissional com cores slate e verde brand
