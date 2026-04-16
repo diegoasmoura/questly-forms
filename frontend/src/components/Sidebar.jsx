@@ -12,23 +12,24 @@ import {
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-const TreasureMapIcon = ({ size = 20 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3 5L12 2L21 5V8L12 11L3 8V5Z" fill="#D97706" />
-    <path d="M3 8L12 11L21 8V11L12 14L3 11V8Z" fill="#F59E0B" />
-    <path d="M3 11L12 14L21 11V14L12 17L3 14V11Z" fill="#FBBF24" />
-    <path d="M3 14L12 17L21 14V17L12 20L3 17V14Z" fill="#FCD34D" />
-    <path d="M9 3L12 4.5L15 3" stroke="#92400E" strokeWidth="0.5" />
-    <path d="M6 6L12 9L18 6" stroke="#92400E" strokeWidth="0.5" />
-    <path d="M6 9L12 12L18 9" stroke="#92400E" strokeWidth="0.5" />
-    <path d="M6 12L12 15L18 12" stroke="#92400E" strokeWidth="0.5" />
-    <circle cx="12" cy="8" r="1.5" fill="#DC2626" />
-    <path d="M12 6.5V5M12 11V9.5" stroke="#DC2626" strokeWidth="0.5" />
-    <path d="M10.5 8H13.5" stroke="#DC2626" strokeWidth="0.5" />
-    <path d="M11 6.5L12 5L13 6.5" stroke="#DC2626" strokeWidth="0.5" />
-    <path d="M11 9.5L12 11L13 9.5" stroke="#DC2626" strokeWidth="0.5" />
-    <path d="M10.5 7L12 8L13.5 7" stroke="#DC2626" strokeWidth="0.5" />
-    <path d="M10.5 9L12 8L13.5 9" stroke="#DC2626" strokeWidth="0.5" />
+const TreasureMapIcon = ({ size = 28 }) => (
+  <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="8" y="12" width="48" height="40" rx="2" fill="#E8DCC4" stroke="#8B6914" strokeWidth="2"/>
+    <rect x="12" y="16" width="40" height="32" rx="1" fill="#F5ECD7"/>
+    <path d="M16 20H48M16 26H48M16 32H48M16 38H48M16 44H48" stroke="#C4A574" strokeWidth="0.5" strokeDasharray="2 2"/>
+    <path d="M20 16V48M28 16V48M36 16V48M44 16V48" stroke="#C4A574" strokeWidth="0.5" strokeDasharray="2 2"/>
+    <path d="M36 36L40 40L44 36" stroke="#DC2626" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M36 36L40 40" stroke="#DC2626" strokeWidth="3" strokeLinecap="round"/>
+    <path d="M14 14L18 14L18 18" stroke="#8B6914" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M50 14L46 14L46 18" stroke="#8B6914" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M14 50L18 50L18 46" stroke="#8B6914" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M50 50L46 50L46 46" stroke="#8B6914" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="24" cy="26" r="3" fill="none" stroke="#C4A574" strokeWidth="0.5"/>
+    <circle cx="40" cy="28" r="2" fill="none" stroke="#C4A574" strokeWidth="0.5"/>
+    <circle cx="28" cy="42" r="2.5" fill="none" stroke="#C4A574" strokeWidth="0.5"/>
+    <path d="M22 24L24 26L26 24" stroke="#C4A574" strokeWidth="0.5" strokeLinecap="round"/>
+    <path d="M38 26L40 28L42 26" stroke="#C4A574" strokeWidth="0.5" strokeLinecap="round"/>
+    <path d="M26 40L28 42L30 40" stroke="#C4A574" strokeWidth="0.5" strokeLinecap="round"/>
   </svg>
 );
 
@@ -83,7 +84,7 @@ export default function Sidebar() {
     >
       {/* Header */}
       <div className="h-16 flex items-center justify-between px-3 border-b border-slate-800 shrink-0">
-        <div className="flex items-center justify-center flex-1 min-w-0">
+        <div className={`flex items-center ${collapsed ? "justify-start pl-1" : "justify-start"} min-w-0`}>
           {collapsed ? (
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
@@ -106,7 +107,7 @@ export default function Sidebar() {
         </div>
         <button 
           onClick={() => setCollapsed(!collapsed)}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0 ml-1"
+          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0"
         >
           {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
         </button>
@@ -114,7 +115,7 @@ export default function Sidebar() {
 
       {/* User Profile */}
       <div className="px-3 py-4 shrink-0">
-        <div className={`flex items-center rounded-xl bg-slate-800/50 transition-all duration-300 ${collapsed ? "justify-center p-2" : "justify-start p-1.5"}`}>
+        <div className={`flex items-center rounded-xl bg-slate-800/50 transition-all duration-300 ${collapsed ? "justify-start pl-1" : "justify-start p-1.5"}`}>
           <motion.div
             className={`rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold shadow-md shrink-0`}
             style={{ width: 40, height: 40 }}
@@ -136,7 +137,7 @@ export default function Sidebar() {
       </div>
 
       {/* Menu Items */}
-      <nav className="flex-1 px-3 space-y-0.5 overflow-hidden">
+      <nav className={`flex-1 space-y-0.5 overflow-hidden ${collapsed ? "px-2" : "px-3"}`}>
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path || (item.path !== "/home" && location.pathname.startsWith(item.path));
           return (
@@ -147,7 +148,7 @@ export default function Sidebar() {
                 isActive 
                   ? "bg-brand-700/80 text-white" 
                   : "text-slate-400 hover:text-white hover:bg-slate-800/50"
-              } ${collapsed ? "justify-center py-2.5" : "py-2.5 px-3"}`}
+              } ${collapsed ? "justify-start pl-1 py-2.5" : "py-2.5 px-3"}`}
               title={collapsed ? item.label : ""}
             >
               <item.icon size={18} className="shrink-0" />
@@ -171,7 +172,7 @@ export default function Sidebar() {
         <button
           onClick={handleLogout}
           className={`flex items-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 ${
-            collapsed ? "justify-center py-2.5 w-full" : "py-2.5 px-3"
+            collapsed ? "justify-start pl-1 py-2.5" : "py-2.5 px-3"
           }`}
           title={collapsed ? "Logout" : ""}
         >
