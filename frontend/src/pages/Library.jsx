@@ -52,12 +52,12 @@ export default function Library() {
   );
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto animate-fade-in">
+    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in bg-brand-50/30">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div>
-          <h1 className="text-3xl font-display font-bold text-brand-950">Biblioteca Clínica</h1>
-          <p className="text-brand-500 mt-2">Explore e utilize modelos validados por especialistas.</p>
+          <h1 className="text-2xl font-display font-bold text-brand-950">Biblioteca Clínica</h1>
+          <p className="text-sm text-brand-500">Explore e utilize modelos validados por especialistas.</p>
         </div>
       </div>
 
@@ -93,7 +93,7 @@ export default function Library() {
 
       {/* Template Grid */}
       {viewMode === "grid" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 flex-1 overflow-y-auto">
           {filteredTemplates.map((template) => (
             <div 
               key={template.id} 

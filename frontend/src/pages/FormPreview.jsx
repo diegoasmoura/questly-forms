@@ -30,7 +30,7 @@ export default function FormPreview() {
       <div className="min-h-screen bg-brand-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="animate-spin text-brand-400" size={32} />
-          <p className="text-sm text-brand-500">Carregando visualização...</p>
+          <p className="text-sm text-brand-500">Carregando...</p>
         </div>
       </div>
     );
@@ -54,13 +54,13 @@ export default function FormPreview() {
   if (!form || !form.schema) return null;
 
   const survey = new Model(form.schema);
-  survey.mode = "display";
+  survey.mode = "edit";
 
   return (
-    <div className="min-h-screen bg-brand-50">
+    <div className="min-h-screen bg-brand-50 flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="bg-white border-b border-brand-100 sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-4 py-4">
+      <header className="bg-white border-b border-brand-100 shrink-0">
+        <div className="px-4 py-4">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
@@ -72,15 +72,15 @@ export default function FormPreview() {
               <h1 className="text-lg font-semibold text-brand-950">
                 {form.title}
               </h1>
-              <p className="text-xs text-brand-400 mt-1">Modo Visualização</p>
+              <p className="text-xs text-brand-400">Modo de Teste</p>
             </div>
           </div>
         </div>
       </header>
 
       {/* Survey Container */}
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-xl overflow-hidden border border-brand-100">
+      <div className="flex-1 overflow-auto p-4 md:p-6">
+        <div className="bg-white rounded-xl border border-brand-100 min-h-full" style={{ maxWidth: '100%' }}>
           <Survey model={survey} ref={surveyRef} />
         </div>
       </div>

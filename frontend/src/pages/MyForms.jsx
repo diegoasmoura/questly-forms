@@ -123,21 +123,21 @@ export default function MyForms() {
   );
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto animate-fade-in">
+    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in bg-brand-50/30">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div>
-          <h1 className="text-3xl font-display font-bold text-brand-950">Meus Formulários</h1>
-          <p className="text-brand-500 mt-2">Gerencie seus modelos personalizados e colete respostas.</p>
+          <h1 className="text-2xl font-display font-bold text-brand-950">Meus Formulários</h1>
+          <p className="text-sm text-brand-500">Gerencie seus modelos personalizados.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Link to="/library" className="btn btn-secondary">
-            <BookTemplate size={18} />
+        <div className="flex items-center gap-2">
+          <Link to="/library" className="btn btn-secondary text-xs">
+            <BookTemplate size={16} />
             Biblioteca
           </Link>
-          <button onClick={() => setShowCreateModal(true)} className="btn btn-primary">
-            <Plus size={18} />
-            Novo Formulário
+          <button onClick={() => setShowCreateModal(true)} className="btn btn-primary text-xs">
+            <Plus size={16} />
+            Novo
           </button>
         </div>
       </div>
@@ -172,36 +172,37 @@ export default function MyForms() {
         </div>
       </div>
 
-      {/* Grid */}
-      {loading ? (
-        viewMode === "grid" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="card p-6 animate-pulse">
-                <div className="h-12 w-12 bg-brand-100 rounded-2xl mb-6" />
-                <div className="h-6 bg-brand-200 rounded w-3/4 mb-2" />
-                <div className="h-4 bg-brand-100 rounded w-1/2 mb-6" />
-                <div className="h-16 bg-brand-50 rounded-xl border border-dashed border-brand-100" />
-                <div className="flex gap-6 mt-6 pt-6 border-t border-brand-50">
-                  <div className="h-8 w-12" />
-                  <div className="h-8 w-12" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="card p-4 animate-pulse">
-                <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 bg-brand-100 rounded-xl" />
-                  <div className="flex-1">
-                    <div className="h-5 bg-brand-200 rounded w-1/3 mb-2" />
-                    <div className="h-4 bg-brand-100 rounded w-1/4" />
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto">
+        {loading ? (
+          viewMode === "grid" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="card p-6 animate-pulse">
+                  <div className="h-12 w-12 bg-brand-100 rounded-2xl mb-6" />
+                  <div className="h-6 bg-brand-200 rounded w-3/4 mb-2" />
+                  <div className="h-4 bg-brand-100 rounded w-1/2 mb-6" />
+                  <div className="h-16 bg-brand-50 rounded-xl border border-dashed border-brand-100" />
+                  <div className="flex gap-6 mt-6 pt-6 border-t border-brand-50">
+                    <div className="h-8 w-12" />
+                    <div className="h-8 w-12" />
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="card p-4 animate-pulse">
+                  <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 bg-brand-100 rounded-xl" />
+                    <div className="flex-1">
+                      <div className="h-5 bg-brand-200 rounded w-1/3 mb-2" />
+                      <div className="h-4 bg-brand-100 rounded w-1/4" />
+                    </div>
+                  </div>
+                </div>
+              ))}
           </div>
         )
       ) : filteredForms.length === 0 ? (
@@ -246,6 +247,7 @@ export default function MyForms() {
           ))}
         </div>
       )}
+      </div>
 
       {/* Create Form Modal */}
       {showCreateModal && (

@@ -107,22 +107,22 @@ export default function FormResponses() {
   }
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto animate-fade-in">
+    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in bg-brand-50/30">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div className="flex items-center gap-4">
           <Link to="/my-forms" className="p-2 rounded-xl hover:bg-brand-50 text-brand-400 hover:text-brand-950 transition-all">
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <h1 className="text-3xl font-display font-bold text-brand-950">{form?.title}</h1>
-            <p className="text-brand-500 mt-1">
+            <h1 className="text-2xl font-display font-bold text-brand-950">{form?.title}</h1>
+            <p className="text-sm text-brand-500">
               Resultados e análise das respostas coletadas.
               {aggregate && ` • ${aggregate.total} respostas totais`}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button onClick={handleExportCSV} className="btn btn-secondary text-xs">
             <Download size={14} />
             Exportar CSV
@@ -132,8 +132,8 @@ export default function FormResponses() {
 
       {/* Stats */}
       {aggregate && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <StatBox label="Total de Respostas" value={aggregate.total} color="bg-blue-50 text-blue-600" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 shrink-0">
+          <StatBox label="Total" value={aggregate.total} color="bg-blue-50 text-blue-600" />
           <StatBox label="Hoje" value={aggregate.todayCount} color="bg-emerald-50 text-emerald-600" />
           <StatBox label="Esta Semana" value={aggregate.weekCount} color="bg-purple-50 text-purple-600" />
           <StatBox label="Dias Ativos" value={Object.keys(aggregate.dailyCounts || {}).length} color="bg-orange-50 text-orange-600" />
@@ -164,49 +164,51 @@ export default function FormResponses() {
         </div>
       </div>
 
-      {/* Patient Filter */}
-      {uniquePatients.length > 0 && (
-        <div className="card p-5 mb-8 bg-brand-50/50 border-brand-100">
-          <div className="flex flex-col md:flex-row md:items-center gap-4">
-            <span className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">Filtrar por Paciente:</span>
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setSelectedPatient("all")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  selectedPatient === "all"
-                    ? "bg-brand-950 text-white shadow-md shadow-brand-950/10"
-                    : "bg-white text-brand-600 hover:text-brand-950 border border-brand-100"
-                }`}
-              >
-                Todos ({responses.length})
-              </button>
-              {uniquePatients.map(patient => {
-                const count = responses.filter(r => r.patient?.id === patient.id).length;
-                return (
-                  <button
-                    key={patient.id}
-                    onClick={() => setSelectedPatient(patient.id)}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      selectedPatient === patient.id
-                        ? "bg-brand-950 text-white shadow-md shadow-brand-950/10"
-                        : "bg-white text-brand-600 hover:text-brand-950 border border-brand-100"
-                    }`}
-                  >
-                    <div className="w-5 h-5 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 text-[8px] font-black">
-                      {patient.name.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="truncate max-w-[120px]">{patient.name}</span>
-                    <span className="text-[9px] opacity-60">({count})</span>
-                  </button>
-                );
-              })}
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto">
+        {/* Patient Filter */}
+        {uniquePatients.length > 0 && (
+          <div className="card p-4 mb-4 bg-brand-50/50 border-brand-100">
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
+              <span className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">Filtrar por Paciente:</span>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setSelectedPatient("all")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    selectedPatient === "all"
+                      ? "bg-brand-950 text-white shadow-md shadow-brand-950/10"
+                      : "bg-white text-brand-600 hover:text-brand-950 border border-brand-100"
+                  }`}
+                >
+                  Todos ({responses.length})
+                </button>
+                {uniquePatients.map(patient => {
+                  const count = responses.filter(r => r.patient?.id === patient.id).length;
+                  return (
+                    <button
+                      key={patient.id}
+                      onClick={() => setSelectedPatient(patient.id)}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        selectedPatient === patient.id
+                          ? "bg-brand-950 text-white shadow-md shadow-brand-950/10"
+                          : "bg-white text-brand-600 hover:text-brand-950 border border-brand-100"
+                      }`}
+                    >
+                      <div className="w-5 h-5 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 text-[8px] font-black">
+                        {patient.name.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="truncate max-w-[120px]">{patient.name}</span>
+                      <span className="text-[9px] opacity-60">({count})</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Content Area */}
-      <div className="animate-fade-in">
+        {/* Content Area */}
+        <div className="animate-fade-in">
         {/* Trend Tab */}
         {activeTab === "trend" && aggregate?.dailyCounts && (
           <div className="card p-8">
@@ -331,6 +333,7 @@ export default function FormResponses() {
           </div>
         )
         )}
+      </div>
       </div>
     </div>
   );

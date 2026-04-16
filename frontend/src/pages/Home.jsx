@@ -11,7 +11,8 @@ import {
   Calendar,
   Clock,
   TrendingUp,
-  Settings
+  Settings,
+  Activity
 } from "lucide-react";
 
 export default function Home() {
@@ -23,7 +24,7 @@ export default function Home() {
     totalResponses: 0,
     activeLinks: 0
   });
-  const [recentPatients, setRecentPatients] = useState([]);
+  const [recentResponses, setRecentResponses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [aggregateData, setAggregateData] = useState({});
 
@@ -39,7 +40,27 @@ export default function Home() {
         api.getForms()
       ]);
 
-      setRecentPatients(patients.slice(0, 6));
+      // Fetch all responses to find patients who responded recently
+      const allResponses = [];
+      for (const form of forms) {
+        try {
+          const responses = await api.getResponses(form.id);
+          allResponses.push(...responses.map(r => ({
+            ...r,
+            formTitle: form.title
+          })));
+        } catch (e) {
+          // Skip if can't fetch responses for this form
+        }
+      }
+
+      // Filter responses with patients and sort by date (most recent first)
+      const responsesWithPatients = allResponses
+        .filter(r => r.patient)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 8); // Show top 8 most recent
+
+      setRecentResponses(responsesWithPatients);
       
       const formStatsPromises = forms.map(f => api.getFormStats(f.id));
       const allFormStats = await Promise.all(formStatsPromises);
@@ -128,10 +149,13 @@ export default function Home() {
         />
       </div>
 
-      {/* Patients Section - Full Width */}
+      {/* Recent Activity Section */}
       <section className="card flex-1 min-h-0 overflow-hidden">
         <div className="p-5 border-b border-brand-50 flex items-center justify-between">
-          <h2 className="text-base font-bold text-brand-950">Pacientes Recentes</h2>
+          <div className="flex items-center gap-3">
+            <Activity size={18} className="text-emerald-600" />
+            <h2 className="text-base font-bold text-brand-950">Pacientes Atendidos Recentemente</h2>
+          </div>
           <Link 
             to="/patients" 
             className="btn btn-secondary text-[10px] font-bold uppercase flex items-center gap-2"
@@ -153,33 +177,34 @@ export default function Home() {
                 </div>
               ))}
             </div>
-          ) : recentPatients.length === 0 ? (
+          ) : recentResponses.length === 0 ? (
             <div className="p-10 text-center">
-              <Users size={32} className="mx-auto text-brand-200 mb-3" />
-              <p className="text-xs text-brand-500 font-bold uppercase tracking-tight">Nenhum paciente ainda</p>
-              <button 
-                onClick={() => navigate("/patients", { state: { openAddModal: true } })}
-                className="btn btn-secondary text-[10px] font-black uppercase mt-4 px-6"
-              >
-                Cadastrar Novo
-              </button>
+              <Calendar size={32} className="mx-auto text-brand-200 mb-3" />
+              <p className="text-xs text-brand-500 font-bold uppercase tracking-tight">Nenhum atendimento registrado</p>
+              <p className="text-[10px] text-brand-400 mt-1">Pacientes que responderam formulários aparecerão aqui</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-5">
-              {recentPatients.map(patient => (
+              {recentResponses.map((response, idx) => (
                 <Link 
-                  key={patient.id} 
-                  to={`/patients/${patient.id}`}
+                  key={response.id} 
+                  to={`/patients/${response.patient.id}`}
                   className="flex items-center gap-4 p-4 bg-brand-50/30 hover:bg-brand-50 rounded-2xl transition-all group border border-brand-100/50 hover:border-brand-200 hover:shadow-md"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center text-brand-700 font-black shrink-0 group-hover:bg-brand-950 group-hover:text-white transition-colors duration-300">
-                    {patient.name.charAt(0)}
+                  <div className="relative">
+                    <div className="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center text-brand-700 font-black shrink-0 group-hover:bg-brand-950 group-hover:text-white transition-colors duration-300">
+                      {response.patient.name.charAt(0)}
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white text-[8px] font-black flex items-center justify-center">
+                      #{idx + 1}
+                    </div>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-brand-950 truncate group-hover:text-brand-700 transition-colors">{patient.name}</p>
-                    <div className="flex items-center gap-2 text-[10px] font-bold text-brand-400 mt-0.5">
+                    <p className="text-sm font-bold text-brand-950 truncate group-hover:text-brand-700 transition-colors">{response.patient.name}</p>
+                    <p className="text-[10px] text-brand-500 truncate mt-0.5">{response.formTitle}</p>
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-brand-400 mt-1">
                       <Clock size={10} />
-                      <span className="uppercase">Visto em {new Date(patient.updatedAt).toLocaleDateString('pt-BR')}</span>
+                      <span>{new Date(response.createdAt).toLocaleDateString('pt-BR')} · {new Date(response.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                   </div>
                   <ArrowRight size={14} className="text-brand-200 group-hover:text-brand-950 group-hover:translate-x-1 transition-all shrink-0" />

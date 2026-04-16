@@ -160,15 +160,15 @@ export default function Patients() {
   );
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
+    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in bg-brand-50/30">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div>
-          <h1 className="text-3xl font-display font-bold text-brand-950">Pacientes</h1>
-          <p className="text-brand-500 mt-2">Gerencie seus pacientes e seus históricos clínicos.</p>
+          <h1 className="text-2xl font-display font-bold text-brand-950">Pacientes</h1>
+          <p className="text-sm text-brand-500">Gerencie seus pacientes e seus históricos clínicos.</p>
         </div>
-        <button onClick={() => setShowAddModal(true)} className="btn btn-primary px-6">
+        <button onClick={() => setShowAddModal(true)} className="btn btn-primary px-4">
           <UserPlus size={18} />
-          Cadastrar Paciente
+          Cadastrar
         </button>
       </div>
 
@@ -203,45 +203,46 @@ export default function Patients() {
       </div>
 
       {/* Patients List */}
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="card p-6 animate-pulse">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-full bg-brand-100" />
-                <div className="flex-1">
-                  <div className="h-4 bg-brand-200 rounded w-3/4 mb-2" />
-                  <div className="h-3 bg-brand-100 rounded w-1/2" />
+      <div className="flex-1 overflow-y-auto">
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="card p-6 animate-pulse">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-brand-100" />
+                  <div className="flex-1">
+                    <div className="h-4 bg-brand-200 rounded w-3/4 mb-2" />
+                    <div className="h-3 bg-brand-100 rounded w-1/2" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3 bg-brand-50 rounded w-full" />
+                  <div className="h-3 bg-brand-50 rounded w-full" />
                 </div>
               </div>
-              <div className="space-y-2">
-                <div className="h-3 bg-brand-50 rounded w-full" />
-                <div className="h-3 bg-brand-50 rounded w-full" />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : filteredPatients.length === 0 ? (
-        <div className="card p-20 text-center border-dashed border-2">
-          <div className="w-20 h-20 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Users size={40} className="text-brand-200" />
+            ))}
           </div>
-          <h3 className="text-xl font-semibold text-brand-950 mb-2">
-            {searchQuery ? "Nenhum paciente encontrado" : "Nenhum paciente cadastrado"}
-          </h3>
-          <p className="text-brand-500 mb-8 max-w-sm mx-auto">
-            {searchQuery ? "Tente um termo de busca diferente" : "Comece cadastrando seu primeiro paciente para acompanhar sua evolução clínica."}
-          </p>
-          {!searchQuery && (
-            <button onClick={() => setShowAddModal(true)} className="btn btn-primary">
-              <UserPlus size={18} />
-              Cadastrar Paciente
-            </button>
-          )}
-        </div>
-      ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {filteredPatients.map((patient) => (
+        ) : filteredPatients.length === 0 ? (
+          <div className="card p-20 text-center border-dashed border-2">
+            <div className="w-20 h-20 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Users size={40} className="text-brand-200" />
+            </div>
+            <h3 className="text-xl font-semibold text-brand-950 mb-2">
+              {searchQuery ? "Nenhum paciente encontrado" : "Nenhum paciente cadastrado"}
+            </h3>
+            <p className="text-brand-500 mb-8 max-w-sm mx-auto">
+              {searchQuery ? "Tente um termo de busca diferente" : "Comece cadastrando seu primeiro paciente para acompanhar sua evolução clínica."}
+            </p>
+            {!searchQuery && (
+              <button onClick={() => setShowAddModal(true)} className="btn btn-primary">
+                <UserPlus size={18} />
+                Cadastrar Paciente
+              </button>
+            )}
+          </div>
+        ) : viewMode === "grid" ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {filteredPatients.map((patient) => (
             <PatientCard
               key={patient.id}
               patient={patient}
@@ -262,6 +263,7 @@ export default function Patients() {
           ))}
         </div>
       )}
+      </div>
 
       {/* Add Patient Modal */}
       {showAddModal && (

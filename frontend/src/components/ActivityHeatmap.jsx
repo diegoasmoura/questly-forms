@@ -204,26 +204,6 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
           })}
         </div>
       </div>
-
-      {/* Legend & Stats */}
-      <div className="mt-6 pt-4 border-t border-brand-100 flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <div className="text-center">
-            <p className="text-2xl font-black text-brand-950">{total}</p>
-            <p className="text-[10px] font-bold text-brand-400 uppercase">Respostas</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-black text-brand-950">{maxValue}</p>
-            <p className="text-[10px] font-bold text-brand-400 uppercase">Máximo/Dia</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-black text-brand-950">
-              {Object.keys(data).length}
-            </p>
-            <p className="text-[10px] font-bold text-brand-400 uppercase">Dias Ativos</p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

@@ -278,40 +278,41 @@ export default function PatientRecord() {
   }
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto">
-      <Link to="/patients" className="inline-flex items-center gap-2 text-sm text-brand-500 hover:text-brand-950 mb-8 group transition-colors">
+    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in bg-brand-50/30">
+      <Link to="/patients" className="inline-flex items-center gap-2 text-sm text-brand-500 hover:text-brand-950 mb-4 group transition-colors shrink-0">
         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
         Voltar para Lista de Pacientes
       </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-        {/* Left Column: Patient Profile - sticky so it doesn't move when right column expands */}
-        <div className="lg:col-span-1 lg:sticky lg:top-4 space-y-6">
-          <div className="card p-6">
-            <div className="flex flex-col items-center text-center mb-8">
-              <div className="w-24 h-24 rounded-3xl bg-brand-950 flex items-center justify-center text-white font-bold text-4xl mb-4 shadow-xl shadow-brand-950/20">
-                {patient.name.charAt(0).toUpperCase()}
-              </div>
-              <h1 className="text-2xl font-bold text-brand-950">{patient.name}</h1>
-              <p className="text-xs font-bold text-brand-400 mt-1 uppercase tracking-widest">Prontuário #{patient.id.slice(0, 8).toUpperCase()}</p>
-            </div>
-
-            <div className="space-y-3 pt-6 border-t border-brand-50">
-              {patient.email && (
-                <div className="flex items-center justify-between px-2 py-1.5">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Email</p>
-                    <p className="text-xs text-brand-700 font-medium truncate">{patient.email}</p>
-                  </div>
-                  <a
-                    href={`mailto:${patient.email}`}
-                    className="btn btn-ghost text-[10px] py-1 px-2 shrink-0 ml-2"
-                    title="Enviar Email"
-                  >
-                    Enviar
-                  </a>
+      <div className="flex-1 overflow-y-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Left Column: Patient Profile */}
+          <div className="lg:col-span-1">
+            <div className="card p-6">
+              <div className="flex flex-col items-center text-center mb-6">
+                <div className="w-20 h-20 rounded-2xl bg-brand-950 flex items-center justify-center text-white font-bold text-3xl mb-3 shadow-xl shadow-brand-950/20">
+                  {patient.name.charAt(0).toUpperCase()}
                 </div>
-              )}
+                <h1 className="text-xl font-bold text-brand-950">{patient.name}</h1>
+                <p className="text-[10px] font-bold text-brand-400 mt-1 uppercase tracking-widest">Prontuário #{patient.id.slice(0, 8).toUpperCase()}</p>
+              </div>
+
+              <div className="space-y-3 pt-4 border-t border-brand-50">
+                {patient.email && (
+                  <div className="flex items-center justify-between px-2 py-1.5">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Email</p>
+                      <p className="text-xs text-brand-700 font-medium truncate">{patient.email}</p>
+                    </div>
+                    <a
+                      href={`mailto:${patient.email}`}
+                      className="btn btn-ghost text-[10px] py-1 px-2 shrink-0 ml-2"
+                      title="Enviar Email"
+                    >
+                      Enviar
+                    </a>
+                  </div>
+                )}
               {patient.phone && (
                 <div className="flex items-center justify-between px-2 py-1.5">
                   <div className="min-w-0 flex-1">
@@ -1029,6 +1030,7 @@ export default function PatientRecord() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

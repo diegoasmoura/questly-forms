@@ -15,11 +15,13 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 ## 🌟 Novidades Recentes
 
 - **SurveyJS v2.5.19:** Upgrade completo do motor de formulários para a versão mais recente, garantindo estabilidade, novos recursos e UI aprimorada.
-- **Arquitetura de Navegação 360°:** Navegação fluida entre Dashboard, Prontuário do Paciente e Análise Detalhada de Respostas.
-- **Reorganização Clínica:** Hierarquia de informação otimizada (Resumo → Detalhe → Dados Brutos), com resultados críticos sempre no topo.
-- **Vínculo Inteligente:** Sistema aprimorado para diferenciar respostas de pacientes identificados vs. respostas anônimas via link.
 - **Toggle Grid/List:** Visualização em cards ou lista nas páginas Meus Formulários, Pacientes e Biblioteca. Preferência salva em localStorage.
 - **Mapa de Calor (Activity Heatmap):** Visualização estilo GitHub da atividade clínica no Home. Ano completo com células dinâmicas que se adaptam ao espaço disponível.
+- **Pacientes Atendidos Recentemente:** Seção no Home mostrando pacientes ordenados pelo último atendimento, com ranking e detalhes do formulário respondido.
+- **Layout Consistente:** Todas as páginas principais (Home, Biblioteca, Pacientes, Meus Formulários, Respostas, Prontuário) agora usam o mesmo padrão de layout ocupando 100% da altura da tela.
+- **Visualização de Formulários:** FormPreview agora abre direto no modo de teste para permitir preenchimento e validação do formulário antes de enviar aos pacientes.
+- **Navegação Inteligente:** Botão voltar contextualizado nas telas de análise, retorna para o contexto de origem (Prontuário ou Lista de Respostas).
+- **Responsividade Aprimorada:** Formulários no preview expandem dinamicamente para ocupar todo o espaço disponível.
 - **Visualização de Respostas (FormResponsesView):**
   - **Labels em Português:** Extrai títulos das questões do schema JSON do formulário com mapa de tradução para instrumentos clínicos (GAD-7, PHQ-9)
   - **Seções Grouped:** Questões organizadas por página/seção seguindo a ordem do schema
