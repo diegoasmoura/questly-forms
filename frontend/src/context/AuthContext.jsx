@@ -5,9 +5,13 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem("user");
-    console.log("🔐 AuthProvider iniciado. Usuário salvo:", saved ? "SIM" : "NÃO");
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem("user");
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      localStorage.removeItem("user");
+      return null;
+    }
   });
   const [loading, setLoading] = useState(true);
 
@@ -35,25 +39,20 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    console.log("🔐 AuthProvider useEffect. Token salvo:", token ? "SIM" : "NÃO");
     
     if (token) {
       api.me()
         .then((data) => {
-          console.log("✅ api.me() retornou com sucesso:", data.user.email);
           localStorage.setItem("user", JSON.stringify(data.user));
           setUser(data.user);
         })
-        .catch((err) => {
-          console.error("❌ api.me() falhou:", err.message);
+        .catch(() => {
           logout();
         })
         .finally(() => {
-          console.log("✅ setLoading(false)");
           setLoading(false);
         });
     } else {
-      console.log("✅ Sem token, setLoading(false)");
       setLoading(false);
     }
   }, [logout]);

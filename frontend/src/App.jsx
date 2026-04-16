@@ -20,6 +20,17 @@ import ResponseDetail from "./pages/ResponseDetail";
 import ShareLink from "./pages/ShareLink";
 import PatientForm from "./pages/PatientForm";
 
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-100">
+      <div className="animate-pulse flex flex-col items-center gap-4">
+        <div className="w-10 h-10 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin" />
+        <p className="text-sm text-slate-600 font-medium">Carregando aplicação...</p>
+      </div>
+    </div>
+  );
+}
+
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
@@ -35,17 +46,6 @@ function PublicRoute({ children }) {
   if (loading) return <LoadingScreen />;
   if (user) return <Navigate to="/home" replace />;
   return children;
-}
-
-function LoadingScreen() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100">
-      <div className="animate-pulse flex flex-col items-center gap-4">
-        <div className="w-10 h-10 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin" />
-        <p className="text-sm text-slate-600 font-medium">Carregando aplicação...</p>
-      </div>
-    </div>
-  );
 }
 
 export default function App() {

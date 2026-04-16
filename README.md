@@ -78,6 +78,16 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 
 ## Novidades Recentes
 
+### Correções de Bugs e Refatoração (v2.8)
+- **App.jsx:** Bug crítico corrigido - LoadingScreen movido para antes dos componentes de rota
+- **AuthContext.jsx:** JSON.parse envolvido em try-catch para evitar crash com dados corrompidos
+- **ShareLinkCard.jsx:** Bug corrigido na função de renovação customizada (passagem de parâmetros)
+- **api.js:** Timeout de 15s em todas requisições + classe ApiError personalizada
+- **utils.js:** Funções utilitárias criadas (formatCPF, formatPhone, formatCEP, formatDate, debounce)
+- **Home.jsx:** N+1 queries otimizadas com Promise.all para todas requisições paralelas
+- **Acessibilidade:** ARIA labels adicionados em botões da sidebar e modais
+- **Console logs:** Removidos logs de debug do código em produção
+
 ### Aprimoramentos de UX (v2.7)
 - **Sidebar Inteligente:** "My Forms" permanece selecionado ao criar/editar formulários
 - **Scrollbar Estilizado:** Cor slate para combinar com o tema

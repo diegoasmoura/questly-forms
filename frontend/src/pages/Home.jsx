@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
 import { ActivityHeatmap } from "../components/ActivityHeatmap";
@@ -11,13 +11,11 @@ import {
   Calendar,
   Clock,
   TrendingUp,
-  Settings,
   Activity
 } from "lucide-react";
 
 export default function Home() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [stats, setStats] = useState({
     patientCount: 0,
     formCount: 0,
@@ -28,11 +26,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [aggregateData, setAggregateData] = useState({});
 
-  useEffect(() => {
-    loadHomeData();
-  }, []);
-
-  const loadHomeData = async () => {
+  const loadHomeData = useCallback(async () => {
     setLoading(true);
     try {
       const [patients, forms] = await Promise.all([
@@ -40,33 +34,32 @@ export default function Home() {
         api.getForms()
       ]);
 
-      // Fetch all responses to find patients who responded recently
-      const allResponses = [];
-      for (const form of forms) {
+      const responsePromises = forms.map(async (form) => {
         try {
           const responses = await api.getResponses(form.id);
-          allResponses.push(...responses.map(r => ({
-            ...r,
-            formTitle: form.title
-          })));
-        } catch (e) {
-          // Skip if can't fetch responses for this form
+          return responses.map(r => ({ ...r, formTitle: form.title }));
+        } catch {
+          return [];
         }
-      }
+      });
 
-      // Filter responses with patients and sort by date (most recent first)
+      const responseResults = await Promise.all(responsePromises);
+      const allResponses = responseResults.flat();
+
       const responsesWithPatients = allResponses
         .filter(r => r.patient)
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .slice(0, 8); // Show top 8 most recent
+        .slice(0, 8);
 
       setRecentResponses(responsesWithPatients);
+
+      const [formStats, aggregateResults] = await Promise.all([
+        Promise.all(forms.map(f => api.getFormStats(f.id).catch(() => ({ responseCount: 0, shareLinkCount: 0 })))),
+        Promise.all(forms.map(f => api.getAggregate(f.id).catch(() => null)))
+      ]);
       
-      const formStatsPromises = forms.map(f => api.getFormStats(f.id));
-      const allFormStats = await Promise.all(formStatsPromises);
-      
-      const totalResponses = allFormStats.reduce((sum, s) => sum + (s.responseCount || 0), 0);
-      const activeLinks = allFormStats.reduce((sum, s) => sum + (s.shareLinkCount || 0), 0);
+      const totalResponses = formStats.reduce((sum, s) => sum + (s.responseCount || 0), 0);
+      const activeLinks = formStats.reduce((sum, s) => sum + (s.shareLinkCount || 0), 0);
 
       setStats({
         patientCount: patients.length,
@@ -75,11 +68,8 @@ export default function Home() {
         activeLinks
       });
 
-      const aggPromises = forms.map(f => api.getAggregate(f.id).catch(() => null));
-      const allAggData = await Promise.all(aggPromises);
-      
       const mergedAgg = {};
-      allAggData.forEach(agg => {
+      aggregateResults.forEach(agg => {
         if (agg?.dailyCounts) {
           Object.entries(agg.dailyCounts).forEach(([date, count]) => {
             mergedAgg[date] = (mergedAgg[date] || 0) + count;
@@ -93,7 +83,11 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadHomeData();
+  }, [loadHomeData]);
 
   return (
     <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in">

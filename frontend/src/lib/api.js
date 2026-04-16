@@ -1,4 +1,14 @@
 const API_URL = import.meta.env.VITE_API_URL || "/api";
+const REQUEST_TIMEOUT = 15000;
+
+class ApiError extends Error {
+  constructor(message, status, details) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.details = details;
+  }
+}
 
 async function request(endpoint, options = {}) {
   const token = localStorage.getItem("token");
@@ -8,25 +18,44 @@ async function request(endpoint, options = {}) {
     ...options.headers,
   };
 
-  const res = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
-  if (res.status === 401) {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    window.location.href = "/login";
-  }
+  try {
+    const res = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
+      headers,
+      signal: controller.signal,
+    });
 
-  const data = await res.json();
-  if (!res.ok) {
-    const error = new Error(data.error || "Request failed");
-    error.status = res.status;
-    error.details = data;
-    throw error;
+    clearTimeout(timeoutId);
+
+    if (res.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+    }
+
+    const data = await res.json();
+    
+    if (!res.ok) {
+      throw new ApiError(data.error || "Request failed", res.status, data);
+    }
+    
+    return data;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    
+    if (error.name === "AbortError") {
+      throw new ApiError("Tempo limite da requisição excedido", 408, null);
+    }
+    
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    
+    throw new ApiError(error.message || "Erro de conexão", 0, null);
   }
-  return data;
 }
 
 export const api = {
@@ -68,3 +97,5 @@ export const api = {
   updatePatient: (id, data) => request(`/patients/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   deletePatient: (id) => request(`/patients/${id}`, { method: "DELETE" }),
 };
+
+export { ApiError };

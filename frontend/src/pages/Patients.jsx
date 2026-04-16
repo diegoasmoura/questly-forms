@@ -123,7 +123,6 @@ export default function Patients() {
     e.preventDefault();
     setSaving(true);
     try {
-      console.log("Enviando dados:", newPatient);
       await api.createPatient(newPatient);
       setShowAddModal(false);
       setNewPatient({
@@ -135,9 +134,7 @@ export default function Patients() {
       });
       loadPatients();
     } catch (error) {
-      console.error("Erro detalhado:", error);
-      // Alerta de Debug para o usuário
-      alert(`ERRO AO SALVAR:\n\nStatus: ${error.status}\nMensagem: ${error.message}\nDetalhes: ${JSON.stringify(error.details || error)}`);
+      console.error("Erro ao salvar paciente:", error);
     } finally {
       setSaving(false);
     }
@@ -274,7 +271,7 @@ export default function Patients() {
                 <h2 className="text-2xl font-bold text-slate-800">Novo Cadastro de Paciente</h2>
                 <p className="text-sm text-amber-600/80 mt-1">Preencha os dados clínicos para o prontuário.</p>
               </div>
-              <button onClick={() => setShowAddModal(false)} className="p-2 rounded-xl hover:bg-amber-100/50 text-amber-500 hover:text-amber-700 transition-all">
+              <button onClick={() => setShowAddModal(false)} className="p-2 rounded-xl hover:bg-amber-100/50 text-amber-500 hover:text-amber-700 transition-all" aria-label="Fechar">
                 <Plus size={28} className="rotate-45" />
               </button>
             </div>

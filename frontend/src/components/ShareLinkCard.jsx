@@ -61,7 +61,7 @@ export default function ShareLinkCard({
 
   const handleCustomExtend = async () => {
     if (customDays > 0 && customDays <= 365) {
-      await onExtend(customDays, isAnswered ? "newResponse" : "renewal");
+      await onExtend(link.id, customDays, isAnswered ? "newResponse" : "renewal");
       setShowCustomModal(false);
     }
   };
