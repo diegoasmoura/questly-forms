@@ -64,7 +64,7 @@ export default function Sidebar() {
       <div className="h-16 flex items-center justify-between px-3 border-b border-slate-800 shrink-0">
         <div className="flex items-center justify-start min-w-0">
           {!collapsed && (
-            <div className="overflow-hidden">
+            <div className="overflow-hidden" key={`brand-${collapsed}`}>
               <motion.span
                 className="text-xl font-bold text-white tracking-tight whitespace-nowrap inline-block"
                 initial={{ width: 0 }}
