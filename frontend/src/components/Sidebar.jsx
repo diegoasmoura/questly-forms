@@ -7,11 +7,30 @@ import {
   FileText, 
   LogOut, 
   ChevronLeft, 
-  ChevronRight,
-  Compass
+  ChevronRight
 } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
+
+const TreasureMapIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3 5L12 2L21 5V8L12 11L3 8V5Z" fill="#D97706" />
+    <path d="M3 8L12 11L21 8V11L12 14L3 11V8Z" fill="#F59E0B" />
+    <path d="M3 11L12 14L21 11V14L12 17L3 14V11Z" fill="#FBBF24" />
+    <path d="M3 14L12 17L21 14V17L12 20L3 17V14Z" fill="#FCD34D" />
+    <path d="M9 3L12 4.5L15 3" stroke="#92400E" strokeWidth="0.5" />
+    <path d="M6 6L12 9L18 6" stroke="#92400E" strokeWidth="0.5" />
+    <path d="M6 9L12 12L18 9" stroke="#92400E" strokeWidth="0.5" />
+    <path d="M6 12L12 15L18 12" stroke="#92400E" strokeWidth="0.5" />
+    <circle cx="12" cy="8" r="1.5" fill="#DC2626" />
+    <path d="M12 6.5V5M12 11V9.5" stroke="#DC2626" strokeWidth="0.5" />
+    <path d="M10.5 8H13.5" stroke="#DC2626" strokeWidth="0.5" />
+    <path d="M11 6.5L12 5L13 6.5" stroke="#DC2626" strokeWidth="0.5" />
+    <path d="M11 9.5L12 11L13 9.5" stroke="#DC2626" strokeWidth="0.5" />
+    <path d="M10.5 7L12 8L13.5 7" stroke="#DC2626" strokeWidth="0.5" />
+    <path d="M10.5 9L12 8L13.5 9" stroke="#DC2626" strokeWidth="0.5" />
+  </svg>
+);
 
 const menuItems = [
   { icon: Home, label: "Home", path: "/home" },
@@ -70,9 +89,9 @@ export default function Sidebar() {
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg"
+              className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg"
             >
-              <Compass size={20} className="text-white" />
+              <TreasureMapIcon size={28} />
             </motion.div>
           ) : (
             <motion.span
