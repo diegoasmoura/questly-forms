@@ -11,7 +11,8 @@ import {
   Filter,
   ArrowLeft,
   LayoutGrid,
-  List
+  List,
+  Loader2
 } from "lucide-react";
 
 export default function Library() {
@@ -19,10 +20,29 @@ export default function Library() {
   const [searchQuery, setSearchQuery] = useState("");
   const [importing, setImporting] = useState(null);
   const [viewMode, setViewMode] = useState(() => localStorage.getItem("library-view") || "grid");
+  const [previewingId, setPreviewingId] = useState(null);
 
   const handleViewMode = (mode) => {
     setViewMode(mode);
     localStorage.setItem("library-view", mode);
+  };
+
+  const handlePreview = async (template) => {
+    setPreviewingId(template.id);
+    try {
+      const newForm = await api.createForm({
+        title: template.title,
+        schema: template.schema,
+        source: "template",
+        type: "Avaliação"
+      });
+      navigate(`/forms/${newForm.id}/preview`);
+    } catch (error) {
+      console.error("Erro ao visualizar template:", error);
+      alert("Erro ao abrir visualização");
+    } finally {
+      setPreviewingId(null);
+    }
   };
 
   const handleImportTemplate = async (template) => {
@@ -126,9 +146,14 @@ export default function Library() {
               <div className="p-4 bg-brand-50/50 border-t border-brand-50 flex items-center justify-between gap-3">
                 <button 
                   className="btn btn-secondary text-xs flex-1"
-                  onClick={() => alert("Visualização em breve!")}
+                  onClick={() => handlePreview(template)}
+                  disabled={previewingId === template.id}
                 >
-                  <Eye size={14} />
+                  {previewingId === template.id ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <Eye size={14} />
+                  )}
                   Visualizar
                 </button>
                 <button 
@@ -166,8 +191,9 @@ export default function Library() {
               key={template.id}
               template={template}
               importing={importing}
+              previewing={previewingId === template.id}
               onImport={handleImportTemplate}
-              onPreview={() => alert("Visualização em breve!")}
+              onPreview={() => handlePreview(template)}
             />
           ))}
           <div className="card border-dashed border-2 border-brand-200 bg-transparent flex items-center justify-center p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
@@ -182,7 +208,7 @@ export default function Library() {
   );
 }
 
-function LibraryListRow({ template, importing, onImport, onPreview }) {
+function LibraryListRow({ template, importing, previewing, onImport, onPreview }) {
   return (
     <div className="card p-4 flex items-center gap-4 hover:border-brand-200 transition-all">
       <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-brand-50 text-brand-950">
@@ -202,9 +228,14 @@ function LibraryListRow({ template, importing, onImport, onPreview }) {
       <div className="flex items-center gap-2 shrink-0">
         <button 
           onClick={onPreview}
+          disabled={previewing}
           className="btn btn-secondary py-2 px-3 text-xs"
         >
-          <Eye size={14} />
+          {previewing ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : (
+            <Eye size={14} />
+          )}
         </button>
         <button 
           onClick={() => onImport(template)}

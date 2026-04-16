@@ -21,6 +21,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Layout Consistente:** Todas as páginas principais (Home, Biblioteca, Pacientes, Meus Formulários, Respostas, Prontuário) agora usam o mesmo padrão de layout ocupando 100% da altura da tela.
 - **Visualização de Formulários:** FormPreview agora abre direto no modo de teste para permitir preenchimento e validação do formulário antes de enviar aos pacientes.
 - **Navegação Inteligente:** Botão voltar contextualizado nas telas de análise, retorna para o contexto de origem (Prontuário ou Lista de Respostas).
+- **Visualização de Templates:** Botão "Visualizar" na Biblioteca importa o template temporariamente e abre no modo de teste para validação antes de adicionar oficialmente.
 - **Responsividade Aprimorada:** Formulários no preview expandem dinamicamente para ocupar todo o espaço disponível.
 - **Visualização de Respostas (FormResponsesView):**
   - **Labels em Português:** Extrai títulos das questões do schema JSON do formulário com mapa de tradução para instrumentos clínicos (GAD-7, PHQ-9)
