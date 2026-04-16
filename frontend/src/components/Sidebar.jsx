@@ -7,7 +7,8 @@ import {
   FileText, 
   LogOut, 
   ChevronLeft, 
-  ChevronRight
+  ChevronRight,
+  Compass
 } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -66,12 +67,12 @@ export default function Sidebar() {
         <div className="flex items-center justify-center flex-1 min-w-0">
           {collapsed ? (
             <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 400, damping: 25 }}
-              className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-lg shadow-brand-700/30"
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg"
             >
-              <span className="text-white font-bold text-lg">Q</span>
+              <Compass size={20} className="text-white" />
             </motion.div>
           ) : (
             <motion.span
