@@ -18,6 +18,8 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Arquitetura de Navegação 360°:** Navegação fluida entre Dashboard, Prontuário do Paciente e Análise Detalhada de Respostas.
 - **Reorganização Clínica:** Hierarquia de informação otimizada (Resumo → Detalhe → Dados Brutos), com resultados críticos sempre no topo.
 - **Vínculo Inteligente:** Sistema aprimorado para diferenciar respostas de pacientes identificados vs. respostas anônimas via link.
+- **Toggle Grid/List:** Visualização em cards ou lista nas páginas Meus Formulários, Pacientes e Biblioteca. Preferência salva em localStorage.
+- **Mapa de Calor (Activity Heatmap):** Visualização estilo GitHub da atividade clínica no Home. Ano completo com células dinâmicas que se adaptam ao espaço disponível.
 - **Visualização de Respostas (FormResponsesView):**
   - **Labels em Português:** Extrai títulos das questões do schema JSON do formulário com mapa de tradução para instrumentos clínicos (GAD-7, PHQ-9)
   - **Seções Grouped:** Questões organizadas por página/seção seguindo a ordem do schema

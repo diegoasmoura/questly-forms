@@ -1,29 +1,48 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 
 export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
-  const { weeks, maxValue, total, yearStart } = useMemo(() => {
+  const containerRef = useRef(null);
+  const [containerWidth, setContainerWidth] = useState(1000);
+  
+  useEffect(() => {
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+      }
+    };
+    
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
+
+  const { weeks, maxValue, total } = useMemo(() => {
     const today = new Date();
-    const yearStartDate = new Date(today.getFullYear(), 0, 1);
+    const currentYear = today.getFullYear();
+    const yearStartDate = new Date(currentYear, 0, 1);
+    const yearEndDate = new Date(currentYear, 11, 31);
     const weeks = [];
     let maxValue = 0;
     let total = 0;
 
-    // Calculate weeks from start of year to today
-    const startOfYear = new Date(yearStartDate);
-    // Adjust to start from Sunday of that week
-    const dayOfWeek = startOfYear.getDay();
-    startOfYear.setDate(startOfYear.getDate() - dayOfWeek);
+    // Calculate weeks from start of year to end of year
+    const startOfFirstWeek = new Date(yearStartDate);
+    const dayOfWeek = startOfFirstWeek.getDay();
+    startOfFirstWeek.setDate(startOfFirstWeek.getDate() - dayOfWeek);
 
-    let currentDate = new Date(startOfYear);
+    let currentDate = new Date(startOfFirstWeek);
     let currentWeek = [];
+    const maxWeeks = 53;
 
-    while (currentDate <= today || currentWeek.length > 0) {
+    for (let i = 0; i < maxWeeks * 7; i++) {
       if (currentWeek.length === 7) {
         weeks.push(currentWeek);
         currentWeek = [];
       }
 
-      if (currentDate <= today) {
+      const isInYear = currentDate >= yearStartDate && currentDate <= yearEndDate;
+      
+      if (isInYear) {
         const dateStr = currentDate.toISOString().split('T')[0];
         const count = data[dateStr] || 0;
         
@@ -37,19 +56,44 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
           isToday: dateStr === today.toISOString().split('T')[0],
           isFuture: currentDate > today
         });
-        
-        currentDate.setDate(currentDate.getDate() + 1);
-      } else {
+      } else if (currentDate < yearStartDate) {
+        currentWeek.push({
+          date: null,
+          dayOfWeek: currentDate.getDay(),
+          count: 0,
+          isToday: false,
+          isFuture: true
+        });
+      }
+
+      currentDate.setDate(currentDate.getDate() + 1);
+      
+      if (currentDate > yearEndDate && currentWeek.length === 0) {
         break;
       }
     }
 
-    if (currentWeek.length > 0) {
+    while (currentWeek.length > 0 && currentWeek.length < 7) {
+      currentWeek.push({
+        date: null,
+        dayOfWeek: currentWeek.length,
+        count: 0,
+        isToday: false,
+        isFuture: true
+      });
+    }
+    if (currentWeek.length === 7) {
       weeks.push(currentWeek);
     }
 
-    return { weeks, maxValue, total, yearStart: yearStartDate };
+    return { weeks, maxValue, total };
   }, [data]);
+
+  // Calculate cell size based on container width
+  const labelWidth = 40; // Width for day labels
+  const gap = 4;
+  const availableWidth = containerWidth - labelWidth - 48; // 48px for padding
+  const cellSize = Math.max(12, Math.floor((availableWidth - (weeks.length * gap)) / weeks.length));
 
   const getColor = (count) => {
     if (count === 0) return "bg-brand-100";
@@ -62,37 +106,23 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
 
   const dayLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   
+  const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+  const currentYear = new Date().getFullYear();
+  const firstDay = new Date(currentYear, 0, 1);
+  const startOfFirstWeek = new Date(firstDay);
+  startOfFirstWeek.setDate(startOfFirstWeek.getDate() - firstDay.getDay());
+  
   const monthLabels = useMemo(() => {
-    const labels = [];
-    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    const today = new Date();
-    
-    // Get the first day of the year
-    const firstDay = new Date(today.getFullYear(), 0, 1);
-    // Adjust to Sunday start
-    const startOfFirstWeek = new Date(firstDay);
-    startOfFirstWeek.setDate(startOfFirstWeek.getDate() - firstDay.getDay());
-    
-    // Calculate week index for each month
-    months.forEach((month, idx) => {
-      const firstOfMonth = new Date(today.getFullYear(), idx, 1);
+    return months.map((month, idx) => {
+      const firstOfMonth = new Date(currentYear, idx, 1);
       const weekIndex = Math.floor((firstOfMonth - startOfFirstWeek) / (7 * 24 * 60 * 60 * 1000));
-      
-      // Only show if this week is within our data
-      if (weekIndex >= 0 && weekIndex < weeks.length) {
-        labels.push({ month, weekIndex });
-      }
+      return { month, weekIndex: Math.max(0, weekIndex) };
     });
-    
-    return labels;
-  }, [weeks]);
-
-  const cellSize = 14;
-  const gap = 3;
+  }, []);
 
   return (
-    <div className="card p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="card p-6" ref={containerRef}>
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-lg font-bold text-brand-950">{title}</h2>
           <p className="text-xs font-bold text-brand-400 uppercase tracking-widest">
@@ -115,17 +145,17 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
       </div>
 
       {/* Month labels */}
-      <div className="flex mb-2 ml-10">
+      <div className="flex mb-2 ml-12">
         {monthLabels.map(({ month, weekIndex }, idx) => {
           const nextLabel = monthLabels[idx + 1];
           const width = nextLabel 
             ? (nextLabel.weekIndex - weekIndex) * (cellSize + gap) 
             : (weeks.length - weekIndex) * (cellSize + gap);
-          
+
           return (
             <span 
               key={`${month}-${weekIndex}`} 
-              className="text-[10px] text-brand-500 capitalize font-medium"
+              className="text-xs text-brand-500 capitalize font-medium"
               style={{ width: `${width}px` }}
             >
               {month}
@@ -136,41 +166,42 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
 
       <div className="flex">
         {/* Day labels */}
-        <div className="flex flex-col gap-[3px] mr-3">
+        <div className="flex flex-col gap-[4px] mr-3 w-10">
           {dayLabels.map((label, i) => (
-            <span 
+            <div 
               key={i} 
-              className="text-[10px] text-brand-400 font-medium flex items-center"
+              className="text-xs text-brand-400 font-medium flex items-center"
               style={{ height: `${cellSize}px` }}
             >
               {i % 2 === 1 ? label : ''}
-            </span>
+            </div>
           ))}
         </div>
 
-        {/* Heatmap grid */}
-        <div className="flex gap-[3px]">
-          {weeks.map((week, weekIndex) => (
-            <div key={weekIndex} className="flex flex-col gap-[3px]">
-              {week.map((day, dayIndex) => (
-                <div
-                  key={`${weekIndex}-${dayIndex}`}
-                  title={`${new Date(day.date).toLocaleDateString('pt-BR')}: ${day.count} resposta${day.count !== 1 ? 's' : ''}`}
-                  className={`
-                    rounded-sm transition-all cursor-pointer
-                    ${day.isFuture ? 'bg-transparent' : getColor(day.count)}
-                    ${day.isToday ? 'ring-2 ring-brand-600 ring-offset-1' : ''}
-                    hover:ring-2 hover:ring-brand-400
-                  `}
-                  style={{ 
-                    width: `${cellSize}px`, 
-                    height: `${cellSize}px`,
-                    opacity: day.isFuture ? 0 : 1
-                  }}
-                />
-              ))}
-            </div>
-          ))}
+        {/* Heatmap grid - fills available width */}
+        <div className="flex gap-[4px]">
+          {weeks.map((week, weekIndex) => {
+            return (
+              <div key={weekIndex} className="flex flex-col gap-[4px]">
+                {week.map((day, dayIndex) => (
+                  <div
+                    key={`${weekIndex}-${dayIndex}`}
+                    title={day.date ? `${new Date(day.date).toLocaleDateString('pt-BR')}: ${day.count} resposta${day.count !== 1 ? 's' : ''}` : ''}
+                    className={`
+                      rounded-sm transition-all cursor-pointer
+                      ${!day.date ? 'bg-transparent' : day.isFuture ? 'bg-brand-50' : getColor(day.count)}
+                      ${day.isToday ? 'ring-2 ring-brand-600 ring-offset-1' : ''}
+                      hover:ring-2 hover:ring-brand-400
+                    `}
+                    style={{ 
+                      width: `${cellSize}px`, 
+                      height: `${cellSize}px`
+                    }}
+                  />
+                ))}
+              </div>
+            );
+          })}
         </div>
       </div>
 
