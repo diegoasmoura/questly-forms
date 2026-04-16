@@ -84,7 +84,7 @@ export default function Sidebar() {
     >
       {/* Header */}
       <div className="h-16 flex items-center justify-between px-3 border-b border-slate-800 shrink-0">
-        <div className={`flex items-center ${collapsed ? "justify-start pl-1" : "justify-start"} min-w-0`}>
+        <div className={`flex items-center ${collapsed ? "justify-center" : "justify-start"} min-w-0`}>
           {collapsed ? (
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
@@ -114,12 +114,12 @@ export default function Sidebar() {
       </div>
 
       {/* User Profile */}
-      <div className={`px-3 py-4 shrink-0 transition-all duration-300 ${collapsed ? "pl-1" : ""}`}>
+      <div className="px-3 py-4 shrink-0">
         {collapsed ? (
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className={`rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold shadow-md w-[32px] h-[32px]`}
+            className={`rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold shadow-md w-[32px] h-[32px] mx-auto`}
             whileHover={{ scale: 1.05 }}
           >
             {initials}
@@ -145,7 +145,7 @@ export default function Sidebar() {
                 isActive 
                   ? "bg-brand-700/80 text-white" 
                   : "text-slate-400 hover:text-white hover:bg-slate-800/50"
-              } ${collapsed ? "justify-start pl-1 py-2.5" : "py-2.5 px-3"}`}
+              } ${collapsed ? "justify-center py-2.5" : "py-2.5 px-3"}`}
               title={collapsed ? item.label : ""}
             >
               <item.icon size={18} className="shrink-0" />
@@ -169,7 +169,7 @@ export default function Sidebar() {
         <button
           onClick={handleLogout}
           className={`flex items-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 ${
-            collapsed ? "justify-start pl-1 py-2.5" : "py-2.5 px-3"
+            collapsed ? "justify-center py-2.5 w-full" : "py-2.5 px-3"
           }`}
           title={collapsed ? "Logout" : ""}
         >
