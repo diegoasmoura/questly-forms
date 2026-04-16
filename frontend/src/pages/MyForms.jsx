@@ -307,7 +307,7 @@ export default function MyForms() {
                     const isActive = link.active && (!link.expiresAt || new Date(link.expiresAt) > new Date());
                     
                     return (
-                      <div key={link.id} className={`p-4 rounded-lg border transition-all ${isActive ? 'bg-white border-emerald-100 hover:border-emerald-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+                      <div key={link.id} className={`p-4 rounded-lg border transition-all ${isActive ? 'card-bone border-emerald-100 hover:border-emerald-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
                         <div className="flex items-start justify-between gap-3 mb-3">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
@@ -448,7 +448,7 @@ function FormListRow({ form, stats, onDelete, onDuplicate }) {
           {showOptions && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShowOptions(false)} />
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-emerald-100 rounded-xl shadow-lg z-20 py-2">
+              <div className="absolute right-0 mt-2 w-48 card-bone border border-emerald-100 rounded-xl shadow-lg z-20 py-2">
                 <button onClick={() => { onDuplicate(form.id); setShowOptions(false); }} className="w-full px-4 py-2 text-left text-sm font-medium text-emerald-700 hover:bg-emerald-50 flex items-center gap-3">
                   <Copy size={16} /> Duplicar
                 </button>
@@ -478,7 +478,7 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
   const isTemplate = form.source === "template";
 
   return (
-    <div className="card group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full bg-white overflow-hidden border-emerald-100/50">
+    <div className="card group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full card-bone overflow-hidden border-emerald-100/50">
       <div className="p-6 flex-1">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -509,7 +509,7 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
                   className="fixed inset-0 z-10" 
                   onClick={() => setShowOptions(false)}
                 />
-                <div className="absolute right-0 mt-2 w-48 bg-white border border-emerald-100 rounded-2xl shadow-xl z-20 py-2 animate-scale-in">
+                <div className="absolute right-0 mt-2 w-48 card-bone border border-emerald-100 rounded-2xl shadow-xl z-20 py-2 animate-scale-in">
                   <button 
                     onClick={() => { onDuplicate(form.id); setShowOptions(false); }}
                     className="w-full px-4 py-2 text-left text-sm font-medium text-emerald-700 hover:bg-emerald-50 flex items-center gap-3 transition-colors"

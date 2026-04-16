@@ -748,7 +748,7 @@ function PatientCard({ patient, onDelete, onEdit }) {
   const shareLinkCount = patient._count?.shareLinks || 0;
 
   return (
-    <div className="card group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full bg-white overflow-hidden border-emerald-100/50">
+    <div className="card group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full card-bone overflow-hidden border-emerald-100/50">
       <div className="p-6 flex-1">
         <div className="flex items-start justify-between mb-6">
           <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-lg group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">

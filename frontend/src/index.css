@@ -4,6 +4,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --color-bone: #F9F6F0;
+  }
+}
+
+@layer components {
+  .card-bone {
+    background-color: #F9F6F0;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
