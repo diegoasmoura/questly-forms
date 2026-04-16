@@ -12,27 +12,6 @@ import {
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-const TreasureMapIcon = ({ size = 28 }) => (
-  <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="8" y="12" width="48" height="40" rx="2" fill="#E8DCC4" stroke="#8B6914" strokeWidth="2"/>
-    <rect x="12" y="16" width="40" height="32" rx="1" fill="#F5ECD7"/>
-    <path d="M16 20H48M16 26H48M16 32H48M16 38H48M16 44H48" stroke="#C4A574" strokeWidth="0.5" strokeDasharray="2 2"/>
-    <path d="M20 16V48M28 16V48M36 16V48M44 16V48" stroke="#C4A574" strokeWidth="0.5" strokeDasharray="2 2"/>
-    <path d="M36 36L40 40L44 36" stroke="#DC2626" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M36 36L40 40" stroke="#DC2626" strokeWidth="3" strokeLinecap="round"/>
-    <path d="M14 14L18 14L18 18" stroke="#8B6914" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M50 14L46 14L46 18" stroke="#8B6914" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M14 50L18 50L18 46" stroke="#8B6914" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M50 50L46 50L46 46" stroke="#8B6914" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <circle cx="24" cy="26" r="3" fill="none" stroke="#C4A574" strokeWidth="0.5"/>
-    <circle cx="40" cy="28" r="2" fill="none" stroke="#C4A574" strokeWidth="0.5"/>
-    <circle cx="28" cy="42" r="2.5" fill="none" stroke="#C4A574" strokeWidth="0.5"/>
-    <path d="M22 24L24 26L26 24" stroke="#C4A574" strokeWidth="0.5" strokeLinecap="round"/>
-    <path d="M38 26L40 28L42 26" stroke="#C4A574" strokeWidth="0.5" strokeLinecap="round"/>
-    <path d="M26 40L28 42L30 40" stroke="#C4A574" strokeWidth="0.5" strokeLinecap="round"/>
-  </svg>
-);
-
 const menuItems = [
   { icon: Home, label: "Home", path: "/home" },
   { icon: Users, label: "Patients", path: "/patients" },
@@ -83,16 +62,9 @@ export default function Sidebar() {
     >
       {/* Header */}
       <div className="h-16 flex items-center justify-between px-3 border-b border-slate-800 shrink-0">
-        <div className={`flex items-center ${collapsed ? "justify-center" : "justify-start"} min-w-0`}>
+        <div className="flex items-center justify-start min-w-0">
           {collapsed ? (
-            <motion.div
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg"
-            >
-              <TreasureMapIcon size={28} />
-            </motion.div>
+            <div className="w-10" />
           ) : (
             <motion.span
               initial={{ opacity: 0 }}
