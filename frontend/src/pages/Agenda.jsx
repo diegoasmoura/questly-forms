@@ -1,11 +1,28 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import Calendar from "react-calendar";
 import { api } from "../lib/api";
-import { Calendar, Clock, Users, ChevronRight, ArrowRight } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, Users, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import "react-calendar/dist/Calendar.css";
+
+const tileClassName = ({ date, view }) => {
+  if (view === "month") {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkDate = new Date(date);
+    checkDate.setHours(0, 0, 0, 0);
+
+    if (checkDate.getTime() === today.getTime()) {
+      return "bg-emerald-500 text-white rounded-full";
+    }
+  }
+  return "";
+};
 
 export default function Agenda() {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [calendarDate, setCalendarDate] = useState(new Date());
 
   useEffect(() => {
     loadPatients();
@@ -25,24 +42,6 @@ export default function Agenda() {
   const today = new Date();
   const todayStr = today.toISOString().split("T")[0];
 
-  const getWeekDays = () => {
-    const days = [];
-    const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      days.push({
-        date: date.toISOString().split("T")[0],
-        dayName: dayNames[date.getDay()],
-        dayNum: date.getDate(),
-        isToday: i === 0,
-      });
-    }
-    return days;
-  };
-
-  const weekDays = getWeekDays();
-
   const patientsWithNextSession = patients.filter(
     (p) => p.nextSession && p.isActive !== false
   );
@@ -54,7 +53,9 @@ export default function Agenda() {
 
   const thisWeekSessions = patientsWithNextSession.filter((p) => {
     const sessionDate = p.nextSession?.split("T")[0];
-    return sessionDate >= todayStr && sessionDate <= weekDays[6].date;
+    const weekEnd = new Date(today);
+    weekEnd.setDate(today.getDate() + 7);
+    return sessionDate >= todayStr && sessionDate <= weekEnd.toISOString().split("T")[0];
   });
 
   const frequencyLabels = {
@@ -69,6 +70,23 @@ export default function Agenda() {
     if (!dateStr) return "";
     const date = new Date(dateStr);
     return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+  };
+
+  const monthSessions = patientsWithNextSession.filter((p => {
+    if (!p.nextSession) return false;
+    const sessionDate = new Date(p.nextSession);
+    const calDate = new Date(calendarDate);
+    return sessionDate.getMonth() === calDate.getMonth() && 
+           sessionDate.getFullYear() === calDate.getFullYear();
+  }));
+
+  const tileDisabled = ({ date, view }) => {
+    return view === "month" && date < new Date(today.setHours(0, 0, 0, 0));
+  };
+
+  const getSessionsForDay = (date) => {
+    const dateStr = date.toISOString().split("T")[0];
+    return patientsWithNextSession.filter((p) => p.nextSession?.split("T")[0] === dateStr);
   };
 
   if (loading) {
@@ -93,7 +111,7 @@ export default function Agenda() {
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
-              <Calendar size={20} className="text-emerald-600" />
+              <CalendarIcon size={20} className="text-emerald-600" />
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-800">{todaysSessions.length}</p>
@@ -127,72 +145,49 @@ export default function Agenda() {
         </div>
       </div>
 
-      {/* Week View */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-100">
-          <h2 className="text-sm font-semibold text-slate-700">Próximos 7 dias</h2>
-        </div>
+      {/* Month Calendar */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+        <h2 className="text-sm font-semibold text-slate-700 mb-4">
+          {calendarDate.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
+        </h2>
         
-        <div className="grid grid-cols-7 divide-x divide-slate-100">
-          {weekDays.map((day) => {
-            const daySessions = patientsWithNextSession.filter((p) => 
-              p.nextSession?.split("T")[0] === day.date
-            );
-            
-            return (
-              <div key={day.date} className={`p-3 ${day.isToday ? "bg-emerald-50" : ""}`}>
-                <div className="text-center mb-2">
-                  <p className={`text-xs font-medium ${day.isToday ? "text-emerald-600" : "text-slate-500"}`}>
-                    {day.dayName}
-                  </p>
-                  <p className={`text-lg font-semibold ${day.isToday ? "text-emerald-700" : "text-slate-800"}`}>
-                    {day.dayNum}
-                  </p>
-                </div>
-                
-                <div className="space-y-1">
-                  {daySessions.length === 0 ? (
-                    <p className="text-xs text-slate-400 text-center">-</p>
-                  ) : (
-                    daySessions.map((p) => (
-                      <Link
-                        key={p.id}
-                        to={`/patients/${p.id}`}
-                        className="block px-2 py-1.5 text-xs bg-emerald-100 text-emerald-700 rounded-md hover:bg-emerald-200 transition-colors truncate"
-                      >
-                        {p.sessionTime?.slice(0, 5)} {p.name?.split(" ")[0]}
-                      </Link>
-                    ))
-                  )}
-                </div>
-              </div>
-            );
-          })}
+        <Calendar
+          onChange={setCalendarDate}
+          value={calendarDate}
+          locale="pt-BR"
+          view="month"
+          tileClassName={tileClassName}
+          tileDisabled={tileDisabled}
+          formatShortWeekday={(locale, index) => ["D", "S", "T", "Q", "Q", "S", "S"][index]}
+          className="w-full"
+        />
+        
+        {/* Legend */}
+        <div className="flex gap-4 mt-4 pt-4 border-t border-slate-100">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
+            <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+            Hoje
+          </div>
+          <div className="flex items-center gap-2 text-xs text-slate-500">
+            <div className="w-3 h-3 bg-amber-400 rounded-full"></div>
+            Sessão agendada
+          </div>
         </div>
       </div>
 
-      {/* Upcoming Sessions List */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-700">Próximas sessões</h2>
-          <Link to="/patients" className="text-xs text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
-            Ver todos <ArrowRight size={12} />
-          </Link>
-        </div>
-        
-        <div className="divide-y divide-slate-100">
-          {patientsWithNextSession.length === 0 ? (
-            <div className="p-8 text-center">
-              <Calendar size={32} className="text-slate-300 mx-auto mb-2" />
-              <p className="text-sm text-slate-500">Nenhuma sessão agendada</p>
-              <Link to="/patients" className="text-xs text-emerald-600 hover:text-emerald-700 mt-2 inline-block">
-                Configurar agenda na aba Agenda do paciente
-              </Link>
-            </div>
-          ) : (
-            patientsWithNextSession
+      {/* Sessions for selected month */}
+      {monthSessions.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-slate-700">
+              Sessões em {calendarDate.toLocaleDateString("pt-BR", { month: "long" })}
+            </h2>
+            <span className="text-xs text-slate-500">{monthSessions.length} sessões</span>
+          </div>
+          
+          <div className="divide-y divide-slate-100 max-h-64 overflow-y-auto">
+            {monthSessions
               .sort((a, b) => new Date(a.nextSession) - new Date(b.nextSession))
-              .slice(0, 10)
               .map((patient) => (
                 <Link
                   key={patient.id}
@@ -200,7 +195,7 @@ export default function Agenda() {
                   className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-semibold text-sm">
+                    <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 font-semibold text-sm">
                       {patient.name?.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                     </div>
                     <div>
@@ -211,19 +206,29 @@ export default function Agenda() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium text-emerald-700">
+                    <p className="text-sm font-medium text-amber-700">
                       {formatSessionDate(patient.nextSession)}
                     </p>
                     <p className="text-xs text-slate-500">
                       {new Date(patient.nextSession).toLocaleDateString("pt-BR", { weekday: "short" })}
                     </p>
                   </div>
-                  <ChevronRight size={16} className="text-slate-400" />
                 </Link>
-              ))
-          )}
+              ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Empty state */}
+      {patientsWithNextSession.length === 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 text-center">
+          <CalendarIcon size={32} className="text-slate-300 mx-auto mb-2" />
+          <p className="text-sm text-slate-500">Nenhuma sessão agendada</p>
+          <Link to="/patients" className="text-xs text-emerald-600 hover:text-emerald-700 mt-2 inline-block">
+            Configurar agenda na aba Agenda do paciente
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
