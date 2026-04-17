@@ -104,7 +104,7 @@ export default function Login() {
               <div className="w-12 h-12 rounded-lg bg-emerald-700 flex items-center justify-center">
                 <span className="text-xl font-bold">Q</span>
               </div>
-              <span className="text-2xl font-semibold">Questly Form</span>
+              <span className="text-2xl font-semibold">Questly Forms</span>
             </div>
             <h1 className="text-4xl font-semibold leading-tight mb-4">
               Gerencie seus formulários clínicos com facilidade

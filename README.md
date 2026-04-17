@@ -1,4 +1,4 @@
-# Questly Form - Gestão Clínica para Psicólogos
+# Questly Forms - Gestão Clínica para Psicólogos
 
 Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criarem formulários clínicos baseados em evidências e acompanharem a evolução terapêutica através de dados.
 
@@ -141,7 +141,7 @@ const day = date.toLocaleDateString('en-CA'); // YYYY-MM-DD local
 - **Ícones Centralizados:** Todos os ícones centralizados quando retraído
 - **Avatar do Usuário:** Siglas (DM) aparecem apenas quando sidebar retraído
 - **Paleta Azul Profissional:** Avatar com gradientes em tons de azul que combinam com o tema escuro
-- **Typewriter Animation:** Nome "Questly Form" aparece letra por letra ao expandir
+- **Typewriter Animation:** Nome "Questly Forms" aparece letra por letra ao expandir
 
 ### Grid Pattern em Todas as Telas (v2.5)
 - **Background Grid Verde:** Padrão sutil de linhas emerald (#10b981) com 20% de opacidade
@@ -158,7 +158,7 @@ const day = date.toLocaleDateString('en-CA'); // YYYY-MM-DD local
 - **Dias futuros:** Exibidos em slate-200 com opacidade reduzida
 
 ### Rebranding Visual (v2.0)
-- **Novo Nome:** Curious → Questly Form
+- **Novo Nome:** Curious → Questly Forms
 - **Nova Identidade Visual:** Design profissional com cores slate e verde brand
 - **Sidebar Escura:** slate-900 para navegação clara e moderna
 - **Background Suave:** slate-100 (#f1f5f9) em vez de branco puro
@@ -173,7 +173,7 @@ A página inicial é uma landing page minimalista com animações 3D que demonst
 
 ```
 ┌─────────────────────────────────────────┐
-│  [Logo Q] Questly Form   [Entrar] [Começar]│
+│  [Logo Q] Questly Forms   [Entrar] [Começar]│
 ├─────────────────────────────────────────┤
 │                                         │
 │        Avalie.                          │
@@ -193,7 +193,7 @@ A página inicial é uma landing page minimalista com animações 3D que demonst
 │     ║  ○ Sim, mais da metade   ║       │
 │     ╚═══════════════════════════╝       │
 ├─────────────────────────────────────────┤
-│      Questly Form 2025. Todos os       │
+│      Questly Forms 2025. Todos os       │
 │           direitos reservados.           │
 └─────────────────────────────────────────┘
 ```

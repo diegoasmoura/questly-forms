@@ -164,6 +164,14 @@ export default function Sidebar() {
                 >
                   m
                 </motion.span>
+                <motion.span
+                  className="inline-block"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.88, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
+                >
+                  s
+                </motion.span>
               </motion.span>
             </div>
           )}

@@ -113,7 +113,7 @@ export default function Landing() {
             <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
               <span className="text-white font-bold text-sm">Q</span>
             </div>
-            <span className="text-lg font-semibold text-slate-900">Questly Form</span>
+            <span className="text-lg font-semibold text-slate-900">Questly Forms</span>
           </div>
           <div className="flex items-center gap-3">
             <Link
@@ -169,7 +169,7 @@ export default function Landing() {
               transition={{ delay: 0.4, duration: 0.6 }}
               className="text-base text-slate-600 max-w-xl mx-auto"
             >
-              O Questly Form transforma seus formulários em experiências digitais organizadas, padronizadas e prontas para análise.
+              O Questly Forms transforma seus formulários em experiências digitais organizadas, padronizadas e prontas para análise.
             </motion.p>
           </motion.div>
         </div>
@@ -213,7 +213,7 @@ export default function Landing() {
         className="w-full py-6 shrink-0"
       >
         <p className="text-xs text-slate-400 text-center">
-          Questly Form 2025. Todos os direitos reservados.
+          Questly Forms 2025. Todos os direitos reservados.
         </p>
       </motion.footer>
     </div>
