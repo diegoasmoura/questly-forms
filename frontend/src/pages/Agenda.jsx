@@ -59,7 +59,7 @@ export default function Agenda() {
   });
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 bg-slate-50 min-h-screen">
+    <div className="p-4 sm:p-6 h-full flex flex-col overflow-hidden animate-fade-in space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -116,18 +116,22 @@ export default function Agenda() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center h-96 bg-white rounded-3xl border border-slate-200 border-dashed">
+        <div className="flex-1 flex items-center justify-center bg-white/50 rounded-3xl border border-slate-300 border-dashed">
           <div className="text-center">
             <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
             <p className="text-slate-500 font-medium">Carregando seus horários...</p>
           </div>
         </div>
-      ) : view === "week" ? (
-        <WeekView weekDays={weekDays} appointments={appointments} />
-      ) : view === "month" ? (
-        <MonthView currentDate={currentDate} appointments={appointments} />
       ) : (
-        <ListView appointments={appointments} />
+        <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
+          {view === "week" ? (
+            <WeekView weekDays={weekDays} appointments={appointments} />
+          ) : view === "month" ? (
+            <MonthView currentDate={currentDate} appointments={appointments} />
+          ) : (
+            <ListView appointments={appointments} />
+          )}
+        </div>
       )}
     </div>
   );
