@@ -78,14 +78,14 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 
 ## Novidades Recentes
 
-### Aba Agenda (v2.16)
-- **Campos da Agenda:** Horário Fixo, Duração, Periodicidade, Próxima Sessão
-- **Select Horário Fixo:** Dropdown com horários de 07:00 a 21:00 (intervalo de 30min)
-- **Select Duração:** 30, 45, 50, 60, 90 minutos
-- **Select Periodicidade:** Semanal, Quinzenal, Mensal, 2x por semana, Outro
-- **Próxima Sessão:** Date picker para agendar próxima consulta
-- **Modelo Prisma:** sessionTime, sessionDuration, sessionFrequency, nextSession
-- **Backend:** Campos adicionados allowedFields no POST e PUT
+### Agenda Profissional (v3.0)
+- **Multivisão Avançada:** Alternância rápida entre visões Semanal, Mensal e em Lista.
+- **Múltiplos Agendamentos:** Suporte para pacientes com sessões recorrentes (2x ou mais por semana) com gerenciamento de slots individuais.
+- **Visão Semanal Compacta:** Grade otimizada de 07:00 às 21:00 com alto contraste e design denso para evitar rolagem.
+- **Visão Mensal Estruturada:** Calendário clássico com indicadores de sessão e destaque para o dia atual.
+- **Detecção de Conflitos:** Verificação em tempo real de sobreposição de horários no cadastro do paciente com alerta visual (vermelho) e indicação de choque.
+- **Integração com Prontuário:** Acesso direto aos dados do paciente e histórico clínico a partir de qualquer visão da agenda.
+- **Modelo Prisma Evoluído:** Implementação da tabela `Appointment` para gestão robusta de sessões recorrentes.
 
 ### Tab Renomeada (v2.16)
 - **Config. → Agenda:** Aba de configurações renomeada para "Agenda"

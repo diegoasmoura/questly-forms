@@ -7,6 +7,7 @@ import responseRoutes from "./routes/responses.js";
 import shareRoutes from "./routes/share.js";
 import patientRoutes from "./routes/patients.js";
 import attachmentRoutes from "./routes/attachments.js";
+import appointmentRoutes from "./routes/appointments.js";
 
 dotenv.config();
 
@@ -67,7 +68,8 @@ app.use("/api/forms", formRoutes);
 app.use("/api/responses", responseRoutes);
 app.use("/api/share", shareRoutes);
 app.use("/api/patients", patientRoutes);
-app.use("/api/patients", attachmentRoutes);
+app.use("/api/attachments", attachmentRoutes);
+app.use("/api/appointments", appointmentRoutes);
 
 app.use((err, req, res, next) => {
   if (err.message === 'Origem não permitida') {

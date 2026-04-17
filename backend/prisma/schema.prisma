@@ -62,9 +62,27 @@ model Patient {
   responses      Response[]
   shareLinks     ShareLink[]
   attachments    Attachment[]
+  appointments   Appointment[]
 
   @@unique([email, psychologistId])
   @@unique([cpf, psychologistId])
+}
+
+model Appointment {
+  id              String   @id @default(uuid())
+  patientId       String
+  dayOfWeek       Int      // 0 (Dom) a 6 (Sab)
+  time            String   // HH:mm
+  duration        Int      // em minutos
+  
+  patient         Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  psychologistId  String
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([patientId])
+  @@index([psychologistId])
 }
 
 model Attachment {

@@ -874,41 +874,75 @@ function EditPatientModal({ patient, onClose, onSave }) {
   const [attachments, setAttachments] = useState([]);
   const [loadingAttachments, setLoadingAttachments] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [appointments, setAppointments] = useState([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(false);
+  const [conflicts, setConflicts] = useState({}); // { slotId: conflictData }
 
   useEffect(() => {
     loadAttachments();
+    loadPatientAppointments();
   }, [patient.id]);
 
-  const loadAttachments = async () => {
-    setLoadingAttachments(true);
+  const loadPatientAppointments = async () => {
+    setLoadingAppointments(true);
     try {
-      const data = await api.getAttachments(patient.id);
-      setAttachments(data);
+      const data = await api.getPatientAppointments(patient.id);
+      setAppointments(data || []);
     } catch (error) {
-      console.error("Erro ao carregar anexos:", error);
+      console.error("Erro ao carregar agendamentos:", error);
     } finally {
-      setLoadingAttachments(false);
+      setLoadingAppointments(false);
     }
   };
 
-  const handleCepLookup = async (cep) => {
-    const cleanCep = cep.replace(/\D/g, "");
-    if (cleanCep.length === 8) {
-      try {
-        const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
-        const data = await response.json();
-        if (!data.erro) {
-          setFormData(prev => ({
-            ...prev,
-            street: data.logradouro,
-            neighborhood: data.bairro,
-            city: data.localidade,
-            state: data.uf
-          }));
-        }
-      } catch (error) {
-        console.error("CEP lookup failed:", error);
-      }
+  const checkConflict = async (id, dayOfWeek, time) => {
+    try {
+      const result = await api.checkAppointmentConflict({
+        dayOfWeek,
+        time,
+        excludePatientId: patient.id
+      });
+      
+      setConflicts(prev => ({
+        ...prev,
+        [id]: result.hasConflict ? result.conflicts[0] : null
+      }));
+    } catch (error) {
+      console.error("Erro ao verificar conflito:", error);
+    }
+  };
+
+  const addAppointmentSlot = () => {
+    const newId = `new-${Date.now()}`;
+    setAppointments([...appointments, {
+      id: newId,
+      dayOfWeek: 1,
+      time: "08:00",
+      duration: 50,
+      isNew: true
+    }]);
+    checkConflict(newId, 1, "08:00");
+  };
+
+  const removeAppointmentSlot = (id) => {
+    setAppointments(appointments.filter(a => a.id !== id));
+    setConflicts(prev => {
+      const newConflicts = { ...prev };
+      delete newConflicts[id];
+      return newConflicts;
+    });
+  };
+
+  const updateAppointmentSlot = (id, field, value) => {
+    const updatedApps = appointments.map(a => 
+      a.id === id ? { ...a, [field]: value } : a
+    );
+    setAppointments(updatedApps);
+
+    // Se mudou dia ou hora, verifica conflito
+    if (field === "dayOfWeek" || field === "time") {
+      const slot = updatedApps.find(a => a.id === id);
+      checkConflict(id, slot.dayOfWeek, slot.time);
     }
   };
 
@@ -917,6 +951,14 @@ function EditPatientModal({ patient, onClose, onSave }) {
     setSaving(true);
     try {
       await api.updatePatient(patient.id, formData);
+      
+      const slots = appointments.map(({ dayOfWeek, time, duration }) => ({
+        dayOfWeek: parseInt(dayOfWeek),
+        time,
+        duration: parseInt(duration)
+      }));
+      await api.saveAppointmentsBatch(patient.id, slots);
+      
       onSave();
     } catch (error) {
       alert("Erro ao salvar: " + error.message);
@@ -1287,90 +1329,135 @@ function EditPatientModal({ patient, onClose, onSave }) {
 
             {editTab === "settings" && (
               <div className="space-y-5">
-                <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
-                  <h4 className="text-sm font-semibold text-emerald-800 mb-4">Agenda do Paciente</h4>
+                <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h4 className="text-sm font-bold text-emerald-800">Agenda do Paciente</h4>
+                      <p className="text-[10px] text-emerald-600 font-medium uppercase tracking-wider">Horários fixos de atendimento</p>
+                    </div>
+                    <button 
+                      type="button"
+                      onClick={addAppointmentSlot}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500 text-white rounded-xl text-xs font-bold hover:bg-emerald-600 transition-all shadow-sm"
+                    >
+                      <Plus size={14} />
+                      Adicionar Horário
+                    </button>
+                  </div>
                   
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Horário Fixo</label>
-                        <select
-                          className="input text-sm"
-                          value={formData.sessionTime}
-                          onChange={e => setFormData({ ...formData, sessionTime: e.target.value })}
-                        >
-                          <option value="">Selecione</option>
-                          <option value="07:00">07:00</option>
-                          <option value="07:30">07:30</option>
-                          <option value="08:00">08:00</option>
-                          <option value="08:30">08:30</option>
-                          <option value="09:00">09:00</option>
-                          <option value="09:30">09:30</option>
-                          <option value="10:00">10:00</option>
-                          <option value="10:30">10:30</option>
-                          <option value="11:00">11:00</option>
-                          <option value="11:30">11:30</option>
-                          <option value="12:00">12:00</option>
-                          <option value="12:30">12:30</option>
-                          <option value="13:00">13:00</option>
-                          <option value="13:30">13:30</option>
-                          <option value="14:00">14:00</option>
-                          <option value="14:30">14:30</option>
-                          <option value="15:00">15:00</option>
-                          <option value="15:30">15:30</option>
-                          <option value="16:00">16:00</option>
-                          <option value="16:30">16:30</option>
-                          <option value="17:00">17:00</option>
-                          <option value="17:30">17:30</option>
-                          <option value="18:00">18:00</option>
-                          <option value="18:30">18:30</option>
-                          <option value="19:00">19:00</option>
-                          <option value="19:30">19:30</option>
-                          <option value="20:00">20:00</option>
-                          <option value="20:30">20:30</option>
-                          <option value="21:00">21:00</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Duração</label>
-                        <select
-                          className="input text-sm"
-                          value={formData.sessionDuration}
-                          onChange={e => setFormData({ ...formData, sessionDuration: e.target.value })}
-                        >
-                          <option value="30">30 min</option>
-                          <option value="45">45 min</option>
-                          <option value="50">50 min</option>
-                          <option value="60">60 min</option>
-                          <option value="90">90 min</option>
-                        </select>
-                      </div>
+                  {loadingAppointments ? (
+                    <div className="py-8 text-center">
+                      <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
                     </div>
+                  ) : appointments.length === 0 ? (
+                    <div className="py-8 text-center bg-white/50 rounded-xl border border-dashed border-emerald-200">
+                      <Calendar size={24} className="mx-auto text-emerald-300 mb-2" />
+                      <p className="text-xs text-emerald-600 font-medium">Nenhum horário definido</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {appointments.map((app, idx) => {
+                        const conflict = conflicts[app.id];
+                        return (
+                          <div 
+                            key={app.id} 
+                            className={`bg-white p-4 rounded-xl border transition-all animate-scale-in shadow-sm ${conflict ? 'border-red-200 bg-red-50/20' : 'border-emerald-100'}`}
+                          >
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-2">
+                                <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${conflict ? 'bg-red-100 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                                  Horário #{idx + 1}
+                                </span>
+                                {conflict && (
+                                  <div className="flex items-center gap-1 text-[10px] font-bold text-red-600 animate-pulse">
+                                    <AlertTriangle size={12} />
+                                    CONFLITO COM: {conflict.patient?.name}
+                                  </div>
+                                )}
+                              </div>
+                              <button 
+                                type="button" 
+                                onClick={() => removeAppointmentSlot(app.id)}
+                                className="text-slate-400 hover:text-red-500 p-1 transition-colors"
+                              >
+                                <Trash size={14} />
+                              </button>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Dia da Semana</label>
+                                <select
+                                  className={`input text-xs font-semibold py-2 ${conflict ? 'border-red-300 focus:ring-red-500' : ''}`}
+                                  value={app.dayOfWeek}
+                                  onChange={e => updateAppointmentSlot(app.id, "dayOfWeek", e.target.value)}
+                                >
+                                  {["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"].map((day, i) => (
+                                    <option key={i} value={i}>{day}</option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Horário</label>
+                                <select
+                                  className={`input text-xs font-semibold py-2 ${conflict ? 'border-red-300 focus:ring-red-500' : ''}`}
+                                  value={app.time}
+                                  onChange={e => updateAppointmentSlot(app.id, "time", e.target.value)}
+                                >
+                                  <option value="07:00">07:00</option>
+                                  <option value="07:30">07:30</option>
+                                  <option value="08:00">08:00</option>
+                                  <option value="08:30">08:30</option>
+                                  <option value="09:00">09:00</option>
+                                  <option value="09:30">09:30</option>
+                                  <option value="10:00">10:00</option>
+                                  <option value="10:30">10:30</option>
+                                  <option value="11:00">11:00</option>
+                                  <option value="11:30">11:30</option>
+                                  <option value="12:00">12:00</option>
+                                  <option value="13:00">13:00</option>
+                                  <option value="14:00">14:00</option>
+                                  <option value="15:00">15:00</option>
+                                  <option value="16:00">16:00</option>
+                                  <option value="17:00">17:00</option>
+                                  <option value="18:00">18:00</option>
+                                  <option value="19:00">19:00</option>
+                                  <option value="20:00">20:00</option>
+                                  <option value="21:00">21:00</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Duração</label>
+                                <select
+                                  className="input text-xs font-semibold py-2"
+                                  value={app.duration}
+                                  onChange={e => updateAppointmentSlot(app.id, "duration", e.target.value)}
+                                >
+                                  <option value="30">30 min</option>
+                                  <option value="45">45 min</option>
+                                  <option value="50">50 min</option>
+                                  <option value="60">60 min</option>
+                                  <option value="90">90 min</option>
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
 
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-2">Periodicidade</label>
-                      <select
-                        className="input text-sm"
-                        value={formData.sessionFrequency}
-                        onChange={e => setFormData({ ...formData, sessionFrequency: e.target.value })}
-                      >
-                        <option value="semanal">Semanal</option>
-                        <option value="quinzenal">Quinzenal</option>
-                        <option value="mensal">Mensal</option>
-                        <option value="semanal-2">2x por semana</option>
-                        <option value="outro">Outro</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-2">Próxima Sessão</label>
-                      <input
-                        type="date"
-                        className="input text-sm"
-                        value={formData.nextSession}
-                        onChange={e => setFormData({ ...formData, nextSession: e.target.value })}
-                      />
-                    </div>
+                  <div className="mt-6 pt-6 border-t border-emerald-100">
+                    <label className="block text-[10px] font-bold text-emerald-800 uppercase mb-2">Próxima Sessão (Excepcional)</label>
+                    <input
+                      type="date"
+                      className="input text-xs font-semibold"
+                      value={formData.nextSession}
+                      onChange={e => setFormData({ ...formData, nextSession: e.target.value })}
+                    />
+                    <p className="text-[10px] text-emerald-600/70 mt-2 font-medium italic">
+                      * Use este campo para marcar uma sessão fora do horário fixo habitual.
+                    </p>
                   </div>
                 </div>
               </div>

@@ -99,49 +99,29 @@ export const api = {
   deletePatient: (id) => request(`/patients/${id}`, { method: "DELETE" }),
 
   // Attachments
-  getAttachments: (patientId) => request(`/patients/${patientId}/attachments`),
+  getAttachments: (patientId) => request(`/attachments/patient/${patientId}`),
   uploadAttachment: async (patientId, file) => {
     const token = localStorage.getItem("token");
     const formData = new FormData();
     formData.append("file", file);
     
-    const res = await fetch(`${API_URL}/patients/${patientId}/attachments`, {
+    const res = await fetch(`${API_URL}/attachments/patient/${patientId}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
     });
     
     if (!res.ok) {
-      const text = await res.text();
-      console.error("Upload error response:", text);
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        throw new ApiError(text || "Erro ao fazer upload", res.status);
-      }
+      const data = await res.json();
       throw new ApiError(data.error || "Erro ao fazer upload", res.status);
     }
     
     return res.json();
   },
-  deleteAttachment: async (attachmentId) => {
-    const token = localStorage.getItem("token");
-    const res = await fetch(`${API_URL}/patients/attachments/${attachmentId}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    
-    if (!res.ok) {
-      const data = await res.json();
-      throw new ApiError(data.error || "Erro ao deletar arquivo", res.status);
-    }
-    
-    return res.json();
-  },
+  deleteAttachment: (attachmentId) => request(`/attachments/${attachmentId}`, { method: "DELETE" }),
   downloadAttachment: async (attachmentId, filename) => {
     const token = localStorage.getItem("token");
-    const res = await fetch(`${API_URL}/patients/attachments/${attachmentId}/download`, {
+    const res = await fetch(`${API_URL}/attachments/${attachmentId}/download`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     
@@ -159,6 +139,18 @@ export const api = {
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
   },
+
+  // Appointments (Agenda)
+  getAppointments: () => request("/appointments"),
+  getPatientAppointments: (patientId) => request(`/appointments/patient/${patientId}`),
+  saveAppointmentsBatch: (patientId, slots) => request("/appointments/batch", { 
+    method: "POST", 
+    body: JSON.stringify({ patientId, slots }) 
+  }),
+  checkAppointmentConflict: (data) => request("/appointments/check-conflict", { 
+    method: "POST", 
+    body: JSON.stringify(data) 
+  }),
 };
 
 export { ApiError };
