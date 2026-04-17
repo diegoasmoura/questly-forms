@@ -78,6 +78,32 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 
 ## Novidades Recentes
 
+### Correções de Fuso Horário (v2.12)
+- **Problema:** O mapa de calor não coloria os dias corretos mesmo com respostas existentes
+- **Causa:** Backend retornava datas em UTC (ISOString) mas frontend usava timezone local
+- **Solução:** Usar `toLocaleDateString('en-CA')` no backend para gerar YYYY-MM-DD no fuso local
+- **Arquivo:** `backend/src/routes/responses.js` - função de agregação de diários
+
+⚠️ **Importante:** Ao trabalhar com datas, SEMPRE use timezone local:
+```javascript
+// ❌ Errado - UTC
+const day = new Date(r.createdAt).toISOString().split('T')[0];
+
+// ✅ Correto - Timezone local
+const day = date.toLocaleDateString('en-CA'); // YYYY-MM-DD local
+```
+
+### Design - Cores Diferenciadas (v2.11)
+- **Forms:** Background Bone (#F9F6F0) com linhas horizontais de caderno
+- **Patients:** Background Warm Cream (#F0EBE3) com acentos em âmbar
+- **Botões:** Tooltips adicionados em todas as telas de lista
+- **Sem Atividade:** Fundo azul claro (blue-50) com texto slate
+
+### Correção do FormBuilder (v2.12)
+- **Problema:** Ao editar formulário, dados não carregavam corretamente
+- **Solução:** Adicionado delay de 100ms + loading state antes de definir JSON no Creator
+- **Melhoria:** Estado de loading visual com indicador animado
+
 ### Segurança (v2.10)
 - **CORS Restrito:** Apenas origens permitidas configuradas
 - **Rate Limiting:** 5 tentativas de login por 15 minutos por IP

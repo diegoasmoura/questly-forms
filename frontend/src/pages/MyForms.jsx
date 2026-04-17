@@ -561,7 +561,7 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
             <ResponseTrendChart data={aggregateData} title="" height={64} />
           </div>
         ) : (
-          <div className="mt-6 h-16 flex items-center justify-center border border-dashed border-emerald-200 rounded-xl bg-emerald-50/50">
+          <div className="mt-6 h-16 flex items-center justify-center border border-dashed border-blue-200 rounded-xl bg-blue-50/50">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Sem atividade recente</p>
           </div>
         )}

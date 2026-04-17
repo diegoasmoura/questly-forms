@@ -64,6 +64,14 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
           isToday: false,
           isFuture: true
         });
+      } else {
+        currentWeek.push({
+          date: null,
+          dayOfWeek: currentDate.getDay(),
+          count: 0,
+          isToday: false,
+          isFuture: true
+        });
       }
 
       currentDate.setDate(currentDate.getDate() + 1);

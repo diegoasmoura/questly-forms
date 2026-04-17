@@ -16,7 +16,10 @@ export default function FormBuilder() {
   const [title, setTitle] = useState("");
   const [saving, setSaving] = useState(false);
   const [savingSuccess, setSavingSuccess] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [creatorReady, setCreatorReady] = useState(false);
   const titleInputRef = useRef(null);
+  const formLoadedRef = useRef(false);
 
   // Initialize SurveyJS Creator with v2.x options
   const creator = useMemo(() => {
@@ -27,7 +30,6 @@ export default function FormBuilder() {
       showJSONEditorTab: true,
       showEmbeddedSurveyTab: false,
       isAutoSave: false,
-      // v2.x property grid settings
       showSidebar: true,
       propertyGridNavigationMode: "accordion",
       showOneCategoryInPropertyGrid: false,
@@ -35,39 +37,66 @@ export default function FormBuilder() {
     
     const c = new SurveyCreator(options);
 
-    // Explicitly ensure visibility of all tabs
     c.showDesignerTab = true;
     c.showPreviewTab = true;
-    
-    // Ensure all property categories are visible
     c.showOneCategoryInPropertyGrid = false;
+
+    // Wait for creator to be ready
+    if (creator.survey) {
+      setCreatorReady(true);
+    }
 
     return c;
   }, []);
 
-  // Load existing form
+  // Load existing form - waits for creator to be ready
   useEffect(() => {
-    if (id) {
-      api.getForm(id).then((data) => {
-        setForm(data);
-        setTitle(data.title);
-        if (titleInputRef.current) {
-          titleInputRef.current.value = data.title;
-        }
-        if (data.schema) {
-          creator.JSON = data.schema;
-        }
-      }).catch(() => navigate("/dashboard"));
-    } else {
+    if (!id) {
+      // New form
       creator.JSON = {
-        title: "New Form",
+        title: "Novo Formulário",
         pages: [{ elements: [] }],
       };
+      setLoading(false);
+      return;
     }
+
+    // Existing form - fetch and load
+    api.getForm(id)
+      .then((data) => {
+        setForm(data);
+        setTitle(data.title);
+        formLoadedRef.current = data;
+        
+        // Set JSON after a small delay to ensure creator is ready
+        const timeoutId = setTimeout(() => {
+          if (data.schema) {
+            creator.JSON = data.schema;
+          }
+          if (titleInputRef.current) {
+            titleInputRef.current.value = data.title;
+          }
+          setLoading(false);
+        }, 100);
+        
+        return () => clearTimeout(timeoutId);
+      })
+      .catch(() => {
+        navigate("/dashboard");
+      });
   }, [id, navigate, creator]);
+
+  // Sync title input with state
+  useEffect(() => {
+    if (titleInputRef.current && formLoadedRef.current) {
+      titleInputRef.current.value = title;
+    }
+  }, [title]);
 
   // Listen for title changes in the survey
   useEffect(() => {
+    if (!creator.survey) return;
+    
     const onPropertyChanged = (_, options) => {
       if (options.name === "title" && titleInputRef.current) {
         setTitle(options.newValue || "");
@@ -75,7 +104,7 @@ export default function FormBuilder() {
       }
     };
     creator.survey.onPropertyChanged.add(onPropertyChanged);
-    return () => creator.survey.onPropertyChanged.remove(onPropertyChanged);
+    return () => creator.survey?.onPropertyChanged?.remove(onPropertyChanged);
   }, [creator]);
 
   const handleSave = useCallback(async () => {
@@ -172,9 +201,18 @@ export default function FormBuilder() {
 
       {/* Creator Container */}
       <div className="flex-1 relative w-full overflow-hidden">
-        <div className="absolute inset-0">
-          <SurveyCreatorComponent creator={creator} />
-        </div>
+        {loading ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-50">
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="animate-spin text-emerald-600" size={32} />
+              <span className="text-sm text-slate-500 font-medium">Carregando formulário...</span>
+            </div>
+          </div>
+        ) : (
+          <div className="absolute inset-0">
+            <SurveyCreatorComponent creator={creator} />
+          </div>
+        )}
       </div>
     </div>
   );

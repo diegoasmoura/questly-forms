@@ -142,10 +142,11 @@ router.get("/form/:formId/aggregate", async (req, res) => {
     const todayCount = responses.filter((r) => new Date(r.createdAt) >= today).length;
     const weekCount = responses.filter((r) => new Date(r.createdAt) >= thisWeek).length;
 
-    // Per-day counts for chart
+    // Per-day counts for chart (use local timezone)
     const dailyCounts = {};
     responses.forEach((r) => {
-      const day = new Date(r.createdAt).toISOString().split("T")[0];
+      const date = new Date(r.createdAt);
+      const day = date.toLocaleDateString('en-CA'); // YYYY-MM-DD in local timezone
       dailyCounts[day] = (dailyCounts[day] || 0) + 1;
     });
 
