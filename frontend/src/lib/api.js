@@ -22,6 +22,7 @@ async function request(endpoint, options = {}) {
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
   try {
+    console.log(`API Request: ${options.method || 'GET'} ${endpoint}`, options.body ? JSON.parse(options.body) : '');
     const res = await fetch(`${API_URL}${endpoint}`, {
       ...options,
       headers,

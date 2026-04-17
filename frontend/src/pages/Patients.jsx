@@ -71,10 +71,10 @@ export default function Patients() {
     emergencyPhone: "",
     notes: "",
     isActive: true,
+    sessionTime: "",
+    sessionDuration: "50",
     sessionFrequency: "semanal",
-    sessionValue: "",
-    sessionCount: "",
-    sessionType: "indeterminado"
+    nextSession: ""
   });
   const [attachments, setAttachments] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -147,8 +147,11 @@ export default function Patients() {
         profession: "", cep: "", street: "", number: "",
         complement: "", neighborhood: "", city: "", state: "",
         emergencyName: "", emergencyPhone: "", notes: "",
-        isActive: true, sessionFrequency: "semanal",
-        sessionValue: "", sessionCount: "", sessionType: "indeterminado"
+        isActive: true,
+        sessionTime: "",
+        sessionDuration: "50",
+        sessionFrequency: "semanal",
+        nextSession: ""
       });
       setAttachments([]);
       setAddFormTab("identity");
@@ -305,7 +308,7 @@ export default function Patients() {
                   { id: "contact", label: "Contato", icon: Contact },
                   { id: "address", label: "Endereço", icon: MapPin },
                   { id: "notes", label: "Notas", icon: FileText },
-                  { id: "settings", label: "Config.", icon: Settings },
+                  { id: "settings", label: "Agenda", icon: Settings },
                 ].map(tab => (
                   <button
                     key={tab.id}
@@ -600,13 +603,69 @@ export default function Patients() {
                   </div>
                 )}
 
-                {/* TAB: Configurações */}
+                {/* TAB: Agenda */}
                 {addFormTab === "settings" && (
                   <div className="space-y-5">
                     <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
-                      <h4 className="text-sm font-semibold text-emerald-800 mb-4">Configurações do Acompanhamento</h4>
+                      <h4 className="text-sm font-semibold text-emerald-800 mb-4">Agenda do Paciente</h4>
                       
                       <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-600 mb-2">Horário Fixo</label>
+                            <select
+                              className="input text-sm"
+                              value={newPatient.sessionTime}
+                              onChange={e => setNewPatient({ ...newPatient, sessionTime: e.target.value })}
+                            >
+                              <option value="">Selecione</option>
+                              <option value="07:00">07:00</option>
+                              <option value="07:30">07:30</option>
+                              <option value="08:00">08:00</option>
+                              <option value="08:30">08:30</option>
+                              <option value="09:00">09:00</option>
+                              <option value="09:30">09:30</option>
+                              <option value="10:00">10:00</option>
+                              <option value="10:30">10:30</option>
+                              <option value="11:00">11:00</option>
+                              <option value="11:30">11:30</option>
+                              <option value="12:00">12:00</option>
+                              <option value="12:30">12:30</option>
+                              <option value="13:00">13:00</option>
+                              <option value="13:30">13:30</option>
+                              <option value="14:00">14:00</option>
+                              <option value="14:30">14:30</option>
+                              <option value="15:00">15:00</option>
+                              <option value="15:30">15:30</option>
+                              <option value="16:00">16:00</option>
+                              <option value="16:30">16:30</option>
+                              <option value="17:00">17:00</option>
+                              <option value="17:30">17:30</option>
+                              <option value="18:00">18:00</option>
+                              <option value="18:30">18:30</option>
+                              <option value="19:00">19:00</option>
+                              <option value="19:30">19:30</option>
+                              <option value="20:00">20:00</option>
+                              <option value="20:30">20:30</option>
+                              <option value="21:00">21:00</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-600 mb-2">Duração</label>
+                            <select
+                              className="input text-sm"
+                              value={newPatient.sessionDuration}
+                              onChange={e => setNewPatient({ ...newPatient, sessionDuration: e.target.value })}
+                            >
+                              <option value="30">30 min</option>
+                              <option value="45">45 min</option>
+                              <option value="50">50 min</option>
+                              <option value="60">60 min</option>
+                              <option value="90">90 min</option>
+                            </select>
+                          </div>
+                        </div>
+
                         <div>
                           <label className="block text-xs font-semibold text-slate-600 mb-2">Periodicidade</label>
                           <select
@@ -622,46 +681,15 @@ export default function Patients() {
                           </select>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs font-semibold text-slate-600 mb-2">Valor por Sessão</label>
-                            <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">R$</span>
-                              <input
-                                type="text"
-                                className="input text-sm pl-8"
-                                value={newPatient.sessionValue}
-                                onChange={e => setNewPatient({ ...newPatient, sessionValue: e.target.value })}
-                                placeholder="0,00"
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <label className="block text-xs font-semibold text-slate-600 mb-2">Tipo de Encerramento</label>
-                            <select
-                              className="input text-sm"
-                              value={newPatient.sessionType}
-                              onChange={e => setNewPatient({ ...newPatient, sessionType: e.target.value })}
-                            >
-                              <option value="indeterminado">Indeterminado</option>
-                              <option value="fixed">X Sessões</option>
-                            </select>
-                          </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-600 mb-2">Próxima Sessão</label>
+                          <input
+                            type="date"
+                            className="input text-sm"
+                            value={newPatient.nextSession}
+                            onChange={e => setNewPatient({ ...newPatient, nextSession: e.target.value })}
+                          />
                         </div>
-
-                        {newPatient.sessionType === "fixed" && (
-                          <div>
-                            <label className="block text-xs font-semibold text-slate-600 mb-2">Número de Sessões</label>
-                            <input
-                              type="number"
-                              className="input text-sm w-32"
-                              value={newPatient.sessionCount}
-                              onChange={e => setNewPatient({ ...newPatient, sessionCount: e.target.value })}
-                              placeholder="12"
-                              min="1"
-                            />
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -836,10 +864,10 @@ function EditPatientModal({ patient, onClose, onSave }) {
     emergencyPhone: formatPhone(patient.emergencyPhone || ""),
     notes: patient.notes || "",
     isActive: patient.isActive !== false,
+    sessionTime: patient.sessionTime || "",
+    sessionDuration: patient.sessionDuration || "50",
     sessionFrequency: patient.sessionFrequency || "semanal",
-    sessionValue: patient.sessionValue || "",
-    sessionCount: patient.sessionCount || "",
-    sessionType: patient.sessionType || "indeterminado"
+    nextSession: patient.nextSession ? patient.nextSession.split('T')[0] : ""
   });
   const [saving, setSaving] = useState(false);
   const [editTab, setEditTab] = useState("identity");
@@ -962,7 +990,7 @@ function EditPatientModal({ patient, onClose, onSave }) {
               { id: "contact", label: "Contato", icon: Contact },
               { id: "address", label: "Endereço", icon: MapPin },
               { id: "notes", label: "Notas", icon: FileText },
-              { id: "settings", label: "Config.", icon: Settings },
+              { id: "settings", label: "Agenda", icon: Settings },
             ].map(tab => (
               <button
                 key={tab.id}
@@ -1260,9 +1288,65 @@ function EditPatientModal({ patient, onClose, onSave }) {
             {editTab === "settings" && (
               <div className="space-y-5">
                 <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
-                  <h4 className="text-sm font-semibold text-emerald-800 mb-4">Configurações do Acompanhamento</h4>
+                  <h4 className="text-sm font-semibold text-emerald-800 mb-4">Agenda do Paciente</h4>
                   
                   <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Horário Fixo</label>
+                        <select
+                          className="input text-sm"
+                          value={formData.sessionTime}
+                          onChange={e => setFormData({ ...formData, sessionTime: e.target.value })}
+                        >
+                          <option value="">Selecione</option>
+                          <option value="07:00">07:00</option>
+                          <option value="07:30">07:30</option>
+                          <option value="08:00">08:00</option>
+                          <option value="08:30">08:30</option>
+                          <option value="09:00">09:00</option>
+                          <option value="09:30">09:30</option>
+                          <option value="10:00">10:00</option>
+                          <option value="10:30">10:30</option>
+                          <option value="11:00">11:00</option>
+                          <option value="11:30">11:30</option>
+                          <option value="12:00">12:00</option>
+                          <option value="12:30">12:30</option>
+                          <option value="13:00">13:00</option>
+                          <option value="13:30">13:30</option>
+                          <option value="14:00">14:00</option>
+                          <option value="14:30">14:30</option>
+                          <option value="15:00">15:00</option>
+                          <option value="15:30">15:30</option>
+                          <option value="16:00">16:00</option>
+                          <option value="16:30">16:30</option>
+                          <option value="17:00">17:00</option>
+                          <option value="17:30">17:30</option>
+                          <option value="18:00">18:00</option>
+                          <option value="18:30">18:30</option>
+                          <option value="19:00">19:00</option>
+                          <option value="19:30">19:30</option>
+                          <option value="20:00">20:00</option>
+                          <option value="20:30">20:30</option>
+                          <option value="21:00">21:00</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Duração</label>
+                        <select
+                          className="input text-sm"
+                          value={formData.sessionDuration}
+                          onChange={e => setFormData({ ...formData, sessionDuration: e.target.value })}
+                        >
+                          <option value="30">30 min</option>
+                          <option value="45">45 min</option>
+                          <option value="50">50 min</option>
+                          <option value="60">60 min</option>
+                          <option value="90">90 min</option>
+                        </select>
+                      </div>
+                    </div>
+
                     <div>
                       <label className="block text-xs font-semibold text-slate-600 mb-2">Periodicidade</label>
                       <select
@@ -1278,46 +1362,15 @@ function EditPatientModal({ patient, onClose, onSave }) {
                       </select>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Valor por Sessão</label>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">R$</span>
-                          <input
-                            type="text"
-                            className="input text-sm pl-8"
-                            value={formData.sessionValue}
-                            onChange={e => setFormData({ ...formData, sessionValue: e.target.value })}
-                            placeholder="0,00"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Tipo de Encerramento</label>
-                        <select
-                          className="input text-sm"
-                          value={formData.sessionType}
-                          onChange={e => setFormData({ ...formData, sessionType: e.target.value })}
-                        >
-                          <option value="indeterminado">Indeterminado</option>
-                          <option value="fixed">X Sessões</option>
-                        </select>
-                      </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">Próxima Sessão</label>
+                      <input
+                        type="date"
+                        className="input text-sm"
+                        value={formData.nextSession}
+                        onChange={e => setFormData({ ...formData, nextSession: e.target.value })}
+                      />
                     </div>
-
-                    {formData.sessionType === "fixed" && (
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Número de Sessões</label>
-                        <input
-                          type="number"
-                          className="input text-sm w-32"
-                          value={formData.sessionCount}
-                          onChange={e => setFormData({ ...formData, sessionCount: e.target.value })}
-                          placeholder="12"
-                          min="1"
-                        />
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>

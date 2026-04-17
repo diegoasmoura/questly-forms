@@ -48,6 +48,13 @@ model Patient {
   notes          String?
   isActive       Boolean     @default(true)
   inactivatedAt DateTime?
+
+  // Agenda
+  sessionTime     String?
+  sessionDuration Int?
+  sessionFrequency String?
+  nextSession     DateTime?
+
   psychologistId String
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt

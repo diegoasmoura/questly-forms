@@ -77,7 +77,8 @@ router.post("/", async (req, res) => {
       "email", "phone", "birthDate", "notes", "cpf", "rg", 
       "gender", "maritalStatus", "profession", "cep", "street", 
       "number", "complement", "neighborhood", "city", "state",
-      "emergencyName", "emergencyPhone"
+      "emergencyName", "emergencyPhone", "sessionTime", "sessionDuration", 
+      "sessionFrequency", "nextSession"
     ];
     
     const fieldsToNormalize = ["cpf", "phone", "emergencyPhone", "cep"];
@@ -96,10 +97,15 @@ router.post("/", async (req, res) => {
         value = value.replace(/\D/g, "");
       }
 
-      if (key === "birthDate") {
+      if (key === "birthDate" || key === "nextSession") {
         const date = new Date(value);
         if (isNaN(date.getTime())) return;
         value = date;
+      }
+
+      if (key === "sessionDuration") {
+        value = parseInt(value, 10);
+        if (isNaN(value)) return;
       }
 
       insertData[key] = value;
@@ -128,6 +134,8 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
   try {
     const data = req.body;
+    console.log("PUT /patients/:id - received data:", JSON.stringify(data, null, 2));
+    
     const patient = await prisma.patient.findFirst({
       where: { id: req.params.id, psychologistId: req.user.id },
     });
@@ -137,7 +145,8 @@ router.put("/:id", async (req, res) => {
       "name", "email", "phone", "birthDate", "notes", "cpf", "rg",
       "gender", "maritalStatus", "profession", "cep", "street",
       "number", "complement", "neighborhood", "city", "state",
-      "emergencyName", "emergencyPhone", "isActive", "inactivatedAt"
+      "emergencyName", "emergencyPhone", "isActive", "inactivatedAt",
+      "sessionTime", "sessionDuration", "sessionFrequency", "nextSession"
     ];
 
     const cleanData = {};
@@ -146,10 +155,24 @@ router.put("/:id", async (req, res) => {
         cleanData[key] = data[key] === "" ? null : data[key];
       }
     });
+    
+    console.log("cleanData after processing:", JSON.stringify(cleanData, null, 2));
 
     if (cleanData.birthDate) {
       const date = new Date(cleanData.birthDate);
       cleanData.birthDate = isNaN(date.getTime()) ? null : date;
+    }
+
+    if (cleanData.nextSession) {
+      const date = new Date(cleanData.nextSession);
+      cleanData.nextSession = isNaN(date.getTime()) ? null : date;
+    }
+
+    if (cleanData.sessionDuration) {
+      cleanData.sessionDuration = parseInt(cleanData.sessionDuration, 10);
+      if (isNaN(cleanData.sessionDuration)) {
+        cleanData.sessionDuration = null;
+      }
     }
 
     // Handle isActive toggle
@@ -163,6 +186,7 @@ router.put("/:id", async (req, res) => {
       where: { id: req.params.id },
       data: cleanData,
     });
+    console.log("Updated patient from DB:", JSON.stringify(updated, null, 2));
     res.json(updated);
   } catch (error) {
     console.error("Error updating patient:", error.message);

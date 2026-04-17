@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
-import { formatCPF, formatPhone } from "../lib/utils";
+import { formatCPF, formatPhone, formatCEP } from "../lib/utils";
 import { useAuth } from "../context/AuthContext";
 import { generatePremiumSummary } from "../lib/pdf";
 import { scoreTest } from "../lib/scoring";
@@ -35,7 +35,18 @@ import {
   Plus,
   Share2,
   Copy,
-  Eye
+  Eye,
+  UserCheck,
+  UserX,
+  Contact,
+  MapPin,
+  Settings,
+  X,
+  Check,
+  Paperclip,
+  File,
+  Trash,
+  Download
 } from "lucide-react";
 
 export default function PatientRecord() {
@@ -47,6 +58,10 @@ export default function PatientRecord() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("timeline"); // 'timeline' or 'trend' or 'table' or 'share'
   const [showEditModal, setShowEditModal] = useState(false);
+  const [editTab, setEditTab] = useState("identity");
+  const [attachments, setAttachments] = useState([]);
+  const [loadingAttachments, setLoadingAttachments] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState(null);
   const [forms, setForms] = useState([]);
@@ -155,14 +170,14 @@ export default function PatientRecord() {
       setFormData({
         name: patient.name || "",
         email: patient.email || "",
-        phone: patient.phone || "",
+        phone: formatPhone(patient.phone || ""),
         birthDate: patient.birthDate ? patient.birthDate.split('T')[0] : "",
-        cpf: patient.cpf || "",
+        cpf: formatCPF(patient.cpf || ""),
         rg: patient.rg || "",
         gender: patient.gender || "",
         maritalStatus: patient.maritalStatus || "",
         profession: patient.profession || "",
-        cep: patient.cep || "",
+        cep: formatCEP(patient.cep || ""),
         street: patient.street || "",
         number: patient.number || "",
         complement: patient.complement || "",
@@ -170,8 +185,13 @@ export default function PatientRecord() {
         city: patient.city || "",
         state: patient.state || "",
         emergencyName: patient.emergencyName || "",
-        emergencyPhone: patient.emergencyPhone || "",
-        notes: patient.notes || ""
+        emergencyPhone: formatPhone(patient.emergencyPhone || ""),
+        notes: patient.notes || "",
+        isActive: patient.isActive !== false,
+        sessionTime: patient.sessionTime || "",
+        sessionDuration: patient.sessionDuration || "50",
+        sessionFrequency: patient.sessionFrequency || "semanal",
+        nextSession: patient.nextSession ? patient.nextSession.split('T')[0] : ""
       });
     }
   }, [patient]);
@@ -188,14 +208,68 @@ export default function PatientRecord() {
     }
   };
 
+  const loadAttachments = async () => {
+    setLoadingAttachments(true);
+    try {
+      const data = await api.getAttachments(id);
+      setAttachments(data);
+    } catch (error) {
+      console.error("Erro ao carregar anexos:", error);
+    } finally {
+      setLoadingAttachments(false);
+    }
+  };
+
+  const handleUploadAttachment = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    
+    setUploading(true);
+    try {
+      for (const file of files) {
+        const result = await api.uploadAttachment(id, file);
+        setAttachments(prev => [result, ...prev]);
+      }
+    } catch (error) {
+      console.error("Erro ao fazer upload:", error);
+      alert("Erro ao fazer upload do arquivo");
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleDeleteAttachment = async (attachmentId) => {
+    if (!confirm("Tem certeza que deseja excluir este anexo?")) return;
+    try {
+      await api.deleteAttachment(attachmentId);
+      setAttachments(prev => prev.filter(a => a.id !== attachmentId));
+    } catch (error) {
+      console.error("Erro ao deletar anexo:", error);
+      alert("Erro ao deletar arquivo");
+    }
+  };
+
+  const handleDownloadAttachment = async (att) => {
+    try {
+      await api.downloadAttachment(att.id, att.filename);
+    } catch (error) {
+      console.error("Erro ao baixar:", error);
+      alert("Erro ao baixar arquivo");
+    }
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
+    console.log("handleSave - Enviando dados:", JSON.stringify(formData, null, 2));
     setSaving(true);
     try {
-      await api.updatePatient(patient.id, formData);
+      const result = await api.updatePatient(patient.id, formData);
+      console.log("Resposta do servidor:", JSON.stringify(result, null, 2));
       await loadPatient();
       setShowEditModal(false);
     } catch (error) {
+      console.error("Erro ao salvar:", error);
       alert("Erro ao salvar: " + error.message);
     } finally {
       setSaving(false);
@@ -334,7 +408,7 @@ export default function PatientRecord() {
               </div>
               
               <button
-                onClick={() => setShowEditModal(true)}
+                onClick={() => { setEditTab("identity"); loadAttachments(); setShowEditModal(true); }}
                 className="w-full mt-4 btn btn-primary text-xs py-3"
               >
                 <Edit size={14} />
@@ -681,176 +755,363 @@ export default function PatientRecord() {
 
       {/* Edit Patient Modal */}
       {showEditModal && formData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-900/20 backdrop-blur-sm">
-          <div className="card w-full max-w-3xl p-8 animate-scale-in max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-8 bg-white pb-4 border-b border-emerald-50">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-900">Editar Cadastro de Paciente</h2>
-                <p className="text-sm text-slate-600 mt-1">Atualize os dados clínicos do prontuário.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
+          <div className="card w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-slate-200 shrink-0">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800">Editar Paciente</h2>
+                  <p className="text-xs text-slate-500 mt-1">Atualize os dados do prontuário</p>
+                </div>
+                <button onClick={() => setShowEditModal(false)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all" aria-label="Fechar">
+                  <X size={20} />
+                </button>
               </div>
-              <button onClick={() => setShowEditModal(false)} className="p-2 rounded-xl hover:bg-emerald-50 text-slate-500 hover:text-slate-900 transition-all">
-                <Plus size={28} className="rotate-45" />
-              </button>
+              
+              <div className="flex gap-1 bg-slate-100 p-1 rounded-lg overflow-x-auto">
+                {[
+                  { id: "identity", label: "Identificação", icon: UserCheck },
+                  { id: "contact", label: "Contato", icon: Contact },
+                  { id: "address", label: "Endereço", icon: MapPin },
+                  { id: "notes", label: "Notas", icon: FileText },
+                  { id: "settings", label: "Agenda", icon: Settings },
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setEditTab(tab.id)}
+                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
+                      editTab === tab.id
+                        ? "bg-white text-emerald-700 shadow-sm"
+                        : "text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    <tab.icon size={14} />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <form onSubmit={handleSave} className="space-y-8">
-              {/* Section: Identificação */}
-              <section>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-900" />
-                  Identificação do Paciente
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Nome Completo *</label>
-                    <input type="text" required className="input" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Nome social ou completo" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">CPF</label>
-                    <input type="text" className="input" value={formData.cpf} onChange={e => setFormData({ ...formData, cpf: formatCPF(e.target.value) })} placeholder="000.000.000-00" maxLength={14} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">RG</label>
-                    <input type="text" className="input" value={formData.rg} onChange={e => setFormData({ ...formData, rg: e.target.value })} placeholder="Órgão Emissor" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Data de Nascimento</label>
-                    <input type="date" className="input" value={formData.birthDate} onChange={e => setFormData({ ...formData, birthDate: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Gênero / Identidade</label>
-                    <select className="input" value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })}>
-                      <option value="">Selecionar...</option>
-                      <option value="Masculino">Masculino</option>
-                      <option value="Feminino">Feminino</option>
-                      <option value="Não-Binário">Não-Binário</option>
-                      <option value="Outro">Outro / Prefiro não dizer</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Estado Civil</label>
-                    <select className="input" value={formData.maritalStatus} onChange={e => setFormData({ ...formData, maritalStatus: e.target.value })}>
-                      <option value="">Selecionar...</option>
-                      <option value="Solteiro(a)">Solteiro(a)</option>
-                      <option value="Casado(a)">Casado(a)</option>
-                      <option value="União Estável">União Estável</option>
-                      <option value="Divorciado(a)">Divorciado(a)</option>
-                      <option value="Viúvo(a)">Viúvo(a)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Profissão / Ocupação</label>
-                    <input type="text" className="input" value={formData.profession} onChange={e => setFormData({ ...formData, profession: e.target.value })} placeholder="Cargo ou área" />
-                  </div>
-                </div>
-              </section>
+            <div className="flex-1 overflow-y-auto p-6">
+              <form id="edit-patient-form-record" onSubmit={handleSave} className="space-y-5">
+                
+                {editTab === "identity" && (
+                  <div className="space-y-5">
+                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+                      <div className="flex items-center gap-3">
+                        {formData.isActive ? (
+                          <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                            <UserCheck size={20} className="text-emerald-600" />
+                          </div>
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
+                            <UserX size={20} className="text-slate-500" />
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-sm font-semibold text-slate-700">Status do Paciente</p>
+                          <p className="text-xs text-slate-500">{formData.isActive ? "Ativo no acompanhamento" : "Inativo / Arquivado"}</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
+                        className={`relative w-14 h-7 rounded-full transition-colors ${formData.isActive ? "bg-emerald-500" : "bg-slate-300"}`}
+                      >
+                        <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${formData.isActive ? "left-8" : "left-1"}`} />
+                      </button>
+                    </div>
 
-              {/* Section: Contato */}
-              <section>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-900" />
-                  Informações de Contato
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">E-mail</label>
-                    <input type="email" className="input" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="email@exemplo.com" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Telefone / WhatsApp</label>
-                    <input type="tel" className="input" value={formData.phone} onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
-                  </div>
-                </div>
-              </section>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">Nome Completo *</label>
+                      <input type="text" required className="input text-sm" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Nome social ou completo" />
+                    </div>
 
-              {/* Section: Endereço */}
-              <section>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-900" />
-                  Localização / Endereço
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">CEP</label>
-                    <input type="text" className="input" value={formData.cep} onChange={e => {
-                      setFormData({ ...formData, cep: e.target.value });
-                      handleCepLookup(e.target.value);
-                    }} placeholder="00000-000" />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Logradouro (Rua/Av)</label>
-                    <input type="text" className="input" value={formData.street} onChange={e => setFormData({ ...formData, street: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Número</label>
-                    <input type="text" className="input" value={formData.number} onChange={e => setFormData({ ...formData, number: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Bairro</label>
-                    <input type="text" className="input" value={formData.neighborhood} onChange={e => setFormData({ ...formData, neighborhood: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Cidade / UF</label>
-                    <div className="flex gap-2">
-                      <input type="text" className="input flex-1" value={formData.city} onChange={e => setFormData({ ...formData, city: e.target.value })} />
-                      <input type="text" className="input w-16" value={formData.state} onChange={e => setFormData({ ...formData, state: e.target.value })} maxLength={2} />
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">CPF</label>
+                        <input type="text" className="input text-sm" value={formData.cpf} onChange={e => setFormData({ ...formData, cpf: formatCPF(e.target.value) })} placeholder="000.000.000-00" maxLength={14} />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Nascimento</label>
+                        <input type="date" className="input text-sm" value={formData.birthDate} onChange={e => setFormData({ ...formData, birthDate: e.target.value })} />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Gênero</label>
+                        <select className="input text-sm" value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })}>
+                          <option value="">...</option>
+                          <option value="Masculino">Masculino</option>
+                          <option value="Feminino">Feminino</option>
+                          <option value="Não-Binário">Não-Binário</option>
+                          <option value="Outro">Outro</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">RG</label>
+                        <input type="text" className="input text-sm" value={formData.rg} onChange={e => setFormData({ ...formData, rg: e.target.value })} placeholder="Documento" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Estado Civil</label>
+                        <select className="input text-sm" value={formData.maritalStatus} onChange={e => setFormData({ ...formData, maritalStatus: e.target.value })}>
+                          <option value="">...</option>
+                          <option value="Solteiro(a)">Solteiro(a)</option>
+                          <option value="Casado(a)">Casado(a)</option>
+                          <option value="União Estável">União Estável</option>
+                          <option value="Divorciado(a)">Divorciado(a)</option>
+                          <option value="Viúvo(a)">Viúvo(a)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Profissão</label>
+                        <input type="text" className="input text-sm" value={formData.profession} onChange={e => setFormData({ ...formData, profession: e.target.value })} placeholder="Cargo/área" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </section>
+                )}
 
-              {/* Section: Emergência */}
-              <section>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-900" />
-                  Contato de Emergência
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Nome do Contato</label>
-                    <input type="text" className="input" value={formData.emergencyName} onChange={e => setFormData({ ...formData, emergencyName: e.target.value })} placeholder="Parente, amigo, etc." />
+                {editTab === "contact" && (
+                  <div className="space-y-5">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">E-mail</label>
+                      <input type="email" className="input text-sm" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="email@exemplo.com" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone</label>
+                        <input type="tel" className="input text-sm" value={formData.phone} onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência</label>
+                        <input type="tel" className="input text-sm" value={formData.emergencyPhone} onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">Nome Emergência</label>
+                      <input type="text" className="input text-sm" value={formData.emergencyName} onChange={e => setFormData({ ...formData, emergencyName: e.target.value })} placeholder="Contato de emergência" />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">Telefone de Emergência</label>
-                    <input type="tel" className="input" value={formData.emergencyPhone} onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
+                )}
+
+                {editTab === "address" && (
+                  <div className="space-y-5">
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">CEP</label>
+                        <input type="text" className="input text-sm" value={formData.cep} onChange={e => {
+                          const formatted = formatCEP(e.target.value);
+                          setFormData({ ...formData, cep: formatted });
+                          handleCepLookup(formatted);
+                        }} placeholder="00000-000" maxLength={9} />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Endereço</label>
+                        <input type="text" className="input text-sm" value={formData.street} onChange={e => setFormData({ ...formData, street: e.target.value })} placeholder="Rua, Avenida..." />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Número</label>
+                        <input type="text" className="input text-sm" value={formData.number} onChange={e => setFormData({ ...formData, number: e.target.value })} placeholder="Nº" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Complemento</label>
+                        <input type="text" className="input text-sm" value={formData.complement} onChange={e => setFormData({ ...formData, complement: e.target.value })} placeholder="Apto, Bloco..." />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Bairro</label>
+                        <input type="text" className="input text-sm" value={formData.neighborhood} onChange={e => setFormData({ ...formData, neighborhood: e.target.value })} placeholder="Bairro" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Cidade</label>
+                        <input type="text" className="input text-sm" value={formData.city} onChange={e => setFormData({ ...formData, city: e.target.value })} placeholder="Cidade" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">UF</label>
+                        <input type="text" className="input text-sm" value={formData.state} onChange={e => setFormData({ ...formData, state: e.target.value.toUpperCase() })} placeholder="SP" maxLength={2} />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </section>
+                )}
 
-              {/* Section: Observações */}
-              <section>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-900" />
-                  Observações Gerais
-                </h3>
-                <textarea
-                  className="input min-h-[120px] py-4"
-                  value={formData.notes}
-                  onChange={e => setFormData({ ...formData, notes: e.target.value })}
-                  placeholder="Informações relevantes para o acompanhamento..."
-                />
-              </section>
+                {editTab === "notes" && (
+                  <div className="space-y-5">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">Observações Clínicas</label>
+                      <textarea className="input text-sm min-h-[150px]" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} placeholder="Anotações relevantes sobre o paciente..." />
+                    </div>
 
-              <div className="flex gap-4 pt-8 bg-white pb-4 border-t border-emerald-50">
-                <button type="button" onClick={() => setShowEditModal(false)} className="btn btn-secondary flex-1 py-4 font-bold">
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="btn btn-primary flex-1 py-4 font-bold shadow-xl shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+                    {/* Anexos */}
+                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <Paperclip size={16} className="text-slate-500" />
+                          <h4 className="text-sm font-semibold text-slate-700">Laudos e Anexos</h4>
+                        </div>
+                        <label className={`flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium cursor-pointer transition-all ${uploading ? 'opacity-50' : 'hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700'}`}>
+                          {uploading ? (
+                            <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Plus size={14} />
+                          )}
+                          {uploading ? 'Enviando...' : 'Anexar'}
+                          <input type="file" multiple className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" disabled={uploading} onChange={handleUploadAttachment} />
+                        </label>
+                      </div>
+
+                      {loadingAttachments ? (
+                        <div className="text-center py-8 text-slate-400">
+                          <div className="w-6 h-6 border-2 border-slate-300 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                          <p className="text-xs">Carregando anexos...</p>
+                        </div>
+                      ) : attachments.length === 0 ? (
+                        <div className="text-center py-8 text-slate-400">
+                          <File size={32} className="mx-auto mb-2 opacity-50" />
+                          <p className="text-xs">Nenhum anexo</p>
+                          <p className="text-[10px] mt-1">PDF, JPG, PNG, DOC (máx. 10MB)</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2 max-h-48 overflow-y-auto">
+                          {attachments.map((att) => (
+                            <div key={att.id} className="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <File size={16} className="text-slate-400 shrink-0" />
+                                <div className="min-w-0">
+                                  <p className="text-xs font-medium text-slate-700 truncate">{att.filename}</p>
+                                  <p className="text-[10px] text-slate-400">{(att.size / 1024).toFixed(1)} KB</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <button type="button" onClick={() => handleDownloadAttachment(att)} className="p-1 hover:bg-emerald-50 rounded text-slate-400 hover:text-emerald-600 transition-colors" title="Baixar">
+                                  <Download size={14} />
+                                </button>
+                                <button type="button" onClick={() => handleDeleteAttachment(att.id)} className="p-1 hover:bg-red-50 rounded text-slate-400 hover:text-red-500 transition-colors" title="Excluir">
+                                  <Trash size={14} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {editTab === "settings" && (
+                  <div className="space-y-5">
+                    <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                      <h4 className="text-sm font-semibold text-emerald-800 mb-4">Agenda do Paciente</h4>
+                      
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-600 mb-2">Horário Fixo</label>
+                            <select
+                              className="input text-sm"
+                              value={formData.sessionTime}
+                              onChange={e => setFormData({ ...formData, sessionTime: e.target.value })}
+                            >
+                              <option value="">Selecione</option>
+                              <option value="07:00">07:00</option>
+                              <option value="07:30">07:30</option>
+                              <option value="08:00">08:00</option>
+                              <option value="08:30">08:30</option>
+                              <option value="09:00">09:00</option>
+                              <option value="09:30">09:30</option>
+                              <option value="10:00">10:00</option>
+                              <option value="10:30">10:30</option>
+                              <option value="11:00">11:00</option>
+                              <option value="11:30">11:30</option>
+                              <option value="12:00">12:00</option>
+                              <option value="12:30">12:30</option>
+                              <option value="13:00">13:00</option>
+                              <option value="13:30">13:30</option>
+                              <option value="14:00">14:00</option>
+                              <option value="14:30">14:30</option>
+                              <option value="15:00">15:00</option>
+                              <option value="15:30">15:30</option>
+                              <option value="16:00">16:00</option>
+                              <option value="16:30">16:30</option>
+                              <option value="17:00">17:00</option>
+                              <option value="17:30">17:30</option>
+                              <option value="18:00">18:00</option>
+                              <option value="18:30">18:30</option>
+                              <option value="19:00">19:00</option>
+                              <option value="19:30">19:30</option>
+                              <option value="20:00">20:00</option>
+                              <option value="20:30">20:30</option>
+                              <option value="21:00">21:00</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-600 mb-2">Duração</label>
+                            <select
+                              className="input text-sm"
+                              value={formData.sessionDuration}
+                              onChange={e => setFormData({ ...formData, sessionDuration: e.target.value })}
+                            >
+                              <option value="30">30 min</option>
+                              <option value="45">45 min</option>
+                              <option value="50">50 min</option>
+                              <option value="60">60 min</option>
+                              <option value="90">90 min</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-600 mb-2">Periodicidade</label>
+                          <select
+                            className="input text-sm"
+                            value={formData.sessionFrequency}
+                            onChange={e => setFormData({ ...formData, sessionFrequency: e.target.value })}
+                          >
+                            <option value="semanal">Semanal</option>
+                            <option value="quinzenal">Quinzenal</option>
+                            <option value="mensal">Mensal</option>
+                            <option value="semanal-2">2x por semana</option>
+                            <option value="outro">Outro</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-600 mb-2">Próxima Sessão</label>
+                          <input
+                            type="date"
+                            className="input text-sm"
+                            value={formData.nextSession}
+                            onChange={e => setFormData({ ...formData, nextSession: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </form>
+            </div>
+
+            <div className="p-6 border-t border-slate-200 bg-slate-50 shrink-0">
+              <div className="flex gap-3">
+                <button type="button" onClick={() => setShowEditModal(false)} className="btn btn-secondary flex-1">Cancelar</button>
+                <button type="submit" form="edit-patient-form-record" disabled={saving} className="btn btn-primary flex-1 flex items-center justify-center gap-2">
                   {saving ? (
-                    <div className="flex items-center justify-center gap-2">
+                    <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Salvando...
-                    </div>
+                    </>
                   ) : (
-                    "Salvar Alterações"
+                    <>
+                      <Check size={16} />
+                      Salvar
+                    </>
                   )}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
