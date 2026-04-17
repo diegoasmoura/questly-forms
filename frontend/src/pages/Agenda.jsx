@@ -9,7 +9,8 @@ import {
   Plus,
   MoreVertical,
   CalendarDays,
-  List
+  List,
+  AlertTriangle
 } from "lucide-react";
 import { format, startOfWeek, endOfWeek, addDays, startOfMonth, endOfMonth, isSameDay, addMonths, subMonths, eachDayOfInterval } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -22,7 +23,7 @@ const TIME_SLOTS = [
 ];
 
 export default function Agenda() {
-  const [view, setView] = useState("week"); // week, month, list
+  const [view, setView] = useState(() => localStorage.getItem("agenda-view") || "week");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,6 +31,11 @@ export default function Agenda() {
   useEffect(() => {
     loadAppointments();
   }, []);
+
+  const handleViewChange = (newView) => {
+    setView(newView);
+    localStorage.setItem("agenda-view", newView);
+  };
 
   const loadAppointments = async () => {
     try {
@@ -63,57 +69,88 @@ export default function Agenda() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Agenda</h1>
+          <h1 className="text-2xl font-bold text-slate-800 font-display">Agenda</h1>
           <p className="text-sm text-slate-500">Gestão de horários e sessões</p>
         </div>
 
-        <div className="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
-          <button 
-            onClick={() => setView("week")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${view === 'week' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-50'}`}
-          >
-            <CalendarDays size={14} />
-            Semana
-          </button>
-          <button 
-            onClick={() => setView("month")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${view === 'month' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-50'}`}
-          >
-            <CalendarIcon size={14} />
-            Mês
-          </button>
-          <button 
-            onClick={() => setView("list")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${view === 'list' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-50'}`}
-          >
-            <List size={14} />
-            Lista
-          </button>
+        {/* View Toggle - Seguindo padrão solicitado */}
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+          {[
+            { id: 'week', label: 'Semana', icon: CalendarDays },
+            { id: 'month', label: 'Mês', icon: CalendarIcon },
+            { id: 'list', label: 'Lista', icon: List }
+          ].map(item => (
+            <button
+              key={item.id}
+              onClick={() => handleViewChange(item.id)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${
+                view === item.id 
+                  ? "bg-emerald-600 text-white" 
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"
+              }`}
+            >
+              <item.icon size={18} />
+              <span className="text-xs font-bold">{item.label}</span>
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Toolbar */}
-      <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-        <div className="flex items-center gap-4">
-          <h2 className="text-lg font-bold text-slate-700 capitalize">
-            {view === 'week' 
-              ? `Semana de ${format(weekDays[0], "d 'de' MMMM", { locale: ptBR })}`
-              : format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })
-            }
-          </h2>
-          <div className="flex items-center gap-1">
-            <button onClick={prevDate} className="p-2 hover:bg-slate-100 rounded-lg text-slate-500">
-              <ChevronLeft size={20} />
-            </button>
-            <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1 text-xs font-medium text-emerald-600 hover:bg-emerald-50 rounded-md">
-              Hoje
-            </button>
-            <button onClick={nextDate} className="p-2 hover:bg-slate-100 rounded-lg text-slate-500">
-              <ChevronRight size={20} />
-            </button>
+      {/* Toolbar - Oculta no modo lista */}
+      {view !== 'list' && (
+        <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-300 shadow-sm animate-scale-in">
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col">
+              <h2 className="text-lg font-bold text-slate-800 capitalize leading-tight">
+                {view === 'week' 
+                  ? `Semana de ${format(weekDays[0], "d 'de' MMMM", { locale: ptBR })}`
+                  : format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })
+                }
+              </h2>
+              {view === 'week' && (
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                  {format(currentDate, "yyyy")}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200">
+              <button 
+                onClick={prevDate} 
+                className="p-1.5 hover:bg-white hover:shadow-sm rounded-lg text-slate-600 transition-all"
+                title="Anterior"
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <button 
+                onClick={() => setCurrentDate(new Date())} 
+                className="px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-white hover:shadow-sm rounded-lg transition-all"
+              >
+                Hoje
+              </button>
+              <button 
+                onClick={nextDate} 
+                className="p-1.5 hover:bg-white hover:shadow-sm rounded-lg text-slate-600 transition-all"
+                title="Próximo"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {view === 'list' && (
+        <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100 flex items-center justify-between">
+           <div>
+              <h2 className="text-sm font-bold text-emerald-800 uppercase tracking-wider">Resumo da Grade Semanal</h2>
+              <p className="text-[10px] text-emerald-600 font-medium">Visualização de todos os horários fixos recorrentes</p>
+           </div>
+           <div className="flex items-center gap-2">
+              <Users size={16} className="text-emerald-400" />
+              <span className="text-xs font-bold text-emerald-700">{appointments.length} Sessões Ativas</span>
+           </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex-1 flex items-center justify-center bg-white/50 rounded-3xl border border-slate-300 border-dashed">
@@ -147,7 +184,7 @@ function ListView({ appointments }) {
 
   if (grouped.length === 0) {
     return (
-      <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 border-dashed">
+      <div className="p-12 text-center bg-white rounded-3xl border border-slate-300 border-dashed">
         <Users size={48} className="mx-auto text-slate-300 mb-4" />
         <h3 className="text-lg font-semibold text-slate-700">Nenhuma sessão agendada</h3>
         <p className="text-slate-500">Adicione horários nos prontuários dos pacientes para vê-los aqui.</p>
@@ -158,8 +195,8 @@ function ListView({ appointments }) {
   return (
     <div className="space-y-4">
       {grouped.map((group, gIdx) => (
-        <div key={gIdx} className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden animate-slide-up" style={{ animationDelay: `${gIdx * 50}ms` }}>
-          <div className="px-6 py-4 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
+        <div key={gIdx} className="bg-white rounded-3xl border border-slate-300 shadow-sm overflow-hidden animate-slide-up" style={{ animationDelay: `${gIdx * 50}ms` }}>
+          <div className="px-6 py-4 bg-slate-50/50 border-b border-slate-200 flex items-center justify-between">
             <h3 className="font-bold text-slate-700 flex items-center gap-2">
               <CalendarIcon size={16} className="text-emerald-500" />
               {group.dayName}
@@ -168,7 +205,7 @@ function ListView({ appointments }) {
               {group.apps.length} {group.apps.length === 1 ? 'Sessão' : 'Sessões'}
             </span>
           </div>
-          <div className="divide-y divide-slate-50">
+          <div className="divide-y divide-slate-100">
             {group.apps.map(app => (
               <div key={app.id} className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/30 transition-colors group">
                 <div className="flex items-center gap-4">

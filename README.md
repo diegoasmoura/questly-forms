@@ -87,6 +87,11 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Integração com Prontuário:** Acesso direto aos dados do paciente e histórico clínico a partir de qualquer visão da agenda.
 - **Modelo Prisma Evoluído:** Implementação da tabela `Appointment` para gestão robusta de sessões recorrentes.
 
+### Padronização de Interface (v3.1)
+- **Toggle de Visualização Unificado:** Seletores de "Cards" e "Lista" padronizados em todo o sistema (Pacientes, Formulários, Biblioteca e Agenda).
+- **UX Aprimorada:** Inclusão de rótulos de texto junto aos ícones para facilitar a identificação da visualização.
+- **Design de Alto Contraste:** Ícones aumentados para 18px e bordas mais definidas para melhor legibilidade.
+
 ### Tab Renomeada (v2.16)
 - **Config. → Agenda:** Aba de configurações renomeada para "Agenda"
 - **Ícone:** Settings (engrenagem) mantido
