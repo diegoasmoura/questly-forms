@@ -6,6 +6,7 @@ import { api } from "../lib/api";
 import "survey-core/survey-core.min.css";
 import "survey-creator-core/survey-creator-core.min.css";
 import { SurveyCreator, SurveyCreatorComponent } from "survey-creator-react";
+import * as SurveyTheme from "survey-core/themes";
 
 import { ArrowLeft, Save, Download, Loader2 } from "lucide-react";
 
