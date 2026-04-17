@@ -100,9 +100,9 @@ export default function Login() {
               <ArrowLeft size={18} />
               <span className="text-sm">Voltar ao início</span>
             </Link>
-            <div className="flex items-center gap-3 mb-12">
-              <div className="w-12 h-12 rounded-lg bg-emerald-700 flex items-center justify-center">
-                <span className="text-xl font-bold">Q</span>
+            <div className="flex items-center gap-4 mb-12">
+              <div className="w-12 h-12 rounded-sm rotate-45 bg-emerald-700 flex items-center justify-center">
+                <span className="text-xl font-bold -rotate-45">Q</span>
               </div>
               <span className="text-2xl font-semibold">Questly Forms</span>
             </div>

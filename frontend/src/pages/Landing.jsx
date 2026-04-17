@@ -109,9 +109,9 @@ export default function Landing() {
         className="w-full px-6 py-4 shrink-0"
       >
         <div className="max-w-5xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">Q</span>
+          <div className="flex items-center gap-4">
+            <div className="w-8 h-8 rounded-sm rotate-45 bg-emerald-600 flex items-center justify-center">
+              <span className="text-white font-bold text-sm -rotate-45">Q</span>
             </div>
             <span className="text-lg font-semibold text-slate-900">Questly Forms</span>
           </div>

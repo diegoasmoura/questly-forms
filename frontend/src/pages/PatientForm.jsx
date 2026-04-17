@@ -87,13 +87,11 @@ export default function PatientForm() {
       {/* Header */}
       <header className="bg-white border-b border-emerald-100">
         <div className="max-w-3xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-900 flex items-center justify-center">
-              <svg width="16" height="16" viewBox="0 0 140 31" fill="white">
-                <path d="M64.062 26.378v3.771H77.96v-3.771h-4.386V9.652h-9.1v3.73h4.303v12.996h-4.714Z" />
-              </svg>
+          <div className="flex items-center gap-4">
+            <div className="w-8 h-8 rounded-sm rotate-45 bg-emerald-900 flex items-center justify-center">
+              <span className="text-white font-bold text-sm -rotate-45">Q</span>
             </div>
-            <span className="text-sm font-medium text-slate-900">Curious</span>
+            <span className="text-sm font-medium text-slate-900">Questly Forms</span>
           </div>
         </div>
       </header>

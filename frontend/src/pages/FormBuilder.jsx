@@ -6,7 +6,20 @@ import { api } from "../lib/api";
 import "survey-core/survey-core.min.css";
 import "survey-creator-core/survey-creator-core.min.css";
 import { SurveyCreator, SurveyCreatorComponent } from "survey-creator-react";
-import * as SurveyTheme from "survey-core/themes";
+
+// Import themes for theme selector
+import {
+  DefaultLight, DefaultDark, DefaultLightPanelless, DefaultDarkPanelless,
+  SharpLight, SharpDark, SharpLightPanelless, SharpDarkPanelless,
+  BorderlessLight, BorderlessDark, BorderlessLightPanelless, BorderlessDarkPanelless,
+  FlatLight, FlatDark, FlatLightPanelless, FlatDarkPanelless,
+  PlainLight, PlainDark, PlainLightPanelless, PlainDarkPanelless,
+  DoubleBorderLight, DoubleBorderDark, DoubleBorderLightPanelless, DoubleBorderDarkPanelless,
+  LayeredLight, LayeredDark, LayeredLightPanelless, LayeredDarkPanelless,
+  SolidLight, SolidDark, SolidLightPanelless, SolidDarkPanelless,
+  ThreeDimensionalLight, ThreeDimensionalDark, ThreeDimensionalLightPanelless, ThreeDimensionalDarkPanelless,
+  ContrastLight, ContrastDark, ContrastLightPanelless, ContrastDarkPanelless
+} from "survey-core/themes";
 
 import { ArrowLeft, Save, Download, Loader2 } from "lucide-react";
 
@@ -40,6 +53,50 @@ export default function FormBuilder() {
     c.showDesignerTab = true;
     c.showPreviewTab = true;
     c.showOneCategoryInPropertyGrid = false;
+
+    // Add themes to the theme selector (including Panelless versions)
+    if (c.themeEditor) {
+      c.themeEditor.addTheme(DefaultLight, true);
+      c.themeEditor.addTheme(DefaultDark);
+      c.themeEditor.addTheme(DefaultLightPanelless);
+      c.themeEditor.addTheme(DefaultDarkPanelless);
+      c.themeEditor.addTheme(SharpLight);
+      c.themeEditor.addTheme(SharpDark);
+      c.themeEditor.addTheme(SharpLightPanelless);
+      c.themeEditor.addTheme(SharpDarkPanelless);
+      c.themeEditor.addTheme(BorderlessLight);
+      c.themeEditor.addTheme(BorderlessDark);
+      c.themeEditor.addTheme(BorderlessLightPanelless);
+      c.themeEditor.addTheme(BorderlessDarkPanelless);
+      c.themeEditor.addTheme(FlatLight);
+      c.themeEditor.addTheme(FlatDark);
+      c.themeEditor.addTheme(FlatLightPanelless);
+      c.themeEditor.addTheme(FlatDarkPanelless);
+      c.themeEditor.addTheme(PlainLight);
+      c.themeEditor.addTheme(PlainDark);
+      c.themeEditor.addTheme(PlainLightPanelless);
+      c.themeEditor.addTheme(PlainDarkPanelless);
+      c.themeEditor.addTheme(DoubleBorderLight);
+      c.themeEditor.addTheme(DoubleBorderDark);
+      c.themeEditor.addTheme(DoubleBorderLightPanelless);
+      c.themeEditor.addTheme(DoubleBorderDarkPanelless);
+      c.themeEditor.addTheme(LayeredLight);
+      c.themeEditor.addTheme(LayeredDark);
+      c.themeEditor.addTheme(LayeredLightPanelless);
+      c.themeEditor.addTheme(LayeredDarkPanelless);
+      c.themeEditor.addTheme(SolidLight);
+      c.themeEditor.addTheme(SolidDark);
+      c.themeEditor.addTheme(SolidLightPanelless);
+      c.themeEditor.addTheme(SolidDarkPanelless);
+      c.themeEditor.addTheme(ThreeDimensionalLight);
+      c.themeEditor.addTheme(ThreeDimensionalDark);
+      c.themeEditor.addTheme(ThreeDimensionalLightPanelless);
+      c.themeEditor.addTheme(ThreeDimensionalDarkPanelless);
+      c.themeEditor.addTheme(ContrastLight);
+      c.themeEditor.addTheme(ContrastDark);
+      c.themeEditor.addTheme(ContrastLightPanelless);
+      c.themeEditor.addTheme(ContrastDarkPanelless);
+    }
 
     return c;
   }, []);
