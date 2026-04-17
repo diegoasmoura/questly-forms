@@ -262,7 +262,7 @@ export default function PatientRecord() {
   }
 
   return (
-    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in bg-emerald-50/30">
+    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in">
       <Link to="/patients" className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-4 group transition-colors shrink-0">
         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
         Voltar para Lista de Pacientes
@@ -343,14 +343,20 @@ export default function PatientRecord() {
             </div>
           </div>
 
-          <div className="card p-6 bg-emerald-50/50 border-emerald-100">
+          <div className="card p-6">
             <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
               <Edit size={16} />
               Notas Clínicas
             </h3>
-            <p className="text-sm text-emerald-600 whitespace-pre-wrap leading-relaxed">
-              {patient.notes || "Nenhuma observação clínica registrada para este paciente."}
-            </p>
+            {patient.notes ? (
+              <p className="text-sm text-slate-700 font-medium whitespace-pre-wrap leading-relaxed bg-amber-50 p-3 rounded-lg border border-amber-100">
+                {patient.notes}
+              </p>
+            ) : (
+              <p className="text-sm text-slate-400 italic">
+                Nenhuma observação clínica registrada para este paciente.
+              </p>
+            )}
           </div>
         </div>
 
@@ -375,7 +381,7 @@ export default function PatientRecord() {
                 active={activeTab === "share"}
                 onClick={() => setActiveTab("share")}
                 icon={<Share2 size={14} />}
-                label="Enviar Formulário"
+                label="Formulários"
               />
             </div>
           </div>

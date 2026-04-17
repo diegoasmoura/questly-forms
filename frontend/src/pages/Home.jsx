@@ -23,6 +23,7 @@ export default function Home() {
     activeLinks: 0
   });
   const [recentResponses, setRecentResponses] = useState([]);
+  const [groupedPatients, setGroupedPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [aggregateData, setAggregateData] = useState({});
 
@@ -48,10 +49,33 @@ export default function Home() {
 
       const responsesWithPatients = allResponses
         .filter(r => r.patient)
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      // Group by patient
+      const grouped = [];
+      const seenPatients = new Set();
+      
+      responsesWithPatients.forEach(response => {
+        const patientId = response.patient.id;
+        if (!seenPatients.has(patientId)) {
+          seenPatients.add(patientId);
+          const patientResponses = responsesWithPatients.filter(r => r.patient.id === patientId);
+          grouped.push({
+            patient: response.patient,
+            responses: patientResponses,
+            count: patientResponses.length,
+            latestResponse: patientResponses[0],
+            latestDate: new Date(patientResponses[0].createdAt)
+          });
+        }
+      });
+
+      const topPatients = grouped
+        .sort((a, b) => b.latestDate - a.latestDate)
         .slice(0, 8);
 
-      setRecentResponses(responsesWithPatients);
+      setRecentResponses(responsesWithPatients.slice(0, 8));
+      setGroupedPatients(topPatients);
 
       const [formStats, aggregateResults] = await Promise.all([
         Promise.all(forms.map(f => api.getFormStats(f.id).catch(() => ({ responseCount: 0, shareLinkCount: 0 })))),
@@ -164,34 +188,42 @@ export default function Home() {
                 </div>
               ))}
             </div>
-          ) : recentResponses.length === 0 ? (
+          ) : groupedPatients.length === 0 ? (
             <div className="p-10 text-center">
               <Calendar size={32} className="mx-auto text-slate-300 mb-3" />
               <p className="text-xs text-slate-500 font-bold uppercase tracking-tight">Nenhum atendimento registrado</p>
               <p className="text-[10px] text-slate-400 mt-1">Pacientes que responderam formulários aparecerão aqui</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-5">
-              {recentResponses.map((response, idx) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-5">
+              {groupedPatients.map((group, idx) => (
                 <Link 
-                  key={response.id} 
-                  to={`/patients/${response.patient.id}`}
-                  className="flex items-center gap-4 p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all group border border-slate-200 hover:border-slate-300 hover:shadow-sm"
+                  key={group.patient.id} 
+                  to={`/patients/${group.patient.id}`}
+                  className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all group border border-slate-200 hover:border-slate-300 hover:shadow-sm"
                 >
                   <div className="relative">
-                    <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 font-black shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
-                      {response.patient.name.charAt(0)}
+                    <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 font-black shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
+                      {group.patient.name.charAt(0)}
                     </div>
-                    <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white text-[8px] font-black flex items-center justify-center">
-                      #{idx + 1}
-                    </div>
+                    {group.count > 1 && (
+                      <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white text-[9px] font-black flex items-center justify-center">
+                        {group.count}
+                      </div>
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-slate-700 truncate group-hover:text-slate-900 transition-colors">{response.patient.name}</p>
-                    <p className="text-[10px] text-slate-500 truncate mt-0.5">{response.formTitle}</p>
-                    <div className="flex items-center gap-2 text-[10px] font-medium text-slate-400 mt-1">
+                    <p className="text-sm font-bold text-slate-700 group-hover:text-slate-900 transition-colors leading-tight">{group.patient.name}</p>
+                    {group.count > 1 ? (
+                      <p className="text-xs text-emerald-600 font-medium mt-0.5">
+                        {group.count} respostas · <span className="text-slate-500 truncate">{group.responses[0].formTitle}</span>
+                      </p>
+                    ) : (
+                      <p className="text-xs text-slate-500 mt-0.5 truncate">{group.responses[0].formTitle}</p>
+                    )}
+                    <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-1">
                       <Clock size={10} />
-                      <span>{new Date(response.createdAt).toLocaleDateString('pt-BR')} · {new Date(response.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                      <span>{group.latestDate.toLocaleDateString('pt-BR')}</span>
                     </div>
                   </div>
                   <ArrowRight size={14} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all shrink-0" />

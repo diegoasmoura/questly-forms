@@ -78,6 +78,23 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 
 ## Novidades Recentes
 
+### UX - Agrupamento de Pacientes (v2.13)
+- **Problema:** Pacientes com múltiplas respostas apareciam repetidos na lista
+- **Solução:** Cards agrupados por paciente com badge mostrando quantidade de respostas
+- **Exemplo:** "5 respostas · PHQ-9: Questionário..."
+- **Arquivo:** `frontend/src/pages/Home.jsx`
+
+### UI - Branding Losango (v2.13)
+- **Logo:** Quadrado rotacionado 45° (losango) com Q centralizado
+- **Aplicado em:** Landing, Login, Register, ShareLink, PatientForm, Sidebar
+- **Animação:** Spring rotation ao expandir/colapsar sidebar
+- **Sidebar:** Losango centralizado quando colapsado
+
+### UX - Notas Clínicas Destacadas (v2.13)
+- **Notas preenchidas:** Fundo amber para destaque visual
+- **Notas vazias:** Texto cinza itálico
+- **Consistência:** Página segue padrão de background (sem fundo verde)
+
 ### Correções de Fuso Horário (v2.12)
 - **Problema:** O mapa de calor não coloria os dias corretos mesmo com respostas existentes
 - **Causa:** Backend retornava datas em UTC (ISOString) mas frontend usava timezone local
