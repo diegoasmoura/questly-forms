@@ -151,6 +151,15 @@ export const api = {
     method: "POST", 
     body: JSON.stringify(data) 
   }),
+  
+  // Attendance (presença/falta)
+  getAttendances: () => request("/attendances"),
+  getAttendanceStats: (startDate, endDate) => request(`/attendances/stats?startDate=${startDate}&endDate=${endDate}`),
+  saveAttendance: (data) => request("/attendances", {
+    method: "POST",
+    body: JSON.stringify(data)
+  }),
+  deleteAttendance: (id) => request(`/attendances/${id}`, { method: "DELETE" }),
 };
 
 export { ApiError };

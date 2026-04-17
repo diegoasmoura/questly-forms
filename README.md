@@ -78,6 +78,17 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 
 ## Novidades Recentes
 
+### Attendance na MonthView (v3.2)
+- **Botões diretos no calendário:** Presença (P), Falta (F), Justificada (J) diretamente na MonthView
+- **Melhor legibilidade:** Células maiores (100px), texto maior, até 3 pacientes por célula
+- **Data de início:** Sessões só aparecem a partir da Data de Início do paciente
+- **Contadores dinâmicos:** TotalPacientes, Presenças, Faltas, Justificadas atualizam em tempo real
+
+### Attendance Trackking (v3.2)
+- **Modelo Attendance:** Nova tabela para registrar presença/falta/justificada por data
+- **Backend routes:** `/api/attendances` com CRUD completo
+- **Frontend:** botões em todas as views (Week, Month, List)
+
 ### Agenda Profissional (v3.0)
 - **Multivisão Avançada:** Alternância rápida entre visões Semanal, Mensal e em Lista.
 - **Múltiplos Agendamentos:** Suporte para pacientes com sessões recorrentes (2x ou mais por semana) com gerenciamento de slots individuais.

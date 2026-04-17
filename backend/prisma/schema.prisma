@@ -63,6 +63,7 @@ model Patient {
   shareLinks     ShareLink[]
   attachments    Attachment[]
   appointments   Appointment[]
+  attendances    Attendance[]
 
   @@unique([email, psychologistId])
   @@unique([cpf, psychologistId])
@@ -84,6 +85,27 @@ model Appointment {
 
   @@index([patientId])
   @@index([psychologistId])
+}
+
+// Registro de presença/falta
+model Attendance {
+  id            String   @id @default(uuid())
+  patientId     String
+  date          DateTime // Data da sessão
+  status       String   // "presente", "falta", "justificada"
+  notes         String?  // Observações
+  sessionTime   String?  // Horário da sessão naquele dia
+  
+  patient       Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  psychologistId String
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([patientId, date])
+  @@index([patientId])
+  @@index([psychologistId])
+  @@index([date])
 }
 
 model Attachment {
