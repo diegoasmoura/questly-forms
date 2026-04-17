@@ -52,9 +52,24 @@ model Patient {
   psychologist   User        @relation(fields: [psychologistId], references: [id])
   responses      Response[]
   shareLinks     ShareLink[]
+  attachments    Attachment[]
 
   @@unique([email, psychologistId])
   @@unique([cpf, psychologistId])
+}
+
+model Attachment {
+  id         String   @id @default(uuid())
+  filename   String
+  originalName String
+  mimeType   String
+  size       Int
+  patientId  String
+  uploadedBy String
+  createdAt  DateTime @default(now())
+  patient    Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  @@index([patientId])
 }
 
 model Form {

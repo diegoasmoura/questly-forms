@@ -78,6 +78,23 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 
 ## Novidades Recentes
 
+### Sistema de Upload de Anexos (v2.14)
+- **Secure Upload:** Upload de arquivos seguros para pacientes (PDF, JPG, PNG, DOC)
+- **Validação:** Tipos de arquivo permitidos e limite de 10MB
+- **Segurança:** UUIDs para nomes de arquivos, verificação de propriedade
+- **Backend:** Rotas dedicadas em `backend/src/routes/attachments.js`
+- **Modelo Prisma:** Tabela Attachment vinculada ao Patient
+- **Proteção:** Middleware de autenticação com suporte a query token
+- **Upload direto:** Download via fetch + blob (sem abrir nova aba)
+
+### Cadastro/Edicação de Pacientes Padronizados (v2.14)
+- **Design unificado:** Modal de cadastro e edição com visual idêntico
+- **5 abas:** Identificação, Contato, Endereço, Notas, Configurações
+- **Ícones Lucide:** UserCheck, Contact, MapPin, FileText, Settings
+- **Máscaras:** CPF, Telefone, CEP formatados automaticamente
+- **Toggle Status:** Ativo/Inativo no cadastro e edição
+- **Configurações:** Periodicidade, valor por sessão, tipo de encerramento
+
 ### UX - Agrupamento de Pacientes (v2.13)
 - **Problema:** Pacientes com múltiplas respostas apareciam repetidos na lista
 - **Solução:** Cards agrupados por paciente com badge mostrando quantidade de respostas

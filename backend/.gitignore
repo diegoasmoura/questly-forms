@@ -29,3 +29,6 @@ prisma/migrations/
 
 # Test
 coverage/
+
+# Uploads (patient attachments)
+uploads/
