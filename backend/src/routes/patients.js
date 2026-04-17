@@ -13,7 +13,7 @@ router.get("/", async (req, res) => {
       orderBy: { name: "asc" },
       include: {
         _count: {
-          select: { responses: true }
+          select: { responses: true, shareLinks: true }
         }
       }
     });
@@ -133,9 +133,18 @@ router.put("/:id", async (req, res) => {
     });
     if (!patient) return res.status(404).json({ error: "Paciente não encontrado" });
 
+    const allowedFields = [
+      "name", "email", "phone", "birthDate", "notes", "cpf", "rg",
+      "gender", "maritalStatus", "profession", "cep", "street",
+      "number", "complement", "neighborhood", "city", "state",
+      "emergencyName", "emergencyPhone", "isActive", "inactivatedAt"
+    ];
+
     const cleanData = {};
-    Object.keys(data).forEach(key => {
-      cleanData[key] = data[key] === "" ? null : data[key];
+    allowedFields.forEach(key => {
+      if (data.hasOwnProperty(key)) {
+        cleanData[key] = data[key] === "" ? null : data[key];
+      }
     });
 
     if (cleanData.birthDate) {
@@ -143,13 +152,16 @@ router.put("/:id", async (req, res) => {
       cleanData.birthDate = isNaN(date.getTime()) ? null : date;
     }
 
+    // Handle isActive toggle
+    if (data.isActive === false && patient.isActive !== false) {
+      cleanData.inactivatedAt = new Date();
+    } else if (data.isActive === true) {
+      cleanData.inactivatedAt = null;
+    }
+
     const updated = await prisma.patient.update({
       where: { id: req.params.id },
-      data: {
-        ...cleanData,
-        id: undefined,
-        psychologistId: undefined
-      },
+      data: cleanData,
     });
     res.json(updated);
   } catch (error) {

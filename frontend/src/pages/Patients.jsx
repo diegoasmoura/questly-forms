@@ -331,33 +331,39 @@ export default function Patients() {
                 {addFormTab === "identity" && (
                   <div className="space-y-5">
                     {/* Status Toggle */}
-                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
-                      <div className="flex items-center gap-3">
-                        {newPatient.isActive ? (
-                          <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                            <UserCheck size={20} className="text-emerald-600" />
+                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          {newPatient.isActive ? (
+                            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                              <UserCheck size={20} className="text-emerald-600" />
+                            </div>
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
+                              <UserX size={20} className="text-slate-500" />
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-sm font-semibold text-slate-700">Status do Paciente</p>
+                            <p className="text-xs text-slate-500">{newPatient.isActive ? "Ativo no acompanhamento" : "Inativo / Arquivado"}</p>
                           </div>
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
-                            <UserX size={20} className="text-slate-500" />
-                          </div>
-                        )}
-                        <div>
-                          <p className="text-sm font-semibold text-slate-700">Status do Paciente</p>
-                          <p className="text-xs text-slate-500">{newPatient.isActive ? "Ativo no acompanhamento" : "Inativo / Arquivado"}</p>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => setNewPatient({ ...newPatient, isActive: !newPatient.isActive })}
+                          className={`relative w-14 h-7 rounded-full transition-colors ${
+                            newPatient.isActive ? "bg-emerald-500" : "bg-slate-300"
+                          }`}
+                        >
+                          <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${
+                            newPatient.isActive ? "left-8" : "left-1"
+                          }`} />
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setNewPatient({ ...newPatient, isActive: !newPatient.isActive })}
-                        className={`relative w-14 h-7 rounded-full transition-colors ${
-                          newPatient.isActive ? "bg-emerald-500" : "bg-slate-300"
-                        }`}
-                      >
-                        <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${
-                          newPatient.isActive ? "left-8" : "left-1"
-                        }`} />
-                      </button>
+                      <div className="flex items-center gap-1 text-xs text-slate-500">
+                        <Calendar size={12} />
+                        <span>Cadastro: {new Date().toLocaleDateString('pt-BR')}</span>
+                      </div>
                     </div>
 
                     {/* Nome Completo */}
@@ -980,29 +986,43 @@ function EditPatientModal({ patient, onClose, onSave }) {
             {editTab === "identity" && (
               <div className="space-y-5">
                 {/* Status Toggle */}
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
-                  <div className="flex items-center gap-3">
-                    {formData.isActive ? (
-                      <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                        <UserCheck size={20} className="text-emerald-600" />
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      {formData.isActive ? (
+                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                          <UserCheck size={20} className="text-emerald-600" />
+                        </div>
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
+                          <UserX size={20} className="text-slate-500" />
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-sm font-semibold text-slate-700">Status do Paciente</p>
+                        <p className="text-xs text-slate-500">{formData.isActive ? "Ativo no acompanhamento" : "Inativo / Arquivado"}</p>
                       </div>
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
-                        <UserX size={20} className="text-slate-500" />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
+                      className={`relative w-14 h-7 rounded-full transition-colors ${formData.isActive ? "bg-emerald-500" : "bg-slate-300"}`}
+                    >
+                      <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${formData.isActive ? "left-8" : "left-1"}`} />
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs text-slate-500">
+                    <div className="flex items-center gap-1">
+                      <Calendar size={12} />
+                      <span>Cadastro: {patient.createdAt ? new Date(patient.createdAt).toLocaleDateString('pt-BR') : 'N/A'}</span>
+                    </div>
+                    {!formData.isActive && patient.inactivatedAt && (
+                      <div className="flex items-center gap-1">
+                        <Calendar size={12} />
+                        <span>Inatividade: {new Date(patient.inactivatedAt).toLocaleDateString('pt-BR')}</span>
                       </div>
                     )}
-                    <div>
-                      <p className="text-sm font-semibold text-slate-700">Status do Paciente</p>
-                      <p className="text-xs text-slate-500">{formData.isActive ? "Ativo no acompanhamento" : "Inativo / Arquivado"}</p>
-                    </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
-                    className={`relative w-14 h-7 rounded-full transition-colors ${formData.isActive ? "bg-emerald-500" : "bg-slate-300"}`}
-                  >
-                    <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${formData.isActive ? "left-8" : "left-1"}`} />
-                  </button>
                 </div>
 
                 {/* Nome Completo */}
@@ -1425,15 +1445,33 @@ function EditPatientModal({ patient, onClose, onSave }) {
 }
 
 function PatientCard({ patient, onDelete, onEdit }) {
+  const sentCount = patient._count?.shareLinks || 0;
   const responseCount = patient._count?.responses || 0;
-  const shareLinkCount = patient._count?.shareLinks || 0;
+  const isActive = patient.isActive !== false;
 
   return (
-    <div className="card group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full card-bone overflow-hidden border-emerald-100/50">
+    <div className={`card group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full card-bone overflow-hidden border-emerald-100/50 ${!isActive ? 'opacity-70' : ''}`}>
       <div className="p-6 flex-1">
-        <div className="flex items-start justify-between mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-lg group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
-            {patient.name.charAt(0).toUpperCase()}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-lg transition-colors duration-300 ${isActive ? 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white' : 'bg-slate-200 text-slate-500'}`}>
+              {patient.name.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                {isActive ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full">
+                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                    ATIVO
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-200 text-slate-500 text-[10px] font-bold rounded-full">
+                    <span className="w-1.5 h-1.5 bg-slate-400 rounded-full"></span>
+                    INATIVO
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
           <div className="relative">
             <button
@@ -1457,7 +1495,7 @@ function PatientCard({ patient, onDelete, onEdit }) {
           )}
         </Link>
 
-        <div className="mt-6 space-y-2 text-xs text-slate-600">
+        <div className="mt-4 space-y-2 text-xs text-slate-600">
           {patient.email && (
             <div className="flex items-center gap-2">
               <Mail size={12} className="shrink-0 text-emerald-400" />
@@ -1472,14 +1510,21 @@ function PatientCard({ patient, onDelete, onEdit }) {
           )}
         </div>
 
-        <div className="flex items-center gap-6 mt-6 pt-6 border-t border-emerald-50">
+        <div className="flex items-center gap-4 mt-4 pt-4 border-t border-emerald-50">
           <div className="flex flex-col">
-            <span className="text-lg font-black text-slate-800 leading-none">{responseCount}</span>
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Respostas</span>
+            <span className="text-lg font-black text-slate-800 leading-none">{sentCount}</span>
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">
+              {sentCount <= 1 ? 'Enviado' : 'Enviados'}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <ChevronRight size={14} className="text-emerald-400" />
           </div>
           <div className="flex flex-col">
-            <span className="text-lg font-black text-slate-800 leading-none">{shareLinkCount}</span>
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Links</span>
+            <span className="text-lg font-black text-emerald-600 leading-none">{responseCount}</span>
+            <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-1">
+              {responseCount <= 1 ? 'Respondido' : 'Respondidos'}
+            </span>
           </div>
         </div>
       </div>
@@ -1505,18 +1550,24 @@ function PatientCard({ patient, onDelete, onEdit }) {
 }
 
 function PatientListRow({ patient, onDelete, onEdit }) {
+  const sentCount = patient._count?.shareLinks || 0;
   const responseCount = patient._count?.responses || 0;
-  const shareLinkCount = patient._count?.shareLinks || 0;
+  const isActive = patient.isActive !== false;
 
   return (
-    <div className="card p-4 flex items-center gap-4 hover:border-emerald-200 transition-all">
-      <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-lg shrink-0">
+    <div className={`card p-4 flex items-center gap-4 hover:border-emerald-200 transition-all ${!isActive ? 'opacity-70' : ''}`}>
+      <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg shrink-0 ${isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-200 text-slate-500'}`}>
         {patient.name.charAt(0).toUpperCase()}
       </div>
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-3 mb-1">
           <h4 className="font-bold text-slate-800 truncate">{patient.name}</h4>
+          {!isActive && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-200 text-slate-500 text-[10px] font-bold rounded-full">
+              INATIVO
+            </span>
+          )}
           {patient.birthDate && (
             <span className="text-xs text-slate-500">
               ({(() => {
@@ -1548,14 +1599,19 @@ function PatientListRow({ patient, onDelete, onEdit }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-6 shrink-0">
+      <div className="flex items-center gap-3 shrink-0">
         <div className="flex flex-col items-center">
-          <span className="text-lg font-black text-slate-800">{responseCount}</span>
-          <span className="text-[10px] font-bold text-slate-500 uppercase">Respostas</span>
+          <span className="text-lg font-black text-slate-800">{sentCount}</span>
+          <span className="text-[10px] font-bold text-slate-500 uppercase">
+            {sentCount <= 1 ? 'Enviado' : 'Enviados'}
+          </span>
         </div>
+        <ChevronRight size={14} className="text-emerald-400" />
         <div className="flex flex-col items-center">
-          <span className="text-lg font-black text-slate-800">{shareLinkCount}</span>
-          <span className="text-[10px] font-bold text-slate-500 uppercase">Links</span>
+          <span className="text-lg font-black text-emerald-600">{responseCount}</span>
+          <span className="text-[10px] font-bold text-emerald-600 uppercase">
+            {responseCount <= 1 ? 'Respondido' : 'Respondidos'}
+          </span>
         </div>
       </div>
 

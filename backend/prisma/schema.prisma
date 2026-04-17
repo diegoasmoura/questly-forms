@@ -46,6 +46,8 @@ model Patient {
   emergencyPhone String?
 
   notes          String?
+  isActive       Boolean     @default(true)
+  inactivatedAt DateTime?
   psychologistId String
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt

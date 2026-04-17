@@ -467,7 +467,7 @@ export default function PatientRecord() {
                     <div>
                       <h4 className="text-sm font-black uppercase tracking-[0.2em] text-slate-500 mb-4 flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                        Respondidos ({answered.length})
+                        {answered.length === 1 ? 'Respondido' : 'Respondidos'} ({answered.length})
                       </h4>
                       <div className="space-y-4">
                         {answered.map(link => {

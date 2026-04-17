@@ -78,6 +78,15 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 
 ## Novidades Recentes
 
+### Status de Pacientes e Contadores (v2.15)
+- **Campos isActive/inactivatedAt:** Pacientes podem ser ativados ou inativados
+- **Badge de status:** ATIVO (verde) ou INATIVO (cinza) nos cards
+- **Datas de cadastro:** Exibidas no modal de edição
+- **Data de inativação:** Registrada automaticamente ao desativar
+- **Contadores plurais:** 0/1 Enviado, 2+ Enviados (singular/plural correto)
+- **Visual diferenciado:** Pacientes inativos com opacidade reduzida (70%)
+- **Ícone cinza:** Sigla do paciente fica cinza quando inativo
+
 ### Sistema de Upload de Anexos (v2.14)
 - **Secure Upload:** Upload de arquivos seguros para pacientes (PDF, JPG, PNG, DOC)
 - **Validação:** Tipos de arquivo permitidos e limite de 10MB
