@@ -43,7 +43,8 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
       const isInYear = currentDate >= yearStartDate && currentDate <= yearEndDate;
       
       if (isInYear) {
-        const dateStr = currentDate.toISOString().split('T')[0];
+        const dateStr = currentDate.toLocaleDateString('en-CA'); // YYYY-MM-DD local
+        const todayStr = today.toLocaleDateString('en-CA'); // YYYY-MM-DD local
         const count = data[dateStr] || 0;
         
         maxValue = Math.max(maxValue, count);
@@ -53,7 +54,7 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
           date: dateStr,
           dayOfWeek: currentDate.getDay(),
           count,
-          isToday: dateStr === today.toISOString().split('T')[0],
+          isToday: dateStr === todayStr,
           isFuture: currentDate > today
         });
       } else if (currentDate < yearStartDate) {
