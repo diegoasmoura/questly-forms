@@ -17,7 +17,6 @@ export default function FormBuilder() {
   const [saving, setSaving] = useState(false);
   const [savingSuccess, setSavingSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [creatorReady, setCreatorReady] = useState(false);
   const titleInputRef = useRef(null);
   const formLoadedRef = useRef(false);
 
@@ -40,11 +39,6 @@ export default function FormBuilder() {
     c.showDesignerTab = true;
     c.showPreviewTab = true;
     c.showOneCategoryInPropertyGrid = false;
-
-    // Wait for creator to be ready
-    if (creator.survey) {
-      setCreatorReady(true);
-    }
 
     return c;
   }, []);
