@@ -352,17 +352,22 @@ export default function Agenda() {
       sessionDate = addDays(date, diff);
     }
     
+    const dateStr = sessionDate.toISOString().split('T')[0];
+    const existingAtt = attendances.find(a => a.patientId === appointment.patientId && a.date.split('T')[0] === dateStr);
+    
     try {
-      const data = {
-        patientId: appointment.patientId,
-        date: sessionDate.toISOString(),
-        status,
-        sessionTime: appointment.time
-      };
+      if (existingAtt?.status === status) {
+        await api.deleteAttendance(existingAtt.id);
+      } else {
+        const data = {
+          patientId: appointment.patientId,
+          date: sessionDate.toISOString(),
+          status,
+          sessionTime: appointment.time
+        };
+        await api.saveAttendance(data);
+      }
       
-      await api.saveAttendance(data);
-      
-      // Recarregar attendances
       const atts = await api.getAttendances() || [];
       setAttendances(atts);
     } catch (error) {

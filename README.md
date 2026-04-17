@@ -83,6 +83,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Melhor legibilidade:** Células maiores (100px), texto maior, até 3 pacientes por célula
 - **Data de início:** Sessões só aparecem a partir da Data de Início do paciente
 - **Contadores dinâmicos:** TotalPacientes, Presenças, Faltas, Justificadas atualizam em tempo real
+- **Toggle attendance:** Clicar no mesmo botão remove o registro (desmarcar)
 
 ### Attendance Trackking (v3.2)
 - **Modelo Attendance:** Nova tabela para registrar presença/falta/justificada por data
