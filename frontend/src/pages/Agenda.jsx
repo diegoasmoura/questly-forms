@@ -40,10 +40,36 @@ export default function Agenda() {
   const loadAppointments = async () => {
     try {
       setLoading(true);
-      const data = await api.getAppointments();
-      setAppointments(data || []);
+      let data = [];
+      try {
+        data = await api.getAppointments() || [];
+      } catch (e) {
+        // Se não houver appointments, usa pacientes com nextSession
+        console.log("Nenhum appointment, usando pacientes");
+      }
+      
+      // Se não tiver appointments, buscar pacientes com nextSession
+      if (data.length === 0) {
+        const patients = await api.getPatients() || [];
+        // Converter pacientes com nextSession para formato de appointment
+        data = patients
+          .filter(p => p.nextSession && p.isActive !== false)
+          .map(p => ({
+            id: p.id,
+            patientId: p.id,
+            dayOfWeek: new Date(p.nextSession).getDay(),
+            time: p.sessionTime || "09:00",
+            duration: p.sessionDuration || 50,
+            patient: { id: p.id, name: p.name },
+            nextSession: p.nextSession,
+            frequency: p.sessionFrequency
+          }));
+      }
+      
+      setAppointments(data);
     } catch (error) {
       console.error("Erro ao carregar agenda:", error);
+      setAppointments([]);
     } finally {
       setLoading(false);
     }
@@ -85,7 +111,7 @@ export default function Agenda() {
               onClick={() => handleViewChange(item.id)}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${
                 view === item.id 
-                  ? "bg-emerald-600 text-white" 
+                  ? "bg-slate-700 text-white" 
                   : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"
               }`}
             >
@@ -123,7 +149,7 @@ export default function Agenda() {
               </button>
               <button 
                 onClick={() => setCurrentDate(new Date())} 
-                className="px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-white hover:shadow-sm rounded-lg transition-all"
+                className="px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-white hover:shadow-sm rounded-lg transition-all"
               >
                 Hoje
               </button>
@@ -140,14 +166,14 @@ export default function Agenda() {
       )}
 
       {view === 'list' && (
-        <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100 flex items-center justify-between">
+        <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 flex items-center justify-between">
            <div>
-              <h2 className="text-sm font-bold text-emerald-800 uppercase tracking-wider">Resumo da Grade Semanal</h2>
-              <p className="text-[10px] text-emerald-600 font-medium">Visualização de todos os horários fixos recorrentes</p>
+              <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Resumo da Grade Semanal</h2>
+              <p className="text-[10px] text-slate-600 font-medium">Visualização de todos os horários fixos recorrentes</p>
            </div>
            <div className="flex items-center gap-2">
-              <Users size={16} className="text-emerald-400" />
-              <span className="text-xs font-bold text-emerald-700">{appointments.length} Sessões Ativas</span>
+              <Users size={16} className="text-slate-400" />
+              <span className="text-xs font-bold text-slate-700">{appointments.length} Sessões Ativas</span>
            </div>
         </div>
       )}
@@ -155,7 +181,7 @@ export default function Agenda() {
       {loading ? (
         <div className="flex-1 flex items-center justify-center bg-white/50 rounded-3xl border border-slate-300 border-dashed">
           <div className="text-center">
-            <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <div className="w-10 h-10 border-4 border-slate-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
             <p className="text-slate-500 font-medium">Carregando seus horários...</p>
           </div>
         </div>
@@ -198,10 +224,10 @@ function ListView({ appointments }) {
         <div key={gIdx} className="bg-white rounded-3xl border border-slate-300 shadow-sm overflow-hidden animate-slide-up" style={{ animationDelay: `${gIdx * 50}ms` }}>
           <div className="px-6 py-4 bg-slate-50/50 border-b border-slate-200 flex items-center justify-between">
             <h3 className="font-bold text-slate-700 flex items-center gap-2">
-              <CalendarIcon size={16} className="text-emerald-500" />
+              <CalendarIcon size={16} className="text-slate-500" />
               {group.dayName}
             </h3>
-            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full uppercase tracking-wider">
+            <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-bold rounded-full uppercase tracking-wider">
               {group.apps.length} {group.apps.length === 1 ? 'Sessão' : 'Sessões'}
             </span>
           </div>
@@ -209,13 +235,13 @@ function ListView({ appointments }) {
             {group.apps.map(app => (
               <div key={app.id} className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/30 transition-colors group">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300">
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 group-hover:bg-slate-500 group-hover:text-white transition-all duration-300">
                     <Clock size={18} />
                   </div>
                   <div>
                     <p className="text-sm font-bold text-slate-700">{app.patient?.name}</p>
                     <div className="flex items-center gap-3 mt-0.5">
-                      <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1">
+                      <span className="text-xs font-semibold text-slate-600 flex items-center gap-1">
                         {app.time}
                       </span>
                       <span className="text-[10px] text-slate-400 font-medium">• {app.duration} min</span>
@@ -224,7 +250,7 @@ function ListView({ appointments }) {
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  <button className="px-3 py-1.5 text-[10px] font-bold text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all uppercase tracking-wider">
+                  <button className="px-3 py-1.5 text-[10px] font-bold text-slate-500 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-all uppercase tracking-wider">
                     Ver Prontuário
                   </button>
                   <button className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-all">
@@ -273,14 +299,14 @@ function MonthView({ currentDate, appointments }) {
               className={`min-h-[120px] p-2 border-r border-b border-slate-200 transition-colors hover:bg-slate-50/50 ${!isCurrentMonth ? 'bg-slate-50/40 grayscale-[0.5] opacity-40' : ''}`}
             >
               <div className="flex justify-end mb-1">
-                <span className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full ${isToday ? 'bg-emerald-500 text-white' : 'text-slate-400'}`}>
+                <span className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full ${isToday ? 'bg-slate-500 text-white' : 'text-slate-400'}`}>
                   {format(day, 'd')}
                 </span>
               </div>
               
               <div className="space-y-1 overflow-y-auto max-h-[80px] custom-scrollbar">
                 {dayApps.slice(0, 3).map(app => (
-                  <div key={app.id} className="px-2 py-1 rounded-md bg-emerald-50 border border-emerald-100 text-[9px] font-bold text-emerald-700 truncate">
+                  <div key={app.id} className="px-2 py-1 rounded-md bg-slate-50 border border-slate-100 text-[9px] font-bold text-slate-700 truncate">
                     {app.time} • {app.patient?.name}
                   </div>
                 ))}
@@ -307,9 +333,9 @@ function WeekView({ weekDays, appointments }) {
           <div className="grid grid-cols-[100px_repeat(7,1fr)] border-b border-slate-300 bg-slate-50/80">
             <div className="p-4" />
             {weekDays.map((day, idx) => (
-              <div key={idx} className={`p-4 text-center border-l border-slate-200 ${isSameDay(day, new Date()) ? 'bg-emerald-50/50' : ''}`}>
+              <div key={idx} className={`p-4 text-center border-l border-slate-200 ${isSameDay(day, new Date()) ? 'bg-slate-50/50' : ''}`}>
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{DAYS_OF_WEEK[day.getDay()]}</p>
-                <p className={`text-xl font-bold mt-1 ${isSameDay(day, new Date()) ? 'text-emerald-600' : 'text-slate-700'}`}>
+                <p className={`text-xl font-bold mt-1 ${isSameDay(day, new Date()) ? 'text-slate-600' : 'text-slate-700'}`}>
                   {format(day, 'd')}
                 </p>
               </div>
@@ -330,13 +356,13 @@ function WeekView({ weekDays, appointments }) {
                       {dayApps.map(app => (
                         <div 
                           key={app.id} 
-                          className="px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-100 shadow-sm group/item hover:bg-emerald-100 transition-all cursor-pointer h-full flex flex-col justify-center"
+                          className="px-2 py-1 rounded-lg bg-slate-50 border border-slate-100 shadow-sm group/item hover:bg-slate-100 transition-all cursor-pointer h-full flex flex-col justify-center"
                         >
                           <div className="flex items-center justify-between gap-1">
-                            <p className="text-[9px] font-bold text-emerald-800 truncate leading-tight">
+                            <p className="text-[9px] font-bold text-slate-800 truncate leading-tight">
                               {app.patient?.name}
                             </p>
-                            <span className="text-[8px] font-bold text-emerald-600/80 whitespace-nowrap">{app.time}</span>
+                            <span className="text-[8px] font-bold text-slate-600/80 whitespace-nowrap">{app.time}</span>
                           </div>
                         </div>
                       ))}

@@ -895,6 +895,18 @@ function EditPatientModal({ patient, onClose, onSave }) {
     }
   };
 
+  const loadAttachments = async () => {
+    setLoadingAttachments(true);
+    try {
+      const data = await api.getAttachments(patient.id);
+      setAttachments(data);
+    } catch (error) {
+      console.error("Erro ao carregar anexos:", error);
+    } finally {
+      setLoadingAttachments(false);
+    }
+  };
+
   const checkConflict = async (id, dayOfWeek, time) => {
     try {
       const result = await api.checkAppointmentConflict({

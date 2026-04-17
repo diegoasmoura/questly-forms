@@ -90,6 +90,10 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 ### Padronização de Interface (v3.1)
 - **Toggle de Visualização Unificado:** Seletores de "Cards" e "Lista" padronizados em todo o sistema (Pacientes, Formulários, Biblioteca e Agenda).
 - **UX Aprimorada:** Inclusão de rótulos de texto junto aos ícones para facilitar a identificação da visualização.
+
+### Agenda com Cores Slate (v3.1.1)
+- **Cores Neutras:** Agenda usa paleta slate em vez de emerald para视觉 consistente
+- **Fallback de Pacientes:** Se não houver Appointments, usa dados dos pacientes com nextSession
 - **Design de Alto Contraste:** Ícones aumentados para 18px e bordas mais definidas para melhor legibilidade.
 
 ### Tab Renomeada (v2.16)
