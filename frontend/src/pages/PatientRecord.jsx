@@ -774,7 +774,7 @@ export default function PatientRecord() {
                   { id: "contact", label: "Contato", icon: Contact },
                   { id: "address", label: "Endereço", icon: MapPin },
                   { id: "notes", label: "Notas", icon: FileText },
-                  { id: "settings", label: "Agenda", icon: Settings },
+                  { id: "settings", label: "Agenda", icon: Calendar },
                 ].map(tab => (
                   <button
                     key={tab.id}

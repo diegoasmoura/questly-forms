@@ -308,7 +308,7 @@ export default function Patients() {
                   { id: "contact", label: "Contato", icon: Contact },
                   { id: "address", label: "Endereço", icon: MapPin },
                   { id: "notes", label: "Notas", icon: FileText },
-                  { id: "settings", label: "Agenda", icon: Settings },
+                  { id: "settings", label: "Agenda", icon: Calendar },
                 ].map(tab => (
                   <button
                     key={tab.id}
@@ -990,7 +990,7 @@ function EditPatientModal({ patient, onClose, onSave }) {
               { id: "contact", label: "Contato", icon: Contact },
               { id: "address", label: "Endereço", icon: MapPin },
               { id: "notes", label: "Notas", icon: FileText },
-              { id: "settings", label: "Agenda", icon: Settings },
+              { id: "settings", label: "Agenda", icon: Calendar },
             ].map(tab => (
               <button
                 key={tab.id}
