@@ -20,6 +20,7 @@ import FormResponses from "./pages/FormResponses";
 import ResponseDetail from "./pages/ResponseDetail";
 import ShareLink from "./pages/ShareLink";
 import PatientForm from "./pages/PatientForm";
+import Agenda from "./pages/Agenda";
 
 function LoadingScreen() {
   return (
@@ -61,6 +62,7 @@ export default function App() {
         <Route path="/dashboard" element={<Navigate to="/home" replace />} />
         <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
         <Route path="/patients/:id" element={<ProtectedRoute><PatientRecord /></ProtectedRoute>} />
+        <Route path="/agenda" element={<ProtectedRoute><Agenda /></ProtectedRoute>} />
         <Route path="/my-forms" element={<ProtectedRoute><MyForms /></ProtectedRoute>} />
         <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
         

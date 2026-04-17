@@ -7,7 +7,8 @@ import {
   FileText, 
   LogOut, 
   ChevronLeft, 
-  ChevronRight
+  ChevronRight,
+  Calendar
 } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -15,6 +16,7 @@ import { motion } from "framer-motion";
 const menuItems = [
   { icon: Home, label: "Home", path: "/home" },
   { icon: Users, label: "Patients", path: "/patients" },
+  { icon: Calendar, label: "Agenda", path: "/agenda" },
   { icon: FileText, label: "My Forms", path: "/my-forms" },
   { icon: Library, label: "Library", path: "/library" },
 ];
