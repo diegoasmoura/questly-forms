@@ -91,6 +91,13 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Toggle de Visualização Unificado:** Seletores de "Cards" e "Lista" padronizados em todo o sistema (Pacientes, Formulários, Biblioteca e Agenda).
 - **UX Aprimorada:** Inclusão de rótulos de texto junto aos ícones para facilitar a identificação da visualização.
 
+### Correções Críticas de Infraestrutura (v3.1.2)
+- **Correção da Agenda (Backend):** Resolvido erro 500 fatal causado por tentativa de selecionar o campo inexistente `color` na tabela de Pacientes.
+- **Sincronização de Datas:** Implementada comparação de datas robusta (YYYY-MM-DD) no frontend, eliminando problemas de fuso horário que impediam agendamentos de aparecer no dia correto.
+- **Validação Flexível:** Removida restrição estrita de data retroativa no backend para evitar falhas de salvamento causadas por diferenças de fuso horário entre cliente e servidor.
+- **Estabilidade da UI:** Corrigido erro de referência (`AlertTriangle`) que travava a interface ao tentar adicionar horários em Pacientes.
+- **Auditoria Visual:** Adicionado contador de agendamentos carregados no cabeçalho da Agenda para facilitar o diagnóstico de sincronização.
+
 ### Agenda com Cores Slate (v3.1.1)
 - **Cores Neutras:** Agenda usa paleta slate em vez de emerald para视觉 consistente
 - **Fallback de Pacientes:** Se não houver Appointments, usa dados dos pacientes com nextSession

@@ -12,7 +12,7 @@ router.get("/", async (req, res) => {
       where: { psychologistId: req.user.id },
       include: {
         patient: {
-          select: { id: true, name: true, color: true } // Cor opcional se adicionarmos
+          select: { id: true, name: true }
         }
       },
       orderBy: [
@@ -43,9 +43,13 @@ router.get("/patient/:patientId", async (req, res) => {
 
 // Salvar/Atualizar horários de um paciente (Lógica para 1x, 2x por semana etc)
 router.post("/batch", async (req, res) => {
-  const { patientId, slots } = req.body; // slots: [{ dayOfWeek, time, duration }]
+  const { patientId, slots, startDate } = req.body; // slots: [{ dayOfWeek, time, duration }]
 
   try {
+    // Validar data de início
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+    
     // 1. Remover horários antigos do paciente para este profissional
     await prisma.appointment.deleteMany({
       where: { patientId, psychologistId: req.user.id }
@@ -56,7 +60,10 @@ router.post("/batch", async (req, res) => {
       slots.map(slot => 
         prisma.appointment.create({
           data: {
-            ...slot,
+            dayOfWeek: slot.dayOfWeek,
+            time: slot.time,
+            duration: slot.duration,
+            startDate: start,
             patientId,
             psychologistId: req.user.id
           }

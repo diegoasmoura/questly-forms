@@ -73,13 +73,14 @@ model Appointment {
   patientId       String
   dayOfWeek       Int      // 0 (Dom) a 6 (Sab)
   time            String   // HH:mm
-  duration        Int      // em minutos
+  duration      Int      // em minutos
+  startDate     DateTime // Data de início (não permite retroativo)
   
-  patient         Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  psychologistId  String
+  patient        Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  psychologistId String
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([patientId])
   @@index([psychologistId])

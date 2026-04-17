@@ -32,7 +32,9 @@ import {
   File,
   Paperclip,
   Download,
-  Trash
+  Trash,
+  AlertTriangle,
+  Clock
 } from "lucide-react";
 
 export default function Patients() {
@@ -877,6 +879,7 @@ function EditPatientModal({ patient, onClose, onSave }) {
   const [appointments, setAppointments] = useState([]);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
   const [conflicts, setConflicts] = useState({}); // { slotId: conflictData }
+  const [appointmentStartDate, setAppointmentStartDate] = useState("");
 
   useEffect(() => {
     loadAttachments();
@@ -888,6 +891,14 @@ function EditPatientModal({ patient, onClose, onSave }) {
     try {
       const data = await api.getPatientAppointments(patient.id);
       setAppointments(data || []);
+      
+      // Carrega data de início do primeiro appointment
+      if (data && data.length > 0 && data[0].startDate) {
+        const startDate = new Date(data[0].startDate);
+        setAppointmentStartDate(startDate.toISOString().split('T')[0]);
+      } else {
+        setAppointmentStartDate("");
+      }
     } catch (error) {
       console.error("Erro ao carregar agendamentos:", error);
     } finally {
@@ -964,12 +975,20 @@ function EditPatientModal({ patient, onClose, onSave }) {
     try {
       await api.updatePatient(patient.id, formData);
       
+      if (!appointmentStartDate) {
+        alert("Por favor, informe a data de início");
+        setSaving(false);
+        return;
+      }
+
       const slots = appointments.map(({ dayOfWeek, time, duration }) => ({
         dayOfWeek: parseInt(dayOfWeek),
         time,
         duration: parseInt(duration)
       }));
-      await api.saveAppointmentsBatch(patient.id, slots);
+      
+      const result = await api.saveAppointmentsBatch(patient.id, slots, appointmentStartDate);
+      alert(`Sucesso! ${slots.length} horário(s) salvo(s) a partir de ${appointmentStartDate}`);
       
       onSave();
     } catch (error) {
@@ -1355,6 +1374,20 @@ function EditPatientModal({ patient, onClose, onSave }) {
                       <Plus size={14} />
                       Adicionar Horário
                     </button>
+                  </div>
+                  
+                  {/* Data de Início */}
+                  <div className="mb-6">
+                    <label className="block text-xs font-semibold text-slate-600 mb-2">Data de Início *</label>
+                    <input 
+                      type="date"
+                      className="input text-sm"
+                      value={appointmentStartDate}
+                      min={new Date().toISOString().split('T')[0]}
+                      onChange={e => setAppointmentStartDate(e.target.value)}
+                      required
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1">A partir desta data, os horários se repetirão semanalmente</p>
                   </div>
                   
                   {loadingAppointments ? (

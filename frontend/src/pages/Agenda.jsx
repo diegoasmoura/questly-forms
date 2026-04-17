@@ -6,14 +6,10 @@ import {
   ChevronRight, 
   Clock, 
   Users, 
-  Plus,
   MoreVertical,
-  CalendarDays,
-  List,
-  AlertTriangle
+  List
 } from "lucide-react";
-import { format, startOfWeek, endOfWeek, addDays, startOfMonth, endOfMonth, isSameDay, addMonths, subMonths, eachDayOfInterval } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { format, startOfWeek, endOfWeek, addDays, startOfMonth, endOfMonth, isSameDay, eachDayOfInterval } from "date-fns";
 
 const DAYS_OF_WEEK = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 const TIME_SLOTS = [
@@ -22,198 +18,65 @@ const TIME_SLOTS = [
   "19:00", "20:00", "21:00"
 ];
 
-export default function Agenda() {
-  const [view, setView] = useState(() => localStorage.getItem("agenda-view") || "week");
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
+// ======================
+// COMPONENTES AUXILIARES
+// ======================
 
-  useEffect(() => {
-    loadAppointments();
-  }, []);
-
-  const handleViewChange = (newView) => {
-    setView(newView);
-    localStorage.setItem("agenda-view", newView);
-  };
-
-  const loadAppointments = async () => {
-    try {
-      setLoading(true);
-      let data = [];
-      try {
-        data = await api.getAppointments() || [];
-      } catch (e) {
-        // Se não houver appointments, usa pacientes com nextSession
-        console.log("Nenhum appointment, usando pacientes");
-      }
-      
-      // Se não tiver appointments, buscar pacientes com nextSession
-      if (data.length === 0) {
-        const patients = await api.getPatients() || [];
-        // Converter pacientes com nextSession para formato de appointment
-        data = patients
-          .filter(p => p.nextSession && p.isActive !== false)
-          .map(p => ({
-            id: p.id,
-            patientId: p.id,
-            dayOfWeek: new Date(p.nextSession).getDay(),
-            time: p.sessionTime || "09:00",
-            duration: p.sessionDuration || 50,
-            patient: { id: p.id, name: p.name },
-            nextSession: p.nextSession,
-            frequency: p.sessionFrequency
-          }));
-      }
-      
-      setAppointments(data);
-    } catch (error) {
-      console.error("Erro ao carregar agenda:", error);
-      setAppointments([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const nextDate = () => {
-    if (view === "week") setCurrentDate(addDays(currentDate, 7));
-    else setCurrentDate(addMonths(currentDate, 1));
-  };
-
-  const prevDate = () => {
-    if (view === "week") setCurrentDate(addDays(currentDate, -7));
-    else setCurrentDate(subMonths(currentDate, 1));
-  };
-
-  const weekDays = eachDayOfInterval({
-    start: startOfWeek(currentDate, { weekStartsOn: 0 }),
-    end: endOfWeek(currentDate, { weekStartsOn: 0 })
+function UpcomingStarts({ appointments }) {
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
+  
+  const upcoming = appointments.filter(a => {
+    if (!a.startDate) return false;
+    const startStr = (typeof a.startDate === 'string' ? a.startDate : a.startDate.toISOString()).split('T')[0];
+    return startStr > todayStr;
   });
-
+  
+  if (upcoming.length === 0) return null;
+  
+  const grouped = upcoming.reduce((acc, app) => {
+    const dateStr = new Date(app.startDate).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+    if (!acc[dateStr]) acc[dateStr] = [];
+    acc[dateStr].push(app);
+    return acc;
+  }, {});
+  
   return (
-    <div className="p-4 sm:p-6 h-full flex flex-col overflow-hidden animate-fade-in space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 font-display">Agenda</h1>
-          <p className="text-sm text-slate-500">Gestão de horários e sessões</p>
-        </div>
-
-        {/* View Toggle - Seguindo padrão solicitado */}
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
-          {[
-            { id: 'week', label: 'Semana', icon: CalendarDays },
-            { id: 'month', label: 'Mês', icon: CalendarIcon },
-            { id: 'list', label: 'Lista', icon: List }
-          ].map(item => (
-            <button
-              key={item.id}
-              onClick={() => handleViewChange(item.id)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${
-                view === item.id 
-                  ? "bg-slate-700 text-white" 
-                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"
-              }`}
-            >
-              <item.icon size={18} />
-              <span className="text-xs font-bold">{item.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Toolbar - Oculta no modo lista */}
-      {view !== 'list' && (
-        <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-300 shadow-sm animate-scale-in">
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col">
-              <h2 className="text-lg font-bold text-slate-800 capitalize leading-tight">
-                {view === 'week' 
-                  ? `Semana de ${format(weekDays[0], "d 'de' MMMM", { locale: ptBR })}`
-                  : format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })
-                }
-              </h2>
-              {view === 'week' && (
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                  {format(currentDate, "yyyy")}
-                </p>
-              )}
-            </div>
-            <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200">
-              <button 
-                onClick={prevDate} 
-                className="p-1.5 hover:bg-white hover:shadow-sm rounded-lg text-slate-600 transition-all"
-                title="Anterior"
-              >
-                <ChevronLeft size={18} />
-              </button>
-              <button 
-                onClick={() => setCurrentDate(new Date())} 
-                className="px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-white hover:shadow-sm rounded-lg transition-all"
-              >
-                Hoje
-              </button>
-              <button 
-                onClick={nextDate} 
-                className="p-1.5 hover:bg-white hover:shadow-sm rounded-lg text-slate-600 transition-all"
-                title="Próximo"
-              >
-                <ChevronRight size={18} />
-              </button>
-            </div>
+    <div className="mt-6 bg-slate-50 rounded-2xl border border-slate-200 p-4">
+      <h3 className="text-sm font-bold text-slate-700 mb-4">Próximos Inícios</h3>
+      {Object.entries(grouped).map(([dateStr, apps]) => (
+        <div key={dateStr} className="mb-3">
+          <p className="text-xs font-semibold text-slate-500 mb-2">{dateStr}</p>
+          <div className="space-y-1">
+            {apps.map(app => (
+              <div key={app.id} className="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-600">
+                    {app.time}
+                  </div>
+                  <span className="text-xs font-medium text-slate-700">{app.patient?.name}</span>
+                </div>
+                <span className="text-[10px] text-slate-500">{DAYS_OF_WEEK[app.dayOfWeek]}</span>
+              </div>
+            ))}
           </div>
         </div>
-      )}
-
-      {view === 'list' && (
-        <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 flex items-center justify-between">
-           <div>
-              <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Resumo da Grade Semanal</h2>
-              <p className="text-[10px] text-slate-600 font-medium">Visualização de todos os horários fixos recorrentes</p>
-           </div>
-           <div className="flex items-center gap-2">
-              <Users size={16} className="text-slate-400" />
-              <span className="text-xs font-bold text-slate-700">{appointments.length} Sessões Ativas</span>
-           </div>
-        </div>
-      )}
-
-      {loading ? (
-        <div className="flex-1 flex items-center justify-center bg-white/50 rounded-3xl border border-slate-300 border-dashed">
-          <div className="text-center">
-            <div className="w-10 h-10 border-4 border-slate-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-slate-500 font-medium">Carregando seus horários...</p>
-          </div>
-        </div>
-      ) : (
-        <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
-          {view === "week" ? (
-            <WeekView weekDays={weekDays} appointments={appointments} />
-          ) : view === "month" ? (
-            <MonthView currentDate={currentDate} appointments={appointments} />
-          ) : (
-            <ListView appointments={appointments} />
-          )}
-        </div>
-      )}
+      ))}
     </div>
   );
 }
 
 function ListView({ appointments }) {
-  const grouped = [0, 1, 2, 3, 4, 5, 6].map(dayIdx => {
-    return {
-      dayName: DAYS_OF_WEEK[dayIdx],
-      apps: appointments.filter(a => a.dayOfWeek === dayIdx).sort((a, b) => a.time.localeCompare(b.time))
-    };
-  }).filter(group => group.apps.length > 0);
+  const grouped = [0, 1, 2, 3, 4, 5, 6].map(dayIdx => ({
+    dayName: DAYS_OF_WEEK[dayIdx],
+    apps: appointments.filter(a => a.dayOfWeek === dayIdx).sort((a, b) => a.time.localeCompare(b.time))
+  })).filter(group => group.apps.length > 0);
 
   if (grouped.length === 0) {
     return (
       <div className="p-12 text-center bg-white rounded-3xl border border-slate-300 border-dashed">
         <Users size={48} className="mx-auto text-slate-300 mb-4" />
         <h3 className="text-lg font-semibold text-slate-700">Nenhuma sessão agendada</h3>
-        <p className="text-slate-500">Adicione horários nos prontuários dos pacientes para vê-los aqui.</p>
+        <p className="text-slate-500">Adicione horários nos prontuários dos pacientes.</p>
       </div>
     );
   }
@@ -221,42 +84,31 @@ function ListView({ appointments }) {
   return (
     <div className="space-y-4">
       {grouped.map((group, gIdx) => (
-        <div key={gIdx} className="bg-white rounded-3xl border border-slate-300 shadow-sm overflow-hidden animate-slide-up" style={{ animationDelay: `${gIdx * 50}ms` }}>
+        <div key={gIdx} className="bg-white rounded-3xl border border-slate-300 shadow-sm overflow-hidden">
           <div className="px-6 py-4 bg-slate-50/50 border-b border-slate-200 flex items-center justify-between">
             <h3 className="font-bold text-slate-700 flex items-center gap-2">
               <CalendarIcon size={16} className="text-slate-500" />
               {group.dayName}
             </h3>
-            <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-bold rounded-full uppercase tracking-wider">
+            <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full">
               {group.apps.length} {group.apps.length === 1 ? 'Sessão' : 'Sessões'}
             </span>
           </div>
           <div className="divide-y divide-slate-100">
             {group.apps.map(app => (
-              <div key={app.id} className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/30 transition-colors group">
+              <div key={app.id} className="px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 group-hover:bg-slate-500 group-hover:text-white transition-all duration-300">
+                  <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600">
                     <Clock size={18} />
                   </div>
                   <div>
                     <p className="text-sm font-bold text-slate-700">{app.patient?.name}</p>
-                    <div className="flex items-center gap-3 mt-0.5">
-                      <span className="text-xs font-semibold text-slate-600 flex items-center gap-1">
-                        {app.time}
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-medium">• {app.duration} min</span>
-                    </div>
+                    <p className="text-xs text-slate-500">{app.time} • {app.duration} min</p>
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-2">
-                  <button className="px-3 py-1.5 text-[10px] font-bold text-slate-500 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-all uppercase tracking-wider">
-                    Ver Prontuário
-                  </button>
-                  <button className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-all">
-                    <MoreVertical size={16} />
-                  </button>
-                </div>
+                <button className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100">
+                  <MoreVertical size={16} />
+                </button>
               </div>
             ))}
           </div>
@@ -271,50 +123,49 @@ function MonthView({ currentDate, appointments }) {
   const monthEnd = endOfMonth(monthStart);
   const startDate = startOfWeek(monthStart, { weekStartsOn: 0 });
   const endDate = endOfWeek(monthEnd, { weekStartsOn: 0 });
-
-  const calendarDays = eachDayOfInterval({
-    start: startDate,
-    end: endDate
-  });
+  const calendarDays = eachDayOfInterval({ start: startDate, end: endDate });
 
   return (
     <div className="bg-white rounded-3xl border border-slate-300 shadow-sm overflow-hidden">
       <div className="grid grid-cols-7 border-b border-slate-300 bg-slate-50/80">
         {DAYS_OF_WEEK.map((day, idx) => (
-          <div key={idx} className="p-4 text-center border-r border-slate-200 last:border-r-0">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{day}</p>
+          <div key={idx} className="p-4 text-center border-r border-slate-200">
+            <p className="text-[10px] font-bold text-slate-500 uppercase">{day}</p>
           </div>
         ))}
       </div>
-
       <div className="grid grid-cols-7">
         {calendarDays.map((day, idx) => {
           const isCurrentMonth = format(day, 'M') === format(monthStart, 'M');
           const isToday = isSameDay(day, new Date());
-          const dayApps = appointments.filter(a => a.dayOfWeek === day.getDay());
+          
+          const dayApps = appointments.filter(a => {
+            // Verifica o dia da semana
+            if (Number(a.dayOfWeek) !== day.getDay()) return false;
+            
+            // Verifica a data de início de forma robusta
+            if (a.startDate) {
+              const startStr = (typeof a.startDate === 'string' ? a.startDate : a.startDate.toISOString()).split('T')[0];
+              const currentStr = format(day, 'yyyy-MM-dd');
+              return currentStr >= startStr;
+            }
+            return true;
+          });
 
           return (
-            <div 
-              key={idx} 
-              className={`min-h-[120px] p-2 border-r border-b border-slate-200 transition-colors hover:bg-slate-50/50 ${!isCurrentMonth ? 'bg-slate-50/40 grayscale-[0.5] opacity-40' : ''}`}
-            >
+            <div key={idx} className={`min-h-[120px] p-2 border-r border-b border-slate-200 ${!isCurrentMonth ? 'bg-slate-50/40 grayscale opacity-40' : ''}`}>
               <div className="flex justify-end mb-1">
-                <span className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full ${isToday ? 'bg-slate-500 text-white' : 'text-slate-400'}`}>
+                <span className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full ${isToday ? 'bg-slate-600 text-white' : 'text-slate-400'}`}>
                   {format(day, 'd')}
                 </span>
               </div>
-              
-              <div className="space-y-1 overflow-y-auto max-h-[80px] custom-scrollbar">
+              <div className="space-y-1">
                 {dayApps.slice(0, 3).map(app => (
-                  <div key={app.id} className="px-2 py-1 rounded-md bg-slate-50 border border-slate-100 text-[9px] font-bold text-slate-700 truncate">
+                  <div key={app.id} className="px-2 py-1 rounded bg-slate-50 border border-slate-100 text-[9px] font-bold text-slate-700 truncate">
                     {app.time} • {app.patient?.name}
                   </div>
                 ))}
-                {dayApps.length > 3 && (
-                  <p className="text-[9px] font-bold text-slate-400 px-1">
-                    + {dayApps.length - 3} sessões
-                  </p>
-                )}
+                {dayApps.length > 3 && <p className="text-[9px] text-slate-400">+{dayApps.length - 3}</p>}
               </div>
             </div>
           );
@@ -329,41 +180,39 @@ function WeekView({ weekDays, appointments }) {
     <div className="bg-white rounded-3xl border border-slate-300 shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
         <div className="min-w-[800px]">
-          {/* Days Header */}
           <div className="grid grid-cols-[100px_repeat(7,1fr)] border-b border-slate-300 bg-slate-50/80">
             <div className="p-4" />
             {weekDays.map((day, idx) => (
               <div key={idx} className={`p-4 text-center border-l border-slate-200 ${isSameDay(day, new Date()) ? 'bg-slate-50/50' : ''}`}>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{DAYS_OF_WEEK[day.getDay()]}</p>
-                <p className={`text-xl font-bold mt-1 ${isSameDay(day, new Date()) ? 'text-slate-600' : 'text-slate-700'}`}>
-                  {format(day, 'd')}
-                </p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase">{DAYS_OF_WEEK[day.getDay()]}</p>
+                <p className="text-xl font-bold">{format(day, 'd')}</p>
               </div>
             ))}
           </div>
-
-          {/* Time Grid */}
-          <div className="relative">
+          <div>
             {TIME_SLOTS.map((slot, sIdx) => (
-              <div key={sIdx} className="grid grid-cols-[100px_repeat(7,1fr)] border-b border-slate-200 group">
-                <div className="p-2 text-[10px] font-bold text-slate-500 text-right pr-4 flex items-center justify-end bg-slate-50/30 border-r border-slate-200">
-                  {slot}
-                </div>
-                {[0,1,2,3,4,5,6].map(dayIdx => {
-                  const dayApps = appointments.filter(a => a.dayOfWeek === dayIdx && a.time === slot);
+              <div key={sIdx} className="grid grid-cols-[100px_repeat(7,1fr)] border-b border-slate-200">
+                <div className="p-2 text-[10px] font-bold text-slate-500 text-right pr-4 bg-slate-50/30 border-r border-slate-200">{slot}</div>
+                {weekDays.map((day, dIdx) => {
+                  const dayIdx = day.getDay();
+                  const dayApps = appointments.filter(a => {
+                    // Verifica dia da semana e horário
+                    if (Number(a.dayOfWeek) !== dayIdx || a.time !== slot) return false;
+                    
+                    // Verifica data de início robustamente
+                    if (a.startDate) {
+                      const startStr = (typeof a.startDate === 'string' ? a.startDate : a.startDate.toISOString()).split('T')[0];
+                      const currentStr = format(day, 'yyyy-MM-dd');
+                      return currentStr >= startStr;
+                    }
+                    return true;
+                  });
+
                   return (
-                    <div key={dayIdx} className="p-0.5 min-h-[45px] border-l border-slate-200 group-hover:bg-slate-50/50 transition-colors relative">
+                    <div key={dIdx} className="p-0.5 min-h-[45px] border-l border-slate-200">
                       {dayApps.map(app => (
-                        <div 
-                          key={app.id} 
-                          className="px-2 py-1 rounded-lg bg-slate-50 border border-slate-100 shadow-sm group/item hover:bg-slate-100 transition-all cursor-pointer h-full flex flex-col justify-center"
-                        >
-                          <div className="flex items-center justify-between gap-1">
-                            <p className="text-[9px] font-bold text-slate-800 truncate leading-tight">
-                              {app.patient?.name}
-                            </p>
-                            <span className="text-[8px] font-bold text-slate-600/80 whitespace-nowrap">{app.time}</span>
-                          </div>
+                        <div key={app.id} className="px-2 py-1 rounded bg-slate-50 border border-slate-100 text-[9px] font-bold text-slate-800">
+                          {app.patient?.name}
                         </div>
                       ))}
                     </div>
@@ -374,6 +223,125 @@ function WeekView({ weekDays, appointments }) {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ======================
+// COMPONENTE PRINCIPAL
+// ======================
+
+export default function Agenda() {
+  const [view, setView] = useState("month");
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadAppointments();
+  }, []);
+
+  const loadAppointments = async () => {
+    try {
+      setLoading(true);
+      let data = [];
+      try {
+        data = await api.getAppointments() || [];
+        console.log("Appointments from API:", data);
+      } catch (e) {
+        console.log("Nenhum appointment");
+      }
+      // Se não tiver appointments, buscar pacientes com próxima sessão
+      if (data.length === 0) {
+        const patients = await api.getPatients() || [];
+        data = patients.filter(p => p.nextSession && p.isActive !== false).map(p => ({
+          id: p.id,
+          patientId: p.id,
+          dayOfWeek: new Date(p.nextSession).getDay(),
+          time: p.sessionTime || "09:00",
+          duration: p.sessionDuration || 50,
+          startDate: p.nextSession,
+          patient: { id: p.id, name: p.name }
+        }));
+      }
+      console.log("Total appointments:", data.length);
+      setAppointments(data);
+    } catch (error) {
+      console.error("Erro ao carregar:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const weekDays = eachDayOfInterval({
+    start: startOfWeek(currentDate, { weekStartsOn: 0 }),
+    end: endOfWeek(currentDate, { weekStartsOn: 0 })
+  });
+
+  return (
+    <div className="p-4 sm:p-6 h-full flex flex-col space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Agenda</h1>
+          <p className="text-sm text-slate-500">Gestão de horários e sessões ({appointments.length} carregados)</p>
+        </div>
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+          {[
+            { id: 'week', label: 'Semana', icon: CalendarIcon },
+            { id: 'month', label: 'Mês', icon: CalendarIcon },
+            { id: 'list', label: 'Lista', icon: List }
+          ].map(item => (
+            <button
+              key={item.id}
+              onClick={() => setView(item.id)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${
+                view === item.id ? "bg-slate-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"
+              }`}
+            >
+              <item.icon size={18} />
+              <span className="text-xs font-bold">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Toolbar */}
+      {view !== 'list' && (
+        <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200">
+          <div className="flex items-center gap-4">
+            <h2 className="text-lg font-bold text-slate-800">
+              {view === 'week' 
+                ? `Semana de ${format(weekDays[0], "d 'de' MMMM")}`
+                : format(currentDate, "MMMM 'de' yyyy")
+              }
+            </h2>
+            <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200">
+              <button onClick={() => setCurrentDate(view === 'week' ? addDays(currentDate, -7) : new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))} className="p-1.5 hover:bg-white rounded-lg">
+                <ChevronLeft size={18} />
+              </button>
+              <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-white rounded-lg">Hoje</button>
+              <button onClick={() => setCurrentDate(view === 'week' ? addDays(currentDate, 7) : new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))} className="p-1.5 hover:bg-white rounded-lg">
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {loading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-10 h-10 border-4 border-slate-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto">
+          {view === "week" ? <WeekView weekDays={weekDays} appointments={appointments} /> :
+           view === "month" ? <MonthView currentDate={currentDate} appointments={appointments} /> :
+           <ListView appointments={appointments} />}
+        </div>
+      )}
+
+      <UpcomingStarts appointments={appointments} />
     </div>
   );
 }

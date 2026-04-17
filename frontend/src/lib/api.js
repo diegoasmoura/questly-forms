@@ -143,9 +143,9 @@ export const api = {
   // Appointments (Agenda)
   getAppointments: () => request("/appointments"),
   getPatientAppointments: (patientId) => request(`/appointments/patient/${patientId}`),
-  saveAppointmentsBatch: (patientId, slots) => request("/appointments/batch", { 
+  saveAppointmentsBatch: (patientId, slots, startDate) => request("/appointments/batch", { 
     method: "POST", 
-    body: JSON.stringify({ patientId, slots }) 
+    body: JSON.stringify({ patientId, slots, startDate }) 
   }),
   checkAppointmentConflict: (data) => request("/appointments/check-conflict", { 
     method: "POST", 
