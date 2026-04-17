@@ -606,8 +606,8 @@ export default function Patients() {
                 {/* TAB: Agenda */}
                 {addFormTab === "settings" && (
                   <div className="space-y-5">
-                    <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
-                      <h4 className="text-sm font-semibold text-emerald-800 mb-4">Agenda do Paciente</h4>
+                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                      <h4 className="text-sm font-semibold text-slate-700 mb-4">Agenda do Paciente</h4>
                       
                       <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-3">
@@ -1341,16 +1341,16 @@ function EditPatientModal({ patient, onClose, onSave }) {
 
             {editTab === "settings" && (
               <div className="space-y-5">
-                <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h4 className="text-sm font-bold text-emerald-800">Agenda do Paciente</h4>
-                      <p className="text-[10px] text-emerald-600 font-medium uppercase tracking-wider">Horários fixos de atendimento</p>
+                      <h4 className="text-sm font-bold text-slate-700">Agenda do Paciente</h4>
+                      <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Horários fixos de atendimento</p>
                     </div>
                     <button 
                       type="button"
                       onClick={addAppointmentSlot}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500 text-white rounded-xl text-xs font-bold hover:bg-emerald-600 transition-all shadow-sm"
+                      className="flex items-center gap-2 px-3 py-1.5 bg-slate-600 text-white rounded-xl text-xs font-bold hover:bg-slate-700 transition-all shadow-sm"
                     >
                       <Plus size={14} />
                       Adicionar Horário

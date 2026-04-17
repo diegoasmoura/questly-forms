@@ -1003,8 +1003,8 @@ export default function PatientRecord() {
 
                 {editTab === "settings" && (
                   <div className="space-y-5">
-                    <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
-                      <h4 className="text-sm font-semibold text-emerald-800 mb-4">Agenda do Paciente</h4>
+                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                      <h4 className="text-sm font-semibold text-slate-700 mb-4">Agenda do Paciente</h4>
                       
                       <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-3">
