@@ -151,7 +151,7 @@ function DayView({ date, appointments, attendances, onStatus }) {
               onStatus={onStatus}
             />
           ))
-        )}
+)}
       </div>
     </div>
   );
@@ -299,6 +299,8 @@ export default function Agenda() {
   const [appointments, setAppointments] = useState([]);
   const [attendances, setAttendances] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [justModal, setJustModal] = useState({ open: false, patient: null, appointment: null, date: null });
+  const [justData, setJustData] = useState({ date: "", notes: "" });
 
   useEffect(() => {
     loadData();
@@ -355,6 +357,12 @@ export default function Agenda() {
     const dateStr = sessionDate.toISOString().split('T')[0];
     const existingAtt = attendances.find(a => a.patientId === appointment.patientId && a.date.split('T')[0] === dateStr);
     
+    if (status === 'justificada') {
+      setJustModal({ open: true, patient: appointment.patient, appointment, date: sessionDate });
+      setJustData({ date: dateStr, notes: existingAtt?.notes || "" });
+      return;
+    }
+    
     try {
       if (existingAtt?.status === status) {
         await api.deleteAttendance(existingAtt.id);
@@ -374,8 +382,54 @@ export default function Agenda() {
       console.error("Erro ao salvar:", error);
     }
   };
+  
+  const saveJustificada = async () => {
+    if (!justModal.appointment) return;
+    
+    const selectedDateStr = justData.date;
+    const selectedDate = new Date(selectedDateStr + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+      alert("Não é possível justificar datas passadas");
+      return;
+    }
+    
+    try {
+      const dateToSave = new Date(selectedDateStr + 'T' + justModal.appointment.time + ':00');
+      const data = {
+        patientId: justModal.appointment.patientId,
+        date: dateToSave.toISOString(),
+        status: 'justificada',
+        notes: justData.notes,
+        sessionTime: justModal.appointment.time
+      };
+      
+      await api.saveAttendance(data);
+      
+      alert("Salvo!");
+      
+      const newDate = new Date(selectedDateStr);
+      setCurrentDate(newDate);
+      setView('month');
+      setJustModal({ open: false, patient: null, appointment: null, date: null });
+    } catch (error) {
+      console.error("Erro ao salvar:", error);
+    }
+  };
 
-  const weekDays = eachDayOfInterval({
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const dateParam = params.get('date');
+    if (dateParam) {
+      const newDate = new Date(dateParam);
+      setCurrentDate(newDate);
+      setView('month');
+    }
+  }, []);
+
+const weekDays = eachDayOfInterval({
     start: startOfWeek(currentDate, { weekStartsOn: 0 }),
     end: endOfWeek(currentDate, { weekStartsOn: 0 })
   });
@@ -435,6 +489,28 @@ export default function Agenda() {
           {view === "month" && <MonthView currentDate={currentDate} appointments={appointments} attendances={attendances} onStatus={handleAttendance} />}
           {view === "list" && <ListView appointments={appointments} attendances={attendances} onStatus={handleAttendance} />}
         </>
+      )}
+      
+      {justModal.open && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setJustModal({ open: false, patient: null, appointment: null, date: null })}>
+          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
+            <h2 className="text-xl font-bold text-slate-800 mb-4">Justificar Falta</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-600 mb-1">Justificativa</label>
+                <textarea value={justData.notes} onChange={e => setJustData({ ...justData, notes: e.target.value })} placeholder="Ex: Férias, doença, conflito de horário..." className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 h-24 resize-none" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-600 mb-1"> Nova data da Sessão</label>
+                <input type="date" min={new Date().toISOString().split('T')[0]} value={justData.date} onChange={e => setJustData({ ...justData, date: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-6">
+              <button onClick={() => setJustModal({ open: false, patient: null, appointment: null, date: null })} className="flex-1 px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50">Cancelar</button>
+              <button onClick={saveJustificada} className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-medium">Salvar</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
