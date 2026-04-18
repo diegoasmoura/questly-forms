@@ -44,7 +44,7 @@ router.get("/filter", async (req, res) => {
 
 // Registrar presença/falta
 router.post("/", async (req, res) => {
-  const { patientId, date, status, notes, sessionTime } = req.body;
+  const { patientId, date, status, notes, sessionTime, parentId } = req.body;
   
   try {
     const existing = await prisma.attendance.findFirst({
@@ -58,7 +58,12 @@ router.post("/", async (req, res) => {
     if (existing) {
       const updated = await prisma.attendance.update({
         where: { id: existing.id },
-        data: { status, notes, sessionTime }
+        data: { 
+          status, 
+          notes, 
+          sessionTime,
+          ...(parentId && { parentId })
+        }
       });
       return res.json(updated);
     }
@@ -70,7 +75,8 @@ router.post("/", async (req, res) => {
         status,
         notes,
         sessionTime,
-        psychologistId: req.user.id
+        psychologistId: req.user.id,
+        ...(parentId && { parentId })
       }
     });
     

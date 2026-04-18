@@ -11,7 +11,11 @@ import {
   Check,
   X,
   AlertCircle,
-  TrendingUp
+  TrendingUp,
+  RefreshCcw,
+  BookOpen,
+  Edit,
+  Trash2
 } from "lucide-react";
 import { format, startOfWeek, endOfWeek, addDays, startOfMonth, endOfMonth, isSameDay, eachDayOfInterval } from "date-fns";
 import { ptBR } from 'date-fns/locale';
@@ -101,28 +105,28 @@ function SessionCard({ appointment, onStatus, attendance, date }) {
         </div>
       </div>
       <div className="flex items-center gap-1">
-        <button
-          onClick={() => onStatus(appointment, "presente", date)}
-          className={`p-2 rounded-lg transition-colors ${
-            attendanceStatus === "presente" ? "bg-emerald-600 text-white" : "text-emerald-600 hover:bg-emerald-50"
-          }`}
-          title="Presente"
-        >
-          <Check size={16} />
-        </button>
-        <button
-          onClick={() => onStatus(appointment, "falta", date)}
-          className={`p-2 rounded-lg transition-colors ${
-            attendanceStatus === "falta" ? "bg-red-600 text-white" : "text-red-600 hover:bg-red-50"
-          }`}
-          title="Falta"
-        >
-          <X size={16} />
-        </button>
+        {attendanceStatus !== 'justificada' && (
+          <>
+            <button
+              onClick={() => onStatus(appointment, "presente", date)}
+              className="p-2 rounded-lg transition-all text-emerald-600 hover:bg-emerald-50"
+              title="Presente"
+            >
+              <Check size={16} />
+            </button>
+            <button
+              onClick={() => onStatus(appointment, "falta", date)}
+              className="p-2 rounded-lg transition-all text-red-600 hover:bg-red-50"
+              title="Falta"
+            >
+              <X size={16} />
+            </button>
+          </>
+        )}
         <button
           onClick={() => onStatus(appointment, "justificada", date)}
-          className={`p-2 rounded-lg transition-colors ${
-            attendanceStatus === "justificada" ? "bg-amber-600 text-white" : "text-amber-600 hover:bg-amber-50"
+          className={`p-2 rounded-lg transition-all ${
+            attendanceStatus === "justificada" ? "bg-amber-600 text-white shadow-sm" : "text-amber-600 hover:bg-amber-50"
           }`}
           title="Justificar"
         >
@@ -274,30 +278,65 @@ function MonthView({ currentDate, appointments, attendances, onStatus }) {
                   {format(day, 'd')}
                 </span>
               </div>
-              <div className="space-y-1 mt-1">
-                {allSessions.slice(0, 4).map((session, i) => {
+              <div className="space-y-2 mt-1">
+                {allSessions.slice(0, 3).map((session, i) => {
+                  const att = session.att;
+                  
                   const statusStyles = {
-                    presente: "bg-emerald-500 text-white border-emerald-600",
-                    falta: "bg-red-500 text-white border-red-600",
-                    justificada: "bg-amber-500 text-white border-amber-600",
-                    default: "bg-white text-slate-700 border-slate-200"
+                    presente: "bg-emerald-100 text-emerald-700 border-emerald-300",
+                    falta: "bg-red-100 text-red-700 border-red-300",
+                    justificada: "bg-amber-100 text-amber-700 border-amber-300",
+                    default: "bg-slate-100 text-slate-600 border-slate-200"
                   };
                   
-                  const style = statusStyles[session.att?.status] || statusStyles.default;
+                  const style = statusStyles[att?.status] || statusStyles.default;
+                  const isReagendado = att?.status === 'justificada' && att?.notes?.includes('Reagendado');
                   
                   return (
-                    <button
-                      key={session.app.id + i}
-                      onClick={() => onStatus(session.app, session.att?.status === 'presente' ? 'falta' : 'presente', day)}
-                      className={`w-full text-left px-1.5 py-1 rounded border text-[9px] font-black uppercase tracking-tighter transition-all truncate ${style} ${session.type === 'extra' ? 'border-dashed border-2' : ''}`}
-                    >
-                      <span className="font-bold mr-1">{session.app.time}</span>
-                      {session.app.patient?.name?.split(" ")[0]}
-                    </button>
+                    <div key={session.app.id + i} className="flex items-center gap-1">
+                      <div className={`text-[10px] px-1.5 py-1 rounded truncate flex-1 font-bold border ${style} ${session.type === 'extra' ? 'border-dashed border-2' : ''} ${isReagendado ? 'opacity-50 grayscale-[0.5]' : ''}`}>
+                        <div className="flex items-center justify-between">
+                          <span className="truncate">
+                            {session.app.patient?.name?.split(" ")[0]}
+                          </span>
+                          {isReagendado && <RefreshCcw size={10} className="ml-1 animate-spin-slow" />}
+                          {!isReagendado && <span>{session.app.time}</span>}
+                        </div>
+                      </div>
+                      <div className="flex gap-0.5">
+                        {att?.status !== 'justificada' && (
+                          <>
+                            <button 
+                              onClick={() => onStatus(session.app, 'presente', day)} 
+                              className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition-all bg-emerald-50 text-emerald-600 hover:bg-emerald-100" 
+                              title="Presente"
+                            >
+                              P
+                            </button>
+                            <button 
+                              onClick={() => onStatus(session.app, 'falta', day)} 
+                              className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition-all bg-red-50 text-red-600 hover:bg-red-100" 
+                              title="Falta"
+                            >
+                              F
+                            </button>
+                          </>
+                        )}
+                        <button 
+                          onClick={() => onStatus(session.app, 'justificada', day)} 
+                          className={`w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black transition-all ${
+                            att?.status === 'justificada' ? 'bg-amber-500 text-white shadow-sm' : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
+                          }`} 
+                          title="Justificada"
+                        >
+                          J
+                        </button>
+                      </div>
+                    </div>
                   );
                 })}
-                {allSessions.length > 4 && (
-                  <div className="text-[8px] font-bold text-slate-400 text-center">+{allSessions.length - 4}</div>
+                {allSessions.length > 3 && (
+                  <div className="text-[8px] font-bold text-slate-400 text-center">+{allSessions.length - 3} mais</div>
                 )}
               </div>
             </div>
@@ -367,8 +406,16 @@ export default function Agenda() {
   const [appointments, setAppointments] = useState([]);
   const [attendances, setAttendances] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [justModal, setJustModal] = useState({ open: false, patient: null, appointment: null, date: null });
+  const [successMessage, setSuccessMessage] = useState("");
+  const [justModal, setJustModal] = useState({ open: false, patient: null, appointment: null, date: null, isEdit: false, existingAtt: null });
   const [justData, setJustData] = useState({ date: "", notes: "" });
+
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => setSuccessMessage(""), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
 
   useEffect(() => {
     loadData();
@@ -377,15 +424,12 @@ export default function Agenda() {
   const loadData = async () => {
     try {
       setLoading(true);
-      
       const [apps, atts] = await Promise.all([
         api.getAppointments() || [],
         api.getAttendances() || []
       ]);
-      
       setAppointments(apps);
       setAttendances(atts);
-      
     } catch (error) {
       console.error("Erro ao carregar:", error);
     } finally {
@@ -406,8 +450,24 @@ export default function Agenda() {
     const existingAtt = attendances.find(a => a.patientId === appointment.patientId && formatDateKey(new Date(a.date)) === dateStr);
     
     if (status === 'justificada') {
-      setJustModal({ open: true, patient: appointment.patient, appointment, date: sessionDate });
-      setJustData({ date: "", notes: existingAtt?.notes || "" });
+      // Se já existe uma justificativa, abre em modo de visualização primeiro
+      setJustModal({ 
+        open: true, 
+        patient: appointment.patient, 
+        appointment, 
+        date: sessionDate, 
+        isEdit: !existingAtt, // Se não existe, entra direto em edição
+        existingAtt 
+      });
+      
+      // Tentar extrair a data de reagendamento das notas se existir
+      let reschedDate = "";
+      if (existingAtt?.notes?.includes("Reagendado para ")) {
+        const match = existingAtt.notes.match(/Reagendado para (\d{4}-\d{2}-\d{2})/);
+        if (match) reschedDate = match[1];
+      }
+      
+      setJustData({ date: reschedDate, notes: existingAtt?.notes || "" });
       return;
     }
     
@@ -429,6 +489,28 @@ export default function Agenda() {
       console.error("Erro ao salvar:", error);
     }
   };
+
+  const goToRescheduledDate = (dateStr) => {
+    if (!dateStr) return;
+    const newDate = new Date(dateStr + 'T00:00:00');
+    setCurrentDate(newDate);
+    setView('month');
+    setJustModal({ ...justModal, open: false });
+  };
+
+  const deleteJustification = async () => {
+    if (!justModal.existingAtt) return;
+    if (!confirm("Deseja remover esta justificativa e voltar ao estado normal?")) return;
+    
+    try {
+      await api.deleteAttendance(justModal.existingAtt.id);
+      setSuccessMessage("Justificativa removida!");
+      await loadData();
+      setJustModal({ open: false, patient: null, appointment: null, date: null, isEdit: false, existingAtt: null });
+    } catch (error) {
+      alert("Erro ao remover");
+    }
+  };
   
   const saveJustificada = async () => {
     if (!justModal.appointment || !justModal.date) return;
@@ -437,8 +519,8 @@ export default function Agenda() {
     const newDateStr = justData.date;
     
     try {
-      // 1. Marcar a data original como justificada
-      await api.saveAttendance({
+      // 1. Salvar ou Atualizar o registro original (Pai)
+      const originalResult = await api.saveAttendance({
         patientId: justModal.appointment.patientId,
         date: originalDate.toISOString(),
         status: 'justificada',
@@ -446,7 +528,7 @@ export default function Agenda() {
         sessionTime: justModal.appointment.time
       });
 
-      // 2. Se houver uma nova data, criar um registro de presença nela
+      // 2. Se houver uma nova data, criar o registro Filho vinculado ao Pai
       if (newDateStr) {
         const dateToSave = new Date(newDateStr + 'T' + justModal.appointment.time + ':00');
         await api.saveAttendance({
@@ -454,16 +536,17 @@ export default function Agenda() {
           date: dateToSave.toISOString(),
           status: 'presente', 
           notes: `Reagendamento da sessão de ${originalDate.toLocaleDateString('pt-BR')}. ${justData.notes}`,
-          sessionTime: justModal.appointment.time
+          sessionTime: justModal.appointment.time,
+          parentId: originalResult.id // Vínculo crucial aqui
         });
       }
       
-      alert("Sucesso! Registro atualizado.");
+      setSuccessMessage(`Sessão reagendada para ${newDateStr || 'nova data'}`);
       await loadData();
-      setJustModal({ open: false, patient: null, appointment: null, date: null });
+      setJustModal({ open: false, patient: null, appointment: null, date: null, isEdit: false, existingAtt: null });
     } catch (error) {
       console.error("Erro ao salvar:", error);
-      alert("Erro ao salvar justificativa");
+      setSuccessMessage("Erro ao salvar justificativa");
     }
   };
 
@@ -545,45 +628,127 @@ const weekDays = eachDayOfInterval({
       </div>
       
       {justModal.open && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[100]" onClick={() => setJustModal({ open: false, patient: null, appointment: null, date: null })}>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[100]" onClick={() => setJustModal({ ...justModal, open: false })}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
+            
+            {/* Cabeçalho */}
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-600">
-                <AlertCircle size={24} />
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${justModal.isEdit ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-600'}`}>
+                {justModal.isEdit ? <AlertCircle size={24} /> : <BookOpen size={24} />}
               </div>
               <div>
-                <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Justificar Falta</h2>
+                <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">
+                  {justModal.isEdit ? 'Justificar Falta' : 'Detalhes da Sessão'}
+                </h2>
                 <p className="text-xs font-bold text-slate-500">{justModal.patient?.name}</p>
               </div>
             </div>
 
-            <div className="space-y-5">
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Motivo da Falta</label>
-                <textarea 
-                  value={justData.notes} 
-                  onChange={e => setJustData({ ...justData, notes: e.target.value })} 
-                  placeholder="Ex: Férias, doença, viagem..." 
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all h-24 resize-none text-sm font-medium" 
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Reagendar para qual data?</label>
-                <input 
-                  type="date" 
-                  min={new Date().toISOString().split('T')[0]} 
-                  value={justData.date} 
-                  onChange={e => setJustData({ ...justData, date: e.target.value })} 
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all text-sm font-medium" 
-                />
-                <p className="text-[9px] text-slate-400 mt-2 font-bold italic">* Deixe em branco se não houver reagendamento.</p>
-              </div>
-            </div>
+            {/* Modo Visualização (Se já existir justificativa) */}
+            {!justModal.isEdit && justModal.existingAtt && (
+              <div className="space-y-6">
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Status da Sessão</p>
+                  <div className="flex items-center gap-2 text-amber-600 font-bold">
+                    <AlertCircle size={16} />
+                    <span className="text-sm">Falta Justificada</span>
+                  </div>
+                  {justData.notes && (
+                    <p className="mt-3 text-sm text-slate-600 leading-relaxed italic">"{justData.notes}"</p>
+                  )}
+                </div>
 
-            <div className="flex gap-3 mt-8">
-              <button onClick={() => setJustModal({ open: false, patient: null, appointment: null, date: null })} className="flex-1 py-3 text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-xl transition-all">Cancelar</button>
-              <button onClick={saveJustificada} className="flex-1 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-900 shadow-lg shadow-slate-200 transition-all text-xs font-black uppercase tracking-widest">Confirmar</button>
+                {justData.date && (
+                  <button 
+                    onClick={() => goToRescheduledDate(justData.date)}
+                    className="w-full p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center justify-between group hover:bg-emerald-600 hover:border-emerald-600 transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-emerald-600 shadow-sm group-hover:scale-110 transition-transform">
+                        <CalendarIcon size={20} />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest group-hover:text-emerald-100">Reagendada para</p>
+                        <p className="text-sm font-bold text-slate-800 group-hover:text-white">
+                          {format(new Date(justData.date + 'T00:00:00'), "d 'de' MMMM", { locale: ptBR })}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight size={20} className="text-emerald-300 group-hover:text-white" />
+                  </button>
+                )}
+
+                <div className="grid grid-cols-2 gap-3 pt-4">
+                  <button 
+                    onClick={() => setJustModal({ ...justModal, isEdit: true })}
+                    className="flex items-center justify-center gap-2 py-3 text-xs font-black uppercase tracking-widest text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all"
+                  >
+                    <Edit size={14} />
+                    Editar
+                  </button>
+                  <button 
+                    onClick={deleteJustification}
+                    className="flex items-center justify-center gap-2 py-3 text-xs font-black uppercase tracking-widest text-red-500 bg-white border border-red-100 rounded-xl hover:bg-red-50 transition-all"
+                  >
+                    <Trash2 size={14} />
+                    Remover
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Modo Edição (Formulário) */}
+            {justModal.isEdit && (
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Motivo da Falta</label>
+                  <textarea 
+                    value={justData.notes} 
+                    onChange={e => setJustData({ ...justData, notes: e.target.value })} 
+                    placeholder="Ex: Férias, doença, viagem..." 
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all h-24 resize-none text-sm font-medium" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Reagendar para qual data?</label>
+                  <input 
+                    type="date" 
+                    min={new Date().toISOString().split('T')[0]} 
+                    value={justData.date} 
+                    onChange={e => setJustData({ ...justData, date: e.target.value })} 
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all text-sm font-medium" 
+                  />
+                  <p className="text-[9px] text-slate-400 mt-2 font-bold italic">* Deixe em branco se não houver reagendamento.</p>
+                </div>
+
+                <div className="flex gap-3 mt-8">
+                  <button 
+                    onClick={() => setJustModal({ ...justModal, open: false })} 
+                    className="flex-1 py-3 text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-xl transition-all"
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    onClick={saveJustificada} 
+                    className="flex-1 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-900 shadow-lg shadow-slate-200 transition-all text-xs font-black uppercase tracking-widest"
+                  >
+                    Confirmar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Success Toast */}
+      {successMessage && (
+        <div className="fixed bottom-8 right-8 z-[100] animate-slide-up">
+          <div className="bg-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-500/50 backdrop-blur-sm">
+            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+              <Check size={18} className="text-white" />
             </div>
+            <p className="text-sm font-bold tracking-tight">{successMessage}</p>
           </div>
         </div>
       )}

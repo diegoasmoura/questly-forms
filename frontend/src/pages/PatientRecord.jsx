@@ -46,7 +46,8 @@ import {
   Paperclip,
   File,
   Trash,
-  Download
+  Download,
+  RefreshCcw
 } from "lucide-react";
 
 export default function PatientRecord() {
@@ -56,7 +57,9 @@ export default function PatientRecord() {
   const [loading, setLoading] = useState(true);
   const [selectedResponseId, setSelectedResponseId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("timeline"); // 'timeline' or 'trend' or 'table' or 'share'
+  const [activeTab, setActiveTab] = useState("timeline"); // 'timeline' or 'share' or 'sessions'
+  const [attendances, setAttendances] = useState([]);
+  const [loadingAttendances, setLoadingAttendances] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editTab, setEditTab] = useState("identity");
   const [attachments, setAttachments] = useState([]);
@@ -77,6 +80,25 @@ export default function PatientRecord() {
     loadPatient();
     loadForms();
   }, [id]);
+
+  const loadPatientAttendances = async () => {
+    setLoadingAttendances(true);
+    try {
+      const data = await api.getAttendances();
+      const filtered = data.filter(a => a.patientId === id);
+      setAttendances(filtered.sort((a, b) => new Date(b.date) - new Date(a.date)));
+    } catch (error) {
+      console.error("Erro ao carregar histórico de sessões:", error);
+    } finally {
+      setLoadingAttendances(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "sessions") {
+      loadPatientAttendances();
+    }
+  }, [activeTab]);
 
   const loadForms = async () => {
     setLoadingForms(true);
@@ -457,6 +479,12 @@ export default function PatientRecord() {
                 icon={<Share2 size={14} />}
                 label="Formulários"
               />
+              <TabButton
+                active={activeTab === "sessions"}
+                onClick={() => setActiveTab("sessions")}
+                icon={<Calendar size={14} />}
+                label="Frequência"
+              />
             </div>
           </div>
 
@@ -510,6 +538,116 @@ export default function PatientRecord() {
                         onCopy={handleCopyLink}
                       />
                     ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Sessions/Frequency Tab */}
+          {activeTab === "sessions" && (
+            <div className="space-y-6">
+              {/* Stats Summary */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="card p-4 flex items-center gap-4 border-l-4 border-emerald-500">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <UserCheck size={24} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">{attendances.filter(a => a.status === 'presente').length}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Presenças</p>
+                  </div>
+                </div>
+                <div className="card p-4 flex items-center gap-4 border-l-4 border-red-500">
+                  <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-600">
+                    <UserX size={24} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">{attendances.filter(a => a.status === 'falta').length}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Faltas</p>
+                  </div>
+                </div>
+                <div className="card p-4 flex items-center gap-4 border-l-4 border-amber-500">
+                  <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                    <AlertCircle size={24} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">{attendances.filter(a => a.status === 'justificada').length}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Justificadas</p>
+                  </div>
+                </div>
+                <div className="card p-4 flex items-center gap-4 border-l-4 border-slate-500">
+                  <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
+                    <Activity size={24} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">{attendances.length}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Sessões</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Timeline List */}
+              <div className="card p-8">
+                <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight mb-8">Histórico de Sessões</h3>
+                
+                {loadingAttendances ? (
+                  <div className="text-center py-20 opacity-50">
+                    <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-sm font-bold uppercase tracking-widest">Carregando histórico...</p>
+                  </div>
+                ) : attendances.length === 0 ? (
+                  <div className="text-center py-20 opacity-30">
+                    <Calendar size={48} className="mx-auto mb-4" />
+                    <p className="text-sm font-bold uppercase tracking-widest">Nenhum registro de presença ainda</p>
+                    <p className="text-xs mt-2">Os registros aparecerão conforme você marcar na Agenda.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-0 relative before:absolute before:left-[19px] before:top-2 before:bottom-0 before:w-0.5 before:bg-slate-100">
+                    {attendances.map((att, idx) => {
+                      const isReagendado = att.notes?.includes('Reagendado');
+                      
+                      const statusConfig = {
+                        presente: { color: "bg-emerald-500", label: "Presente", bg: "bg-emerald-50", text: "text-emerald-700", icon: <Check size={12} /> },
+                        falta: { color: "bg-red-500", label: "Falta", bg: "bg-red-50", text: "text-red-700", icon: <X size={12} /> },
+                        justificada: { color: "bg-amber-500", label: "Justificada", bg: "bg-amber-50", text: "text-amber-700", icon: isReagendado ? <RefreshCcw size={12} /> : <AlertCircle size={12} /> },
+                      };
+
+                      const config = statusConfig[att.status] || { color: "bg-slate-400", label: att.status, bg: "bg-slate-50", text: "text-slate-600", icon: <Clock size={12} /> };
+
+                      return (
+                        <div key={att.id} className="relative pl-12 pb-10 group last:pb-0">
+                          {/* Timeline Dot */}
+                          <div className={`absolute left-0 top-1 w-10 h-10 rounded-full border-4 border-white shadow-sm flex items-center justify-center z-10 transition-transform group-hover:scale-110 ${config.color} text-white`}>
+                            {config.icon}
+                          </div>
+
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                              <div className="flex items-center gap-3 mb-1">
+                                <span className="text-sm font-black text-slate-800 uppercase tracking-tight">
+                                  {format(new Date(att.date), "EEEE, d 'de' MMMM", { locale: ptBR })}
+                                </span>
+                                <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${config.bg} ${config.text} border shadow-sm`}>
+                                  {isReagendado ? 'Reagendada' : config.label}
+                                </span>
+                              </div>
+                              <p className="text-xs font-bold text-slate-500 flex items-center gap-1">
+                                <Clock size={12} />
+                                {att.sessionTime || 'Horário não informado'}
+                              </p>
+                            </div>
+                            
+                            {att.notes && (
+                              <div className="max-w-md bg-slate-50 p-3 rounded-xl border border-slate-100 flex-1">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Observação</p>
+                                <p className="text-xs text-slate-600 leading-relaxed font-medium italic">"{att.notes}"</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>

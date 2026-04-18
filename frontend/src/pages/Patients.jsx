@@ -51,6 +51,15 @@ export default function Patients() {
   };
   const [showAddModal, setShowAddModal] = useState(false);
   const [editPatient, setEditPatient] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => setSuccessMessage(""), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
   const [addFormTab, setAddFormTab] = useState("identity");
   const [newPatient, setNewPatient] = useState({
     name: "",
@@ -838,13 +847,26 @@ export default function Patients() {
             setEditPatient(null);
             loadPatients();
           }}
+          setSuccessMessage={setSuccessMessage}
         />
-      )}
-    </div>
-  );
-}
+        )}
 
-function EditPatientModal({ patient, onClose, onSave }) {
+        {/* Success Toast */}
+        {successMessage && (
+        <div className="fixed bottom-8 right-8 z-[100] animate-slide-up">
+          <div className="bg-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-500/50 backdrop-blur-sm">
+            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+              <Check size={18} className="text-white" />
+            </div>
+            <p className="text-sm font-bold tracking-tight">{successMessage}</p>
+          </div>
+        </div>
+        )}
+        </div>
+        );
+        }
+
+function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
   const [formData, setFormData] = useState({
     name: patient.name || "",
     email: patient.email || "",
@@ -969,14 +991,21 @@ function EditPatientModal({ patient, onClose, onSave }) {
     }
   };
 
+  const handleClearAgenda = () => {
+    if (!confirm("Tem certeza que deseja remover TODOS os horários desta lista? A exclusão definitiva só ocorrerá ao clicar em Salvar.")) return;
+    setAppointments([]);
+    setAppointmentStartDate("");
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
       await api.updatePatient(patient.id, formData);
       
-      if (!appointmentStartDate) {
-        alert("Por favor, informe a data de início");
+      // Validação: Se houver horários, a data de início é obrigatória
+      if (appointments.length > 0 && !appointmentStartDate) {
+        alert("Por favor, informe a data de início para os novos horários");
         setSaving(false);
         return;
       }
@@ -987,8 +1016,17 @@ function EditPatientModal({ patient, onClose, onSave }) {
         duration: parseInt(duration)
       }));
       
-      const result = await api.saveAppointmentsBatch(patient.id, slots, appointmentStartDate);
-      alert(`Sucesso! ${slots.length} horário(s) salvo(s) a partir de ${appointmentStartDate}`);
+      // Sempre envia o lote. Se 'slots' estiver vazio, o backend deletará os horários existentes.
+      // Usamos a data atual como fallback para a limpeza caso não haja data definida.
+      const finalStartDate = appointmentStartDate || new Date().toISOString().split('T')[0];
+      
+      await api.saveAppointmentsBatch(patient.id, slots, finalStartDate);
+      
+      if (slots.length > 0) {
+        setSuccessMessage(`Sucesso! ${slots.length} horário(s) salvo(s) a partir de ${appointmentStartDate}`);
+      } else {
+        setSuccessMessage("Agenda do paciente removida com sucesso!");
+      }
       
       onSave();
     } catch (error) {
@@ -1366,15 +1404,27 @@ function EditPatientModal({ patient, onClose, onSave }) {
                       <h4 className="text-sm font-bold text-slate-700">Agenda do Paciente</h4>
                       <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Horários fixos de atendimento</p>
                     </div>
-                    <button 
-                      type="button"
-                      onClick={addAppointmentSlot}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-slate-600 text-white rounded-xl text-xs font-bold hover:bg-slate-700 transition-all shadow-sm"
-                    >
-                      <Plus size={14} />
-                      Adicionar Horário
-                    </button>
-                  </div>
+                    <div className="flex items-center gap-2">
+                      {appointments.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleClearAgenda}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-600 border border-red-100 rounded-xl text-xs font-bold hover:bg-red-100 transition-all shadow-sm"
+                          title="Remover todos os horários fixos"
+                        >
+                          <Trash2 size={14} />
+                          Limpar Agenda
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={addAppointmentSlot}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-slate-600 text-white rounded-xl text-xs font-bold hover:bg-slate-700 transition-all shadow-sm"
+                      >
+                        <Plus size={14} />
+                        Adicionar Horário
+                      </button>
+                    </div>                  </div>
                   
                   {/* Data de Início */}
                   <div className="mb-6">
@@ -1385,7 +1435,7 @@ function EditPatientModal({ patient, onClose, onSave }) {
                       value={appointmentStartDate}
                       min={new Date().toISOString().split('T')[0]}
                       onChange={e => setAppointmentStartDate(e.target.value)}
-                      required
+                      required={appointments.length > 0}
                     />
                     <p className="text-[10px] text-slate-400 mt-1">A partir desta data, os horários se repetirão semanalmente</p>
                   </div>

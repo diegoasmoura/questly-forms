@@ -96,6 +96,11 @@ model Attendance {
   notes         String?  // Observações
   sessionTime   String?  // Horário da sessão naquele dia
   
+  // Vínculo para reagendamentos em cadeia
+  parentId       String?
+  parent         Attendance?  @relation("RescheduleChain", fields: [parentId], references: [id], onDelete: Cascade)
+  children       Attendance[] @relation("RescheduleChain")
+
   patient       Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
   psychologistId String
 

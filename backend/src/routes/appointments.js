@@ -26,18 +26,46 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Listar agendamentos de um paciente específico
+// Listar horários de um paciente específico
 router.get("/patient/:patientId", async (req, res) => {
   try {
     const appointments = await prisma.appointment.findMany({
       where: { 
         patientId: req.params.patientId,
-        psychologistId: req.user.id 
+        psychologistId: req.user.id
       }
     });
     res.json(appointments);
   } catch (error) {
-    res.status(500).json({ error: "Erro ao carregar horários do paciente" });
+    res.status(500).json({ error: "Erro ao buscar agendamentos do paciente" });
+  }
+});
+
+// Excluir todos os agendamentos e registros de presença de um paciente
+router.delete("/patient/:patientId", async (req, res) => {
+  try {
+    const { patientId } = req.params;
+
+    // 1. Remover registros de presença (Attendances) - Limpeza total para o teste
+    await prisma.attendance.deleteMany({
+      where: { 
+        patientId,
+        psychologistId: req.user.id
+      }
+    });
+
+    // 2. Remover agendamentos fixos (Appointments)
+    await prisma.appointment.deleteMany({
+      where: { 
+        patientId,
+        psychologistId: req.user.id
+      }
+    });
+
+    res.json({ success: true, message: "Agenda e histórico de presença removidos com sucesso" });
+  } catch (error) {
+    console.error("Erro ao excluir agenda:", error);
+    res.status(500).json({ error: "Erro ao excluir agenda completa do paciente" });
   }
 });
 
