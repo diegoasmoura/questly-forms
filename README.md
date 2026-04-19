@@ -61,6 +61,11 @@ O sistema utiliza uma tríade de estados para cada sessão:
 - **Feedback Moderno (Toasts):** Substituição de alertas invasivos por avisos flutuantes automáticos (Emerald-600) que não travam o fluxo de trabalho.
 - **Aba Frequência:** Nova seção no prontuário com dashboard de estatísticas e timeline vertical detalhada contendo ícones, selos de reagendamento e notas clínicas.
 
+### 4. Gestão de Fuso Horário (v3.4)
+- **Armazenamento UTC:** Todas as datas são armazenadas no banco em formato UTC para consistência.
+- **Extração de Datas:** O frontend usa funções separadas para extrair datas UTC do banco (`extractUTCDate`) e datas locais do calendário (`formatDateKey`).
+- **Comparação Correta:** As comparações entre agendamentos fixos e registros de presença usam extração UTC para evitar deslocamentos de um dia.
+
 ## Tecnologias
 
 - **Frontend:** React, Tailwind CSS, Lucide React, date-fns.

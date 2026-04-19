@@ -22,11 +22,47 @@ import { ptBR } from 'date-fns/locale';
 
 const DAYS_OF_WEEK = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
-// Função utilitária para chave de data consistente (YYYY-MM-DD local)
+// Função utilitária para chave de data consistente (YYYY-MM-DD fixa)
+// Para objetos Date locais (calendário), usa métodos locais
+// Para strings ISO (banco), extrai diretamente a data UTC
 const formatDateKey = (date) => {
   if (!date) return "";
+  // Se for string ISO (do banco), extrai diretamente
+  if (typeof date === 'string') {
+    return date.split('T')[0];
+  }
+  // Para objetos Date, usa local (para o calendário)
   const d = new Date(date);
-  return d.toLocaleDateString('en-CA'); // Retorna YYYY-MM-DD no fuso local
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Extrai data UTC de string ISO (para comparação com dados do banco)
+const extractUTCDate = (dateStr) => {
+  if (!dateStr) return "";
+  if (typeof dateStr === 'string') {
+    return dateStr.split('T')[0];
+  }
+  const d = new Date(dateStr);
+  const year = d.getUTCFullYear();
+  const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(d.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Converte string ISO ou objeto Date em string YYYY-MM-DD segura
+const normalizeDataToKey = (input) => {
+  if (!input) return "";
+  if (typeof input === 'string') {
+    return input.split('T')[0];
+  }
+  const d = new Date(input);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
 // ======================
@@ -39,7 +75,7 @@ function StatsBar({ appointments, attendances }) {
   // Contar sessões de hoje baseadas na recorrência
   const todaySessions = appointments.filter(a => {
     if (!a.startDate) return false;
-    const startStr = formatDateKey(new Date(a.startDate));
+    const startStr = extractUTCDate(a.startDate);
     return startStr <= todayStr && a.dayOfWeek === new Date().getDay();
   });
   
@@ -145,7 +181,7 @@ function DayView({ date, appointments, attendances, onStatus }) {
   const dayAppointments = appointments.filter(a => {
     if (a.dayOfWeek !== date.getDay()) return false;
     if (a.startDate) {
-      const startStr = formatDateKey(new Date(a.startDate));
+      const startStr = extractUTCDate(a.startDate);
       return startStr <= dateStr;
     }
     return true;
@@ -153,7 +189,7 @@ function DayView({ date, appointments, attendances, onStatus }) {
 
   // 2. Attendances extras (reagendamentos ou sessões avulsas)
   const dayExtras = attendances.filter(att => 
-    formatDateKey(new Date(att.date)) === dateStr &&
+    extractUTCDate(att.date) === dateStr &&
     !dayAppointments.some(app => app.patientId === att.patientId)
   );
 
@@ -162,7 +198,7 @@ function DayView({ date, appointments, attendances, onStatus }) {
     ...dayAppointments.map(app => ({
       type: 'fixed',
       app,
-      attendance: attendances.find(att => att.patientId === app.patientId && formatDateKey(new Date(att.date)) === dateStr)
+      attendance: attendances.find(att => att.patientId === app.patientId && extractUTCDate(att.date) === dateStr)
     })),
     ...dayExtras.map(att => ({
       type: 'extra',
@@ -248,13 +284,13 @@ function MonthView({ currentDate, appointments, attendances, onStatus }) {
           const dayApps = appointments.filter(a => {
             if (a.dayOfWeek !== day.getDay()) return false;
             if (!a.startDate) return true;
-            const appStart = formatDateKey(new Date(a.startDate));
+            const appStart = extractUTCDate(a.startDate);
             return dayStr >= appStart;
           });
 
           // 2. Extras/Reagendamentos
           const dayExtras = attendances.filter(att => 
-            formatDateKey(new Date(att.date)) === dayStr &&
+            extractUTCDate(att.date) === dayStr &&
             !dayApps.some(app => app.patientId === att.patientId)
           );
 
@@ -262,7 +298,7 @@ function MonthView({ currentDate, appointments, attendances, onStatus }) {
             ...dayApps.map(app => ({
               type: 'fixed',
               app,
-              att: attendances.find(a => a.patientId === app.patientId && formatDateKey(new Date(a.date)) === dayStr)
+              att: attendances.find(a => a.patientId === app.patientId && extractUTCDate(a.date) === dayStr)
             })),
             ...dayExtras.map(att => ({
               type: 'extra',
@@ -355,7 +391,7 @@ function ListView({ appointments, attendances, onStatus }) {
     apps: appointments.filter(a => {
       if (a.dayOfWeek !== dayIdx) return false;
       if (!a.startDate) return true;
-      return formatDateKey(new Date(a.startDate)) <= todayStr;
+      return extractUTCDate(a.startDate) <= todayStr;
     })
   })).filter(g => g.apps.length > 0);
   
@@ -384,7 +420,7 @@ function ListView({ appointments, attendances, onStatus }) {
                 <SessionCard 
                   appointment={app}
                   date={new Date()} 
-                  attendance={attendances.find(a => a.patientId === app.patientId && formatDateKey(new Date(a.date)) === todayStr)}
+                  attendance={attendances.find(a => a.patientId === app.patientId && extractUTCDate(a.date) === todayStr)}
                   onStatus={onStatus}
                 />
               </div>
@@ -447,7 +483,7 @@ export default function Agenda() {
     }
     
     const dateStr = formatDateKey(sessionDate);
-    const existingAtt = attendances.find(a => a.patientId === appointment.patientId && formatDateKey(new Date(a.date)) === dateStr);
+    const existingAtt = attendances.find(a => a.patientId === appointment.patientId && extractUTCDate(a.date) === dateStr);
     
     if (status === 'justificada') {
       // Se já existe uma justificativa, abre em modo de visualização primeiro

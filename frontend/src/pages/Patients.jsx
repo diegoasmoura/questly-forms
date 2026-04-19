@@ -991,8 +991,12 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
     }
   };
 
+  const [clearMode, setClearMode] = useState(null); // null, 'future', or 'all'
+
   const handleClearAgenda = () => {
-    if (!confirm("Tem certeza que deseja remover TODOS os horários desta lista? A exclusão definitiva só ocorrerá ao clicar em Salvar.")) return;
+    const choice = window.confirm("Deseja preservar o histórico de presenças PASSADAS deste paciente?\n\nClique em [OK] para manter o passado e limpar apenas o futuro.\nClique em [Cancelar] para realizar uma limpeza COMPLETA (apagar tudo).");
+    
+    setClearMode(choice ? 'future' : 'all');
     setAppointments([]);
     setAppointmentStartDate("");
   };
@@ -1003,31 +1007,29 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
     try {
       await api.updatePatient(patient.id, formData);
       
-      // Validação: Se houver horários, a data de início é obrigatória
-      if (appointments.length > 0 && !appointmentStartDate) {
-        alert("Por favor, informe a data de início para os novos horários");
-        setSaving(false);
-        return;
-      }
+      // Se a lista de horários estiver vazia e houver um modo de limpeza definido
+      if (appointments.length === 0 && clearMode) {
+        await api.deletePatientAppointments(patient.id, clearMode);
+        setSuccessMessage(clearMode === 'future' ? "Agenda futura limpa. Passado preservado." : "Agenda removida completamente.");
+      } else if (appointments.length > 0) {
+        // Validação: Se houver horários, a data de início é obrigatória
+        if (!appointmentStartDate) {
+          alert("Por favor, informe a data de início para os novos horários");
+          setSaving(false);
+          return;
+        }
 
-      const slots = appointments.map(({ dayOfWeek, time, duration }) => ({
-        dayOfWeek: parseInt(dayOfWeek),
-        time,
-        duration: parseInt(duration)
-      }));
-      
-      // Sempre envia o lote. Se 'slots' estiver vazio, o backend deletará os horários existentes.
-      // Usamos a data atual como fallback para a limpeza caso não haja data definida.
-      const finalStartDate = appointmentStartDate || new Date().toISOString().split('T')[0];
-      
-      await api.saveAppointmentsBatch(patient.id, slots, finalStartDate);
-      
-      if (slots.length > 0) {
+        const slots = appointments.map(({ dayOfWeek, time, duration }) => ({
+          dayOfWeek: parseInt(dayOfWeek),
+          time,
+          duration: parseInt(duration)
+        }));
+        
+        await api.saveAppointmentsBatch(patient.id, slots, appointmentStartDate);
         setSuccessMessage(`Sucesso! ${slots.length} horário(s) salvo(s) a partir de ${appointmentStartDate}`);
-      } else {
-        setSuccessMessage("Agenda do paciente removida com sucesso!");
       }
       
+      setClearMode(null);
       onSave();
     } catch (error) {
       alert("Erro ao salvar: " + error.message);

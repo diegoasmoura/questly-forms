@@ -47,10 +47,14 @@ router.post("/", async (req, res) => {
   const { patientId, date, status, notes, sessionTime, parentId } = req.body;
   
   try {
+    // Extrair apenas a data (YYYY-MM-DD) para evitar problemas de fuso horário
+    const dateOnly = typeof date === 'string' ? date.split('T')[0] : date.toISOString().split('T')[0];
+    const normalizedDate = new Date(dateOnly + 'T00:00:00Z');
+
     const existing = await prisma.attendance.findFirst({
       where: {
         patientId,
-        date: new Date(date),
+        date: normalizedDate,
         psychologistId: req.user.id
       }
     });
@@ -71,7 +75,7 @@ router.post("/", async (req, res) => {
     const attendance = await prisma.attendance.create({
       data: {
         patientId,
-        date: new Date(date),
+        date: normalizedDate,
         status,
         notes,
         sessionTime,

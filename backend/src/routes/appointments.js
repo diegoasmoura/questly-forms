@@ -41,20 +41,30 @@ router.get("/patient/:patientId", async (req, res) => {
   }
 });
 
-// Excluir todos os agendamentos e registros de presença de um paciente
+// Excluir agendamentos e registros de presença de um paciente (com filtro de data)
 router.delete("/patient/:patientId", async (req, res) => {
-  try {
-    const { patientId } = req.params;
+  const { mode } = req.query; // 'all' ou 'future'
+  const { patientId } = req.params;
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
 
-    // 1. Remover registros de presença (Attendances) - Limpeza total para o teste
-    await prisma.attendance.deleteMany({
-      where: { 
-        patientId,
-        psychologistId: req.user.id
-      }
-    });
+  try {
+    // 1. Remover registros de presença (Attendances)
+    const attendanceWhere = { 
+      patientId,
+      psychologistId: req.user.id
+    };
+
+    // Se for 'future', só apaga o que for hoje ou depois
+    if (mode === 'future') {
+      attendanceWhere.date = { gte: today };
+    }
+
+    await prisma.attendance.deleteMany({ where: attendanceWhere });
 
     // 2. Remover agendamentos fixos (Appointments)
+    // Note: Appointments são regras recorrentes. Se removermos, eles somem de todo o calendário.
+    // Presumimos que ao limpar a agenda, o profissional quer parar a recorrência.
     await prisma.appointment.deleteMany({
       where: { 
         patientId,
@@ -62,10 +72,13 @@ router.delete("/patient/:patientId", async (req, res) => {
       }
     });
 
-    res.json({ success: true, message: "Agenda e histórico de presença removidos com sucesso" });
+    res.json({ 
+      success: true, 
+      message: mode === 'future' ? "Agenda futura limpa. Histórico passado preservado." : "Agenda e histórico removidos completamente." 
+    });
   } catch (error) {
     console.error("Erro ao excluir agenda:", error);
-    res.status(500).json({ error: "Erro ao excluir agenda completa do paciente" });
+    res.status(500).json({ error: "Erro ao excluir agenda do paciente" });
   }
 });
 
@@ -74,9 +87,9 @@ router.post("/batch", async (req, res) => {
   const { patientId, slots, startDate } = req.body; // slots: [{ dayOfWeek, time, duration }]
 
   try {
-    // Validar data de início
-    const start = new Date(startDate);
-    start.setHours(0, 0, 0, 0);
+    // Validar data de início - extrair apenas YYYY-MM-DD para evitar problemas de fuso
+    const datePart = startDate.split('T')[0];
+    const start = new Date(datePart + 'T00:00:00Z');
     
     // 1. Remover horários antigos do paciente para este profissional
     await prisma.appointment.deleteMany({
