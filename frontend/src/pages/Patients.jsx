@@ -862,6 +862,64 @@ export default function Patients() {
           </div>
         </div>
         )}
+
+        {/* Clear Agenda Confirmation Modal */}
+        {showClearConfirm && (
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[100]" onClick={() => setShowClearConfirm(false)}>
+            <div className="bg-white rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-red-100 text-red-600">
+                  <Trash2 size={24} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Limpar Agenda</h2>
+                  <p className="text-xs font-bold text-slate-500">{patient?.name}</p>
+                </div>
+              </div>
+
+              <p className="text-sm text-slate-600 mb-6">Escolha o que deseja fazer:</p>
+
+              <div className="space-y-3">
+                <button 
+                  onClick={() => confirmClear('future')}
+                  className="w-full p-4 bg-amber-50 border border-amber-100 rounded-2xl hover:bg-amber-100 transition-all text-left group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-amber-600 shadow-sm group-hover:scale-110 transition-transform">
+                      <Clock size={20} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-800">Limpar apenas horários futuros</p>
+                      <p className="text-[10px] text-slate-500">Histórico de presenças será preservado</p>
+                    </div>
+                  </div>
+                </button>
+
+                <button 
+                  onClick={() => confirmClear('all')}
+                  className="w-full p-4 bg-red-50 border border-red-100 rounded-2xl hover:bg-red-100 transition-all text-left group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-red-600 shadow-sm group-hover:scale-110 transition-transform">
+                      <Trash2 size={20} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-800">Limpar toda a agenda</p>
+                      <p className="text-[10px] text-red-500">Remove horários e todo o histórico</p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              <button 
+                onClick={() => setShowClearConfirm(false)} 
+                className="w-full mt-6 py-3 text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-xl transition-all"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
         </div>
         );
         }
@@ -992,13 +1050,17 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
   };
 
   const [clearMode, setClearMode] = useState(null); // null, 'future', or 'all'
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const handleClearAgenda = () => {
-    const choice = window.confirm("Deseja preservar o histórico de presenças PASSADAS deste paciente?\n\nClique em [OK] para manter o passado e limpar apenas o futuro.\nClique em [Cancelar] para realizar uma limpeza COMPLETA (apagar tudo).");
-    
-    setClearMode(choice ? 'future' : 'all');
+    setShowClearConfirm(true);
+  };
+
+  const confirmClear = (mode) => {
+    setClearMode(mode);
     setAppointments([]);
     setAppointmentStartDate("");
+    setShowClearConfirm(false);
   };
 
   const handleSave = async (e) => {
