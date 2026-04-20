@@ -700,22 +700,10 @@ export default function PatientRecord() {
             </div>
             <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-emerald-100 shadow-sm">
               <TabButton
-                active={activeTab === "timeline"}
-                onClick={() => setActiveTab("timeline")}
-                icon={<FileText size={14} />}
-                label="Linha do Tempo"
-              />
-              <TabButton
-                active={activeTab === "share"}
-                onClick={() => setActiveTab("share")}
-                icon={<Share2 size={14} />}
-                label="Formulários"
-              />
-              <TabButton
                 active={activeTab === "sessions"}
                 onClick={() => setActiveTab("sessions")}
-                icon={<Calendar size={14} />}
-                label="Sessões"
+                icon={<Clock size={14} />}
+                label="Sessões e Histórico"
               />
               <TabButton
                 active={activeTab === "financial"}
@@ -726,8 +714,14 @@ export default function PatientRecord() {
               <TabButton
                 active={activeTab === "settings"}
                 onClick={() => setActiveTab("settings")}
-                icon={<Settings size={14} />}
+                icon={<Calendar size={14} />}
                 label="Agenda"
+              />
+              <TabButton
+                active={activeTab === "share"}
+                onClick={() => setActiveTab("share")}
+                icon={<Share2 size={14} />}
+                label="Formulários"
               />
             </div>
           </div>
