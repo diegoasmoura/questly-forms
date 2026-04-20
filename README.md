@@ -43,6 +43,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 ### 1. Gestão de Agenda e Horários (Appointments)
 - **Configuração no Prontuário:** A configuração de horários recorrentes (slots) foi movida para o prontuário de cada paciente, facilitando o onboarding e a visualização centralizada.
 - **Recorrência:** O sistema trabalha com horários fixos semanais (slots).
+- **Data de Início por Slot (v4.0):** Cada slot tem sua própria data de início ("Início"), permitindo configurar dias diferentes para cada horário semanal. Ex: Segunda às 10:00 (início 20/04) e Quarta às 14:00 (início 22/04).
 - **Inativação Inteligente (v3.6):** Ao alterar o status de um paciente para "Inativo", o sistema sugere automaticamente o encerramento da agenda recorrente para liberar o horário no calendário, preservando integralmente o histórico de atendimentos passados.
 - **Limpeza de Agenda:** Disponibiliza duas modalidades de remoção:
   - **Limpar Futuro (Encerrar Ciclo):** Remove horários fixos e registros de presença futuros, mantendo o histórico clínico intocado.

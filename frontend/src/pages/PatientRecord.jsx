@@ -100,7 +100,6 @@ export default function PatientRecord() {
   const [appointments, setAppointments] = useState([]);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
   const [conflicts, setConflicts] = useState({}); // { slotId: conflictData }
-  const [appointmentStartDate, setAppointmentStartDate] = useState("");
   const [clearMode, setClearMode] = useState(null);
   const [cleanupModal, setCleanupModal] = useState({ open: false, title: "", message: "", mode: null });
   const [savingAgenda, setSavingAgenda] = useState(false);
@@ -160,13 +159,6 @@ export default function PatientRecord() {
     try {
       const data = await api.getPatientAppointments(id);
       setAppointments(data || []);
-      
-      if (data && data.length > 0 && data[0].startDate) {
-        const startDate = new Date(data[0].startDate);
-        setAppointmentStartDate(startDate.toISOString().split('T')[0]);
-      } else {
-        setAppointmentStartDate("");
-      }
     } catch (error) {
       console.error("Erro ao carregar agendamentos:", error);
     } finally {
@@ -198,6 +190,7 @@ export default function PatientRecord() {
       dayOfWeek: 1,
       time: "08:00",
       duration: 50,
+      startDate: new Date().toISOString().split('T')[0],
       isNew: true
     }]);
     checkConflict(newId, 1, "08:00");
@@ -247,17 +240,19 @@ export default function PatientRecord() {
         await api.deletePatientAppointments(id, clearMode);
         alert(clearMode === 'future' ? "Agenda futura limpa." : "Agenda removida completamente.");
       } else if (appointments.length > 0) {
-        if (!appointmentStartDate) {
-          alert("Por favor, informe a data de início para os horários");
+        const missingStartDate = appointments.find(a => !a.startDate);
+        if (missingStartDate) {
+          alert("Por favor, informe a data de início para todos os horários");
           setSavingAgenda(false);
           return;
         }
-        const slots = appointments.map(({ dayOfWeek, time, duration }) => ({
+        const slots = appointments.map(({ dayOfWeek, time, duration, startDate }) => ({
           dayOfWeek: parseInt(dayOfWeek),
           time,
-          duration: parseInt(duration)
+          duration: parseInt(duration),
+          startDate
         }));
-        await api.saveAppointmentsBatch(id, slots, appointmentStartDate);
+        await api.saveAppointmentsBatch(id, slots);
         alert("Agenda atualizada com sucesso!");
       }
       setClearMode(null);
@@ -1462,19 +1457,8 @@ export default function PatientRecord() {
                     <p className="text-xs text-slate-400 mt-2">Clique em "Adicionar Horário" para definir a grade semanal.</p>
                   </div>
                 ) : (
-                  <div className="space-y-6">
-                    <div className="max-w-xs">
-                      <label className="block text-[10px] font-black text-emerald-800 uppercase tracking-widest mb-2 px-1">Início do Ciclo (Data da 1ª Sessão)</label>
-                      <input 
-                        type="date"
-                        className="input text-sm font-black"
-                        value={appointmentStartDate}
-                        onChange={e => setAppointmentStartDate(e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4">
                       {appointments.map((app) => {
                         const conflict = conflicts[app.id];
                         return (
@@ -1492,8 +1476,18 @@ export default function PatientRecord() {
                               </button>
                             </div>
                             
-                            <div className="grid grid-cols-3 gap-3">
-                              <div className="col-span-1">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 px-1">Início</label>
+                                <input 
+                                  type="date"
+                                  className={`input text-xs font-black py-2 ${conflict ? 'border-red-300' : ''}`}
+                                  value={app.startDate || ''}
+                                  onChange={e => updateAppointmentSlot(app.id, "startDate", e.target.value)}
+                                  min={new Date().toISOString().split('T')[0]}
+                                />
+                              </div>
+                              <div>
                                 <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 px-1">Dia</label>
                                 <select
                                   className={`input text-xs font-black py-2 ${conflict ? 'border-red-300' : ''}`}

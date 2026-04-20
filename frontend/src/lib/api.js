@@ -31,16 +31,32 @@ async function request(endpoint, options = {}) {
 
     clearTimeout(timeoutId);
 
+    const contentType = res.headers.get("content-type") || "";
+    const isJson = contentType.includes("application/json");
+
     if (res.status === 401) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.href = "/login";
     }
 
-    const data = await res.json();
-    
     if (!res.ok) {
-      throw new ApiError(data.error || "Request failed", res.status, data);
+      if (isJson) {
+        const data = await res.json();
+        throw new ApiError(data.error || "Request failed", res.status, data);
+      }
+      throw new ApiError("Request failed (status: " + res.status + ")", res.status);
+    }
+
+    if (!isJson || res.status === 204) {
+      return { success: true };
+    }
+
+    let data;
+    try {
+      data = await res.json();
+    } catch (e) {
+      throw new ApiError("Resposta inválida do servidor", res.status);
     }
     
     return data;
@@ -165,9 +181,9 @@ export const api = {
   getAppointments: () => request("/appointments"),
   getPatientAppointments: (patientId) => request(`/appointments/patient/${patientId}`),
   deletePatientAppointments: (patientId, mode = 'future') => request(`/appointments/patient/${patientId}?mode=${mode}`, { method: "DELETE" }),
-  saveAppointmentsBatch: (patientId, slots, startDate) => request("/appointments/batch", { 
+  saveAppointmentsBatch: (patientId, slots) => request("/appointments/batch", { 
     method: "POST", 
-    body: JSON.stringify({ patientId, slots, startDate }) 
+    body: JSON.stringify({ patientId, slots }) 
   }),
   checkAppointmentConflict: (data) => request("/appointments/check-conflict", { 
     method: "POST", 

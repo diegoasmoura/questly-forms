@@ -33,10 +33,19 @@ router.get("/patient/:patientId", async (req, res) => {
       where: { 
         patientId: req.params.patientId,
         psychologistId: req.user.id
-      }
+      },
+      orderBy: { startDate: 'asc' }
     });
-    res.json(appointments);
+    const formatted = appointments.map(a => ({
+      id: a.id,
+      dayOfWeek: a.dayOfWeek,
+      time: a.time,
+      duration: a.duration,
+      startDate: a.startDate ? a.startDate.toISOString().split('T')[0] : null
+    }));
+    res.json(formatted);
   } catch (error) {
+    console.error("Error loading appointments:", error);
     res.status(500).json({ error: "Erro ao buscar agendamentos do paciente" });
   }
 });
@@ -84,38 +93,61 @@ router.delete("/patient/:patientId", async (req, res) => {
 
 // Salvar/Atualizar horários de um paciente (Lógica para 1x, 2x por semana etc)
 router.post("/batch", async (req, res) => {
-  const { patientId, slots, startDate } = req.body; // slots: [{ dayOfWeek, time, duration }]
+  const { patientId, slots } = req.body; // slots: [{ dayOfWeek, time, duration, startDate }]
+  
+  console.log("batch slots received:", JSON.stringify(slots, null, 2));
+
+  if (!slots || !Array.isArray(slots) || slots.length === 0) {
+    return res.status(400).json({ error: "Nenhum slot fornecido" });
+  }
+  
+  let missingDate = null;
+  for (let i = 0; i < slots.length; i++) {
+    const slot = slots[i];
+    if (!slot.startDate) {
+      missingDate = i + 1;
+      break;
+    }
+  }
+  
+  if (missingDate) {
+    return res.status(400).json({ error: `Slot ${missingDate}: data de início não informada` });
+  }
 
   try {
-    // Validar data de início - extrair apenas YYYY-MM-DD para evitar problemas de fuso
-    const datePart = startDate.split('T')[0];
-    const start = new Date(datePart + 'T00:00:00Z');
+    console.log("Criando slots...");
     
     // 1. Remover horários antigos do paciente para este profissional
-    await prisma.appointment.deleteMany({
+    const deleted = await prisma.appointment.deleteMany({
       where: { patientId, psychologistId: req.user.id }
     });
+    console.log("Removed:", deleted.count, "old appointments");
 
-    // 2. Criar novos horários
-    const newAppointments = await Promise.all(
-      slots.map(slot => 
-        prisma.appointment.create({
-          data: {
-            dayOfWeek: slot.dayOfWeek,
-            time: slot.time,
-            duration: slot.duration,
-            startDate: start,
-            patientId,
-            psychologistId: req.user.id
-          }
-        })
-      )
-    );
+    // 2. Criar novos horários (cada um com sua própria data de início)
+    const newAppointments = [];
+    for (const slot of slots) {
+      const datePart = slot.startDate.split('T')[0];
+      const start = new Date(datePart + 'T00:00:00Z');
+      console.log("Creating slot:", { dayOfWeek: slot.dayOfWeek, time: slot.time, startDate: start });
+      
+      const created = await prisma.appointment.create({
+        data: {
+          dayOfWeek: slot.dayOfWeek,
+          time: slot.time,
+          duration: slot.duration,
+          startDate: start,
+          patientId,
+          psychologistId: req.user.id
+        }
+      });
+      newAppointments.push(created);
+    }
 
+    console.log("Created appointments:", newAppointments.length);
     res.status(201).json(newAppointments);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Erro ao salvar horários" });
+    console.error("Error saving appointments:", error);
+    res.status(500).json({ error: "Erro ao salvar horários: " + error.message });
   }
 });
 
