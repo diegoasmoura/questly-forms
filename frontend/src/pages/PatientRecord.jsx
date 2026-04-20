@@ -12,6 +12,7 @@ import FormResponsesView from "../components/FormResponsesView";
 import DataTable from "../components/DataTable";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { jsPDF } from "jspdf";
 
 // Extrai data UTC de string ISO (para comparação com dados do banco)
 const extractUTCDate = (dateStr) => {
@@ -550,33 +551,202 @@ export default function PatientRecord() {
     }
   };
 
+  const handleGenerateAllReceipts = async () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    let y = 20;
+    
+    doc.setFontSize(18);
+    doc.setTextColor(15, 23, 42);
+    doc.text('RELATÓRIO FINANCEIRO COMPLETO', pageWidth / 2, y, { align: 'center' });
+    y += 8;
+    doc.setFontSize(12);
+    doc.setTextColor(100, 116, 139);
+    doc.text(patient.name, pageWidth / 2, y, { align: 'center' });
+    y += 10;
+    doc.setDrawColor(5, 150, 105);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 15;
+    
+    const totalAmount = payments.reduce((sum, p) => sum + (typeof p.amount === 'number' ? p.amount : 0), 0);
+    doc.setFontSize(10);
+    doc.setTextColor(100, 116, 139);
+    doc.text('Total de pagamentos:', margin, y);
+    doc.setFontSize(14);
+    doc.setTextColor(5, 150, 105);
+    doc.text(totalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), margin + 50, y);
+    doc.setFontSize(10);
+    doc.setTextColor(30, 41, 59);
+    y += 7;
+    doc.text(`Quantidade: ${payments.length} bloco(s) de sessões`, margin, y);
+    y += 20;
+    
+    payments.forEach((payment, idx) => {
+      if (y > 250) {
+        doc.addPage();
+        y = 20;
+      }
+      
+      doc.setFontSize(12);
+      doc.setTextColor(15, 23, 42);
+      doc.text(`Pagamento ${idx + 1}`, margin, y);
+      doc.setFontSize(10);
+      doc.setTextColor(100, 116, 139);
+      const amountFormatted = typeof payment.amount === 'number' 
+        ? payment.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+        : `R$ ${payment.amount}`;
+      doc.text(amountFormatted, pageWidth - margin - 30, y);
+      y += 8;
+      doc.text(`Data: ${format(new Date(payment.paymentDate), 'dd/MM/yyyy')} | Método: ${payment.method}`, margin, y);
+      y += 8;
+      
+      if (payment.attendances && payment.attendances.length > 0) {
+        doc.setFontSize(9);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`${payment.attendances.length} sessão(ões)`, margin, y);
+        y += 6;
+        payment.attendances.slice(0, 3).forEach(att => {
+          const statusLabel = att.status === 'presente' ? 'P' : att.status === 'falta' ? 'F' : att.status === 'justificada' ? 'J' : '-';
+          doc.text(`• ${format(new Date(att.date), 'dd/MM/yyyy')} ${att.sessionTime || '08:00'} ${statusLabel}`, margin + 5, y);
+          y += 5;
+        });
+        if (payment.attendances.length > 3) {
+          doc.text(`... e mais ${payment.attendances.length - 3}`, margin + 5, y);
+          y += 5;
+        }
+      } else {
+        doc.setTextColor(148, 163, 184);
+        doc.text('Sem sessões vinculado', margin + 5, y);
+      }
+      
+      if (payment.receiptIssued) {
+        doc.setTextColor(5, 150, 105);
+        doc.text('RECIBO EMITIDO', margin, y);
+      }
+      
+      y += 15;
+    });
+    
+    doc.setFontSize(8);
+    doc.setTextColor(148, 163, 184);
+    doc.text(`Gerado em: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, pageWidth / 2, 285, { align: 'center' });
+    
+    doc.save(`Relatorio_Financeiro_${patient.name.replace(/\s/g, '_')}_${format(new Date(), 'yyyyMMdd')}.pdf`);
+  };
+
   const handleGenerateReceipt = (payment) => {
-    // Implementação básica de prestação de contas no console por enquanto
-    // Poderia chamar uma função no pdf.js futuramente
-    alert(`Gerando prestação de contas para ${patient.name}\nValor: R$ ${payment.amount}\nPeríodo: ${payment.attendances.length} sessões`);
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    let y = 20;
     
-    const docContent = `
-      PRESTAÇÃO DE CONTAS - SERVIÇOS DE PSICOLOGIA
-      
-      Paciente: ${patient.name}
-      Data do Pagamento: ${format(new Date(payment.paymentDate), 'dd/MM/yyyy')}
-      Valor Total: R$ ${payment.amount.toFixed(2)}
-      Método: ${payment.method}
-      
-      Sessões Incluídas:
-      ${payment.attendances.map(a => `- ${format(new Date(a.date), 'dd/MM/yyyy')} (${a.status})`).join('\n')}
-      
-      Observações: ${payment.notes || 'Nenhuma'}
-      
-      Status do Recibo: ${payment.receiptIssued ? 'Emitido' : 'Pendente'}
-    `;
+    doc.setFontSize(18);
+    doc.setTextColor(15, 23, 42);
+    doc.text('PRESTAÇÃO DE CONTAS', pageWidth / 2, y, { align: 'center' });
+    y += 8;
+    doc.setFontSize(10);
+    doc.setTextColor(100, 116, 139);
+    doc.text('Serviços de Psicologia', pageWidth / 2, y, { align: 'center' });
+    y += 10;
+    doc.setDrawColor(5, 150, 105);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 15;
     
-    const blob = new Blob([docContent], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Prestacao_Contas_${patient.name}_${format(new Date(payment.paymentDate), 'yyyyMMdd')}.txt`;
-    a.click();
+    doc.setFontSize(10);
+    doc.setTextColor(100, 116, 139);
+    doc.text('Paciente:', margin, y);
+    doc.setTextColor(30, 41, 59);
+    doc.text(patient.name, margin + 30, y);
+    y += 7;
+    doc.setTextColor(100, 116, 139);
+    doc.text('Data do Pagamento:', margin, y);
+    doc.setTextColor(30, 41, 59);
+    doc.text(format(new Date(payment.paymentDate), "dd/MM/yyyy"), margin + 40, y);
+    y += 7;
+    doc.setTextColor(100, 116, 139);
+    doc.text('Valor:', margin, y);
+    doc.setFontSize(14);
+    doc.setTextColor(5, 150, 105);
+    const amountFormatted = typeof payment.amount === 'number' 
+      ? payment.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+      : `R$ ${payment.amount}`;
+    doc.text(amountFormatted, margin + 20, y);
+    doc.setFontSize(10);
+    doc.setTextColor(30, 41, 59);
+    y += 7;
+    doc.setTextColor(100, 116, 139);
+    doc.text('Método:', margin, y);
+    doc.setTextColor(30, 41, 59);
+    doc.text(payment.method, margin + 25, y);
+    y += 20;
+    
+    doc.setFontSize(12);
+    doc.setTextColor(15, 23, 42);
+    doc.text('SESSÕES INCLUÍDAS', margin, y);
+    y += 10;
+    
+    const colWidths = [15, 50, 30, 40];
+    const startX = margin;
+    
+    doc.setFillColor(248, 250, 252);
+    doc.rect(startX, y - 5, pageWidth - 2 * margin, 10, 'F');
+    doc.setFontSize(9);
+    doc.setTextColor(100, 116, 139);
+    doc.text('#', startX + 2, y);
+    doc.text('DATA', startX + colWidths[0] + 2, y);
+    doc.text('HORÁRIO', startX + colWidths[0] + colWidths[1] + 2, y);
+    doc.text('STATUS', startX + colWidths[0] + colWidths[1] + colWidths[2] + 2, y);
+    y += 10;
+    
+    payment.attendances.forEach((att, i) => {
+      doc.setFillColor(255, 255, 255);
+      doc.rect(startX, y - 5, pageWidth - 2 * margin, 12, 'F');
+      doc.setTextColor(30, 41, 59);
+      doc.text(String(i + 1), startX + 2, y);
+      doc.text(format(new Date(att.date), 'dd/MM/yyyy'), startX + colWidths[0] + 2, y);
+      doc.text(att.sessionTime || '08:00', startX + colWidths[0] + colWidths[1] + 2, y);
+      
+      const statusLabel = att.status === 'presente' ? 'PRESENTE' : att.status === 'falta' ? 'FALTA' : att.status === 'justificada' ? 'JUSTIFICADA' : 'PENDENTE';
+      if (att.status === 'presente') doc.setTextColor(5, 150, 105);
+      else if (att.status === 'falta') doc.setTextColor(220, 38, 38);
+      else if (att.status === 'justificada') doc.setTextColor(217, 119, 6);
+      else doc.setTextColor(100, 116, 139);
+      doc.text(statusLabel, startX + colWidths[0] + colWidths[1] + colWidths[2] + 2, y);
+      doc.setTextColor(30, 41, 59);
+      y += 12;
+    });
+    
+    if (payment.notes) {
+      y += 10;
+      doc.setFontSize(12);
+      doc.setTextColor(15, 23, 42);
+      doc.text('OBSERVAÇÕES', margin, y);
+      y += 8;
+      doc.setFontSize(10);
+      doc.setTextColor(100, 116, 139);
+      const splitNotes = doc.splitTextToSize(payment.notes, pageWidth - 2 * margin);
+      doc.text(splitNotes, margin, y);
+      y += splitNotes.length * 6;
+    }
+    
+    y += 15;
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.3);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 10;
+    
+    doc.setFontSize(10);
+    doc.setTextColor(5, 150, 105);
+    doc.text(`Recibo ${payment.receiptIssued ? 'Emitido' : 'Pendente'}`, pageWidth / 2, y, { align: 'center' });
+    y += 6;
+    doc.setFontSize(8);
+    doc.setTextColor(148, 163, 184);
+    doc.text(`Gerado em: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, pageWidth / 2, y, { align: 'center' });
+    
+    doc.save(`Prestacao_Contas_${patient.name.replace(/\s/g, '_')}_${format(new Date(payment.paymentDate), 'yyyyMMdd')}.pdf`);
   };
 
   const handleCepLookup = async (cep) => {
@@ -1054,6 +1224,15 @@ export default function PatientRecord() {
               <div className="card overflow-hidden">
                 <div className="p-6 border-b border-slate-100 flex items-center justify-between">
                   <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Histórico de Lançamentos</h3>
+                  {payments.length > 0 && (
+                    <button 
+                      onClick={() => handleGenerateAllReceipts()}
+                      className="btn btn-primary flex items-center gap-2 text-xs"
+                    >
+                      <File size={14} />
+                      Gerar Relatório Completo
+                    </button>
+                  )}
                 </div>
                 
                 {loadingPayments ? (
@@ -1149,9 +1328,9 @@ export default function PatientRecord() {
                                 <button 
                                   onClick={() => handleGenerateReceipt(payment)}
                                   className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
-                                  title="Gerar Prestação de Contas"
+                                  title="Gerar Prestação de Contas (PDF)"
                                 >
-                                  <Receipt size={16} />
+                                  <Download size={16} />
                                 </button>
                                 <button 
                                   onClick={async () => {

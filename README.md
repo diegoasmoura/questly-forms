@@ -95,9 +95,16 @@ O sistema utiliza uma tríade de estados para cada sessão:
 - **Filtro por Dia:** Lista mostra only as sessões do dia atual (currentDate), não more week grouping.
 - **Status Visual:** Badges P (presente), F (falta), J (justificada) inline with each sessão.
 
+### 7. Gestão Financeira - PDF (v4.1)
+- **Recibo em PDF:** Geração automática de PDFs nice para comprovantes via jsPDF.
+- **Layout Profissional:** Header, dados do paciente, valor, tabela de sessões e rodapé.
+- **Status Colorido:** PRESENTE (verde), FALTA (vermelho), JUSTIFICADA (âmbar).
+- **Relatório Completo:** Botão para gerar PDF com todos os pagamentos de uma vez.
+- **Download Direto:** Arquivo baixa automaticamente sem abrir nova aba.
+
 ## Tecnologias
 
-- **Frontend:** React, Tailwind CSS, Lucide React, date-fns.
+- **Frontend:** React, Tailwind CSS, Lucide React, date-fns, jsPDF.
 - **Backend:** Node.js, Express, Prisma ORM.
 - **Banco de Dados:** PostgreSQL (Relacionamento recursivo em `Attendance`).
 
