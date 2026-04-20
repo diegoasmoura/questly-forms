@@ -319,7 +319,6 @@ export default function Patients() {
                   { id: "contact", label: "Contato", icon: Contact },
                   { id: "address", label: "Endereço", icon: MapPin },
                   { id: "notes", label: "Registros Clínicos", icon: FileText },
-                  { id: "settings", label: "Agenda", icon: Calendar },
                 ].map(tab => (
                   <button
                     key={tab.id}
@@ -611,103 +610,10 @@ export default function Patients() {
                         />
                       </div>
                     </div>
-                  </div>
-                )}
-
-                {/* TAB: Agenda */}
-                {addFormTab === "settings" && (
-                  <div className="space-y-5">
-                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                      <h4 className="text-sm font-semibold text-slate-700 mb-4">Agenda do Paciente</h4>
-                      
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs font-semibold text-slate-600 mb-2">Horário Fixo</label>
-                            <select
-                              className="input text-sm"
-                              value={newPatient.sessionTime}
-                              onChange={e => setNewPatient({ ...newPatient, sessionTime: e.target.value })}
-                            >
-                              <option value="">Selecione</option>
-                              <option value="07:00">07:00</option>
-                              <option value="07:30">07:30</option>
-                              <option value="08:00">08:00</option>
-                              <option value="08:30">08:30</option>
-                              <option value="09:00">09:00</option>
-                              <option value="09:30">09:30</option>
-                              <option value="10:00">10:00</option>
-                              <option value="10:30">10:30</option>
-                              <option value="11:00">11:00</option>
-                              <option value="11:30">11:30</option>
-                              <option value="12:00">12:00</option>
-                              <option value="12:30">12:30</option>
-                              <option value="13:00">13:00</option>
-                              <option value="13:30">13:30</option>
-                              <option value="14:00">14:00</option>
-                              <option value="14:30">14:30</option>
-                              <option value="15:00">15:00</option>
-                              <option value="15:30">15:30</option>
-                              <option value="16:00">16:00</option>
-                              <option value="16:30">16:30</option>
-                              <option value="17:00">17:00</option>
-                              <option value="17:30">17:30</option>
-                              <option value="18:00">18:00</option>
-                              <option value="18:30">18:30</option>
-                              <option value="19:00">19:00</option>
-                              <option value="19:30">19:30</option>
-                              <option value="20:00">20:00</option>
-                              <option value="20:30">20:30</option>
-                              <option value="21:00">21:00</option>
-                            </select>
-                          </div>
-                          <div>
-                            <label className="block text-xs font-semibold text-slate-600 mb-2">Duração</label>
-                            <select
-                              className="input text-sm"
-                              value={newPatient.sessionDuration}
-                              onChange={e => setNewPatient({ ...newPatient, sessionDuration: e.target.value })}
-                            >
-                              <option value="30">30 min</option>
-                              <option value="45">45 min</option>
-                              <option value="50">50 min</option>
-                              <option value="60">60 min</option>
-                              <option value="90">90 min</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-600 mb-2">Periodicidade</label>
-                          <select
-                            className="input text-sm"
-                            value={newPatient.sessionFrequency}
-                            onChange={e => setNewPatient({ ...newPatient, sessionFrequency: e.target.value })}
-                          >
-                            <option value="semanal">Semanal</option>
-                            <option value="quinzenal">Quinzenal</option>
-                            <option value="mensal">Mensal</option>
-                            <option value="semanal-2">2x por semana</option>
-                            <option value="outro">Outro</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-600 mb-2">Próxima Sessão</label>
-                          <input
-                            type="date"
-                            className="input text-sm"
-                            value={newPatient.nextSession}
-                            onChange={e => setNewPatient({ ...newPatient, nextSession: e.target.value })}
-                          />
-                        </div>
-                      </div>
                     </div>
-                  </div>
-                )}
+                    )}
 
-                {/* TAB: Registros Clínicos */}
-                {addFormTab === "notes" && (
+                    {/* TAB: Registros Clínicos */}                {addFormTab === "notes" && (
                   <div className="space-y-5">
                     <div>
                       <label className="block text-xs font-semibold text-slate-600 mb-2">Registros Clínicos (Prontuário)</label>
@@ -898,35 +804,10 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
   const [attachments, setAttachments] = useState([]);
   const [loadingAttachments, setLoadingAttachments] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [appointments, setAppointments] = useState([]);
-  const [loadingAppointments, setLoadingAppointments] = useState(false);
-  const [conflicts, setConflicts] = useState({}); // { slotId: conflictData }
-  const [appointmentStartDate, setAppointmentStartDate] = useState("");
 
   useEffect(() => {
     loadAttachments();
-    loadPatientAppointments();
   }, [patient.id]);
-
-  const loadPatientAppointments = async () => {
-    setLoadingAppointments(true);
-    try {
-      const data = await api.getPatientAppointments(patient.id);
-      setAppointments(data || []);
-      
-      // Carrega data de início do primeiro appointment
-      if (data && data.length > 0 && data[0].startDate) {
-        const startDate = new Date(data[0].startDate);
-        setAppointmentStartDate(startDate.toISOString().split('T')[0]);
-      } else {
-        setAppointmentStartDate("");
-      }
-    } catch (error) {
-      console.error("Erro ao carregar agendamentos:", error);
-    } finally {
-      setLoadingAppointments(false);
-    }
-  };
 
   const loadAttachments = async () => {
     setLoadingAttachments(true);
@@ -940,121 +821,12 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
     }
   };
 
-  const checkConflict = async (id, dayOfWeek, time) => {
-    try {
-      const result = await api.checkAppointmentConflict({
-        dayOfWeek,
-        time,
-        excludePatientId: patient.id
-      });
-      
-      setConflicts(prev => ({
-        ...prev,
-        [id]: result.hasConflict ? result.conflicts[0] : null
-      }));
-    } catch (error) {
-      console.error("Erro ao verificar conflito:", error);
-    }
-  };
-
-  const addAppointmentSlot = () => {
-    const newId = `new-${Date.now()}`;
-    setAppointments([...appointments, {
-      id: newId,
-      dayOfWeek: 1,
-      time: "08:00",
-      duration: 50,
-      isNew: true
-    }]);
-    checkConflict(newId, 1, "08:00");
-  };
-
-  const removeAppointmentSlot = (id) => {
-    setAppointments(appointments.filter(a => a.id !== id));
-    setConflicts(prev => {
-      const newConflicts = { ...prev };
-      delete newConflicts[id];
-      return newConflicts;
-    });
-  };
-
-  const updateAppointmentSlot = (id, field, value) => {
-    const updatedApps = appointments.map(a => 
-      a.id === id ? { ...a, [field]: value } : a
-    );
-    setAppointments(updatedApps);
-
-    // Se mudou dia ou hora, verifica conflito
-    if (field === "dayOfWeek" || field === "time") {
-      const slot = updatedApps.find(a => a.id === id);
-      checkConflict(id, slot.dayOfWeek, slot.time);
-    }
-  };
-
-  const [clearMode, setClearMode] = useState(null); // null, 'future', or 'all'
-  const [cleanupModal, setCleanupModal] = useState({ open: false, title: "", message: "", mode: null });
-
-  const handleClearAgenda = (mode = null) => {
-    if (!mode) {
-      setCleanupModal({
-        open: true,
-        title: "Limpar Agenda",
-        message: "Como você deseja limpar a agenda deste paciente? Escolha uma opção abaixo para prosseguir.",
-        mode: null
-      });
-      return;
-    }
-    
-    setClearMode(mode);
-    setAppointments([]);
-    setAppointmentStartDate("");
-    setCleanupModal({ ...cleanupModal, open: false });
-  };
-
-  const togglePatientStatus = () => {
-    const newActiveStatus = !formData.isActive;
-    setFormData({ ...formData, isActive: newActiveStatus });
-
-    // Se estiver inativando e houver agenda, sugere limpar
-    if (!newActiveStatus && appointments.length > 0) {
-      setCleanupModal({
-        open: true,
-        title: "Inativar Paciente",
-        message: "O paciente foi marcado como inativo. Deseja também remover os horários recorrentes da agenda para liberar espaço? (O histórico passado será preservado)",
-        mode: 'future' // Sugestão padrão para inativação
-      });
-    }
-  };
-
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
       await api.updatePatient(patient.id, formData);
-      
-      // Se a lista de horários estiver vazia e houver um modo de limpeza definido
-      if (appointments.length === 0 && clearMode) {
-        await api.deletePatientAppointments(patient.id, clearMode);
-        setSuccessMessage(clearMode === 'future' ? "Agenda futura limpa. Passado preservado." : "Agenda removida completamente.");
-      } else if (appointments.length > 0) {
-        // Validação: Se houver horários, a data de início é obrigatória
-        if (!appointmentStartDate) {
-          alert("Por favor, informe a data de início para os novos horários");
-          setSaving(false);
-          return;
-        }
-
-        const slots = appointments.map(({ dayOfWeek, time, duration }) => ({
-          dayOfWeek: parseInt(dayOfWeek),
-          time,
-          duration: parseInt(duration)
-        }));
-        
-        await api.saveAppointmentsBatch(patient.id, slots, appointmentStartDate);
-        setSuccessMessage(`Sucesso! ${slots.length} horário(s) salvo(s) a partir de ${appointmentStartDate}`);
-      }
-      
-      setClearMode(null);
+      setSuccessMessage("Cadastro atualizado com sucesso!");
       onSave();
     } catch (error) {
       alert("Erro ao salvar: " + error.message);
@@ -1128,7 +900,6 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
               { id: "contact", label: "Contato", icon: Contact },
               { id: "address", label: "Endereço", icon: MapPin },
               { id: "notes", label: "Registros Clínicos", icon: FileText },
-              { id: "settings", label: "Agenda", icon: Calendar },
             ].map(tab => (
               <button
                 key={tab.id}
