@@ -479,18 +479,20 @@ export default function PatientRecord() {
 
   const handleSavePayment = async (e) => {
     e.preventDefault();
-    if (selectedAttendances.length === 0) {
-      alert("Selecione ao menos uma sessão para vincular ao pagamento.");
-      return;
-    }
-    
     setSaving(true);
     try {
-      await api.savePayment({
-        patientId: id,
-        ...paymentFormData,
-        attendanceIds: selectedAttendances
-      });
+      if (paymentFormData.id) {
+        await api.updatePayment(paymentFormData.id, {
+          ...paymentFormData,
+          attendanceIds: selectedAttendances
+        });
+      } else {
+        await api.savePayment({
+          patientId: id,
+          ...paymentFormData,
+          attendanceIds: selectedAttendances
+        });
+      }
       setShowPaymentModal(false);
       loadPatientPayments();
       loadPatientAttendances();
@@ -499,6 +501,19 @@ export default function PatientRecord() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const openEditPayment = (payment) => {
+    setPaymentFormData({
+      id: payment.id,
+      amount: payment.amount,
+      paymentDate: format(new Date(payment.paymentDate), 'yyyy-MM-dd'),
+      method: payment.method,
+      notes: payment.notes || "",
+      receiptIssued: payment.receiptIssued
+    });
+    setSelectedAttendances(payment.attendances.map(a => a.id));
+    setShowPaymentModal(true);
   };
 
   const handleGenerateReceipt = (payment) => {
@@ -1066,6 +1081,13 @@ export default function PatientRecord() {
                             </td>
                             <td className="px-6 py-4 text-right">
                               <div className="flex items-center justify-end gap-2">
+                                <button 
+                                  onClick={() => openEditPayment(payment)}
+                                  className="p-2 text-slate-500 hover:bg-slate-50 rounded-lg transition-all"
+                                  title="Editar Lançamento"
+                                >
+                                  <Pencil size={16} />
+                                </button>
                                 <button 
                                   onClick={() => handleGenerateReceipt(payment)}
                                   className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
