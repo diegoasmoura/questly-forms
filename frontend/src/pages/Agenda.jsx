@@ -498,7 +498,7 @@ export default function Agenda() {
       
       // Tentar extrair a data de reagendamento das notas se existir
       let reschedDate = "";
-      let reschedTime = existingAtt?.sessionTime || "08:00";
+      let reschedTime = existingAtt?.sessionTime || justModal.appointment?.time || "08:00";
       if (existingAtt?.notes?.includes("Reagendado para ")) {
         const match = existingAtt.notes.match(/Reagendado para (\d{4}-\d{2}-\d{2})/);
         if (match) reschedDate = match[1];
