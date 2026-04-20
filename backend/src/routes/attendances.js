@@ -42,6 +42,33 @@ router.get("/filter", async (req, res) => {
   }
 });
 
+// Função recursiva para buscar todos os descendentes
+async function getDescendants(id) {
+  const children = await prisma.attendance.findMany({
+    where: { parentId: id }
+  });
+  
+  let descendants = [...children];
+  for (const child of children) {
+    const childDescendants = await getDescendants(child.id);
+    descendants = [...descendants, ...childDescendants];
+  }
+  return descendants;
+}
+
+// Buscar contagem e info de descendentes
+router.get("/:id/descendants", async (req, res) => {
+  try {
+    const descendants = await getDescendants(req.params.id);
+    res.json({
+      count: descendants.length,
+      descendants: descendants.map(d => ({ id: d.id, date: d.date }))
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao buscar descendentes" });
+  }
+});
+
 // Registrar presença/falta
 router.post("/", async (req, res) => {
   const { patientId, date, status, notes, sessionTime, parentId } = req.body;
@@ -91,15 +118,47 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Deletar attendance
+// Deletar attendance (Reset com Cascade)
 router.delete("/:id", async (req, res) => {
   try {
+    const recordToDelete = await prisma.attendance.findUnique({
+      where: { id: req.params.id },
+      select: { parentId: true, status: true }
+    });
+
+    if (!recordToDelete) {
+      return res.status(404).json({ error: "Registro não encontrado" });
+    }
+
+    // Se tiver um pai, limpamos a menção ao reagendamento nas notas do pai
+    if (recordToDelete.parentId) {
+      const parent = await prisma.attendance.findUnique({
+        where: { id: recordToDelete.parentId }
+      });
+
+      if (parent && parent.notes) {
+        // Remover a parte "Reagendado para ..." das notas
+        const notesParts = parent.notes.split(/Reagendado para/i);
+        const cleanNotes = notesParts[0].trim();
+        
+        await prisma.attendance.update({
+          where: { id: parent.id },
+          data: { 
+            notes: cleanNotes || "Falta justificada (reagendamento cancelado)." 
+          }
+        });
+      }
+    }
+
+    // A deleção aqui disparará o onDelete: Cascade no banco para todos os filhos
     await prisma.attendance.delete({
       where: { id: req.params.id }
     });
+
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: "Erro ao deletar attendance" });
+    console.error("Erro ao deletar attendance:", error);
+    res.status(500).json({ error: "Erro ao deletar registro" });
   }
 });
 

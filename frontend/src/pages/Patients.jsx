@@ -318,7 +318,7 @@ export default function Patients() {
                   { id: "identity", label: "Identificação", icon: UserCheck },
                   { id: "contact", label: "Contato", icon: Contact },
                   { id: "address", label: "Endereço", icon: MapPin },
-                  { id: "notes", label: "Notas", icon: FileText },
+                  { id: "notes", label: "Registros Clínicos", icon: FileText },
                   { id: "settings", label: "Agenda", icon: Calendar },
                 ].map(tab => (
                   <button
@@ -706,11 +706,11 @@ export default function Patients() {
                   </div>
                 )}
 
-                {/* TAB: Notas */}
+                {/* TAB: Registros Clínicos */}
                 {addFormTab === "notes" && (
                   <div className="space-y-5">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-2">Observações Clínicas</label>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">Registros Clínicos (Prontuário)</label>
                       <textarea
                         className="input text-sm min-h-[150px]"
                         value={newPatient.notes}
@@ -1102,7 +1102,7 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
               { id: "identity", label: "Identificação", icon: UserCheck },
               { id: "contact", label: "Contato", icon: Contact },
               { id: "address", label: "Endereço", icon: MapPin },
-              { id: "notes", label: "Notas", icon: FileText },
+              { id: "notes", label: "Registros Clínicos", icon: FileText },
               { id: "settings", label: "Agenda", icon: Calendar },
             ].map(tab => (
               <button
@@ -1563,7 +1563,7 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
             {editTab === "notes" && (
               <div className="space-y-5">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-2">Observações Clínicas</label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-2">Registros Clínicos (Prontuário)</label>
                   <textarea
                     className="input text-sm min-h-[150px]"
                     value={formData.notes}

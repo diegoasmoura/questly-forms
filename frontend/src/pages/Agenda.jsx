@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { 
   Calendar as CalendarIcon, 
@@ -15,7 +16,10 @@ import {
   RefreshCcw,
   BookOpen,
   Edit,
-  Trash2
+  Trash2,
+  Link2,
+  ArrowLeft,
+  AlertTriangle
 } from "lucide-react";
 import { format, startOfWeek, endOfWeek, addDays, startOfMonth, endOfMonth, isSameDay, eachDayOfInterval } from "date-fns";
 import { ptBR } from 'date-fns/locale';
@@ -331,12 +335,20 @@ function MonthView({ currentDate, appointments, attendances, onStatus }) {
                   
                   const style = statusStyles[att?.status] || statusStyles.default;
                   const isReagendado = att?.status === 'justificada' && att?.notes?.includes('Reagendado');
+                  const isFilho = !!att?.parentId;
+                  const hasFilho = attendances.some(a => a.parentId === att?.id);
                   
                   return (
                     <div key={session.app.id + i} className="flex items-center gap-1">
-                      <div className={`text-[10px] px-1.5 py-1 rounded truncate flex-1 font-bold border ${style} ${session.type === 'extra' ? 'border-dashed border-2' : ''} ${isReagendado ? 'opacity-50 grayscale-[0.5]' : ''}`}>
+                      <div className={`text-[10px] px-1.5 py-1 rounded truncate flex-1 font-bold border transition-all ${style} 
+                        ${session.type === 'extra' || isFilho ? 'border-dashed border-2' : ''} 
+                        ${isReagendado ? 'opacity-70 grayscale-[0.3]' : ''}
+                        ${hasFilho ? 'ring-1 ring-amber-400/30' : ''}`}
+                      >
                         <div className="flex items-center justify-between">
-                          <span className="truncate">
+                          <span className="truncate flex items-center gap-1">
+                            {isFilho && !hasFilho && <Clock size={10} className="shrink-0" />}
+                            {hasFilho && <Link2 size={10} className="shrink-0" />}
                             {session.app.patient?.name?.split(" ")[0]}
                           </span>
                           {isReagendado && <RefreshCcw size={10} className="ml-1 animate-spin-slow" />}
@@ -449,6 +461,8 @@ export default function Agenda() {
   const [successMessage, setSuccessMessage] = useState("");
   const [justModal, setJustModal] = useState({ open: false, patient: null, appointment: null, date: null, isEdit: false, existingAtt: null });
   const [justData, setJustData] = useState({ date: "", time: "08:00", notes: "" });
+  const [descendantsInfo, setDescendantsInfo] = useState({ count: 0, list: [] });
+  const [confirmModal, setConfirmModal] = useState({ open: false, title: "", message: "", onConfirm: null, loading: false });
 
   useEffect(() => {
     if (successMessage) {
@@ -477,6 +491,15 @@ export default function Agenda() {
     }
   };
 
+  const fetchDescendants = async (attendanceId) => {
+    try {
+      const data = await api.getAttendanceDescendants(attendanceId);
+      setDescendantsInfo({ count: data.count, list: data.descendants });
+    } catch (error) {
+      console.error("Erro ao buscar descendentes:", error);
+    }
+  };
+
   const handleAttendance = async (appointment, status, sessionDate) => {
     if (!sessionDate) {
       const date = new Date();
@@ -490,23 +513,26 @@ export default function Agenda() {
     const existingAtt = attendances.find(a => a.patientId === appointment.patientId && extractUTCDate(a.date) === dateStr);
     
     if (status === 'justificada') {
-      // Se já existe uma justificativa, abre em modo de visualização primeiro
+      if (existingAtt) {
+        fetchDescendants(existingAtt.id);
+      } else {
+        setDescendantsInfo({ count: 0, list: [] });
+      }
+
       setJustModal({ 
         open: true, 
         patient: appointment.patient, 
         appointment, 
         date: sessionDate, 
-        isEdit: !existingAtt, // Se não existe, entra direto em edição
+        isEdit: !existingAtt,
         existingAtt 
       });
       
-      // Tentar extrair a data de reagendamento das notas se existir
       let reschedDate = "";
-      let reschedTime = existingAtt?.sessionTime || justModal.appointment?.time || "08:00";
+      let reschedTime = existingAtt?.sessionTime || appointment.time || "08:00";
       if (existingAtt?.notes?.includes("Reagendado para ")) {
         const match = existingAtt.notes.match(/Reagendado para (\d{4}-\d{2}-\d{2})/);
         if (match) reschedDate = match[1];
-        // Tentar extrair hora das notas
         const timeMatch = existingAtt.notes.match(/Reagendado para \d{4}-\d{2}-\d{2} às (\d{2}:\d{2})/);
         if (timeMatch) reschedTime = timeMatch[1];
       }
@@ -544,16 +570,37 @@ export default function Agenda() {
 
   const deleteJustification = async () => {
     if (!justModal.existingAtt) return;
-    if (!confirm("Deseja remover esta justificativa e voltar ao estado normal?")) return;
     
-    try {
-      await api.deleteAttendance(justModal.existingAtt.id);
-      setSuccessMessage("Justificativa removida!");
-      await loadData();
-      setJustModal({ open: false, patient: null, appointment: null, date: null, isEdit: false, existingAtt: null });
-    } catch (error) {
-      alert("Erro ao remover");
+    const count = descendantsInfo.count;
+    let title = "Remover Justificativa";
+    let message = "Deseja desfazer esta falta justificada? A sessão voltará a aparecer sem marcação.";
+    
+    if (count === 1) {
+      const childDate = new Date(descendantsInfo.list[0].date);
+      message = `Deseja remover esta justificativa? O reagendamento de ${format(childDate, "dd/MM")} também será cancelado e excluído permanentemente.`;
+    } else if (count > 1) {
+      message = `Deseja remover esta justificativa? Os ${count} reagendamentos seguintes na cadeia também serão cancelados. Esta ação não pode ser desfeita.`;
     }
+
+    setConfirmModal({
+      open: true,
+      title,
+      message,
+      loading: false,
+      onConfirm: async () => {
+        setConfirmModal(prev => ({ ...prev, loading: true }));
+        try {
+          await api.deleteAttendance(justModal.existingAtt.id);
+          setSuccessMessage(count > 0 ? "Cadeia de reagendamento removida!" : "Justificativa removida!");
+          await loadData();
+          setJustModal({ open: false, patient: null, appointment: null, date: null, isEdit: false, existingAtt: null });
+          setConfirmModal({ open: false, title: "", message: "", onConfirm: null, loading: false });
+        } catch (error) {
+          alert("Erro ao remover: " + error.message);
+          setConfirmModal(prev => ({ ...prev, loading: false }));
+        }
+      }
+    });
   };
   
   const saveJustificada = async () => {
@@ -694,34 +741,78 @@ const weekDays = eachDayOfInterval({
               <div className="space-y-6">
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Status da Sessão</p>
-                  <div className="flex items-center gap-2 text-amber-600 font-bold">
-                    <AlertCircle size={16} />
-                    <span className="text-sm">Falta Justificada</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-amber-600 font-bold">
+                      {justModal.existingAtt.parentId ? <RefreshCcw size={16} /> : <AlertCircle size={16} />}
+                      <span className="text-sm">
+                        {justModal.existingAtt.parentId ? "Falta Justificada (Reagendamento)" : "Falta Justificada"}
+                      </span>
+                    </div>
+                    <span className="text-xs font-black text-slate-500 bg-white px-2 py-1 rounded-lg border border-slate-200 shadow-sm">
+                      {justModal.existingAtt.sessionTime || justModal.appointment?.time}
+                    </span>
                   </div>
                   {justData.notes && (
                     <p className="mt-3 text-sm text-slate-600 leading-relaxed italic">"{justData.notes}"</p>
                   )}
-                  <p className="mt-2 text-xs text-slate-500">Horário: {justData.time}</p>
                 </div>
 
-                {justData.date && (
-                  <button 
-                    onClick={() => goToRescheduledDate(justData.date)}
-                    className="w-full p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center justify-between group hover:bg-emerald-600 hover:border-emerald-600 transition-all"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-emerald-600 shadow-sm group-hover:scale-110 transition-transform">
-                        <CalendarIcon size={20} />
+                {/* Navegação para o Pai */}
+                {justModal.existingAtt.parentId && (
+                  <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Origem do Reagendamento</p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                        <ArrowLeft size={14} />
+                        Sessão original
                       </div>
-                      <div className="text-left">
-                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest group-hover:text-emerald-100">Reagendada para</p>
-                        <p className="text-sm font-bold text-slate-800 group-hover:text-white">
-                          {format(new Date(justData.date + 'T00:00:00'), "d 'de' MMMM", { locale: ptBR })} às {justData.time}
+                      {(() => {
+                        const parent = attendances.find(a => a.id === justModal.existingAtt.parentId);
+                        if (!parent) return null;
+                        return (
+                          <button 
+                            onClick={() => goToRescheduledDate(extractUTCDate(parent.date))}
+                            className="text-xs font-black text-amber-600 uppercase hover:underline flex items-center gap-1"
+                          >
+                            Ver {format(new Date(parent.date), "dd/MM")} às {parent.sessionTime || "00:00"}
+                          </button>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                )}
+
+                {/* Navegação para o Filho */}
+                {justData.date && (
+                  <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl">
+                    <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2">Próximo Reagendamento</p>
+                    <div className="flex items-center justify-between group">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-emerald-600 shadow-sm">
+                          <CalendarIcon size={16} />
+                        </div>
+                        <p className="text-sm font-bold text-slate-800">
+                          {format(new Date(justData.date + 'T00:00:00'), "d 'de' MMM", { locale: ptBR })} às {justData.time}
                         </p>
                       </div>
+                      <button 
+                        onClick={() => goToRescheduledDate(justData.date)}
+                        className="p-2 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-600 hover:text-white transition-all"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
                     </div>
-                    <ChevronRight size={20} className="text-emerald-300 group-hover:text-white" />
-                  </button>
+                  </div>
+                )}
+
+                {/* Aviso de Cascata */}
+                {descendantsInfo.count > 0 && (
+                  <div className="p-3 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2">
+                    <AlertTriangle size={14} className="text-red-500 mt-0.5 shrink-0" />
+                    <p className="text-[10px] text-red-700 font-bold leading-tight">
+                      AVISO: Remover esta justificativa cancelará {descendantsInfo.count === 1 ? "o reagendamento vinculado" : `os ${descendantsInfo.count} reagendamentos vinculados`}.
+                    </p>
+                  </div>
                 )}
 
                 <div className="grid grid-cols-2 gap-3 pt-4">
@@ -800,10 +891,16 @@ const weekDays = eachDayOfInterval({
 
                 <div className="flex gap-3 mt-8">
                   <button 
-                    onClick={() => setJustModal({ ...justModal, open: false })} 
+                    onClick={() => {
+                      if (justModal.existingAtt) {
+                        setJustModal({ ...justModal, isEdit: false });
+                      } else {
+                        setJustModal({ ...justModal, open: false });
+                      }
+                    }} 
                     className="flex-1 py-3 text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-xl transition-all"
                   >
-                    Cancelar
+                    {justModal.existingAtt ? "Voltar" : "Cancelar"}
                   </button>
                   <button 
                     onClick={saveJustificada} 
@@ -814,6 +911,36 @@ const weekDays = eachDayOfInterval({
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Custom Confirmation Modal */}
+      {confirmModal.open && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[110]" onClick={() => !confirmModal.loading && setConfirmModal({ ...confirmModal, open: false })}>
+          <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
+            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+              <AlertTriangle size={32} />
+            </div>
+            <h3 className="text-xl font-black text-slate-800 text-center uppercase tracking-tight mb-3">{confirmModal.title}</h3>
+            <p className="text-sm text-slate-500 text-center leading-relaxed font-medium mb-8">{confirmModal.message}</p>
+            
+            <div className="flex gap-3">
+              <button 
+                disabled={confirmModal.loading}
+                onClick={() => setConfirmModal({ ...confirmModal, open: false })}
+                className="flex-1 py-4 text-xs font-black uppercase tracking-widest text-slate-400 hover:bg-slate-50 rounded-2xl transition-all"
+              >
+                Cancelar
+              </button>
+              <button 
+                disabled={confirmModal.loading}
+                onClick={confirmModal.onConfirm}
+                className="flex-1 py-4 bg-red-500 text-white rounded-2xl hover:bg-red-600 shadow-lg shadow-red-200 transition-all text-xs font-black uppercase tracking-widest flex items-center justify-center"
+              >
+                {confirmModal.loading ? <RefreshCcw size={16} className="animate-spin" /> : "Confirmar"}
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -50,16 +50,21 @@ O sistema utiliza uma tríade de estados para cada sessão:
 - **Falta (F):** Marca a ausência do paciente (Vermelho).
 - **Justificada (J):** Indica que a falta foi comunicada (Âmbar).
 
-#### Lógica de Justificativa e Reagendamento (v3.3)
-- **Vínculo Pai-Filho (Chaining):** Ao reagendar, o sistema cria um vínculo entre a data original (Pai) e a nova data (Filho).
-- **Proteção de Registro:** Assim que um registro é marcado como **J**, os botões **P** e **F** desaparecem da tela para evitar alterações acidentais. Apenas o **J** permanece como porta de entrada para edição.
-- **Rollback em Cadeia:** Graças à relação `parentId` com `onDelete: Cascade`, se você remover a justificativa original, todos os reagendamentos futuros que nasceram dela são excluídos automaticamente.
-- **Portal de Informação:** Clicar em um registro **J** abre um resumo com o motivo e um **botão de atalho** para "pular" o calendário direto para a nova data reagendada.
+#### Lógica de Justificativa e Reagendamento em Cadeia (v3.5)
+- **Lista Encadeada (Linked List):** Cada reagendamento é vinculado a uma sessão anterior via `parentId`, criando uma linhagem clara de eventos clínicos.
+- **Remoção em Cascata Unidirecional:** Ao remover uma justificativa no meio ou início de uma cadeia, o sistema deleta recursivamente todos os descendentes (reagendamentos futuros) e reseta o registro atual para o estado "sem marcação".
+- **Integridade de Notas:** Ao cancelar um reagendamento (filho), o sistema limpa automaticamente a menção ao reagendamento nas notas da sessão pai, mantendo o histórico de observações coerente.
+- **Confirmação Contextual:** O sistema calcula e informa ao profissional quantos registros futuros serão excluídos antes de confirmar uma remoção em cascata.
 
 ### 3. Visualização e UX
-- **Sessões Extras:** Reagendamentos que ocorrem fora do dia habitual do paciente ganham uma **borda pontilhada** no calendário para fácil identificação.
-- **Feedback Moderno (Toasts):** Substituição de alertas invasivos por avisos flutuantes automáticos (Emerald-600) que não travam o fluxo de trabalho.
-- **Aba Frequência:** Nova seção no prontuário com dashboard de estatísticas e timeline vertical detalhada contendo ícones, selos de reagendamento e notas clínicas.
+- **Hierarquia Visual na Agenda:** 
+  - **Sessão Original:** Ícone sólido de alerta.
+  - **Reagendamento Intermediário:** Borda pontilhada + ícone de cadeia 🔗.
+  - **Reagendamento Final:** Borda pontilhada + ícone de relógio ⏰.
+- **Navegação Contextual:** Modais de detalhes permitem "pular" entre sessões da mesma cadeia (ir para origem ou ir para reagendamento) com um clique.
+- **Registros Clínicos (Prontuário):** Unificação de notas, laudos e anexos sob a aba "Registros Clínicos", proporcionando um ambiente organizado para a documentação do paciente.
+- **Timeline de Frequência:** Exibição visual do encadeamento na aba de frequência, com linhas conectoras e badges de status da cadeia (Início, Meio, Fim).
+- **Feedback Moderno (Toasts):** Substituição de alertas invasivos por avisos flutuantes automáticos (Emerald-600).
 
 ### 4. Gestão de Fuso Horário (v3.4)
 - **Armazenamento UTC:** Todas as datas são armazenadas no banco em formato UTC para consistência.

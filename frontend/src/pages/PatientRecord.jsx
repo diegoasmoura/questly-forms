@@ -10,6 +10,22 @@ import { useShareLinkStatus, getStatusBadge } from "../lib/useShareLinkStatus";
 import ShareLinkCard, { ShareLinkStats } from "../components/ShareLinkCard";
 import FormResponsesView from "../components/FormResponsesView";
 import DataTable from "../components/DataTable";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
+// Extrai data UTC de string ISO (para comparação com dados do banco)
+const extractUTCDate = (dateStr) => {
+  if (!dateStr) return "";
+  if (typeof dateStr === 'string') {
+    return dateStr.split('T')[0];
+  }
+  const d = new Date(dateStr);
+  const year = d.getUTCFullYear();
+  const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(d.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 import {
   ArrowLeft,
   Mail,
@@ -441,8 +457,8 @@ export default function PatientRecord() {
 
           <div className="card p-6">
             <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
-              <Edit size={16} />
-              Notas Clínicas
+              <FileText size={16} />
+              Registros Clínicos
             </h3>
             {patient.notes ? (
               <p className="text-sm text-slate-700 font-medium whitespace-pre-wrap leading-relaxed bg-amber-50 p-3 rounded-lg border border-amber-100">
@@ -606,6 +622,11 @@ export default function PatientRecord() {
                   <div className="space-y-0 relative before:absolute before:left-[19px] before:top-2 before:bottom-0 before:w-0.5 before:bg-slate-100">
                     {attendances.map((att, idx) => {
                       const isReagendado = att.notes?.includes('Reagendado');
+                      const isFilho = !!att.parentId;
+                      const hasFilho = attendances.some(a => a.parentId === att.id);
+                      const isChainStart = hasFilho && !isFilho;
+                      const isChainMiddle = hasFilho && isFilho;
+                      const isChainEnd = !hasFilho && isFilho;
                       
                       const statusConfig = {
                         presente: { color: "bg-emerald-500", label: "Presente", bg: "bg-emerald-50", text: "text-emerald-700", icon: <Check size={12} /> },
@@ -617,33 +638,64 @@ export default function PatientRecord() {
 
                       return (
                         <div key={att.id} className="relative pl-12 pb-10 group last:pb-0">
+                          {/* Timeline Line Connector for Chain */}
+                          {hasFilho && (
+                            <div className="absolute left-[19px] top-10 bottom-0 w-0.5 bg-amber-400/40 z-0" />
+                          )}
+                          
                           {/* Timeline Dot */}
-                          <div className={`absolute left-0 top-1 w-10 h-10 rounded-full border-4 border-white shadow-sm flex items-center justify-center z-10 transition-transform group-hover:scale-110 ${config.color} text-white`}>
+                          <div className={`absolute left-0 top-1 w-10 h-10 rounded-full border-4 border-white shadow-sm flex items-center justify-center z-10 transition-transform group-hover:scale-110 ${config.color} text-white ${isFilho ? 'ring-2 ring-amber-400 ring-offset-2' : ''}`}>
                             {config.icon}
                           </div>
 
-                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                              <div className="flex items-center gap-3 mb-1">
+                          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-1 flex-wrap">
                                 <span className="text-sm font-black text-slate-800 uppercase tracking-tight">
                                   {format(new Date(att.date), "EEEE, d 'de' MMMM", { locale: ptBR })}
                                 </span>
-                                <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${config.bg} ${config.text} border shadow-sm`}>
-                                  {isReagendado ? 'Reagendada' : config.label}
-                                </span>
+                                <div className="flex gap-1">
+                                  <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${config.bg} ${config.text} border shadow-sm`}>
+                                    {isReagendado ? 'Reagendada' : config.label}
+                                  </span>
+                                  {isChainStart && <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">Início de Cadeia</span>}
+                                  {isChainMiddle && <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">Reagendamento</span>}
+                                  {isChainEnd && <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">Reagendamento Final</span>}
+                                </div>
                               </div>
-                              <p className="text-xs font-bold text-slate-500 flex items-center gap-1">
+                              <p className="text-xs font-bold text-slate-500 flex items-center gap-1 mb-2">
                                 <Clock size={12} />
                                 {att.sessionTime || 'Horário não informado'}
                               </p>
+
+                              {att.notes && (
+                                <div className={`max-w-md p-3 rounded-xl border flex-1 ${isFilho ? 'bg-amber-50/50 border-amber-100' : 'bg-slate-50 border-slate-100'}`}>
+                                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Observação</p>
+                                  <p className="text-xs text-slate-600 leading-relaxed font-medium italic">"{att.notes}"</p>
+                                </div>
+                              )}
                             </div>
-                            
-                            {att.notes && (
-                              <div className="max-w-md bg-slate-50 p-3 rounded-xl border border-slate-100 flex-1">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Observação</p>
-                                <p className="text-xs text-slate-600 leading-relaxed font-medium italic">"{att.notes}"</p>
-                              </div>
-                            )}
+
+                            <div className="flex flex-col gap-2">
+                              {hasFilho && (
+                                <Link 
+                                  to={`/agenda?date=${extractUTCDate(attendances.find(a => a.parentId === att.id).date)}`}
+                                  className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-amber-600 hover:text-amber-700 bg-amber-50 px-3 py-2 rounded-lg border border-amber-100 transition-all"
+                                >
+                                  <ChevronRight size={12} />
+                                  Ver Reagendamento
+                                </Link>
+                              )}
+                              {isFilho && (
+                                <Link 
+                                  to={`/agenda?date=${extractUTCDate(attendances.find(a => a.id === att.parentId)?.date || att.date)}`}
+                                  className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-700 bg-slate-50 px-3 py-2 rounded-lg border border-slate-100 transition-all"
+                                >
+                                  <ArrowLeft size={12} />
+                                  Ver Origem
+                                </Link>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
@@ -911,7 +963,7 @@ export default function PatientRecord() {
                   { id: "identity", label: "Identificação", icon: UserCheck },
                   { id: "contact", label: "Contato", icon: Contact },
                   { id: "address", label: "Endereço", icon: MapPin },
-                  { id: "notes", label: "Notas", icon: FileText },
+                  { id: "notes", label: "Registros Clínicos", icon: FileText },
                   { id: "settings", label: "Agenda", icon: Calendar },
                 ].map(tab => (
                   <button
@@ -1079,7 +1131,7 @@ export default function PatientRecord() {
                 {editTab === "notes" && (
                   <div className="space-y-5">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-2">Observações Clínicas</label>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">Registros Clínicos (Prontuário)</label>
                       <textarea className="input text-sm min-h-[150px]" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} placeholder="Anotações relevantes sobre o paciente..." />
                     </div>
 

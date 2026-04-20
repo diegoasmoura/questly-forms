@@ -161,6 +161,7 @@ export const api = {
     body: JSON.stringify(data)
   }),
   deleteAttendance: (id) => request(`/attendances/${id}`, { method: "DELETE" }),
+  getAttendanceDescendants: (id) => request(`/attendances/${id}/descendants`),
 };
 
 export { ApiError };
