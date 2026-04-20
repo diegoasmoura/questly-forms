@@ -506,6 +506,9 @@ export default function Agenda() {
       if (existingAtt?.notes?.includes("Reagendado para ")) {
         const match = existingAtt.notes.match(/Reagendado para (\d{4}-\d{2}-\d{2})/);
         if (match) reschedDate = match[1];
+        // Tentar extrair hora das notas
+        const timeMatch = existingAtt.notes.match(/Reagendado para \d{4}-\d{2}-\d{2} às (\d{2}:\d{2})/);
+        if (timeMatch) reschedTime = timeMatch[1];
       }
       
       setJustData({ date: reschedDate, time: reschedTime, notes: existingAtt?.notes || "" });
@@ -712,7 +715,7 @@ const weekDays = eachDayOfInterval({
                       <div className="text-left">
                         <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest group-hover:text-emerald-100">Reagendada para</p>
                         <p className="text-sm font-bold text-slate-800 group-hover:text-white">
-                          {format(new Date(justData.date + 'T00:00:00'), "d 'de' MMMM", { locale: ptBR })}
+                          {format(new Date(justData.date + 'T00:00:00'), "d 'de' MMMM", { locale: ptBR })} às {justData.time}
                         </p>
                       </div>
                     </div>
