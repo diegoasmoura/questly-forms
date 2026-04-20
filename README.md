@@ -88,6 +88,13 @@ O sistema utiliza uma tríade de estados para cada sessão:
 - **Extração de Datas:** O frontend usa funções separadas para extrair datas UTC do banco (`extractUTCDate`) e datas locais do calendário (`formatDateKey`).
 - **Comparação Correta:** As comparações entre agendamentos fixos e registros de presença usam extração UTC para evitar deslocamentos de um dia.
 
+### 6. Agenda (v4.0)
+- **Modo Mês:** Visualização em formato de calendário mensal com navegar between months.
+- **Modo Lista:** Visualização por dia navegável, filtrando by dia específico.
+- **Navegação Simples:** setas para navegar (±1 dia em Lista, ±1 mês em Mês), button "Hoje" para retornar ao dia atual.
+- **Filtro por Dia:** Lista mostra only as sessões do dia atual (currentDate), não more week grouping.
+- **Status Visual:** Badges P (presente), F (falta), J (justificada) inline with each sessão.
+
 ## Tecnologias
 
 - **Frontend:** React, Tailwind CSS, Lucide React, date-fns.

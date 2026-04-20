@@ -284,10 +284,8 @@ function MonthView({ currentDate, appointments, attendances, onStatus }) {
           const dayStr = formatDateKey(day);
           const isToday = dayStr === todayStr;
           
-          // 1. Agendamentos fixos
           const dayApps = appointments.filter(a => {
             if (a.dayOfWeek !== day.getDay()) return false;
-            if (!a.startDate) return true;
             const appStart = extractUTCDate(a.startDate);
             return dayStr >= appStart;
           });
@@ -399,51 +397,78 @@ function MonthView({ currentDate, appointments, attendances, onStatus }) {
   );
 }
 
-function ListView({ appointments, attendances, onStatus }) {
+function ListView({ currentDate, appointments, attendances, onStatus }) {
+  const dayStr = formatDateKey(currentDate);
+  const dayOfWeek = currentDate.getDay();
+  
+  const dayApps = appointments.filter(a => {
+    if (a.dayOfWeek !== dayOfWeek) return false;
+    if (!a.startDate) return true;
+    return extractUTCDate(a.startDate) <= dayStr;
+  });
+  
+  const dayExtras = attendances.filter(att => 
+    extractUTCDate(att.date) === dayStr &&
+    !dayApps.some(app => app.patientId === att.patientId)
+  );
+  
+  const allSessions = [
+    ...dayApps.map(app => ({
+      type: 'fixed',
+      app,
+      att: attendances.find(a => a.patientId === app.patientId && extractUTCDate(a.date) === dayStr)
+    })),
+    ...dayExtras.map(att => ({
+      type: 'extra',
+      app: { id: att.id, patientId: att.patientId, time: att.sessionTime || "08:00", patient: att.patient },
+      att
+    }))
+  ].sort((a,b) => (a.att?.sessionTime || a.app.time).localeCompare(b.att?.sessionTime || b.app.time));
+  
   const todayStr = formatDateKey(new Date());
   
-  const grouped = [0, 1, 2, 3, 4, 5, 6].map(dayIdx => ({
-    dayName: DAYS_OF_WEEK[dayIdx],
-    apps: appointments.filter(a => {
-      if (a.dayOfWeek !== dayIdx) return false;
-      if (!a.startDate) return true;
-      return extractUTCDate(a.startDate) <= todayStr;
-    })
-  })).filter(g => g.apps.length > 0);
-  
-  if (grouped.length === 0) {
+  if (dayApps.length === 0 && dayExtras.length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-slate-200 p-20 text-center shadow-sm">
         <Users size={48} className="mx-auto text-slate-200 mb-4" />
-        <h3 className="text-slate-400 font-bold uppercase tracking-widest text-sm">Nenhuma sessão agendada</h3>
+        <h3 className="text-slate-400 font-bold uppercase tracking-widest text-sm">Nenhuma sessão nesta data</h3>
       </div>
     );
   }
   
   return (
-    <div className="space-y-6">
-      {grouped.map(group => (
-        <div key={group.dayName} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-          <div className="px-6 py-4 bg-slate-50/50 border-b border-slate-200 flex items-center justify-between">
-            <h3 className="font-black text-slate-700 uppercase tracking-widest text-xs">{group.dayName}</h3>
-            <span className="px-3 py-1 bg-white border border-slate-200 text-slate-500 text-[10px] font-black rounded-full shadow-sm">
-              {group.apps.length} SESSÕES
-            </span>
-          </div>
-          <div className="divide-y divide-slate-100">
-            {group.apps.map(app => (
-              <div key={app.id} className="px-6 py-4">
-                <SessionCard 
-                  appointment={app}
-                  date={new Date()} 
-                  attendance={attendances.find(a => a.patientId === app.patientId && extractUTCDate(a.date) === todayStr)}
-                  onStatus={onStatus}
-                />
+    <div className="space-y-3">
+      {allSessions.map((session, i) => {
+        const att = session.att;
+        const statusStyles = {
+          presente: "bg-emerald-100 text-emerald-700 border-emerald-300",
+          falta: "bg-red-100 text-red-700 border-red-300",
+          justificada: "bg-amber-100 text-amber-700 border-amber-300",
+          default: "bg-slate-100 text-slate-600 border-slate-200"
+        };
+        const style = statusStyles[att?.status] || statusStyles.default;
+        
+        return (
+          <div key={session.app.id + i} className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-black ${style}`}>
+                  {session.att?.sessionTime || session.app.time}
+                </div>
+                <div>
+                  <p className="font-bold text-slate-800">{session.app.patient?.name}</p>
+                  <p className="text-xs text-slate-500">{session.app.duration}min</p>
+                </div>
               </div>
-            ))}
+              <div className="flex gap-1">
+                {att?.status !== 'justificada' && (
+                  <button onClick={() => onStatus(session.app, 'presente', currentDate)} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${att?.status === 'presente' ? 'bg-emerald-500 text-white' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'}`}>P</button>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -453,7 +478,7 @@ function ListView({ appointments, attendances, onStatus }) {
 // ======================
 
 export default function Agenda() {
-  const [view, setView] = useState("week");
+  const [view, setView] = useState("month");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [appointments, setAppointments] = useState([]);
   const [attendances, setAttendances] = useState([]);
@@ -652,11 +677,6 @@ export default function Agenda() {
     }
   }, []);
 
-const weekDays = eachDayOfInterval({
-    start: startOfWeek(currentDate, { weekStartsOn: 0 }),
-    end: endOfWeek(currentDate, { weekStartsOn: 0 })
-  });
-
   return (
     <div className="p-4 sm:p-6 h-full flex flex-col space-y-4">
       {/* Header */}
@@ -667,7 +687,6 @@ const weekDays = eachDayOfInterval({
         </div>
         <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
           {[
-            { id: 'week', label: 'Semana' },
             { id: 'month', label: 'Mês' },
             { id: 'list', label: 'Lista' }
           ].map(item => (
@@ -690,14 +709,14 @@ const weekDays = eachDayOfInterval({
       <div className="flex items-center justify-between bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
         <div className="flex items-center gap-4">
           <h2 className="font-black text-slate-800 uppercase tracking-widest text-sm">
-            {view === 'week' ? `Semana de ${format(weekDays[0], 'd MMM', { locale: ptBR })}` : format(currentDate, 'MMMM yyyy', { locale: ptBR })}
+            {view === 'list' ? format(currentDate, 'EEEE, d MMMM', { locale: ptBR }) : format(currentDate, 'MMMM yyyy', { locale: ptBR })}
           </h2>
           <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200">
-            <button onClick={() => setCurrentDate(view === 'week' ? addDays(currentDate, -7) : new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))} className="p-1.5 hover:bg-white rounded-lg transition-all text-slate-500">
+            <button onClick={() => setCurrentDate(view === 'list' ? addDays(currentDate, -1) : new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))} className="p-1.5 hover:bg-white rounded-lg transition-all text-slate-500">
               <ChevronLeft size={18} />
             </button>
             <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-white rounded-lg transition-all">Hoje</button>
-            <button onClick={() => setCurrentDate(view === 'week' ? addDays(currentDate, 7) : new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))} className="p-1.5 hover:bg-white rounded-lg transition-all text-slate-500">
+            <button onClick={() => setCurrentDate(view === 'list' ? addDays(currentDate, 1) : new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))} className="p-1.5 hover:bg-white rounded-lg transition-all text-slate-500">
               <ChevronRight size={18} />
             </button>
           </div>
@@ -712,9 +731,8 @@ const weekDays = eachDayOfInterval({
           </div>
         ) : (
           <div className="animate-fade-in h-full">
-            {view === "week" && <WeekView weekDays={weekDays} appointments={appointments} attendances={attendances} onStatus={handleAttendance} />}
             {view === "month" && <MonthView currentDate={currentDate} appointments={appointments} attendances={attendances} onStatus={handleAttendance} />}
-            {view === "list" && <ListView appointments={appointments} attendances={attendances} onStatus={handleAttendance} />}
+            {view === "list" && <ListView currentDate={currentDate} appointments={appointments} attendances={attendances} onStatus={handleAttendance} />}
           </div>
         )}
       </div>
