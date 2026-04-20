@@ -41,8 +41,10 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 ### 1. Gestão de Agenda e Horários (Appointments)
 - **Recorrência:** O sistema trabalha com horários fixos semanais (slots).
 - **Data de Início:** Essencial para definir quando o ciclo de sessões começa.
-- **Condicional de Validação:** A "Data de Início" é obrigatória **apenas** se houver horários na grade. Se a grade estiver vazia, o campo é opcional para permitir limpezas rápidas.
-- **Limpeza Profunda (Deep Cleanup):** Ao clicar em "Limpar Agenda" e salvar, o sistema remove todos os horários fixos **e todo o histórico de presenças/faltas** daquele paciente (Rollback Total).
+- **Inativação Inteligente (v3.6):** Ao alterar o status de um paciente para "Inativo", o sistema sugere automaticamente o encerramento da agenda recorrente para liberar o horário no calendário, preservando integralmente o histórico de atendimentos passados.
+- **Limpeza de Agenda:** Disponibiliza duas modalidades de remoção:
+  - **Limpar Futuro (Encerrar Ciclo):** Remove horários fixos e registros de presença futuros, mantendo o histórico clínico intocado.
+  - **Limpeza Total (Reset):** Remove todos os registros (fixos e históricos), utilizado apenas para correção de erros de lançamento.
 
 ### 2. Sistema de Frequência e Status (Attendance)
 O sistema utiliza uma tríade de estados para cada sessão:

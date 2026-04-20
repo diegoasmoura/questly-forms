@@ -992,13 +992,38 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
   };
 
   const [clearMode, setClearMode] = useState(null); // null, 'future', or 'all'
+  const [cleanupModal, setCleanupModal] = useState({ open: false, title: "", message: "", mode: null });
 
-  const handleClearAgenda = () => {
-    const choice = window.confirm("Deseja preservar o histórico de presenças PASSADAS deste paciente?\n\nClique em [OK] para manter o passado e limpar apenas o futuro.\nClique em [Cancelar] para realizar uma limpeza COMPLETA (apagar tudo).");
+  const handleClearAgenda = (mode = null) => {
+    if (!mode) {
+      setCleanupModal({
+        open: true,
+        title: "Limpar Agenda",
+        message: "Como você deseja limpar a agenda deste paciente? Escolha uma opção abaixo para prosseguir.",
+        mode: null
+      });
+      return;
+    }
     
-    setClearMode(choice ? 'future' : 'all');
+    setClearMode(mode);
     setAppointments([]);
     setAppointmentStartDate("");
+    setCleanupModal({ ...cleanupModal, open: false });
+  };
+
+  const togglePatientStatus = () => {
+    const newActiveStatus = !formData.isActive;
+    setFormData({ ...formData, isActive: newActiveStatus });
+
+    // Se estiver inativando e houver agenda, sugere limpar
+    if (!newActiveStatus && appointments.length > 0) {
+      setCleanupModal({
+        open: true,
+        title: "Inativar Paciente",
+        message: "O paciente foi marcado como inativo. Deseja também remover os horários recorrentes da agenda para liberar espaço? (O histórico passado será preservado)",
+        mode: 'future' // Sugestão padrão para inativação
+      });
+    }
   };
 
   const handleSave = async (e) => {
@@ -1146,7 +1171,7 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                     </div>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
+                      onClick={togglePatientStatus}
                       className={`relative w-14 h-7 rounded-full transition-colors ${formData.isActive ? "bg-emerald-500" : "bg-slate-300"}`}
                     >
                       <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${formData.isActive ? "left-8" : "left-1"}`} />
@@ -1676,6 +1701,42 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
             </button>
           </div>
         </div>
+
+        {/* Cleanup Selection Modal */}
+        {cleanupModal.open && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[110]" onClick={() => setCleanupModal({ ...cleanupModal, open: false })}>
+            <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
+              <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+                <Trash2 size={32} />
+              </div>
+              <h3 className="text-xl font-black text-slate-800 text-center uppercase tracking-tight mb-3">{cleanupModal.title}</h3>
+              <p className="text-sm text-slate-500 text-center leading-relaxed font-medium mb-8">{cleanupModal.message}</p>
+              
+              <div className="flex flex-col gap-3">
+                <button 
+                  onClick={() => handleClearAgenda('future')}
+                  className="w-full py-4 bg-slate-800 text-white rounded-2xl hover:bg-slate-900 shadow-lg shadow-slate-200 transition-all text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2"
+                >
+                  <Calendar size={16} />
+                  Limpar Futuro (Manter Histórico)
+                </button>
+                <button 
+                  onClick={() => handleClearAgenda('all')}
+                  className="w-full py-4 bg-white text-red-600 border border-red-100 rounded-2xl hover:bg-red-50 transition-all text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2"
+                >
+                  <Trash2 size={16} />
+                  Apagar Tudo (Limpeza Total)
+                </button>
+                <button 
+                  onClick={() => setCleanupModal({ ...cleanupModal, open: false })}
+                  className="w-full py-3 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-all"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
