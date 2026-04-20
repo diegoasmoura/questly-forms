@@ -162,6 +162,19 @@ export const api = {
   }),
   deleteAttendance: (id) => request(`/attendances/${id}`, { method: "DELETE" }),
   getAttendanceDescendants: (id) => request(`/attendances/${id}/descendants`),
+
+  // Payments
+  getPayments: () => request("/payments"),
+  getPatientPayments: (patientId) => request(`/payments/patient/${patientId}`),
+  savePayment: (data) => request("/payments", {
+    method: "POST",
+    body: JSON.stringify(data)
+  }),
+  updatePayment: (id, data) => request(`/payments/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data)
+  }),
+  deletePayment: (id) => request(`/payments/${id}`, { method: "DELETE" }),
 };
 
 export { ApiError };

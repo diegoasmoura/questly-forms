@@ -34,6 +34,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Gestão de Pacientes:** Cadastro completo com prontuário digital, histórico de respostas e análise de evolução.
 - **Agenda Profissional:** Gestão de horários recorrentes com visão semanal, mensal e detecção de conflitos.
 - **Histórico de Frequência:** Registro detalhado de presenças, faltas e reagendamentos inteligentes.
+- **Gestão Financeira:** Controle de pagamentos por blocos de sessões, conciliação clínica e geração de prestações de contas.
 - **Construtor de Formulários:** Criação de escalas e anamneses personalizadas com SurveyJS v2.
 
 ## Regras de Negócio e Lógica do Sistema
@@ -68,7 +69,13 @@ O sistema utiliza uma tríade de estados para cada sessão:
 - **Timeline de Frequência:** Exibição visual do encadeamento na aba de frequência, com linhas conectoras e badges de status da cadeia (Início, Meio, Fim).
 - **Feedback Moderno (Toasts):** Substituição de alertas invasivos por avisos flutuantes automáticos (Emerald-600).
 
-### 4. Gestão de Fuso Horário (v3.4)
+### 4. Gestão Financeira (v3.7)
+- **Conciliação Financeiro-Clínica:** O sistema permite vincular um pagamento a múltiplas sessões realizadas. Isso garante que o profissional saiba exatamente quais datas foram quitadas e quais estão pendentes.
+- **Lançamento em Blocos:** Ideal para pacotes mensais ou quinzenais. O profissional seleciona as sessões, define o valor total e o método de pagamento (Pix, Dinheiro, etc).
+- **Status do Recibo:** Controle visual imediato ("RECIBO OK!") para identificar pendências de prestação de contas.
+- **Prestação de Contas:** Geração de documento detalhado contendo o período das sessões, valores e observações para envio ao paciente.
+
+### 5. Gestão de Fuso Horário (v3.4)
 - **Armazenamento UTC:** Todas as datas são armazenadas no banco em formato UTC para consistência.
 - **Extração de Datas:** O frontend usa funções separadas para extrair datas UTC do banco (`extractUTCDate`) e datas locais do calendário (`formatDateKey`).
 - **Comparação Correta:** As comparações entre agendamentos fixos e registros de presença usam extração UTC para evitar deslocamentos de um dia.

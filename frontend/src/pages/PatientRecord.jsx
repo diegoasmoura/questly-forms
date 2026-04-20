@@ -63,7 +63,10 @@ import {
   File,
   Trash,
   Download,
-  RefreshCcw
+  RefreshCcw,
+  DollarSign,
+  CreditCard,
+  Receipt
 } from "lucide-react";
 
 export default function PatientRecord() {
@@ -73,9 +76,22 @@ export default function PatientRecord() {
   const [loading, setLoading] = useState(true);
   const [selectedResponseId, setSelectedResponseId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("timeline"); // 'timeline' or 'share' or 'sessions'
+  const [activeTab, setActiveTab] = useState("timeline"); // 'timeline', 'share', 'sessions', 'financial'
   const [attendances, setAttendances] = useState([]);
   const [loadingAttendances, setLoadingAttendances] = useState(false);
+  
+  // Financeiro
+  const [payments, setPayments] = useState([]);
+  const [loadingPayments, setLoadingPayments] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedAttendances, setSelectedAttendances] = useState([]); // IDs de sessões selecionadas
+  const [paymentFormData, setPaymentFormData] = useState({
+    amount: "",
+    paymentDate: new Date().toISOString().split('T')[0],
+    method: "Pix",
+    notes: "",
+    receiptIssued: false
+  });
   const [showEditModal, setShowEditModal] = useState(false);
   const [editTab, setEditTab] = useState("identity");
   const [attachments, setAttachments] = useState([]);
@@ -110,8 +126,25 @@ export default function PatientRecord() {
     }
   };
 
+  const loadPatientPayments = async () => {
+    setLoadingPayments(true);
+    try {
+      const data = await api.getPatientPayments(id);
+      setPayments(data);
+    } catch (error) {
+      console.error("Erro ao carregar pagamentos:", error);
+    } finally {
+      setLoadingPayments(false);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === "sessions") {
+      loadPatientAttendances();
+    }
+    if (activeTab === "financial") {
+      loadPatientPayments();
+      // Também carrega attendances para poder selecionar na hora de lançar pagamento
       loadPatientAttendances();
     }
   }, [activeTab]);
@@ -314,6 +347,59 @@ export default function PatientRecord() {
     }
   };
 
+  const handleSavePayment = async (e) => {
+    e.preventDefault();
+    if (selectedAttendances.length === 0) {
+      alert("Selecione ao menos uma sessão para vincular ao pagamento.");
+      return;
+    }
+    
+    setSaving(true);
+    try {
+      await api.savePayment({
+        patientId: id,
+        ...paymentFormData,
+        attendanceIds: selectedAttendances
+      });
+      setShowPaymentModal(false);
+      loadPatientPayments();
+      loadPatientAttendances();
+    } catch (error) {
+      alert("Erro ao salvar pagamento: " + error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleGenerateReceipt = (payment) => {
+    // Implementação básica de prestação de contas no console por enquanto
+    // Poderia chamar uma função no pdf.js futuramente
+    alert(`Gerando prestação de contas para ${patient.name}\nValor: R$ ${payment.amount}\nPeríodo: ${payment.attendances.length} sessões`);
+    
+    const docContent = `
+      PRESTAÇÃO DE CONTAS - SERVIÇOS DE PSICOLOGIA
+      
+      Paciente: ${patient.name}
+      Data do Pagamento: ${format(new Date(payment.paymentDate), 'dd/MM/yyyy')}
+      Valor Total: R$ ${payment.amount.toFixed(2)}
+      Método: ${payment.method}
+      
+      Sessões Incluídas:
+      ${payment.attendances.map(a => `- ${format(new Date(a.date), 'dd/MM/yyyy')} (${a.status})`).join('\n')}
+      
+      Observações: ${payment.notes || 'Nenhuma'}
+      
+      Status do Recibo: ${payment.receiptIssued ? 'Emitido' : 'Pendente'}
+    `;
+    
+    const blob = new Blob([docContent], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Prestacao_Contas_${patient.name}_${format(new Date(payment.paymentDate), 'yyyyMMdd')}.txt`;
+    a.click();
+  };
+
   const handleCepLookup = async (cep) => {
     const cleanCep = cep.replace(/\D/g, "");
     if (cleanCep.length === 8) {
@@ -499,7 +585,13 @@ export default function PatientRecord() {
                 active={activeTab === "sessions"}
                 onClick={() => setActiveTab("sessions")}
                 icon={<Calendar size={14} />}
-                label="Frequência"
+                label="Sessões"
+              />
+              <TabButton
+                active={activeTab === "financial"}
+                onClick={() => setActiveTab("financial")}
+                icon={<DollarSign size={14} />}
+                label="Financeiro"
               />
             </div>
           </div>
@@ -658,6 +750,17 @@ export default function PatientRecord() {
                                   <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${config.bg} ${config.text} border shadow-sm`}>
                                     {isReagendado ? 'Reagendada' : config.label}
                                   </span>
+                                  {att.paymentId ? (
+                                    <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1 shadow-sm">
+                                      <DollarSign size={8} />
+                                      Pago
+                                    </span>
+                                  ) : (
+                                    <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-1 shadow-sm">
+                                      <Clock size={8} />
+                                      Pendente
+                                    </span>
+                                  )}
                                   {isChainStart && <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">Início de Cadeia</span>}
                                   {isChainMiddle && <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">Reagendamento</span>}
                                   {isChainEnd && <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">Reagendamento Final</span>}
@@ -700,6 +803,157 @@ export default function PatientRecord() {
                         </div>
                       );
                     })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Financial Tab */}
+          {activeTab === "financial" && (
+            <div className="space-y-6">
+              {/* Financial Dashboard */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="card p-4 flex items-center gap-4 border-l-4 border-emerald-500">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <DollarSign size={24} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">
+                      R$ {payments.reduce((acc, p) => acc + p.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Pago</p>
+                  </div>
+                </div>
+                <div className="card p-4 flex items-center gap-4 border-l-4 border-amber-500">
+                  <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                    <Clock size={24} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">
+                      {attendances.filter(a => !a.paymentId && a.status === 'presente').length}
+                    </p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sessões Pendentes</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => {
+                    setPaymentFormData({
+                      amount: "",
+                      paymentDate: new Date().toISOString().split('T')[0],
+                      method: "Pix",
+                      notes: "",
+                      receiptIssued: false
+                    });
+                    setSelectedAttendances([]);
+                    setShowPaymentModal(true);
+                  }}
+                  className="card p-4 flex items-center gap-4 border-l-4 border-slate-900 bg-slate-900 text-white hover:bg-slate-800 transition-all text-left group"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                    <Plus size={24} />
+                  </div>
+                  <div>
+                    <p className="text-lg font-black uppercase tracking-tight">Lançar Pagamento</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Novo bloco de sessões</p>
+                  </div>
+                </button>
+              </div>
+
+              {/* Payments History Table */}
+              <div className="card overflow-hidden">
+                <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                  <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Histórico de Lançamentos</h3>
+                </div>
+                
+                {loadingPayments ? (
+                  <div className="text-center py-20 opacity-50">
+                    <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-sm font-bold uppercase tracking-widest">Carregando financeiro...</p>
+                  </div>
+                ) : payments.length === 0 ? (
+                  <div className="text-center py-20 opacity-30">
+                    <CreditCard size={48} className="mx-auto mb-4" />
+                    <p className="text-sm font-bold uppercase tracking-widest">Nenhum pagamento registrado</p>
+                    <p className="text-xs mt-2">Os blocos de pagamento aparecerão aqui.</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                          <th className="px-6 py-4">Período das Sessões</th>
+                          <th className="px-6 py-4">Valor Pago</th>
+                          <th className="px-6 py-4">Data do Pagamento</th>
+                          <th className="px-6 py-4">Status</th>
+                          <th className="px-6 py-4 text-right">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {payments.map(payment => (
+                          <tr key={payment.id} className="hover:bg-slate-50/50 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="flex flex-col">
+                                <span className="text-sm font-bold text-slate-700">
+                                  {payment.attendances.length > 0 
+                                    ? `${format(new Date(payment.attendances[0].date), 'dd/MM/yy')} a ${format(new Date(payment.attendances[payment.attendances.length-1].date), 'dd/MM/yy')}`
+                                    : 'Sem sessões vinculadas'}
+                                </span>
+                                <span className="text-[10px] text-slate-400 font-medium">
+                                  {payment.attendances.length} sessões inclusas
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="text-sm font-black text-slate-800">
+                                R$ {payment.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="text-sm text-slate-600 font-medium">
+                                {format(new Date(payment.paymentDate), 'dd/MM/yyyy')}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              {payment.receiptIssued ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-lg border border-emerald-200">
+                                  <Check size={10} />
+                                  RECIBO OK!
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-lg border border-slate-200">
+                                  PENDENTE
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <button 
+                                  onClick={() => handleGenerateReceipt(payment)}
+                                  className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                                  title="Gerar Prestação de Contas"
+                                >
+                                  <Receipt size={16} />
+                                </button>
+                                <button 
+                                  onClick={async () => {
+                                    if(confirm("Excluir este lançamento financeiro? Os atendimentos voltarão ao status pendente.")) {
+                                      await api.deletePayment(payment.id);
+                                      loadPatientPayments();
+                                      loadPatientAttendances();
+                                    }
+                                  }}
+                                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                  title="Excluir"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </div>
@@ -1468,6 +1722,170 @@ export default function PatientRecord() {
                 )}
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Modal */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="card w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-slate-200">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Lançar Pagamento</h2>
+                  <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Vincular sessões e registrar valor</p>
+                </div>
+                <button onClick={() => setShowPaymentModal(false)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400">
+                  <Plus size={24} className="rotate-45" />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <form id="payment-form" onSubmit={handleSavePayment} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Form Fields */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Valor Total (R$)</label>
+                    <div className="relative">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">R$</div>
+                      <input 
+                        type="number" 
+                        step="0.01" 
+                        required
+                        className="input pl-10 text-sm font-black"
+                        placeholder="0,00"
+                        value={paymentFormData.amount}
+                        onChange={e => setPaymentFormData({...paymentFormData, amount: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Data do Lançamento</label>
+                    <input 
+                      type="date" 
+                      required
+                      className="input text-sm"
+                      value={paymentFormData.paymentDate}
+                      onChange={e => setPaymentFormData({...paymentFormData, paymentDate: e.target.value})}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Método</label>
+                    <select 
+                      className="input text-sm"
+                      value={paymentFormData.method}
+                      onChange={e => setPaymentFormData({...paymentFormData, method: e.target.value})}
+                    >
+                      <option value="Pix">Pix</option>
+                      <option value="Dinheiro">Dinheiro</option>
+                      <option value="Cartão">Cartão</option>
+                      <option value="Transferência">Transferência</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="flex items-center gap-2 cursor-pointer group">
+                      <div className="relative">
+                        <input 
+                          type="checkbox" 
+                          className="peer sr-only"
+                          checked={paymentFormData.receiptIssued}
+                          onChange={e => setPaymentFormData({...paymentFormData, receiptIssued: e.target.checked})}
+                        />
+                        <div className="w-10 h-5 bg-slate-200 rounded-full peer-checked:bg-emerald-500 transition-colors"></div>
+                        <div className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform peer-checked:left-6"></div>
+                      </div>
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest group-hover:text-slate-800">Recibo Emitido (OK!)</span>
+                    </label>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Observações</label>
+                    <textarea 
+                      className="input text-sm min-h-[80px]"
+                      placeholder="Ex: Pagamento referente ao mês de Abril..."
+                      value={paymentFormData.notes}
+                      onChange={e => setPaymentFormData({...paymentFormData, notes: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                {/* Selection of Attendances */}
+                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Selecionar Sessões Pendentes</h4>
+                  <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+                    {attendances.filter(a => !a.paymentId && a.status === 'presente').length === 0 ? (
+                      <div className="py-10 text-center opacity-30 italic text-xs font-bold uppercase tracking-widest">
+                        Nenhuma sessão pendente
+                      </div>
+                    ) : (
+                      attendances.filter(a => !a.paymentId && a.status === 'presente').map(att => (
+                        <label key={att.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
+                          selectedAttendances.includes(att.id) 
+                            ? "bg-emerald-50 border-emerald-300 shadow-sm" 
+                            : "bg-white border-slate-100 hover:border-slate-300"
+                        }`}>
+                          <div className="flex items-center gap-3">
+                            <input 
+                              type="checkbox"
+                              className="sr-only"
+                              checked={selectedAttendances.includes(att.id)}
+                              onChange={() => {
+                                if(selectedAttendances.includes(att.id)) {
+                                  setSelectedAttendances(selectedAttendances.filter(id => id !== att.id));
+                                } else {
+                                  setSelectedAttendances([...selectedAttendances, att.id]);
+                                }
+                              }}
+                            />
+                            <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${
+                              selectedAttendances.includes(att.id) ? "bg-emerald-500 border-emerald-500" : "border-slate-300"
+                            }`}>
+                              {selectedAttendances.includes(att.id) && <Check size={10} className="text-white" />}
+                            </div>
+                            <div>
+                              <p className="text-xs font-black text-slate-800">{format(new Date(att.date), 'dd/MM/yyyy')}</p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase">{att.sessionTime}</p>
+                            </div>
+                          </div>
+                        </label>
+                      ))
+                    )}
+                  </div>
+                  {selectedAttendances.length > 0 && (
+                    <div className="mt-4 p-3 bg-emerald-900 text-white rounded-xl flex items-center justify-between shadow-lg animate-fade-in">
+                      <p className="text-[10px] font-black uppercase tracking-widest">{selectedAttendances.length} selecionadas</p>
+                      <p className="text-xs font-bold">Total: R$ {paymentFormData.amount || "0,00"}</p>
+                    </div>
+                  )}
+                </div>
+              </form>
+            </div>
+
+            <div className="p-6 border-t border-slate-200 bg-slate-50">
+              <div className="flex gap-3">
+                <button onClick={() => setShowPaymentModal(false)} className="btn btn-secondary flex-1">Cancelar</button>
+                <button 
+                  type="submit" 
+                  form="payment-form" 
+                  disabled={saving || selectedAttendances.length === 0}
+                  className="btn btn-primary flex-1 flex items-center justify-center gap-2"
+                >
+                  {saving ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Check size={16} />
+                      Confirmar Lançamento
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

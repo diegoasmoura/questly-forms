@@ -64,6 +64,7 @@ model Patient {
   attachments    Attachment[]
   appointments   Appointment[]
   attendances    Attendance[]
+  payments       Payment[]
 
   @@unique([email, psychologistId])
   @@unique([cpf, psychologistId])
@@ -101,6 +102,10 @@ model Attendance {
   parent         Attendance?  @relation("RescheduleChain", fields: [parentId], references: [id], onDelete: Cascade)
   children       Attendance[] @relation("RescheduleChain")
 
+  // Vínculo financeiro
+  paymentId      String?
+  payment        Payment?     @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
   patient       Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
   psychologistId String
 
@@ -111,6 +116,27 @@ model Attendance {
   @@index([patientId])
   @@index([psychologistId])
   @@index([date])
+}
+
+model Payment {
+  id              String       @id @default(uuid())
+  amount          Float
+  paymentDate     DateTime
+  method          String       @default("Pix") // Pix, Dinheiro, Cartão, Transferência
+  receiptIssued   Boolean      @default(false)
+  notes           String?
+  
+  patientId       String
+  patient         Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  psychologistId  String
+
+  attendances     Attendance[]
+  
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([patientId])
+  @@index([psychologistId])
 }
 
 model Attachment {
