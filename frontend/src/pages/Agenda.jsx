@@ -701,6 +701,7 @@ const weekDays = eachDayOfInterval({
                   {justData.notes && (
                     <p className="mt-3 text-sm text-slate-600 leading-relaxed italic">"{justData.notes}"</p>
                   )}
+                  <p className="mt-2 text-xs text-slate-500">Horário: {justData.time}</p>
                 </div>
 
                 {justData.date && (
