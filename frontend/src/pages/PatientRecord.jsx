@@ -623,7 +623,7 @@ export default function PatientRecord() {
       
       if (payment.receiptIssued) {
         doc.setTextColor(5, 150, 105);
-        doc.text('RECIBO EMITIDO', margin, y);
+        doc.text('NOTA FISCAL', margin, y);
       }
       
       y += 15;
@@ -1289,7 +1289,7 @@ export default function PatientRecord() {
                                   {payment.receiptIssued ? (
                                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-lg border border-emerald-200">
                                       <Check size={10} />
-                                      RECIBO EMITIDO
+                                      NOTA FISCAL
                                     </span>
                                   ) : payment.receiptAttachment ? (
                                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg border border-amber-200">
@@ -2311,7 +2311,7 @@ export default function PatientRecord() {
                         <div className="w-10 h-5 bg-slate-200 rounded-full peer-checked:bg-emerald-500 transition-colors"></div>
                         <div className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform peer-checked:left-6"></div>
                       </div>
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest group-hover:text-slate-800">Recibo Emitido (OK!)</span>
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest group-hover:text-slate-800">Nota Fiscal Emitida</span>
                     </label>
                     
                     {/* Upload Recibo */}
