@@ -881,14 +881,22 @@ export default function PatientRecord() {
                                     {isReagendado ? 'Reagendada' : config.label}
                                   </span>
                                   {att.paymentId ? (
-                                    <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1 shadow-sm">
-                                      <DollarSign size={8} />
-                                      Pago
-                                    </span>
+                                    <>
+                                      <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1 shadow-sm">
+                                        <DollarSign size={8} />
+                                        Pago
+                                      </span>
+                                      <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border shadow-sm flex items-center gap-1 ${
+                                        att.payment?.receiptIssued ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200'
+                                      }`}>
+                                        <Receipt size={8} />
+                                        {att.payment?.receiptIssued ? 'Recibo Emitido' : 'Recibo Pendente'}
+                                      </span>
+                                    </>
                                   ) : (
                                     <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-1 shadow-sm">
                                       <Clock size={8} />
-                                      Pendente
+                                      Pagamento Pendente
                                     </span>
                                   )}
                                   {isChainStart && <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">Início de Cadeia</span>}
