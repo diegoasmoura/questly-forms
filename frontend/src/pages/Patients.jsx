@@ -794,16 +794,13 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
     emergencyPhone: formatPhone(patient.emergencyPhone || ""),
     notes: patient.notes || "",
     isActive: patient.isActive !== false,
-    sessionTime: patient.sessionTime || "",
-    sessionDuration: patient.sessionDuration || "50",
-    sessionFrequency: patient.sessionFrequency || "semanal",
-    nextSession: patient.nextSession ? patient.nextSession.split('T')[0] : ""
   });
   const [saving, setSaving] = useState(false);
   const [editTab, setEditTab] = useState("identity");
   const [attachments, setAttachments] = useState([]);
   const [loadingAttachments, setLoadingAttachments] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [cleanupModal, setCleanupModal] = useState({ open: false, title: "", message: "", mode: null });
 
   useEffect(() => {
     loadAttachments();
@@ -878,6 +875,10 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
     if (bytes < 1024) return bytes + " B";
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
     return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+  };
+
+  const togglePatientStatus = () => {
+    setFormData({ ...formData, isActive: !formData.isActive });
   };
 
   return (
