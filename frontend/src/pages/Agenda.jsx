@@ -302,10 +302,14 @@ function MonthView({ currentDate, appointments, attendances, onStatus }) {
             })),
             ...dayExtras.map(att => ({
               type: 'extra',
-              app: { id: att.id, patientId: att.patientId, time: att.sessionTime || "00:00", patient: att.patient },
+              app: { id: att.id, patientId: att.patientId, time: att.sessionTime || "08:00", patient: att.patient },
               att
             }))
-          ].sort((a,b) => (a.app.time || "").localeCompare(b.app.time || ""));
+          ].sort((a,b) => {
+            const timeA = a.att?.sessionTime || a.app.time || "00:00";
+            const timeB = b.att?.sessionTime || b.app.time || "00:00";
+            return timeA.localeCompare(timeB);
+          });
           
           return (
             <div key={idx} className={`min-h-[120px] p-2 border-r border-b border-slate-100 ${!isCurrentMonth ? 'bg-slate-50/50 opacity-40' : ''}`}>
@@ -336,7 +340,7 @@ function MonthView({ currentDate, appointments, attendances, onStatus }) {
                             {session.app.patient?.name?.split(" ")[0]}
                           </span>
                           {isReagendado && <RefreshCcw size={10} className="ml-1 animate-spin-slow" />}
-                          {!isReagendado && <span>{session.app.time}</span>}
+                          {!isReagendado && <span>{session.att?.sessionTime || session.app.time}</span>}
                         </div>
                       </div>
                       <div className="flex gap-0.5">
