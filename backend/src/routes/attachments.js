@@ -65,18 +65,15 @@ router.post("/:patientId/attachments", authMiddleware, upload.single("file"), as
     const { patientId } = req.params;
     const userId = req.user.id;
 
-    // Verificar se o paciente pertence ao psicólogo
     const patient = await prisma.patient.findFirst({
       where: { id: patientId, psychologistId: userId }
     });
 
     if (!patient) {
-      // Remover arquivo se paciente não existir
       fs.unlinkSync(req.file.path);
       return res.status(404).json({ error: "Paciente não encontrado" });
     }
 
-    // Salvar no banco
     const attachment = await prisma.attachment.create({
       data: {
         filename: req.file.filename,
@@ -105,7 +102,7 @@ router.post("/:patientId/attachments", authMiddleware, upload.single("file"), as
 });
 
 // Listar anexos de um paciente
-router.get("/:patientId/attachments", authMiddleware, async (req, res) => {
+router.get("/patient/:patientId", authMiddleware, async (req, res) => {
   try {
     const { patientId } = req.params;
     const userId = req.user.id;

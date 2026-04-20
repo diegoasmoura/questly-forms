@@ -12,7 +12,8 @@ router.get("/", async (req, res) => {
       where: { psychologistId: req.user.id },
       include: {
         patient: { select: { name: true } },
-        attendances: { select: { date: true, status: true } }
+        attendances: { select: { date: true, status: true } },
+        receiptAttachment: true
       },
       orderBy: { paymentDate: 'desc' }
     });
@@ -34,7 +35,8 @@ router.get("/patient/:patientId", async (req, res) => {
         attendances: { 
           select: { id: true, date: true, status: true, sessionTime: true },
           orderBy: { date: 'asc' }
-        }
+        },
+        receiptAttachment: { select: { id: true, filename: true, originalName: true, mimeType: true, size: true } }
       },
       orderBy: { paymentDate: 'desc' }
     });

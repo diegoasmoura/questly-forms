@@ -90,7 +90,10 @@ export default function PatientRecord() {
     paymentDate: new Date().toISOString().split('T')[0],
     method: "Pix",
     notes: "",
-    receiptIssued: false
+    receiptIssued: false,
+    receiptFile: null,
+    existingReceiptAttachmentId: null,
+    existingReceiptFilename: null
   });
 
   // Agenda (Recurring)
@@ -485,25 +488,32 @@ export default function PatientRecord() {
     }
     setSaving(true);
     try {
-      const { receiptFile, ...data } = paymentFormData;
+      const { receiptFile, existingReceiptAttachmentId, amount, ...restData } = paymentFormData;
+      const amountValue = typeof amount === 'string' 
+        ? parseFloat(amount.replace(/\./g, '').replace(',', '.')) 
+        : amount;
       
       let attachmentId = null;
       if (receiptFile) {
         const attachment = await api.uploadAttachment(id, receiptFile);
         attachmentId = attachment.id;
+      } else if (existingReceiptAttachmentId) {
+        attachmentId = existingReceiptAttachmentId;
       }
       
       let paymentId = paymentFormData.id;
       if (paymentId) {
         await api.updatePayment(paymentId, { 
-          ...data, 
+          ...restData,
+          amount: amountValue,
           attendanceIds: selectedAttendances,
           receiptAttachmentId: attachmentId 
         });
       } else {
         await api.savePayment({ 
           patientId: id, 
-          ...data, 
+          ...restData,
+          amount: amountValue,
           attendanceIds: selectedAttendances,
           receiptAttachmentId: attachmentId 
         });
@@ -520,16 +530,30 @@ export default function PatientRecord() {
   };
 
   const openEditPayment = (payment) => {
+    const formattedAmount = payment.amount 
+      ? payment.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+      : '';
     setPaymentFormData({
       id: payment.id,
-      amount: payment.amount,
+      amount: formattedAmount,
       paymentDate: format(new Date(payment.paymentDate), 'yyyy-MM-dd'),
       method: payment.method,
       notes: payment.notes || "",
-      receiptIssued: payment.receiptIssued
+      receiptIssued: payment.receiptIssued,
+      receiptFile: null,
+      existingReceiptAttachmentId: payment.receiptAttachmentId || null,
+      existingReceiptFilename: payment.receiptAttachment?.originalName || payment.receiptAttachment?.filename || null
     });
     setSelectedAttendances(payment.attendances.map(a => a.id));
     setShowPaymentModal(true);
+  };
+
+  const handleDownloadReceipt = async (attachmentId, filename) => {
+    try {
+      await api.downloadAttachment(attachmentId, filename);
+    } catch (error) {
+      alert("Erro ao baixar arquivo: " + error.message);
+    }
   };
 
   const handleGenerateReceipt = (payment) => {
@@ -1012,7 +1036,10 @@ export default function PatientRecord() {
                       paymentDate: new Date().toISOString().split('T')[0],
                       method: "Pix",
                       notes: "",
-                      receiptIssued: false
+                      receiptIssued: false,
+                      receiptFile: null,
+                      existingReceiptAttachmentId: null,
+                      existingReceiptFilename: null
                     });
                     setSelectedAttendances([]);
                     setShowPaymentModal(true);
@@ -1054,7 +1081,7 @@ export default function PatientRecord() {
                           <th className="px-6 py-4">Período das Sessões</th>
                           <th className="px-6 py-4">Valor Pago</th>
                           <th className="px-6 py-4">Data do Pagamento</th>
-                          <th className="px-6 py-4">Status</th>
+                          <th className="px-6 py-4">Recibo</th>
                           <th className="px-6 py-4 text-right">Ações</th>
                         </tr>
                       </thead>
@@ -1084,16 +1111,37 @@ export default function PatientRecord() {
                               </span>
                             </td>
                             <td className="px-6 py-4">
-                              {payment.receiptIssued ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-lg border border-emerald-200">
-                                  <Check size={10} />
-                                  RECIBO OK!
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-lg border border-slate-200">
-                                  PENDENTE
-                                </span>
-                              )}
+                              <div className="flex flex-col gap-1">
+                                <div>
+                                  {payment.receiptIssued ? (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-lg border border-emerald-200">
+                                      <Check size={10} />
+                                      RECIBO EMITIDO
+                                    </span>
+                                  ) : payment.receiptAttachment ? (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg border border-amber-200">
+                                      <Paperclip size={10} />
+                                      COM ANEXO
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-lg border border-slate-200">
+                                      PENDENTE
+                                    </span>
+                                  )}
+                                </div>
+                                {payment.receiptAttachment && (
+                                  <button 
+                                    onClick={() => handleDownloadReceipt(payment.receiptAttachment.id, payment.receiptAttachment.originalName || payment.receiptAttachment.filename)}
+                                    className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors w-fit"
+                                    title="Baixar arquivo anexado"
+                                  >
+                                    <Download size={10} />
+                                    {(payment.receiptAttachment.originalName || payment.receiptAttachment.filename)?.length > 25 
+                                      ? (payment.receiptAttachment.originalName || payment.receiptAttachment.filename).slice(0, 25) + '...' 
+                                      : payment.receiptAttachment.originalName || payment.receiptAttachment.filename}
+                                  </button>
+                                )}
+                              </div>
                             </td>
                             <td className="px-6 py-4 text-right">
                               <div className="flex items-center justify-end gap-2">
@@ -2017,13 +2065,25 @@ export default function PatientRecord() {
                     <div className="relative">
                       <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">R$</div>
                       <input 
-                        type="number" 
-                        step="0.01" 
+                        type="text"
                         required
                         className="input pl-10 text-sm font-black"
                         placeholder="0,00"
                         value={paymentFormData.amount}
-                        onChange={e => setPaymentFormData({...paymentFormData, amount: e.target.value})}
+                        onChange={e => {
+                          let value = e.target.value.replace(/\D/g, '');
+                          if (value) {
+                            value = (parseInt(value) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                          }
+                          setPaymentFormData({...paymentFormData, amount: value});
+                        }}
+                        onBlur={e => {
+                          const value = e.target.value.replace(/\D/g, '');
+                          if (value) {
+                            const formatted = (parseInt(value) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                            setPaymentFormData({...paymentFormData, amount: formatted});
+                          }
+                        }}
                       />
                     </div>
                   </div>
@@ -2069,17 +2129,46 @@ export default function PatientRecord() {
                     </label>
                     
                     {/* Upload Recibo */}
-                    <div className="mt-2">
-                       <label className={`flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium cursor-pointer transition-all ${paymentFormData.receiptFile ? 'border-emerald-200' : 'hover:border-emerald-300'}`}>
-                        <Paperclip size={14} />
-                        {paymentFormData.receiptFile ? paymentFormData.receiptFile.name : 'Anexar Recibo (PDF/IMG)'}
-                        <input 
-                          type="file" 
-                          className="hidden" 
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          onChange={e => setPaymentFormData({...paymentFormData, receiptFile: e.target.files[0]})}
-                        />
-                      </label>
+                    <div className="mt-2 space-y-2">
+                      {paymentFormData.existingReceiptAttachmentId && paymentFormData.existingReceiptFilename ? (
+                        <div className="flex items-center justify-between px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Paperclip size={14} className="text-emerald-600 shrink-0" />
+                            <span className="text-xs font-medium text-emerald-700 truncate">
+                              {paymentFormData.existingReceiptFilename}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadReceipt(paymentFormData.existingReceiptAttachmentId, paymentFormData.existingReceiptFilename)}
+                              className="p-1.5 text-emerald-700 hover:bg-emerald-100 rounded-lg transition-colors"
+                              title="Baixar Recibo"
+                            >
+                              <Download size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setPaymentFormData({...paymentFormData, existingReceiptAttachmentId: null, existingReceiptFilename: null, receiptFile: null})}
+                              className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg transition-colors"
+                              title="Remover"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <label className={`flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium cursor-pointer transition-all ${paymentFormData.receiptFile ? 'border-emerald-200' : 'hover:border-emerald-300'}`}>
+                          <Paperclip size={14} />
+                          {paymentFormData.receiptFile ? paymentFormData.receiptFile.name : 'Anexar Recibo (PDF/IMG)'}
+                          <input 
+                            type="file" 
+                            className="hidden" 
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            onChange={e => setPaymentFormData({...paymentFormData, receiptFile: e.target.files[0]})}
+                          />
+                        </label>
+                      )}
                     </div>
                   </div>
 
@@ -2096,14 +2185,22 @@ export default function PatientRecord() {
 
                 {/* Selection of Attendances */}
                 <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Selecionar Sessões Pendentes</h4>
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
+                    {paymentFormData.id ? 'Sessões deste Pagamento' : 'Selecionar Sessões Pendentes'}
+                  </h4>
                   <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
-                    {attendances.filter(a => a.status === 'presente').length === 0 ? (
-                      <div className="py-10 text-center opacity-30 italic text-xs font-bold uppercase tracking-widest">
-                        Nenhuma sessão realizada
-                      </div>
-                    ) : (
-                      attendances.filter(a => a.status === 'presente').map(att => (
+                    {(() => {
+                      const id = paymentFormData.id;
+                      const available = attendances.filter(a => a.status === 'presente' && (!a.paymentId || a.paymentId === id));
+                      const linked = available.filter(a => a.paymentId === id);
+                      const pending = available.filter(a => !a.paymentId);
+                      const sorted = [...linked, ...pending];
+                      if (sorted.length === 0) return (
+                        <div className="py-10 text-center opacity-30 italic text-xs font-bold uppercase tracking-widest">
+                          Nenhuma sessão disponível
+                        </div>
+                      );
+                      return sorted.map(att => (
                         <label key={att.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
                           selectedAttendances.includes(att.id) 
                             ? "bg-emerald-50 border-emerald-300 shadow-sm" 
@@ -2129,12 +2226,12 @@ export default function PatientRecord() {
                             </div>
                             <div>
                               <p className="text-xs font-black text-slate-800">{format(new Date(att.date), 'dd/MM/yyyy')}</p>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase">{att.sessionTime} {att.paymentId && att.paymentId !== paymentFormData.id ? '(Outro Pago)' : ''}</p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase">{att.sessionTime}</p>
                             </div>
                           </div>
                         </label>
-                      ))
-                    )}
+                      ));
+                    })()}
                   </div>
                   {selectedAttendances.length > 0 && (
                     <div className="mt-4 p-3 bg-emerald-900 text-white rounded-xl flex items-center justify-between shadow-lg animate-fade-in">

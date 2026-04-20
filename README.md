@@ -70,11 +70,17 @@ O sistema utiliza uma tríade de estados para cada sessão:
 - **Timeline de Frequência:** Exibição visual do encadeamento na aba de frequência, com linhas conectoras e badges de status da cadeia (Início, Meio, Fim).
 - **Feedback Moderno (Toasts):** Substituição de alertas invasivos por avisos flutuantes automáticos (Emerald-600).
 
-### 4. Gestão Financeira (v3.7)
+### 4. Gestão Financeira (v3.7+)
 - **Conciliação Financeiro-Clínica:** O sistema permite vincular um pagamento a múltiplas sessões realizadas. Isso garante que o profissional saiba exatamente quais datas foram quitadas e quais estão pendentes.
 - **Lançamento em Blocos:** Ideal para pacotes mensais ou quinzenais. O profissional seleciona as sessões, define o valor total e o método de pagamento (Pix, Dinheiro, etc).
-- **Status do Recibo:** Controle visual imediato ("RECIBO OK!") para identificar pendências de prestação de contas.
-- **Prestação de Contas:** Geração de documento detalhado contendo o período das sessões, valores e observações para envio ao paciente.
+- **Máscara de Valor BR:** Campo de entrada formatado em tempo real (ex: "1200" → "12,00") conforme o profissional digita.
+- **Anexo de Recibo:** Possibilidade de anexar arquivos PDF/imagens do recibo ao lançamento.
+- **Status do Recibo:** Controle visual com três estados:
+  - **RECIBO EMITIDO** (verde): Recibo正式的已emitido。
+  - **COM ANEXO** (âmbar): 有arquivo anexado。
+  - **PENDENTE** (cinza): Sem nothing registrado。
+- **Edição com Sesvinculadas:** Ao editar um pagamento, as sessões já vinculadas aparecem primeiro na lista para facilitar a manutenção。
+- **Prestação de Contas:** Geração de documento detalhado contendo o período das sessões, valores e observações para envio ao paciente。
 
 ### 5. Gestão de Fuso Horário (v3.4)
 - **Armazenamento UTC:** Todas as datas são armazenadas no banco em formato UTC para consistência.

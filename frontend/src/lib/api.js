@@ -105,7 +105,7 @@ export const api = {
     const formData = new FormData();
     formData.append("file", file);
     
-    const res = await fetch(`${API_URL}/attachments/patient/${patientId}`, {
+    const res = await fetch(`${API_URL}/attachments/${patientId}/attachments`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
@@ -121,12 +121,33 @@ export const api = {
   deleteAttachment: (attachmentId) => request(`/attachments/${attachmentId}`, { method: "DELETE" }),
   downloadAttachment: async (attachmentId, filename) => {
     const token = localStorage.getItem("token");
-    const res = await fetch(`${API_URL}/attachments/${attachmentId}/download`, {
+    if (!token) {
+      window.location.href = "/login";
+      throw new ApiError("Não autorizado", 401);
+    }
+    
+    const res = await fetch(`${API_URL}/attachments/attachments/${attachmentId}/download`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     
+    if (res.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+      throw new ApiError("Sessão expirada", 401);
+    }
+    
+    const contentType = res.headers.get("content-type") || "";
     if (!res.ok) {
-      throw new ApiError("Erro ao baixar arquivo", res.status);
+      if (contentType === "application/json") {
+        const data = await res.json();
+        throw new ApiError(data.error || "Erro ao baixar arquivo", res.status);
+      }
+      throw new ApiError("Erro ao baixar arquivo (status: " + res.status + ")", res.status);
+    }
+    
+    if (!contentType || contentType.includes("text/html")) {
+      throw new ApiError("Arquivo não encontrado", 404);
     }
     
     const blob = await res.blob();
