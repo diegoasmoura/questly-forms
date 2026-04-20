@@ -61,7 +61,7 @@ import {
   Check,
   Paperclip,
   File,
-  Trash,
+  Pencil,
   Download,
   RefreshCcw,
   DollarSign,
@@ -479,25 +479,41 @@ export default function PatientRecord() {
 
   const handleSavePayment = async (e) => {
     e.preventDefault();
+    if (selectedAttendances.length === 0) {
+      alert("Selecione ao menos uma sessão.");
+      return;
+    }
     setSaving(true);
     try {
-      if (paymentFormData.id) {
-        await api.updatePayment(paymentFormData.id, {
-          ...paymentFormData,
-          attendanceIds: selectedAttendances
+      const { receiptFile, ...data } = paymentFormData;
+      
+      let attachmentId = null;
+      if (receiptFile) {
+        const attachment = await api.uploadAttachment(id, receiptFile);
+        attachmentId = attachment.id;
+      }
+      
+      let paymentId = paymentFormData.id;
+      if (paymentId) {
+        await api.updatePayment(paymentId, { 
+          ...data, 
+          attendanceIds: selectedAttendances,
+          receiptAttachmentId: attachmentId 
         });
       } else {
-        await api.savePayment({
-          patientId: id,
-          ...paymentFormData,
-          attendanceIds: selectedAttendances
+        await api.savePayment({ 
+          patientId: id, 
+          ...data, 
+          attendanceIds: selectedAttendances,
+          receiptAttachmentId: attachmentId 
         });
       }
+      
       setShowPaymentModal(false);
       loadPatientPayments();
       loadPatientAttendances();
     } catch (error) {
-      alert("Erro ao salvar pagamento: " + error.message);
+      alert("Erro ao salvar: " + error.message);
     } finally {
       setSaving(false);
     }
@@ -2038,7 +2054,7 @@ export default function PatientRecord() {
                   </div>
 
                   <div>
-                    <label className="flex items-center gap-2 cursor-pointer group">
+                    <label className="flex items-center gap-2 cursor-pointer group mb-2">
                       <div className="relative">
                         <input 
                           type="checkbox" 
@@ -2051,6 +2067,20 @@ export default function PatientRecord() {
                       </div>
                       <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest group-hover:text-slate-800">Recibo Emitido (OK!)</span>
                     </label>
+                    
+                    {/* Upload Recibo */}
+                    <div className="mt-2">
+                       <label className={`flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium cursor-pointer transition-all ${paymentFormData.receiptFile ? 'border-emerald-200' : 'hover:border-emerald-300'}`}>
+                        <Paperclip size={14} />
+                        {paymentFormData.receiptFile ? paymentFormData.receiptFile.name : 'Anexar Recibo (PDF/IMG)'}
+                        <input 
+                          type="file" 
+                          className="hidden" 
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          onChange={e => setPaymentFormData({...paymentFormData, receiptFile: e.target.files[0]})}
+                        />
+                      </label>
+                    </div>
                   </div>
 
                   <div>
@@ -2068,12 +2098,12 @@ export default function PatientRecord() {
                 <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Selecionar Sessões Pendentes</h4>
                   <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
-                    {attendances.filter(a => !a.paymentId && a.status === 'presente').length === 0 ? (
+                    {attendances.filter(a => a.status === 'presente').length === 0 ? (
                       <div className="py-10 text-center opacity-30 italic text-xs font-bold uppercase tracking-widest">
-                        Nenhuma sessão pendente
+                        Nenhuma sessão realizada
                       </div>
                     ) : (
-                      attendances.filter(a => !a.paymentId && a.status === 'presente').map(att => (
+                      attendances.filter(a => a.status === 'presente').map(att => (
                         <label key={att.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
                           selectedAttendances.includes(att.id) 
                             ? "bg-emerald-50 border-emerald-300 shadow-sm" 
@@ -2099,7 +2129,7 @@ export default function PatientRecord() {
                             </div>
                             <div>
                               <p className="text-xs font-black text-slate-800">{format(new Date(att.date), 'dd/MM/yyyy')}</p>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase">{att.sessionTime}</p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase">{att.sessionTime} {att.paymentId && att.paymentId !== paymentFormData.id ? '(Outro Pago)' : ''}</p>
                             </div>
                           </div>
                         </label>

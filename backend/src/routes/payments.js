@@ -59,6 +59,7 @@ router.post("/", async (req, res) => {
           method,
           notes,
           receiptIssued: receiptIssued || false,
+          receiptAttachmentId: req.body.receiptAttachmentId || null,
           psychologistId: req.user.id
         }
       });
@@ -99,7 +100,8 @@ router.put("/:id", async (req, res) => {
           paymentDate: new Date(paymentDate),
           method,
           notes,
-          receiptIssued
+          receiptIssued,
+          receiptAttachmentId: req.body.receiptAttachmentId || null
         }
       });
 

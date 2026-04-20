@@ -122,10 +122,14 @@ model Payment {
   id              String       @id @default(uuid())
   amount          Float
   paymentDate     DateTime
-  method          String       @default("Pix") // Pix, Dinheiro, Cartão, Transferência
+  method          String       @default("Pix") 
   receiptIssued   Boolean      @default(false)
   notes           String?
   
+  // Anexo do Recibo
+  receiptAttachmentId String?
+  receiptAttachment   Attachment? @relation(fields: [receiptAttachmentId], references: [id])
+
   patientId       String
   patient         Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
   psychologistId  String
@@ -137,6 +141,7 @@ model Payment {
 
   @@index([patientId])
   @@index([psychologistId])
+  @@index([receiptAttachmentId])
 }
 
 model Attachment {
@@ -149,6 +154,7 @@ model Attachment {
   uploadedBy String
   createdAt  DateTime @default(now())
   patient    Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  payments   Payment[]
   
   @@index([patientId])
 }
