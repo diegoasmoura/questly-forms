@@ -340,7 +340,7 @@ function MonthView({ currentDate, appointments, attendances, onStatus }) {
                             {session.app.patient?.name?.split(" ")[0]}
                           </span>
                           {isReagendado && <RefreshCcw size={10} className="ml-1 animate-spin-slow" />}
-                          {!isReagendado && <span>{session.att?.sessionTime || session.app.time}</span>}
+                          <span>{session.att?.sessionTime || session.app.time}</span>
                         </div>
                       </div>
                       <div className="flex gap-0.5">
