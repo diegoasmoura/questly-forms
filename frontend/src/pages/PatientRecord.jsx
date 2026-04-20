@@ -76,7 +76,7 @@ export default function PatientRecord() {
   const [loading, setLoading] = useState(true);
   const [selectedResponseId, setSelectedResponseId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("timeline"); // 'timeline', 'share', 'sessions', 'financial'
+  const [activeTab, setActiveTab] = useState("sessions"); // 'sessions', 'share', 'financial', 'settings'
   const [attendances, setAttendances] = useState([]);
   const [loadingAttendances, setLoadingAttendances] = useState(false);
   
