@@ -444,7 +444,7 @@ export default function Agenda() {
   const [loading, setLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState("");
   const [justModal, setJustModal] = useState({ open: false, patient: null, appointment: null, date: null, isEdit: false, existingAtt: null });
-  const [justData, setJustData] = useState({ date: "", notes: "" });
+  const [justData, setJustData] = useState({ date: "", time: "08:00", notes: "" });
 
   useEffect(() => {
     if (successMessage) {
@@ -498,12 +498,13 @@ export default function Agenda() {
       
       // Tentar extrair a data de reagendamento das notas se existir
       let reschedDate = "";
+      let reschedTime = existingAtt?.sessionTime || "08:00";
       if (existingAtt?.notes?.includes("Reagendado para ")) {
         const match = existingAtt.notes.match(/Reagendado para (\d{4}-\d{2}-\d{2})/);
         if (match) reschedDate = match[1];
       }
       
-      setJustData({ date: reschedDate, notes: existingAtt?.notes || "" });
+      setJustData({ date: reschedDate, time: reschedTime, notes: existingAtt?.notes || "" });
       return;
     }
     
@@ -553,6 +554,7 @@ export default function Agenda() {
     
     const originalDate = justModal.date;
     const newDateStr = justData.date;
+    const newTimeStr = justData.time || "08:00";
     
     try {
       // 1. Salvar ou Atualizar o registro original (Pai)
@@ -560,19 +562,19 @@ export default function Agenda() {
         patientId: justModal.appointment.patientId,
         date: originalDate.toISOString(),
         status: 'justificada',
-        notes: `Falta justificada. Reagendado para ${newDateStr || 'sem data'}. Motivo: ${justData.notes}`,
-        sessionTime: justModal.appointment.time
+        notes: `Falta justificada. Reagendado para ${newDateStr || 'sem data'} às ${newTimeStr}. Motivo: ${justData.notes}`,
+        sessionTime: newTimeStr
       });
 
       // 2. Se houver uma nova data, criar o registro Filho vinculado ao Pai
       if (newDateStr) {
-        const dateToSave = new Date(newDateStr + 'T' + justModal.appointment.time + ':00');
+        const dateToSave = new Date(newDateStr + 'T' + newTimeStr + ':00');
         await api.saveAttendance({
           patientId: justModal.appointment.patientId,
           date: dateToSave.toISOString(),
           status: 'presente', 
           notes: `Reagendamento da sessão de ${originalDate.toLocaleDateString('pt-BR')}. ${justData.notes}`,
-          sessionTime: justModal.appointment.time,
+          sessionTime: newTimeStr,
           parentId: originalResult.id // Vínculo crucial aqui
         });
       }
@@ -745,17 +747,48 @@ const weekDays = eachDayOfInterval({
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all h-24 resize-none text-sm font-medium" 
                   />
                 </div>
-                <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Reagendar para qual data?</label>
-                  <input 
-                    type="date" 
-                    min={new Date().toISOString().split('T')[0]} 
-                    value={justData.date} 
-                    onChange={e => setJustData({ ...justData, date: e.target.value })} 
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all text-sm font-medium" 
-                  />
-                  <p className="text-[9px] text-slate-400 mt-2 font-bold italic">* Deixe em branco se não houver reagendamento.</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Data</label>
+                    <input 
+                      type="date" 
+                      min={new Date().toISOString().split('T')[0]} 
+                      value={justData.date || ''} 
+                      onChange={e => setJustData({ ...justData, date: e.target.value })} 
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all text-sm font-medium" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Horário</label>
+                    <select 
+                      value={justData.time || '08:00'} 
+                      onChange={e => setJustData({ ...justData, time: e.target.value })} 
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all text-sm font-medium"
+                    >
+                      <option value="07:00">07:00</option>
+                      <option value="07:30">07:30</option>
+                      <option value="08:00">08:00</option>
+                      <option value="08:30">08:30</option>
+                      <option value="09:00">09:00</option>
+                      <option value="09:30">09:30</option>
+                      <option value="10:00">10:00</option>
+                      <option value="10:30">10:30</option>
+                      <option value="11:00">11:00</option>
+                      <option value="11:30">11:30</option>
+                      <option value="12:00">12:00</option>
+                      <option value="13:00">13:00</option>
+                      <option value="14:00">14:00</option>
+                      <option value="15:00">15:00</option>
+                      <option value="16:00">16:00</option>
+                      <option value="17:00">17:00</option>
+                      <option value="18:00">18:00</option>
+                      <option value="19:00">19:00</option>
+                      <option value="20:00">20:00</option>
+                      <option value="21:00">21:00</option>
+                    </select>
+                  </div>
                 </div>
+                <p className="text-[9px] text-slate-400 mt-2 font-bold italic">* Deixe em branco se não houver reagendamento.</p>
 
                 <div className="flex gap-3 mt-8">
                   <button 
