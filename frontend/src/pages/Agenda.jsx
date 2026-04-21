@@ -177,7 +177,7 @@ function SessionCard({ appointment, onStatus, attendance, date }) {
   );
 }
 
-function DayView({ date, appointments, attendances, onStatus }) {
+function DayView({ date, appointments, attendances, onStatus, setJustModal, setJustData }) {
   const dayName = DAYS_OF_WEEK[date.getDay()];
   const dateStr = formatDateKey(date);
   
@@ -244,7 +244,7 @@ function DayView({ date, appointments, attendances, onStatus }) {
   );
 }
 
-function WeekView({ weekDays, appointments, attendances, onStatus }) {
+function WeekView({ weekDays, appointments, attendances, onStatus, setJustModal, setJustData }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
       {weekDays.map((day, idx) => (
@@ -254,13 +254,15 @@ function WeekView({ weekDays, appointments, attendances, onStatus }) {
           appointments={appointments} 
           attendances={attendances}
           onStatus={onStatus}
+          setJustModal={setJustModal}
+          setJustData={setJustData}
         />
       ))}
     </div>
   );
 }
 
-function MonthView({ currentDate, appointments, attendances, onStatus }) {
+function MonthView({ currentDate, appointments, attendances, onStatus, setJustModal, setJustData }) {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(monthStart);
   const startDate = startOfWeek(monthStart, { weekStartsOn: 0 });
@@ -381,6 +383,23 @@ function MonthView({ currentDate, appointments, attendances, onStatus }) {
                         >
                           J
                         </button>
+                        {att?.parentId && (
+                          <button 
+                            onClick={() => {
+                              setJustModal({ open: true, patient: session.app.patient, appointment: session.app, date: day, isEdit: true, existingAtt: att });
+                              let reschedTime = "";
+                              if (att?.notes?.includes("Reagendado para ")) {
+                                const match = att.notes.match(/Reagendado para \d{4}-\d{2}-\d{2} às (\d{2}:\d{2})/);
+                                if (match) reschedTime = match[1];
+                              }
+                              setJustData({ date: "", time: reschedTime, notes: att?.notes || "" });
+                            }}
+                            className="w-6 h-6 rounded-full flex items-center justify-center bg-slate-200 text-slate-600 hover:bg-slate-300 transition-all"
+                            title="Editar"
+                          >
+                            <Edit size={8} />
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -397,7 +416,7 @@ function MonthView({ currentDate, appointments, attendances, onStatus }) {
   );
 }
 
-function ListView({ currentDate, appointments, attendances, onStatus }) {
+function ListView({ currentDate, appointments, attendances, onStatus, setJustModal, setJustData }) {
   const dayStr = formatDateKey(currentDate);
   const dayOfWeek = currentDate.getDay();
   
@@ -464,6 +483,25 @@ function ListView({ currentDate, appointments, attendances, onStatus }) {
                 {att?.status !== 'justificada' && (
                   <button onClick={() => onStatus(session.app, 'presente', currentDate)} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${att?.status === 'presente' ? 'bg-emerald-500 text-white' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'}`}>P</button>
                 )}
+                {att?.parentId && (
+                  <button 
+                    onClick={() => {
+                      if (att) {
+                        setJustModal({ open: true, patient: session.app.patient, appointment: session.app, date: currentDate, isEdit: true, existingAtt: att });
+                        let reschedTime = "";
+                        if (att?.notes?.includes("Reagendado para ")) {
+                          const match = att.notes.match(/Reagendado para \d{4}-\d{2}-\d{2} às (\d{2}:\d{2})/);
+                          if (match) reschedTime = match[1];
+                        }
+                        setJustData({ date: "", time: reschedTime, notes: att?.notes || "" });
+                      }
+                    }}
+                    className="w-8 h-8 rounded-full flex items-center justify-center bg-amber-100 text-amber-600 hover:bg-amber-200 transition-all"
+                    title="Editar reagendamento"
+                  >
+                    <Edit size={12} />
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -485,7 +523,7 @@ export default function Agenda() {
   const [loading, setLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState("");
   const [justModal, setJustModal] = useState({ open: false, patient: null, appointment: null, date: null, isEdit: false, existingAtt: null });
-  const [justData, setJustData] = useState({ date: "", time: "08:00", notes: "" });
+  const [justData, setJustData] = useState({ date: "", time: "", notes: "" });
   const [descendantsInfo, setDescendantsInfo] = useState({ count: 0, list: [] });
   const [confirmModal, setConfirmModal] = useState({ open: false, title: "", message: "", onConfirm: null, loading: false });
 
@@ -554,12 +592,14 @@ export default function Agenda() {
       });
       
       let reschedDate = "";
-      let reschedTime = existingAtt?.sessionTime || appointment.time || "08:00";
+      let reschedTime = "";
       if (existingAtt?.notes?.includes("Reagendado para ")) {
         const match = existingAtt.notes.match(/Reagendado para (\d{4}-\d{2}-\d{2})/);
         if (match) reschedDate = match[1];
         const timeMatch = existingAtt.notes.match(/Reagendado para \d{4}-\d{2}-\d{2} às (\d{2}:\d{2})/);
         if (timeMatch) reschedTime = timeMatch[1];
+      } else if (existingAtt?.sessionTime) {
+        reschedTime = existingAtt.sessionTime;
       }
       
       setJustData({ date: reschedDate, time: reschedTime, notes: existingAtt?.notes || "" });
@@ -568,7 +608,22 @@ export default function Agenda() {
     
     try {
       if (existingAtt?.status === status) {
-        await api.deleteAttendance(existingAtt.id);
+        // Se for um reagendamento automático (filho), não permitir delete
+        if (existingAtt.parentId) {
+          setSuccessMessage("Esta sessão faz parte de um reagendamento e não pode ser removida aqui.");
+          return;
+        }
+        
+        setConfirmModal({
+          open: true,
+          title: "Remover Marcação",
+          message: "Deseja remover esta marcação?",
+          onConfirm: async () => {
+            setConfirmModal({ ...confirmModal, open: false });
+            await api.deleteAttendance(existingAtt.id);
+            await loadData();
+          }
+        });
       } else {
         const data = {
           patientId: appointment.patientId,
@@ -577,9 +632,8 @@ export default function Agenda() {
           sessionTime: appointment.time
         };
         await api.saveAttendance(data);
+        await loadData();
       }
-      
-      await loadData();
     } catch (error) {
       console.error("Erro ao salvar:", error);
     }
@@ -633,32 +687,41 @@ export default function Agenda() {
     
     const originalDate = justModal.date;
     const newDateStr = justData.date;
-    const newTimeStr = justData.time || "08:00";
+    const newTimeStr = justData.time;
+    const motivo = justData.notes || "Falta justificada";
     
     try {
+      // Montar a nota conforme existência de reagendamento
+      const notes = newDateStr 
+        ? `Falta justificada. Reagendado para ${newDateStr} às ${newTimeStr || "08:00"}. Motivo: ${motivo}`
+        : motivo;
+      
+      const sessionTime = newDateStr ? (newTimeStr || "08:00") : (justModal.appointment?.time || null);
+      
       // 1. Salvar ou Atualizar o registro original (Pai)
       const originalResult = await api.saveAttendance({
         patientId: justModal.appointment.patientId,
         date: originalDate.toISOString(),
         status: 'justificada',
-        notes: `Falta justificada. Reagendado para ${newDateStr || 'sem data'} às ${newTimeStr}. Motivo: ${justData.notes}`,
-        sessionTime: newTimeStr
+        notes,
+        sessionTime
       });
 
       // 2. Se houver uma nova data, criar o registro Filho vinculado ao Pai
       if (newDateStr) {
-        const dateToSave = new Date(newDateStr + 'T' + newTimeStr + ':00');
+        const dateToSave = new Date(newDateStr + 'T' + (newTimeStr || "08:00") + ':00');
+        // Criar registro de reagendamento futuro (sem status até ser realizado)
         await api.saveAttendance({
           patientId: justModal.appointment.patientId,
           date: dateToSave.toISOString(),
-          status: 'presente', 
-          notes: `Reagendamento da sessão de ${originalDate.toLocaleDateString('pt-BR')}. ${justData.notes}`,
-          sessionTime: newTimeStr,
-          parentId: originalResult.id // Vínculo crucial aqui
+          status: '', 
+          notes: `Reagendamento da sessão de ${originalDate.toLocaleDateString('pt-BR')}. ${motivo}`,
+          sessionTime: newTimeStr || "08:00",
+          parentId: originalResult.id
         });
       }
       
-      setSuccessMessage(`Sessão reagendada para ${newDateStr || 'nova data'}`);
+      setSuccessMessage(newDateStr ? `Sessão reagendada para ${newDateStr}` : "Falta justificada registrada!");
       await loadData();
       setJustModal({ open: false, patient: null, appointment: null, date: null, isEdit: false, existingAtt: null });
     } catch (error) {
@@ -731,8 +794,8 @@ export default function Agenda() {
           </div>
         ) : (
           <div className="animate-fade-in h-full">
-            {view === "month" && <MonthView currentDate={currentDate} appointments={appointments} attendances={attendances} onStatus={handleAttendance} />}
-            {view === "list" && <ListView currentDate={currentDate} appointments={appointments} attendances={attendances} onStatus={handleAttendance} />}
+            {view === "month" && <MonthView currentDate={currentDate} appointments={appointments} attendances={attendances} onStatus={handleAttendance} setJustModal={setJustModal} setJustData={setJustData} />}
+            {view === "list" && <ListView currentDate={currentDate} appointments={appointments} attendances={attendances} onStatus={handleAttendance} setJustModal={setJustModal} setJustData={setJustData} />}
           </div>
         )}
       </div>
@@ -754,105 +817,7 @@ export default function Agenda() {
               </div>
             </div>
 
-            {/* Modo Visualização (Se já existir justificativa) */}
-            {!justModal.isEdit && justModal.existingAtt && (
-              <div className="space-y-6">
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Status da Sessão</p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-amber-600 font-bold">
-                      {justModal.existingAtt.parentId ? <RefreshCcw size={16} /> : <AlertCircle size={16} />}
-                      <span className="text-sm">
-                        {justModal.existingAtt.parentId ? "Falta Justificada (Reagendamento)" : "Falta Justificada"}
-                      </span>
-                    </div>
-                    <span className="text-xs font-black text-slate-500 bg-white px-2 py-1 rounded-lg border border-slate-200 shadow-sm">
-                      {justModal.existingAtt.sessionTime || justModal.appointment?.time}
-                    </span>
-                  </div>
-                  {justData.notes && (
-                    <p className="mt-3 text-sm text-slate-600 leading-relaxed italic">"{justData.notes}"</p>
-                  )}
-                </div>
-
-                {/* Navegação para o Pai */}
-                {justModal.existingAtt.parentId && (
-                  <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Origem do Reagendamento</p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
-                        <ArrowLeft size={14} />
-                        Sessão original
-                      </div>
-                      {(() => {
-                        const parent = attendances.find(a => a.id === justModal.existingAtt.parentId);
-                        if (!parent) return null;
-                        return (
-                          <button 
-                            onClick={() => goToRescheduledDate(extractUTCDate(parent.date))}
-                            className="text-xs font-black text-amber-600 uppercase hover:underline flex items-center gap-1"
-                          >
-                            Ver {format(new Date(parent.date), "dd/MM")} às {parent.sessionTime || "00:00"}
-                          </button>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                )}
-
-                {/* Navegação para o Filho */}
-                {justData.date && (
-                  <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl">
-                    <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2">Próximo Reagendamento</p>
-                    <div className="flex items-center justify-between group">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-emerald-600 shadow-sm">
-                          <CalendarIcon size={16} />
-                        </div>
-                        <p className="text-sm font-bold text-slate-800">
-                          {format(new Date(justData.date + 'T00:00:00'), "d 'de' MMM", { locale: ptBR })} às {justData.time}
-                        </p>
-                      </div>
-                      <button 
-                        onClick={() => goToRescheduledDate(justData.date)}
-                        className="p-2 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-600 hover:text-white transition-all"
-                      >
-                        <ChevronRight size={16} />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Aviso de Cascata */}
-                {descendantsInfo.count > 0 && (
-                  <div className="p-3 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2">
-                    <AlertTriangle size={14} className="text-red-500 mt-0.5 shrink-0" />
-                    <p className="text-[10px] text-red-700 font-bold leading-tight">
-                      AVISO: Remover esta justificativa cancelará {descendantsInfo.count === 1 ? "o reagendamento vinculado" : `os ${descendantsInfo.count} reagendamentos vinculados`}.
-                    </p>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-3 pt-4">
-                  <button 
-                    onClick={() => setJustModal({ ...justModal, isEdit: true })}
-                    className="flex items-center justify-center gap-2 py-3 text-xs font-black uppercase tracking-widest text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all"
-                  >
-                    <Edit size={14} />
-                    Editar
-                  </button>
-                  <button 
-                    onClick={deleteJustification}
-                    className="flex items-center justify-center gap-2 py-3 text-xs font-black uppercase tracking-widest text-red-500 bg-white border border-red-100 rounded-xl hover:bg-red-50 transition-all"
-                  >
-                    <Trash2 size={14} />
-                    Remover
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Modo Edição (Formulário) */}
+            {/* Formulário de Justificativa */}
             {justModal.isEdit && (
               <div className="space-y-5">
                 <div>
@@ -878,10 +843,11 @@ export default function Agenda() {
                   <div>
                     <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Horário</label>
                     <select 
-                      value={justData.time || '08:00'} 
+                      value={justData.time || ''} 
                       onChange={e => setJustData({ ...justData, time: e.target.value })} 
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all text-sm font-medium"
                     >
+                      <option value="">--:--</option>
                       <option value="07:00">07:00</option>
                       <option value="07:30">07:30</option>
                       <option value="08:00">08:00</option>
@@ -909,16 +875,10 @@ export default function Agenda() {
 
                 <div className="flex gap-3 mt-8">
                   <button 
-                    onClick={() => {
-                      if (justModal.existingAtt) {
-                        setJustModal({ ...justModal, isEdit: false });
-                      } else {
-                        setJustModal({ ...justModal, open: false });
-                      }
-                    }} 
+                    onClick={() => setJustModal({ ...justModal, open: false })} 
                     className="flex-1 py-3 text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-xl transition-all"
                   >
-                    {justModal.existingAtt ? "Voltar" : "Cancelar"}
+                    Cancelar
                   </button>
                   <button 
                     onClick={saveJustificada} 

@@ -57,16 +57,11 @@ O sistema utiliza uma tríade de estados para cada sessão:
 
 #### Lógica de Justificativa e Reagendamento em Cadeia (v3.5)
 - **Lista Encadeada (Linked List):** Cada reagendamento é vinculado a uma sessão anterior via `parentId`, criando uma linhagem clara de eventos clínicos.
-- **Remoção em Cascata Unidirecional:** Ao remover uma justificativa no meio ou início de uma cadeia, o sistema deleta recursivamente todos os descendentes (reagendamentos futuros) e reseta o registro atual para o estado "sem marcação".
+- **Exclusão em Cascata (v4.2):** Ao deletar um registro pai (justificativa), todos os filhos (reagendamentos) são automaticamente deletados via `ON DELETE CASCADE` no banco de dados. O inverso não acontece: ao deletar um filho, apenas aquele registro é removido e o pai permanece com a observação original (mas sem a menção ao reagendamento).
 - **Integridade de Notas:** Ao cancelar um reagendamento (filho), o sistema limpa automaticamente a menção ao reagendamento nas notas da sessão pai, mantendo o histórico de observações coerente.
 - **Confirmação Contextual:** O sistema calcula e informa ao profissional quantos registros futuros serão excluídos antes de confirmar uma remoção em cascata.
 
 ### 3. Visualização e UX
-- **Hierarquia Visual na Agenda:** 
-  - **Sessão Original:** Ícone sólido de alerta.
-  - **Reagendamento Intermediário:** Borda pontilhada + ícone de cadeia 🔗.
-  - **Reagendamento Final:** Borda pontilhada + ícone de relógio ⏰.
-- **Navegação Contextual:** Modais de detalhes permitem "pular" entre sessões da mesma cadeia (ir para origem ou ir para reagendamento) com um clique.
 - **Registros Clínicos (Prontuário):** Unificação de notas, laudos e anexos sob a aba "Registros Clínicos", proporcionando um ambiente organizado para a documentação do paciente.
 - **Timeline de Frequência:** Exibição visual do encadeamento na aba de frequência, com linhas conectoras e badges de status da cadeia (Início, Meio, Fim).
 - **Feedback Moderno (Toasts):** Substituição de alertas invasivos por avisos flutuantes automáticos (Emerald-600).
