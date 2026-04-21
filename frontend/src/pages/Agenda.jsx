@@ -383,23 +383,6 @@ function MonthView({ currentDate, appointments, attendances, onStatus, setJustMo
                         >
                           J
                         </button>
-                        {att?.parentId && (
-                          <button 
-                            onClick={() => {
-                              setJustModal({ open: true, patient: session.app.patient, appointment: session.app, date: day, isEdit: true, existingAtt: att });
-                              let reschedTime = "";
-                              if (att?.notes?.includes("Reagendado para ")) {
-                                const match = att.notes.match(/Reagendado para \d{4}-\d{2}-\d{2} às (\d{2}:\d{2})/);
-                                if (match) reschedTime = match[1];
-                              }
-                              setJustData({ date: "", time: reschedTime, notes: att?.notes || "" });
-                            }}
-                            className="w-6 h-6 rounded-full flex items-center justify-center bg-slate-200 text-slate-600 hover:bg-slate-300 transition-all"
-                            title="Editar"
-                          >
-                            <Edit size={8} />
-                          </button>
-                        )}
                       </div>
                     </div>
                   );
@@ -482,25 +465,6 @@ function ListView({ currentDate, appointments, attendances, onStatus, setJustMod
               <div className="flex gap-1">
                 {att?.status !== 'justificada' && (
                   <button onClick={() => onStatus(session.app, 'presente', currentDate)} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${att?.status === 'presente' ? 'bg-emerald-500 text-white' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'}`}>P</button>
-                )}
-                {att?.parentId && (
-                  <button 
-                    onClick={() => {
-                      if (att) {
-                        setJustModal({ open: true, patient: session.app.patient, appointment: session.app, date: currentDate, isEdit: true, existingAtt: att });
-                        let reschedTime = "";
-                        if (att?.notes?.includes("Reagendado para ")) {
-                          const match = att.notes.match(/Reagendado para \d{4}-\d{2}-\d{2} às (\d{2}:\d{2})/);
-                          if (match) reschedTime = match[1];
-                        }
-                        setJustData({ date: "", time: reschedTime, notes: att?.notes || "" });
-                      }
-                    }}
-                    className="w-8 h-8 rounded-full flex items-center justify-center bg-amber-100 text-amber-600 hover:bg-amber-200 transition-all"
-                    title="Editar reagendamento"
-                  >
-                    <Edit size={12} />
-                  </button>
                 )}
               </div>
             </div>
@@ -608,22 +572,8 @@ export default function Agenda() {
     
     try {
       if (existingAtt?.status === status) {
-        // Se for um reagendamento automático (filho), não permitir delete
-        if (existingAtt.parentId) {
-          setSuccessMessage("Esta sessão faz parte de um reagendamento e não pode ser removida aqui.");
-          return;
-        }
-        
-        setConfirmModal({
-          open: true,
-          title: "Remover Marcação",
-          message: "Deseja remover esta marcação?",
-          onConfirm: async () => {
-            setConfirmModal({ ...confirmModal, open: false });
-            await api.deleteAttendance(existingAtt.id);
-            await loadData();
-          }
-        });
+        await api.deleteAttendance(existingAtt.id);
+        await loadData();
       } else {
         const data = {
           patientId: appointment.patientId,
@@ -880,6 +830,14 @@ export default function Agenda() {
                   >
                     Cancelar
                   </button>
+                  {justModal.existingAtt && (
+                    <button 
+                      onClick={deleteJustification} 
+                      className="flex-1 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 shadow-lg shadow-red-200 transition-all text-xs font-black uppercase tracking-widest"
+                    >
+                      Excluir
+                    </button>
+                  )}
                   <button 
                     onClick={saveJustificada} 
                     className="flex-1 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-900 shadow-lg shadow-slate-200 transition-all text-xs font-black uppercase tracking-widest"
