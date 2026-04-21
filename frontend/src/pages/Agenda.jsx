@@ -549,7 +549,7 @@ export default function Agenda() {
         patient: appointment.patient, 
         appointment, 
         date: sessionDate, 
-        isEdit: !existingAtt,
+        isEdit: true,
         existingAtt 
       });
       

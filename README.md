@@ -94,6 +94,7 @@ O sistema utiliza uma tríade de estados para cada sessão:
 - **Navegação Simples:** setas para navegar (±1 dia em Lista, ±1 mês em Mês), button "Hoje" para retornar ao dia atual.
 - **Filtro por Dia:** Lista mostra only as sessões do dia atual (currentDate), não more week grouping.
 - **Status Visual:** Badges P (presente), F (falta), J (justificada) inline with each sessão.
+- **Modal de Justificativa (v4.2):** Ao clicar no botão J (Justificar), o sistema sempre abre o formulário de justificativa diretamente, sem passar pela tela de detalhes. Isso garante que o profissional possa lançar o motivo de forma rápida e direta.
 
 ### 7. Gestão Financeira - PDF (v4.1)
 - **Recibo em PDF:** Geração automática de PDFs nice para comprovantes via jsPDF.
