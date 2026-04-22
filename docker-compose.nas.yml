@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: questly-db
+    restart: always
+    environment:
+      POSTGRES_USER: curious
+      POSTGRES_PASSWORD: curious_secret
+      POSTGRES_DB: curious_forms
+    volumes:
+      - questly_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U curious"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: questly-backend
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://curious:curious_secret@db:5432/curious_forms
+      JWT_SECRET: your_production_jwt_secret_here
+      PORT: 3001
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - questly_uploads:/app/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: questly-frontend
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  questly_pgdata:
+  questly_uploads:
