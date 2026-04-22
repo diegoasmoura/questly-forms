@@ -72,35 +72,35 @@ O sistema utiliza uma tríade de estados para cada sessão:
 - **Máscara de Valor BR:** Campo de entrada formatado em tempo real (ex: "1200" → "12,00") conforme o profissional digita.
 - **Anexo de Recibo:** Possibilidade de anexar arquivos PDF/imagens do recibo ao lançamento.
 - **Status do Recibo:** Controle visual com três estados:
-  - **RECIBO EMITIDO** (verde): Recibo正式的已emitido。
-  - **COM ANEXO** (âmbar): 有arquivo anexado。
-  - **PENDENTE** (cinza): Sem nothing registrado。
-- **Edição com Sesvinculadas:** Ao editar um pagamento, as sessões já vinculadas aparecem primeiro na lista para facilitar a manutenção。
-- **Prestação de Contas:** Geração de documento detalhado contendo o período das sessões, valores e observações para envio ao paciente。
+  - **RECIBO EMITIDO** (verde): Recibo oficialmente emitido.
+  - **COM ANEXO** (âmbar): Existe um arquivo anexado.
+  - **PENDENTE** (cinza): Sem registro de emissão ou anexo.
+- **Edição com Sessões Vinculadas:** Ao editar um pagamento, as sessões já vinculadas aparecem primeiro na lista para facilitar a manutenção.
+- **Prestação de Contas:** Geração de documento detalhado contendo o período das sessões, valores e observações para envio ao paciente.
 
 ### 5. Gestão de Fuso Horário (v3.4)
 - **Armazenamento UTC:** Todas as datas são armazenadas no banco em formato UTC para consistência.
 - **Extração de Datas:** O frontend usa funções separadas para extrair datas UTC do banco (`extractUTCDate`) e datas locais do calendário (`formatDateKey`).
 - **Comparação Correta:** As comparações entre agendamentos fixos e registros de presença usam extração UTC para evitar deslocamentos de um dia.
 
-### 6. Agenda (v4.0)
-- **Modo Mês:** Visualização em formato de calendário mensal com navegar between months.
-- **Modo Lista:** Visualização por dia navegável, filtrando by dia específico.
-- **Navegação Simples:** setas para navegar (±1 dia em Lista, ±1 mês em Mês), button "Hoje" para retornar ao dia atual.
-- **Filtro por Dia:** Lista mostra only as sessões do dia atual (currentDate), não more week grouping.
-- **Status Visual:** Badges P (presente), F (falta), J (justificada) inline with each sessão.
-- **Modal de Justificativa (v4.2):** Ao clicar no botão J (Justificar), o sistema sempre abre o formulário de justificativa diretamente, sem passar pela tela de detalhes. O modal contém campos para Motivo, Data (opcional) e Horário (opcional), com botões Cancelar, Excluir (se já existir) e Confirmar.
+### 6. Agenda (v4.3)
+- **Modo Mês:** Visualização em formato de calendário mensal com navegação entre meses.
+- **Modo Lista:** Visualização por dia navegável, filtrando por dia específico.
+- **Navegação Simples:** Setas para navegar (±1 dia em Lista, ±1 mês em Mês), botão "Hoje" para retornar ao dia atual.
+- **Status Visual:** Badges P (presente), F (falta), J (justificada) em linha com cada sessão.
+- **Modal de Justificativa (v4.3):** Fluxo simplificado que abre o formulário de justificativa diretamente. O modal contém campos para Motivo, Data e Horário de reagendamento.
+- **UX de Portals (v4.3):** Modais e confirmações agora utilizam **React Portals**, garantindo que o desfoque de fundo (backdrop-blur) e o conteúdo cubram 100% da tela, eliminando conflitos de layout com a barra lateral ou navegação.
 
-### 7. Gestão Financeira - PDF (v4.1)
-- **Recibo em PDF:** Geração automática de PDFs nice para comprovantes via jsPDF.
-- **Layout Profissional:** Header, dados do paciente, valor, tabela de sessões e rodapé.
-- **Status Colorido:** PRESENTE (verde), FALTA (vermelho), JUSTIFICADA (âmbar).
-- **Relatório Completo:** Botão para gerar PDF com todos os pagamentos de uma vez.
-- **Download Direto:** Arquivo baixa automaticamente sem abrir nova aba.
+### 7. Gestão Financeira - PDF (v4.3)
+- **Relatórios Avançados:** Geração de PDFs profissionais utilizando `jspdf-autotable` para organização superior dos dados clínicos e financeiros.
+- **Layout Consolidado:** O relatório completo agrupa sessões vinculadas a cada pagamento em uma única tabela estruturada com `rowSpan`, oferecendo uma visão clara do fluxo de caixa por bloco de sessões.
+- **Resumo Executivo:** Seção inicial com total acumulado de pagamentos e volume total de sessões realizadas no período.
+- **Identidade Visual:** Design alinhado ao padrão clínico, com cabeçalhos estruturados, linhas divisórias e rodapés automáticos com data e hora da geração do documento.
+- **Download Direto:** O arquivo é gerado e baixado localmente de forma instantânea.
 
 ## Tecnologias
 
-- **Frontend:** React, Tailwind CSS, Lucide React, date-fns, jsPDF.
+- **Frontend:** React, Tailwind CSS, Lucide React, date-fns, jsPDF, jsPDF-AutoTable.
 - **Backend:** Node.js, Express, Prisma ORM.
 - **Banco de Dados:** PostgreSQL (Relacionamento recursivo em `Attendance`).
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { 
@@ -26,16 +27,11 @@ import { ptBR } from 'date-fns/locale';
 
 const DAYS_OF_WEEK = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
-// Função utilitária para chave de data consistente (YYYY-MM-DD fixa)
-// Para objetos Date locais (calendário), usa métodos locais
-// Para strings ISO (banco), extrai diretamente a data UTC
 const formatDateKey = (date) => {
   if (!date) return "";
-  // Se for string ISO (do banco), extrai diretamente
   if (typeof date === 'string') {
     return date.split('T')[0];
   }
-  // Para objetos Date, usa local (para o calendário)
   const d = new Date(date);
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -43,7 +39,6 @@ const formatDateKey = (date) => {
   return `${year}-${month}-${day}`;
 };
 
-// Extrai data UTC de string ISO (para comparação com dados do banco)
 const extractUTCDate = (dateStr) => {
   if (!dateStr) return "";
   if (typeof dateStr === 'string') {
@@ -56,7 +51,6 @@ const extractUTCDate = (dateStr) => {
   return `${year}-${month}-${day}`;
 };
 
-// Converte string ISO ou objeto Date em string YYYY-MM-DD segura
 const normalizeDataToKey = (input) => {
   if (!input) return "";
   if (typeof input === 'string') {
@@ -76,7 +70,6 @@ const normalizeDataToKey = (input) => {
 function StatsBar({ appointments, attendances }) {
   const todayStr = formatDateKey(new Date());
   
-  // Contar sessões de hoje baseadas na recorrência
   const todaySessions = appointments.filter(a => {
     if (!a.startDate) return false;
     const startStr = extractUTCDate(a.startDate);
@@ -181,7 +174,6 @@ function DayView({ date, appointments, attendances, onStatus, setJustModal, setJ
   const dayName = DAYS_OF_WEEK[date.getDay()];
   const dateStr = formatDateKey(date);
   
-  // 1. Agendamentos fixos
   const dayAppointments = appointments.filter(a => {
     if (a.dayOfWeek !== date.getDay()) return false;
     if (a.startDate) {
@@ -191,13 +183,11 @@ function DayView({ date, appointments, attendances, onStatus, setJustModal, setJ
     return true;
   });
 
-  // 2. Attendances extras (reagendamentos ou sessões avulsas)
   const dayExtras = attendances.filter(att => 
     extractUTCDate(att.date) === dateStr &&
     !dayAppointments.some(app => app.patientId === att.patientId)
   );
 
-  // 3. Unir para exibição
   const allSessions = [
     ...dayAppointments.map(app => ({
       type: 'fixed',
@@ -292,7 +282,6 @@ function MonthView({ currentDate, appointments, attendances, onStatus, setJustMo
             return dayStr >= appStart;
           });
 
-          // 2. Extras/Reagendamentos
           const dayExtras = attendances.filter(att => 
             extractUTCDate(att.date) === dayStr &&
             !dayApps.some(app => app.patientId === att.patientId)
@@ -427,8 +416,6 @@ function ListView({ currentDate, appointments, attendances, onStatus, setJustMod
     }))
   ].sort((a,b) => (a.att?.sessionTime || a.app.time).localeCompare(b.att?.sessionTime || b.app.time));
   
-  const todayStr = formatDateKey(new Date());
-  
   if (dayApps.length === 0 && dayExtras.length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-slate-200 p-20 text-center shadow-sm">
@@ -522,8 +509,10 @@ export default function Agenda() {
     try {
       const data = await api.getAttendanceDescendants(attendanceId);
       setDescendantsInfo({ count: data.count, list: data.descendants });
+      return data;
     } catch (error) {
       console.error("Erro ao buscar descendentes:", error);
+      return { count: 0, descendants: [] };
     }
   };
 
@@ -572,7 +561,19 @@ export default function Agenda() {
     
     try {
       if (existingAtt?.status === status) {
-        await api.deleteAttendance(existingAtt.id);
+        // ─── CORREÇÃO: registros filho (reagendamentos) nunca devem ser deletados
+        // ao desmarcar o status, pois não têm Appointment fixo por baixo.
+        // Ao deletar, somem da agenda. Em vez disso, limpamos o status.
+        if (existingAtt.parentId) {
+          await api.saveAttendance({
+            ...existingAtt,
+            status: '',
+            date: existingAtt.date,
+          });
+        } else {
+          // Sessão normal com Appointment fixo: pode deletar normalmente
+          await api.deleteAttendance(existingAtt.id);
+        }
         await loadData();
       } else {
         const data = {
@@ -600,12 +601,16 @@ export default function Agenda() {
   const deleteJustification = async () => {
     if (!justModal.existingAtt) return;
     
-    const count = descendantsInfo.count;
+    // Buscar descendentes frescos antes de montar a mensagem (evita race condition)
+    const data = await fetchDescendants(justModal.existingAtt.id);
+    const count = data.count;
+    const list = data.descendants;
+
     let title = "Remover Justificativa";
     let message = "Deseja desfazer esta falta justificada? A sessão voltará a aparecer sem marcação.";
     
     if (count === 1) {
-      const childDate = new Date(descendantsInfo.list[0].date);
+      const childDate = new Date(list[0].date);
       message = `Deseja remover esta justificativa? O reagendamento de ${format(childDate, "dd/MM")} também será cancelado e excluído permanentemente.`;
     } else if (count > 1) {
       message = `Deseja remover esta justificativa? Os ${count} reagendamentos seguintes na cadeia também serão cancelados. Esta ação não pode ser desfeita.`;
@@ -641,7 +646,6 @@ export default function Agenda() {
     const motivo = justData.notes || "Falta justificada";
     
     try {
-      // Montar a nota conforme existência de reagendamento
       const notes = newDateStr 
         ? `Falta justificada. Reagendado para ${newDateStr} às ${newTimeStr || "08:00"}. Motivo: ${motivo}`
         : motivo;
@@ -660,7 +664,6 @@ export default function Agenda() {
       // 2. Se houver uma nova data, criar o registro Filho vinculado ao Pai
       if (newDateStr) {
         const dateToSave = new Date(newDateStr + 'T' + (newTimeStr || "08:00") + ':00');
-        // Criar registro de reagendamento futuro (sem status até ser realizado)
         await api.saveAttendance({
           patientId: justModal.appointment.patientId,
           date: dateToSave.toISOString(),
@@ -750,8 +753,8 @@ export default function Agenda() {
         )}
       </div>
       
-      {justModal.open && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[100]" onClick={() => setJustModal({ ...justModal, open: false })}>
+      {justModal.open && createPortal(
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[9999]" onClick={() => setJustModal({ ...justModal, open: false })}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
             
             {/* Cabeçalho */}
@@ -848,12 +851,13 @@ export default function Agenda() {
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Custom Confirmation Modal */}
-      {confirmModal.open && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[110]" onClick={() => !confirmModal.loading && setConfirmModal({ ...confirmModal, open: false })}>
+      {confirmModal.open && createPortal(
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[9999]" onClick={() => !confirmModal.loading && setConfirmModal({ ...confirmModal, open: false })}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
             <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-6 mx-auto">
               <AlertTriangle size={32} />
@@ -878,7 +882,8 @@ export default function Agenda() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Success Toast */}

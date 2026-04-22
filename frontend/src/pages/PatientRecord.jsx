@@ -13,6 +13,7 @@ import DataTable from "../components/DataTable";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // Extrai data UTC de string ISO (para comparação com dados do banco)
 const extractUTCDate = (dateStr) => {
@@ -555,83 +556,118 @@ export default function PatientRecord() {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 20;
-    let y = 20;
     
+    // Título Centralizado
     doc.setFontSize(18);
-    doc.setTextColor(15, 23, 42);
-    doc.text('RELATÓRIO FINANCEIRO COMPLETO', pageWidth / 2, y, { align: 'center' });
-    y += 8;
-    doc.setFontSize(12);
-    doc.setTextColor(100, 116, 139);
-    doc.text(patient.name, pageWidth / 2, y, { align: 'center' });
-    y += 10;
-    doc.setDrawColor(5, 150, 105);
-    doc.setLineWidth(0.5);
-    doc.line(margin, y, pageWidth - margin, y);
-    y += 15;
+    doc.setTextColor(51, 51, 51);
+    doc.text('RELATÓRIO FINANCEIRO COMPLETO', pageWidth / 2, 20, { align: 'center' });
     
+    // Nome do Cliente
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Cliente: ${patient.name}`, margin, 35);
+    
+    // Linha Divisória
+    doc.setDrawColor(204, 204, 204);
+    doc.setLineWidth(0.2);
+    doc.line(margin, 40, pageWidth - margin, 40);
+    
+    // Cálculos de Resumo
     const totalAmount = payments.reduce((sum, p) => sum + (typeof p.amount === 'number' ? p.amount : 0), 0);
-    doc.setFontSize(10);
-    doc.setTextColor(100, 116, 139);
-    doc.text('Total de pagamentos:', margin, y);
-    doc.setFontSize(14);
-    doc.setTextColor(5, 150, 105);
-    doc.text(totalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), margin + 50, y);
-    doc.setFontSize(10);
-    doc.setTextColor(30, 41, 59);
-    y += 7;
-    doc.text(`Quantidade: ${payments.length} bloco(s) de sessões`, margin, y);
-    y += 20;
+    const totalSessions = payments.reduce((sum, p) => sum + (p.attendances?.length || 0), 0);
     
-    payments.forEach((payment, idx) => {
-      if (y > 250) {
-        doc.addPage();
-        y = 20;
-      }
-      
-      doc.setFontSize(12);
-      doc.setTextColor(15, 23, 42);
-      doc.text(`Pagamento ${idx + 1}`, margin, y);
-      doc.setFontSize(10);
-      doc.setTextColor(100, 116, 139);
+    // Seção Resumo Financeiro
+    doc.setFontSize(14);
+    doc.setTextColor(85, 85, 85);
+    doc.text('Resumo Financeiro', margin, 50);
+    
+    autoTable(doc, {
+      startY: 55,
+      margin: { left: margin, right: margin },
+      head: [['Descrição', 'Valor']],
+      body: [
+        ['Total de Pagamentos', totalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })],
+        ['Quantidade de Sessões', `${totalSessions} sessões`]
+      ],
+      theme: 'grid',
+      headStyles: { fillColor: [242, 242, 242], textColor: [51, 51, 51], fontStyle: 'bold' },
+      styles: { fontSize: 10, cellPadding: 5 }
+    });
+    
+    // Seção Detalhes Consolidados
+    let currentY = doc.lastAutoTable.finalY + 15;
+    
+    // Linha Divisória antes da próxima seção
+    doc.setDrawColor(204, 204, 204);
+    doc.line(margin, currentY - 5, pageWidth - margin, currentY - 5);
+    
+    doc.setFontSize(14);
+    doc.setTextColor(85, 85, 85);
+    doc.text('Detalhes Consolidados de Pagamentos e Sessões', margin, currentY);
+    
+    const detailedBody = [];
+    payments.forEach((payment) => {
       const amountFormatted = typeof payment.amount === 'number' 
         ? payment.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
         : `R$ ${payment.amount}`;
-      doc.text(amountFormatted, pageWidth - margin - 30, y);
-      y += 8;
-      doc.text(`Data: ${format(new Date(payment.paymentDate), 'dd/MM/yyyy')} | Método: ${payment.method}`, margin, y);
-      y += 8;
+      const paymentDate = format(new Date(payment.paymentDate), 'dd/MM/yyyy');
       
       if (payment.attendances && payment.attendances.length > 0) {
-        doc.setFontSize(9);
-        doc.setTextColor(100, 116, 139);
-        doc.text(`${payment.attendances.length} sessão(ões)`, margin, y);
-        y += 6;
-        payment.attendances.slice(0, 3).forEach(att => {
+        payment.attendances.forEach((att, index) => {
+          const row = [];
+          if (index === 0) {
+            row.push({ content: amountFormatted, rowSpan: payment.attendances.length, styles: { valign: 'middle', halign: 'center' } });
+            row.push({ content: paymentDate, rowSpan: payment.attendances.length, styles: { valign: 'middle', halign: 'center' } });
+            row.push({ content: payment.method, rowSpan: payment.attendances.length, styles: { valign: 'middle', halign: 'center' } });
+          }
+          row.push(format(new Date(att.date), 'dd/MM/yyyy'));
           const statusLabel = att.status === 'presente' ? 'P' : att.status === 'falta' ? 'F' : att.status === 'justificada' ? 'J' : '-';
-          doc.text(`• ${format(new Date(att.date), 'dd/MM/yyyy')} ${att.sessionTime || '08:00'} ${statusLabel}`, margin + 5, y);
-          y += 5;
+          row.push(`${att.sessionTime || '08:00'} ${statusLabel}`);
+          detailedBody.push(row);
         });
-        if (payment.attendances.length > 3) {
-          doc.text(`... e mais ${payment.attendances.length - 3}`, margin + 5, y);
-          y += 5;
-        }
       } else {
-        doc.setTextColor(148, 163, 184);
-        doc.text('Sem sessões vinculado', margin + 5, y);
+        detailedBody.push([
+          { content: amountFormatted, styles: { halign: 'center' } },
+          { content: paymentDate, styles: { halign: 'center' } },
+          { content: payment.method, styles: { halign: 'center' } },
+          'N/A',
+          'N/A'
+        ]);
       }
-      
-      if (payment.receiptIssued) {
-        doc.setTextColor(5, 150, 105);
-        doc.text('NOTA DE SERVIÇO', margin, y);
-      }
-      
-      y += 15;
     });
     
-    doc.setFontSize(8);
-    doc.setTextColor(148, 163, 184);
-    doc.text(`Gerado em: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, pageWidth / 2, 285, { align: 'center' });
+    autoTable(doc, {
+      startY: currentY + 5,
+      margin: { left: margin, right: margin },
+      head: [['Valor do Pagamento', 'Data do Pagamento', 'Método de Pagamento', 'Data da Sessão', 'Horário da Sessão']],
+      body: detailedBody,
+      theme: 'grid',
+      headStyles: { fillColor: [242, 242, 242], textColor: [51, 51, 51], fontStyle: 'bold' },
+      styles: { fontSize: 9, cellPadding: 3 },
+      columnStyles: {
+        0: { halign: 'center' },
+        1: { halign: 'center' },
+        2: { halign: 'center' }
+      }
+    });
+    
+    // Footer em todas as páginas
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(9);
+      doc.setTextColor(119, 119, 119);
+      doc.text(
+        `Gerado em: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`,
+        pageWidth - margin,
+        287,
+        { align: 'right' }
+      );
+      
+      // Linha divisória antes do rodapé
+      doc.setDrawColor(204, 204, 204);
+      doc.line(margin, 282, pageWidth - margin, 282);
+    }
     
     doc.save(`Relatorio_Financeiro_${patient.name.replace(/\s/g, '_')}_${format(new Date(), 'yyyyMMdd')}.pdf`);
   };
@@ -640,111 +676,111 @@ export default function PatientRecord() {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 20;
-    let y = 20;
     
+    // Cabeçalho Profissional
     doc.setFontSize(18);
-    doc.setTextColor(15, 23, 42);
-    doc.text('PRESTAÇÃO DE CONTAS', pageWidth / 2, y, { align: 'center' });
-    y += 8;
+    doc.setTextColor(51, 51, 51);
+    doc.text('PRESTAÇÃO DE CONTAS', pageWidth / 2, 20, { align: 'center' });
+    
     doc.setFontSize(10);
     doc.setTextColor(100, 116, 139);
-    doc.text('Serviços de Psicologia', pageWidth / 2, y, { align: 'center' });
-    y += 10;
+    doc.text('Serviços de Psicologia', pageWidth / 2, 28, { align: 'center' });
+    
+    // Linha Divisória
     doc.setDrawColor(5, 150, 105);
     doc.setLineWidth(0.5);
-    doc.line(margin, y, pageWidth - margin, y);
-    y += 15;
+    doc.line(margin, 35, pageWidth - margin, 35);
     
+    // Informações do Pagamento
     doc.setFontSize(10);
     doc.setTextColor(100, 116, 139);
-    doc.text('Paciente:', margin, y);
+    doc.text('Paciente:', margin, 45);
     doc.setTextColor(30, 41, 59);
-    doc.text(patient.name, margin + 30, y);
-    y += 7;
+    doc.text(patient.name, margin + 30, 45);
+    
     doc.setTextColor(100, 116, 139);
-    doc.text('Data do Pagamento:', margin, y);
+    doc.text('Data do Pagamento:', margin, 52);
     doc.setTextColor(30, 41, 59);
-    doc.text(format(new Date(payment.paymentDate), "dd/MM/yyyy"), margin + 40, y);
-    y += 7;
+    doc.text(format(new Date(payment.paymentDate), "dd/MM/yyyy"), margin + 40, 52);
+    
     doc.setTextColor(100, 116, 139);
-    doc.text('Valor:', margin, y);
+    doc.text('Valor:', margin, 62);
     doc.setFontSize(14);
     doc.setTextColor(5, 150, 105);
     const amountFormatted = typeof payment.amount === 'number' 
       ? payment.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
       : `R$ ${payment.amount}`;
-    doc.text(amountFormatted, margin + 20, y);
+    doc.text(amountFormatted, margin + 20, 62);
+    
     doc.setFontSize(10);
-    doc.setTextColor(30, 41, 59);
-    y += 7;
     doc.setTextColor(100, 116, 139);
-    doc.text('Método:', margin, y);
+    doc.text('Método:', margin, 72);
     doc.setTextColor(30, 41, 59);
-    doc.text(payment.method, margin + 25, y);
-    y += 20;
+    doc.text(payment.method, margin + 25, 72);
     
+    // Tabela de Sessões
     doc.setFontSize(12);
-    doc.setTextColor(15, 23, 42);
-    doc.text('SESSÕES INCLUÍDAS', margin, y);
-    y += 10;
+    doc.setTextColor(51, 51, 51);
+    doc.text('SESSÕES INCLUÍDAS', margin, 85);
     
-    const colWidths = [15, 50, 30, 40];
-    const startX = margin;
-    
-    doc.setFillColor(248, 250, 252);
-    doc.rect(startX, y - 5, pageWidth - 2 * margin, 10, 'F');
-    doc.setFontSize(9);
-    doc.setTextColor(100, 116, 139);
-    doc.text('#', startX + 2, y);
-    doc.text('DATA', startX + colWidths[0] + 2, y);
-    doc.text('HORÁRIO', startX + colWidths[0] + colWidths[1] + 2, y);
-    doc.text('STATUS', startX + colWidths[0] + colWidths[1] + colWidths[2] + 2, y);
-    y += 10;
-    
-    payment.attendances.forEach((att, i) => {
-      doc.setFillColor(255, 255, 255);
-      doc.rect(startX, y - 5, pageWidth - 2 * margin, 12, 'F');
-      doc.setTextColor(30, 41, 59);
-      doc.text(String(i + 1), startX + 2, y);
-      doc.text(format(new Date(att.date), 'dd/MM/yyyy'), startX + colWidths[0] + 2, y);
-      doc.text(att.sessionTime || '08:00', startX + colWidths[0] + colWidths[1] + 2, y);
-      
+    const tableBody = payment.attendances.map((att, index) => {
       const statusLabel = att.status === 'presente' ? 'PRESENTE' : att.status === 'falta' ? 'FALTA' : att.status === 'justificada' ? 'JUSTIFICADA' : 'PENDENTE';
-      if (att.status === 'presente') doc.setTextColor(5, 150, 105);
-      else if (att.status === 'falta') doc.setTextColor(220, 38, 38);
-      else if (att.status === 'justificada') doc.setTextColor(217, 119, 6);
-      else doc.setTextColor(100, 116, 139);
-      doc.text(statusLabel, startX + colWidths[0] + colWidths[1] + colWidths[2] + 2, y);
-      doc.setTextColor(30, 41, 59);
-      y += 12;
+      return [
+        index + 1,
+        format(new Date(att.date), 'dd/MM/yyyy'),
+        att.sessionTime || '08:00',
+        statusLabel
+      ];
     });
     
+    autoTable(doc, {
+      startY: 90,
+      margin: { left: margin, right: margin },
+      head: [['#', 'DATA', 'HORÁRIO', 'STATUS']],
+      body: tableBody,
+      theme: 'grid',
+      headStyles: { fillColor: [248, 250, 252], textColor: [100, 116, 139], fontStyle: 'bold', fontSize: 9 },
+      styles: { fontSize: 9, cellPadding: 4 },
+      didParseCell: function (data) {
+        if (data.section === 'body' && data.column.index === 3) {
+          const status = data.cell.raw;
+          if (status === 'PRESENTE') data.cell.styles.textColor = [5, 150, 105];
+          else if (status === 'FALTA') data.cell.styles.textColor = [220, 38, 38];
+          else if (status === 'JUSTIFICADA') data.cell.styles.textColor = [217, 119, 6];
+        }
+      }
+    });
+    
+    let finalY = doc.lastAutoTable.finalY + 10;
+    
+    // Observações
     if (payment.notes) {
-      y += 10;
+      if (finalY > 250) { doc.addPage(); finalY = 20; }
       doc.setFontSize(12);
-      doc.setTextColor(15, 23, 42);
-      doc.text('OBSERVAÇÕES', margin, y);
-      y += 8;
+      doc.setTextColor(51, 51, 51);
+      doc.text('OBSERVAÇÕES', margin, finalY);
+      finalY += 7;
       doc.setFontSize(10);
       doc.setTextColor(100, 116, 139);
       const splitNotes = doc.splitTextToSize(payment.notes, pageWidth - 2 * margin);
-      doc.text(splitNotes, margin, y);
-      y += splitNotes.length * 6;
+      doc.text(splitNotes, margin, finalY);
+      finalY += (splitNotes.length * 5) + 5;
     }
     
-    y += 15;
+    // Assinatura/Status
+    if (finalY > 260) { doc.addPage(); finalY = 20; }
     doc.setDrawColor(226, 232, 240);
-    doc.setLineWidth(0.3);
-    doc.line(margin, y, pageWidth - margin, y);
-    y += 10;
+    doc.line(margin, finalY, pageWidth - margin, finalY);
+    finalY += 10;
     
     doc.setFontSize(10);
     doc.setTextColor(5, 150, 105);
-    doc.text(`Recibo ${payment.receiptIssued ? 'Emitido' : 'Pendente'}`, pageWidth / 2, y, { align: 'center' });
-    y += 6;
+    doc.text(`Recibo ${payment.receiptIssued ? 'Emitido' : 'Pendente'}`, pageWidth / 2, finalY, { align: 'center' });
+    
+    // Rodapé
     doc.setFontSize(8);
     doc.setTextColor(148, 163, 184);
-    doc.text(`Gerado em: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, pageWidth / 2, y, { align: 'center' });
+    doc.text(`Gerado em: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, pageWidth / 2, 285, { align: 'center' });
     
     doc.save(`Prestacao_Contas_${patient.name.replace(/\s/g, '_')}_${format(new Date(payment.paymentDate), 'yyyyMMdd')}.pdf`);
   };
