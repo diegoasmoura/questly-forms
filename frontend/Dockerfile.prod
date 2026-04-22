@@ -1,7 +1,8 @@
 # Stage 1: Build
 FROM node:20-alpine as build-stage
 WORKDIR /app
-COPY package*.json ./
+COPY package.json ./
+# Limpar cache e instalar do zero (sem depender do lock que está falhando no git)
 RUN npm install
 COPY . .
 RUN npm run build
