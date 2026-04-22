@@ -38,7 +38,7 @@ services:
     container_name: questly-frontend
     restart: always
     ports:
-      - "8080:80"
+      - "8082:80"
     depends_on:
       - backend
 
