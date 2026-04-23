@@ -71,41 +71,50 @@ export const clinicalTemplates = [
       ]
     }
   },
-  {
+{
     id: "aaq_ii",
     title: "AAQ-II: Aceitacao e Acao",
-    description: "Avaliacao de inflexibilidade experiencial (10 itens). Escala 1-7.",
+    description: "Questionario de Aceitacao e Acao - avalia flexibilidade psicologica (10 itens).",
     schema: {
       showProgressBar: true,
       widthMode: "responsive",
+      questionTitleLocation: "underTitle",
       pages: [
         {
-          name: "intro",
+          name: "inicio",
+          title: "Introducao",
           elements: [
-            { type: "html", name: "intro", html: "<div style='padding:20px;'><h2>AAQ-II</h2><p>Avalie o quanto cada frase e verdadeira para voce.</p><p><strong>1 = Nunca verdade</strong> ate <strong>7 = Sempre verdade</strong></p></div>" }
+            { type: "html", name: "intro", html: "<div style='padding:20px;background:#f0fdf4;border-radius:12px;'><h2 style='color:#059669;margin-bottom:12px;'>AAQ-II: Questionário de Aceitação e Ação</h2><p style='margin-bottom:12px;'>Este questionário avalia como você lida com experiências internas difíceis, como pensamentos e sentimentos unpleasant.</p><p style='font-weight:bold;margin-bottom:8px;'>Instruções:</p><p>Para cada frase, marque o quanto ela é VERDADEIRA para você:</p><ul style='margin-left:20px;margin-top:8px;'><li>1 = <strong>Nunca verdade</strong> - Isso nunca acontece comigo</li><li>4 = <strong>Às vezes</strong> - Happens sometimes</li><li>7 = <strong>Sempre verdade</strong> - Isso sempre acontece comigo</li></ul></div>" }
           ]
         },
         {
           name: "itens",
+          title: "Questionário",
           elements: [
             {
               type: "matrix",
               name: "aaq_items",
+              title: "Com que frequência cada frase acontece com você?",
               columns: [
-                { value: "1", text: "1" }, { value: "2", text: "2" }, { value: "3", text: "3" },
-                { value: "4", text: "4" }, { value: "5", text: "5" }, { value: "6", text: "6" }, { value: "7", text: "7" }
+                { value: "1", text: "1\nNunca" },
+                { value: "2", text: "2" },
+                { value: "3", text: "3" },
+                { value: "4", text: "4\nÀs vezes" },
+                { value: "5", text: "5" },
+                { value: "6", text: "6" },
+                { value: "7", text: "7\nSempre" }
               ],
               rows: [
-                { value: "i1", text: "Uma experiencia desconfortavel e apenas isso, desconfortavel." },
+                { value: "i1", text: "Uma experiência desconfortável é apenas isso, desconfortável." },
                 { value: "i2", text: "Eu me preocupo com meus sentimentos." },
                 { value: "i3", text: "Eu percebo que meus pensamentos podem me impedir de fazer coisas." },
-                { value: "i4", text: "E terrivel e posso nunca me sentir bem comigo mesmo." },
-                { value: "i5", text: "Minhas emocoes me incapacitam." },
-                { value: "i6", text: "Sinto-me em paz mesmo quando minhas emocoes estao fora de controle." },
-                { value: "i7", text: "Emocoes desagradaveis sao sempre incapacitantes." },
-                { value: "i8", text: "Preciso controlar emocoes para atingir meus objetivos." },
-                { value: "i9", text: "Controlar emocoes significa sentir-me melhor." },
-                { value: "i10", text: "Quando sinto uma emocao positiva, preciso trabalhar para mantê-la." }
+                { value: "i4", text: "É terrível e posso nunca me sentir bem comigo mesmo." },
+                { value: "i5", text: "Minhas emoções me incapacitam." },
+                { value: "i6", text: "Sinto-me em paz mesmo quando minhas emoções estão fora de controle." },
+                { value: "i7", text: "Para mim, emoções desagradáveis são sempre incapacitantes." },
+                { value: "i8", text: "Preciso controlar emoções para atingir meus objetivos." },
+                { value: "i9", text: "Controlar emoções significa sentir-me melhor." },
+                { value: "i10", text: "Quando sinto uma emoção positiva, preciso trabalhar para mantê-la." }
               ],
               isAllRowsRequired: true
             }
@@ -116,61 +125,78 @@ export const clinicalTemplates = [
   },
   {
     id: "faaq",
-    title: "FAAQ",
-    description: "Functional Acceptance (16 itens).",
+    title: "FAAQ: Aceitacao Funcional",
+    description: "Questionário Functional de Aceitação e Ação - avalia flexibilidade psicológica (16 itens).",
     schema: {
       showProgressBar: true,
       widthMode: "responsive",
+      questionTitleLocation: "underTitle",
       pages: [
-        { name: "itens", elements: [
-          { type: "matrix", name: "faaq_items", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"},{value:"6",text:"6"},{value:"7",text:"7"}],
-            rows: [
-              {value:"i1",text:"Eu tento evitar sentir emocoes negativas."},
-              {value:"i2",text:"Eu me preocupo com emocoes atrapalhando."},
-              {value:"i3",text:"Passo muito tempo pensando em emocoes."},
-              {value:"i4",text:"Emocoes fazem perder oportunidades."},
-              {value:"i5",text:"Incapaz de fazer quando perturbado."},
-              {value:"i6",text:"Emocoes causam problemas."},
-              {value:"i7",text:"Nao sei o que estou sentindo."},
-              {value:"i8",text:"Esforco para nao sentir emocoes."},
-              {value:"i9",text:"Emocoes interferem na vida."},
-              {value:"i10",text:"Dificuldade em aproveitar."},
-              {value:"i11",text:"Sei quao feliz/infeliz."},
-              {value:"i12",text:"Emocoes nao afetam acoes."},
-              {value:"i13",text:"Posso decidir perturbado."},
-              {value:"i14",text:"Volto apos colapso."},
-              {value:"i15",text:"Sinto bem com negatives."},
-              {value:"i16",text:"Listo emocoes claramente."}
-            ], isAllRowsRequired: true}
-        ]}
+        {
+          name: "inicio",
+          title: "Introdução",
+          elements: [
+            { type: "html", name: "intro", html: "<div style='padding:20px;background:#f0fdf4;border-radius:12px;'><h2 style='color:#059669;margin-bottom:12px;'>FAAQ: Questionário Funcional de Aceitação e Ação</h2><p style='margin-bottom:12px;'>Este questionário avalia sua capacidade de aceitar emoções difíceis enquanto age de acordo com seus valores pessoais.</p><p style='font-weight:bold;margin-bottom:8px;'>Instruções:</p><p>Para cada frase, marque o quanto ela é VERDADEIRA para você:</p><ul style='margin-left:20px;margin-top:8px;'><li>1 = <strong>Nunca verdade</strong></li><li>4 = <strong>Às vezes</strong></li><li>7 = <strong>Sempre verdade</strong></li></ul></div>" }
+          ]
+        },
+        {
+          name: "itens",
+          title: "Questionário",
+          elements: [
+            {
+              type: "matrix",
+              name: "faaq_items",
+              title: "Com que frequência cada frase acontece com você?",
+              columns: [
+                { value: "1", text: "1\nNunca" },
+                { value: "2", text: "2" },
+                { value: "3", text: "3" },
+                { value: "4", text: "4\nÀs vezes" },
+                { value: "5", text: "5" },
+                { value: "6", text: "6" },
+                { value: "7", text: "7\nSempre" }
+              ],
+              rows: [
+                { value: "i1", text: "Eu tento evitar sentir emoções negativas." },
+                { value: "i2", text: "Eu me preocupo com emoções atrapalhando minha vida." },
+                { value: "i3", text: "Passo muito tempo pensando em emoções." },
+                { value: "i4", text: "Minhas emoções fazem com que eu perca oportunidades." },
+                { value: "i5", text: "Sou incapaz de fazer coisas importantes quando estou emotivamente perturbado." },
+                { value: "i6", text: "Minhas emoções me causam problemas na vida." },
+                { value: "i7", text: "Geralmente não sei o que estou sentindo." },
+                { value: "i8", text: "Esforço-me muito para não sentir certas emoções." },
+                { value: "i9", text: "Minhas emoções interferem no meu aproveitamento da vida." },
+                { value: "i10", text: "Tenho dificuldade em aproveitar quando estou emotivamente perturbado." },
+                { value: "i11", text: "Geralmente sei quão feliz ou infeliz estou." },
+                { value: "i12", text: "Minhas emoções não têm muito efeito no que eu faço." },
+                { value: "i13", text: "Posso tomar boas decisões mesmo quando estou emotivamente perturbado." },
+                { value: "i14", text: "Depois de um colapso emocional, consigo voltar às minhas atividades." },
+                { value: "i15", text: "Geralmente me sinto bem mesmo quando tenho emoções negativas." },
+                { value: "i16", text: "Listo minhas emoções de forma clara." }
+              ],
+              isAllRowsRequired: true
+            }
+          ]
+        }
       ]
     }
   },
   {
     id: "compact",
-    title: "CompACT",
-    description: "Comprehensive ACT (36 itens em 3 dimensoes).",
+    title: "CompACT: Compreensao ACT",
+    description: "Comprehensive ACT - avaliação de flexibilidade psicológica (36 itens em 3 dimensões).",
     schema: {
       showProgressBar: true,
       widthMode: "responsive",
+      questionTitleLocation: "underTitle",
       pages: [
-        { name: "abertura", title: "Abertura a Experiencia", elements: [
-          { type: "matrix", name: "compact_ab", columns: [{value:"0",text:"0"},{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"},{value:"6",text:"6"}],
-            rows: [
-              {value:"ab1",text:"Posso estar triste e ser produtivo."},
-              {value:"ab2",text:"Sensacoes fisicas guiam decisoes."},
-              {value:"ab3",text:"Nao evito pensamentos."},
-              {value:"ab4",text:"Aceito sentir medo."},
-              {value:"ab5",text:"Permito que neguem quando preciso."},
-              {value:"ab6",text:"Nao preciso me sentir bem."},
-              {value:"ab7",text:"Presto atencao sensacoes corporais."},
-              {value:"ab8",text:"Permito emocoes dificeis."},
-              {value:"ab9",text:"Capaz de sentir varias emocoes."},
-              {value:"ab10",text:"Nao preciso eliminar emocoes."},
-              {value:"ab11",text:"Ouço o que corpo diz."},
-              {value:"ab12",text:"Permito sentimentos."}
-            ], isAllRowsRequired: true}
-        ]},
+        {
+          name: "inicio",
+          title: "Introdução",
+          elements: [
+            { type: "html", name: "intro", html: "<div style='padding:20px;background:#f0fdf4;border-radius:12px;'><h2 style='color:#059669;margin-bottom:12px;'>CompACT: Questionário de Compreensão da Terapia de Aceitação e Compromisso</h2><p style='margin-bottom:12px;'>Este questionário avalia três dimensões importantes da flexibilidade psicológica:</p><ol style='margin-left:20px;'><li><strong>Abertura à Experiência</strong> - aceitar emoções difíceis</li><li><strong>Engajamento Atencional</strong> - focar no momento presente</li><li><strong>Valores e Ação</strong> - viver de acordo com o que é importante</li></ol><p style='font-weight:bold;margin-top:12px;'>Escala:</p><p>0 = Totalmente diferente de mim &nbsp;|&nbsp; 6 = Totalmente igual a mim</p></div>" }
+          ]
+        },
         { name: "engajamento", title: "Engajamento", elements: [
           { type: "matrix", name: "compact_en", columns: [{value:"0",text:"0"},{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"},{value:"6",text:"6"}],
             rows: [
