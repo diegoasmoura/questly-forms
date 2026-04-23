@@ -795,14 +795,25 @@ export const clinicalTemplates = [
   },
   {
     id: "es",
-    title: "ES: Escala de Satisfacao",
-    description: "Escala de Satisfacao com a Vida (5 itens).",
+    title: "SWLS: Escala de Satisfação com a Vida",
+    description: "Satisfaction with Life Scale - avalia satisfação geral com a vida (5 itens).",
     schema: {
       showProgressBar: true,
       widthMode: "responsive",
+      questionTitleLocation: "underTitle",
       pages: [
-        { name: "itens", elements: [
-          { type: "matrix", name: "es_items", columns: [{value:"1",text:"1 discordo"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5 concordo"}],
+        {
+          name: "inicio",
+          title: "Instruções",
+          elements: [
+            { type: "html", name: "intro", html: "<div style='padding:24px;background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border-radius:16px;border:2px solid #a7f3d0;'><h2 style='color:#059669;margin-bottom:16px;font-size:20px;'>Escala de Satisfação com a Vida</h2><p style='margin-bottom:16px;line-height:1.6;'>Para cada frase, pense na sua vida em geral e marque o quanto você concorda ou discorda.</p><p style='font-weight:bold;margin-bottom:12px;'>Escala:</p><ul style='margin-left:16px;line-height:2;'><li><strong>1 = Discordo totalmente</strong> - Não é nada como eu</li><li><strong>2 = Discordo</strong> - Não é muito assim</li><li><strong>3 = Não concordo nem discordo</strong> - É neutro</li><li><strong>4 = Concordo</strong> - É um pouco como eu</li><li><strong>5 = Concordo totalmente</strong> - É exatamente como eu</li></ul></div>" }
+          ]
+        },
+        {
+          name: "itens",
+          title: "Questionário",
+          elements: [
+            { type: "matrix", name: "es_items", title: "Com que intensidade você concorda com cada frase?", columns: [{value:"1",text:"1\nDiscordo\ntotamente"},{value:"2",text:"2\nDiscordo"},{value:"3",text:"3\nNeutro"},{value:"4",text:"4\nConcordo"},{value:"5",text:"5\nConcordo\ntotamente"}],
             rows: [
               {value:"s1",text:"Vida ideal ate agora."},
               {value:"s2",text:"Condicoes vida sod."},
