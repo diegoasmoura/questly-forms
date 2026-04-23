@@ -577,6 +577,197 @@ export const clinicalTemplates = [
     }
   },
   {
+    id: "eq",
+    title: "EQ: Inteligencia Emocional",
+    description: "Escala de Inteligência Emocional (33 itens).",
+    schema: {
+      showProgressBar: true,
+      widthMode: "responsive",
+      pages: [
+        { name: "intro", elements: [
+          { type: "html", name: "intro", html: "<div style='padding:20px;'><h2>EQ</h2><p>Para cada frase, marque: <strong>1 = Discordo</strong> ate <strong>5 = Concordo</strong></p></div>" }
+        ]},
+        { name: "autoconsc", title: "Autoconsciencia", elements: [
+          { type: "matrix", name: "eq_auto", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"}],
+            rows: [
+              {value:"au1",text:"Conheco meus sentimentos."},
+              {value:"au2",text:"Sei quando estou triste."},
+              {value:"au3",text:"Reconheco emocoes."},
+              {value:"au4",text:"Entendo o que sinto."},
+              {value:"au5",text:"Sei como me sinto."},
+              {value:"au6",text:"Identifico sentfisicos."},
+              {value:"au7",text:"Consciente de humores."},
+              {value:"au8",text:"Percebo quando mudo."},
+              {value:"au9",text:"Sei minhas reaccioes."},
+              {value:"au10",text:"Perco quando muda humor."},
+              {value:"au11",text:"Emocional perspicaz."}
+            ], isAllRowsRequired: true}
+        ]},
+        { name: "autoreg", title: "Autoregrulacao", elements: [
+          { type: "matrix", name: "eq_reg", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"}],
+            rows: [
+              {value:"ar1",text:"Controlo emocoes."},
+              {value:"ar2",text:"Nao me altero."},
+              {value:"ar3",text:"Gerenciamento raiva."},
+              {value:"ar4",text:"Tristeza passa rapido."},
+              {value:"ar5",text:"Recupero do stress."},
+              {value:"ar6",text:"Controlo impulsos."},
+              {value:"ar7",text:"遇 calm em sit diff."},
+              {value:"ar8",text:"Nao exajero feelings."},
+              {value:"ar9",text:"Duravel emocionalmente."},
+              {value:"ar10",text:"Equilibrio."},
+              {value:"ar11",text:"Autocontrole."}
+            ], isAllRowsRequired: true}
+        ]},
+        { name: "motv", title: "Motivacao", elements: [
+          { type: "matrix", name: "eq_motv", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"}],
+            rows: [
+              {value:"mo1",text:"Otimista."},
+              {value:"mo2",text:"Perseguo objetivos."},
+              {value:"mo3",text:"Superacao."},
+              {value:"mo4",text:"Focado em resultados."},
+              {value:"mo5",text:"Proseliga."},
+              {value:"mo6",text:"Enfrento diff."},
+              {value:"mo7",text:"Persistir com problemas."},
+              {value:"mo8",text:"Dedication."},
+              {value:"mo9",text:"Trabalho por sonhos."},
+              {value:"mo10",text:"Autodeterminacao."},
+              {value:"mo11",text:"Busca excelëncia."}
+            ], isAllRowsRequired: true}
+        ]},
+        { name: "emp", title: "Empatia", elements: [
+          { type: "matrix", name: "eq_emp", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"}],
+            rows: [
+              {value:"em1",text:"Percebo sentimentos."},
+              {value:"em2",text:"Sinto o que outros."},
+              {value:"em3",text:"Coloco no lugar."},
+              {value:"em4",text:"Compaxao."},
+              {value:"em5",text:"Sensibilidade."},
+              {value:"em6",text:"Cuido do outro."},
+              {value:"em7",text:"Perspectiva do outro."},
+              {value:"em8",text:"Identifico sentfisicos."},
+              {value:"em9",text:"Sinto sympatia."},
+              {value:"em10",text:"Entendo outros."},
+              {value:"em11",text:"Harmonia social."}
+            ], isAllRowsRequired: true}
+        ]},
+        { name: "skillsoc", title: "Habilidades Sociais", elements: [
+          { type: "matrix", name: "eq_soc", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"}],
+            rows: [
+              {value:"so1",text:"Trabalho em equipo."},
+              {value:"so2",text:"Influencio outros."},
+              {value:"so3",text:"Desenvolvimento."},
+              {value:"so4",text:"Lider."},
+              {value:"so5",text:"Colab prac."},
+              {value:"so6",text:"Comunicacao."},
+              {value:"so7",text:"Relaciöes posis."},
+              {value:"so8",text:"Conectar."},
+              {value:"so9",text:"Redes."},
+              {value:"so10",text:"Negociar."},
+              {value:"so11",text:"Gestão conflitos."}
+            ], isAllRowsRequired: true}
+        ]}
+      ]
+    }
+  },
+  {
+    id: "vlq",
+    title: "VLQ: Qualidades de Vida",
+    description: "Valued Living Questionnaire (16 itens).",
+    schema: {
+      showProgressBar: true,
+      widthMode: "responsive",
+      pages: [
+        { name: "valor", title: "Valores", elements: [
+          { type: "matrix", name: "vlq_valor", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"},{value:"6",text:"6"},{value:"7",text:"7"}],
+            rows: [
+              {value:"v1",text:"Familia."},
+              {value:"v2",text:"Amigos."},
+              {value:"v3",text:"Carreira."},
+              {value:"v4",text:"Financas."},
+              {value:"v5",text:"Saude."},
+              {value:"v6",text:"Espiritual."},
+              {value:"v7",text:"Recreacao."},
+              {value:"v8",text:"Crescimento."}
+            ], isAllRowsRequired: true}
+        ]},
+        { name: "acao", title: "Acao", elements: [
+          { type: "matrix", name: "vlq_acao", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"},{value:"6",text:"6"},{value:"7",text:"7"}],
+            rows: [
+              {value:"a1",text:"Familia age."},
+              {value:"a2",text:"Amigos age."},
+              {value:"a3",text:"Carreira age."},
+              {value:"a4",text:"Financas age."},
+              {value:"a5",text:"Saude age."},
+              {value:"a6",text:"Espiritual age."},
+              {value:"a7",text:"Recreacao age."},
+              {value:"a8",text:"Crescimento age."}
+            ], isAllRowsRequired: true}
+        ]}
+      ]
+    }
+  },
+  {
+    id: "cfq",
+    title: "CFQ: Crencas sobre o Futuro",
+    description: "Control Beliefs Questionnaire (23 itens).",
+    schema: {
+      showProgressBar: true,
+      widthMode: "responsive",
+      pages: [
+        { name: "itens", elements: [
+          { type: "matrix", name: "cfq_items", columns: [{value:"1",text:"1discordo"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4concordo"}],
+            rows: [
+              {value:"c1",text:"Controlo meu futuro."},
+              {value:"c2",text:"Posso influenciar."},
+              {value:"c3",text:"Planejar ajuda."},
+              {value:"c4",text:"Forca propria."},
+              {value:"c5",text:"Decisoes minhas."},
+              {value:"c6",text:"Sou responsavel."},
+              {value:"c7",text:"Esforco compensa."},
+              {value:"c8",text:"Posso mudar."},
+              {value:"c9",text:"Determino destino."},
+              {value:"c10",text:"Agindo fac diferenca."},
+              {value:"c11",text:"Futuro depende mim."},
+              {value:"c12",text:"Posso controlar."},
+              {value:"c13",text:"Agir permite."},
+              {value:"c14",text:"Participacao ativa."},
+              {value:"c15",text:"Perseguir objetivos."},
+              {value:"c16",text:"Perseveranca."},
+              {value:"c17",text:"Persistir ate."},
+              {value:"c18",text:"Determinacao."},
+              {value:"c19",text:"Esforco resulta."},
+              {value:"c20",text:"Autonomia."},
+              {value:"c21",text:"Capacidade escolher."},
+              {value:"c22",text:"Forca interior."},
+              {value:"c23",text:"Nao sou victima."}
+            ], isAllRowsRequired: true}
+        ]}
+      ]
+    }
+  },
+  {
+    id: "es",
+    title: "ES: Escala de Satisfacao",
+    description: "Escala de Satisfacao com a Vida (5 itens).",
+    schema: {
+      showProgressBar: true,
+      widthMode: "responsive",
+      pages: [
+        { name: "itens", elements: [
+          { type: "matrix", name: "es_items", columns: [{value:"1",text:"1 discordo"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5 concordo"}],
+            rows: [
+              {value:"s1",text:"Vida ideal ate agora."},
+              {value:"s2",text:"Condicoes vida sod."},
+              {value:"s3",text:"Satisfeito com vida."},
+              {value:"s4",text:"Consegui o que quer."},
+              {value:"s5",text:"Mudaria tudo."}
+            ], isAllRowsRequired: true}
+        ]}
+      ]
+    }
+  },
+  {
     id: "anamnese_infantil",
     title: "Ficha de Anamnese Infantil (Inicial)",
     description: "Modelo para coleta de dados de desenvolvimento e histórico familiar em pediatria/psicologia infantil.",
