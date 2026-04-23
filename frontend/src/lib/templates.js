@@ -358,6 +358,117 @@ export const clinicalTemplates = [
     }
   },
   {
+    id: "ders",
+    title: "DERS: Dificuldades Regulacao Emocional",
+    description: "Difficulties in Emotion Regulation Scale (36 itens em 6 subescalas).",
+    schema: {
+      showProgressBar: true,
+      widthMode: "responsive",
+      pages: [
+        { name: "intro", elements: [
+          { type: "html", name: "intro", html: "<div style='padding:20px;'><h2>DERS</h2><p>Para cada frase, marque <strong>1 = Quase nunca</strong> ate <strong>5 = Quase sempre</strong></p></div>" }
+        ]},
+        { name: "aceite", title: "Nao Aceitacao", elements: [
+          { type: "matrix", name: "ders_aceite", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"}],
+            rows: [
+              {value:"a1",text:"Fico pensando em raiva."},
+              {value:"a2",text:"Sinto que nao posso controlar emocoes."},
+              {value:"a3",text:"Coisa ruim acontece se sentir."},
+              {value:"a4",text:"Nao entendo meus sentimentos."},
+              {value:"a5",text:"Sentimentos me dao medo."},
+              {value:"a6",text:"Tenho pensamentos ruins."}
+            ], isAllRowsRequired: true}
+        ]},
+        { name: "impulso", title: "Dificuldade em Engajar", elements: [
+          { type: "matrix", name: "ders_impulso", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"}],
+            rows: [
+              {value:"i1",text:"Dificuldade fazer atividades."},
+              {value:"i2",text:"Problemas controlando comportamento."},
+              {value:"i3",text:"Dificuldade controlar impulsos."},
+              {value:"i4",text:"Raiva afecta fazer coisas."},
+              {value:"i5",text:"Problemas pensando claramente."},
+              {value:"i6",text:"Nao consigo parar sentimentos."}
+            ], isAllRowsRequired: true}
+        ]},
+        { name: "consci", title: "Consciencia Emocional", elements: [
+          { type: "matrix", name: "ders_consci", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"}],
+            rows: [
+              {value:"c1",text:"Presto atencao aos sentimentos."},
+              {value:"c2",text:"Percebo sensacoes corporais."},
+              {value:"c3",text:"Sei o que estou sentindo."},
+              {value:"c4",text:"Consciente de humores."},
+              {value:"c5",text:"Identifico emocoes."},
+              {value:"c6",text:"Sei como me sinto."}
+            ], isAllRowsRequired: true}
+        ]},
+        { name: "estrateg", title: "Estratégias", elements: [
+          { type: "matrix", name: "ders_estrateg", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"}],
+            rows: [
+              {value:"e1",text:"Tenho ideias para sentir melhor."},
+              {value:"e2",text:"Sei controlar humores."},
+              {value:"e3",text:"Consigo melhorar humor."},
+              {value:"e4",text:"Estratégias para regular."},
+              {value:"e5",text:"Consigo controlar emocoes."},
+              {value:"e6",text:"Sei o que fazer."}
+            ], isAllRowsRequired: true}
+        ]},
+        { name: "clareza", title: "Clareza Emocional", elements: [
+          { type: "matrix", name: "ders_clareza", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"}],
+            rows: [
+              {value:"cl1",text:"Entendo minhas emocoes."},
+              {value:"cl2",text:"Sei como me sinto."},
+              {value:"cl3",text:"Clareza sobre sentimentos."},
+              {value:"cl4",text:"Sei o que sinto."},
+              {value:"cl5",text:"Consigo descrever."},
+              {value:"cl6",text:"Entendo o que sinto."}
+            ], isAllRowsRequired: true}
+        ]}
+      ]
+    }
+  },
+  {
+    id: "epm",
+    title: "EPM: Escala de Regulacao Emocional",
+    description: "Escala de Modulacao Emocional (26 itens).",
+    schema: {
+      showProgressBar: true,
+      widthMode: "responsive",
+      pages: [
+        { name: "itens", elements: [
+          { type: "matrix", name: "epm_items", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"}],
+            rows: [
+              {value:"i1",text:"Consigo controlar emocoes."},
+              {value:"i2",text:"Nao deixo sentimentos."},
+              {value:"i3",text:"Quando irritado consigo."},
+              {value:"i4",text:"Consigo acalmar."},
+              {value:"i5",text:"Antes de demonstrar."},
+              {value:"i6",text:"Sei expressar."},
+              {value:"i7",text:"Experiencio emocoes."},
+              {value:"i8",text:"Reconheco o que sinto."},
+              {value:"i9",text:"Meu equilibrio emocional."},
+              {value:"i10",text:"Dificuldade aceitar."},
+              {value:"i11",text:"Medo nao conseguir."},
+              {value:"i12",text:"Raiva me domina."},
+              {value:"i13",text:"Fico fora de controle."},
+              {value:"i14",text:"Sinto que nao aguento."},
+              {value:"i15",text:"Fico confuso com feelings."},
+              {value:"i16",text:"Perco controle."},
+              {value:"i17",text:"Ansioso com emocoes."},
+              {value:"i18",text:"Nao sei o que fazer."},
+              {value:"i19",text:"Sinto que vou exploded."},
+              {value:"i20",text:"Nao suporto sentir."},
+              {value:"i21",text:"Consigo relaxar."},
+              {value:"i22",text:"Pensamentos confusos."},
+              {value:"i23",text:"Nao consigo pensar."},
+              {value:"i24",text:"Sensivel demais."},
+              {value:"i25",text:"Mudo de humor rapido."},
+              {value:"i26",text:"Sinto-me vazio."}
+            ], isAllRowsRequired: true}
+        ]}
+      ]
+    }
+  },
+  {
     id: "anamnese_infantil",
     title: "Ficha de Anamnese Infantil (Inicial)",
     description: "Modelo para coleta de dados de desenvolvimento e histórico familiar em pediatria/psicologia infantil.",
