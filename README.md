@@ -76,6 +76,8 @@ navigate(-1); // suporta navegação relativa
 - **Gestão UTC:** Datas armazenadas em UTC e extraídas conforme fuso local para evitar erros de calendário.
 - **Feedback Moderno:** Toasts flutuantes (Emerald-600) para confirmação de ações.
 - **Clinical Dashboard:** Visualização instantânea de métricas de engajamento (Presenças vs Respostas de Instrumentos) diretamente na capa do card do paciente.
+- **Padronização de Abas (Patient Record):** Todas as abas seguem o mesmo padrão visual com header (título + botão Save) alinhados horizontalmente usando `btn btn-primary`.
+- **UX de Registro Clínico:** Área clicável para upload de anexos com opção "Adicionar mais" após primeiro arquivo.
 
 ## Tecnologias
 

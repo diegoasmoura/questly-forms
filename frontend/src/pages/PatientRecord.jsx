@@ -69,7 +69,8 @@ import {
   RefreshCcw,
   DollarSign,
   CreditCard,
-  Receipt
+  Receipt,
+  Save
 } from "lucide-react";
 
 export default function PatientRecord() {
@@ -1050,9 +1051,13 @@ export default function PatientRecord() {
                         <p className="text-xs text-slate-500">Anotações e documentos</p>
                       </div>
                     </div>
+                    <button className="btn btn-primary">
+                      <Save size={14} />
+                      Salvar
+                    </button>
                   </div>
                 </div>
-                
+
                 <div className="p-6">
                   <div className="mb-6">
                     <label className="block text-xs font-semibold text-slate-600 mb-2">Anotações</label>
@@ -1118,6 +1123,11 @@ export default function PatientRecord() {
                             </div>
                           </div>
                         ))}
+                        <label className="flex items-center justify-center gap-2 py-3 text-sm text-slate-500 hover:text-emerald-600 cursor-pointer transition-colors">
+                          <Plus size={16} />
+                          <span>Adicionar mais</span>
+                          <input type="file" multiple className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" disabled={uploading} onChange={handleUploadAttachment} />
+                        </label>
                       </div>
                     )}
                   </div>
