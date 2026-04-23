@@ -1075,7 +1075,7 @@ export default function PatientRecord() {
                           </span>
                         )}
                       </div>
-                      <label className={`flex items-center gap-2 px-3 py-1.5 bg-emerald-900 text-white rounded-lg text-xs font-medium cursor-pointer transition-all ${uploading ? 'opacity-50' : 'hover:bg-emerald-800'}`}>
+                      <label className="btn btn-primary cursor-pointer">
                         {uploading ? (
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         ) : (
@@ -1731,7 +1731,7 @@ export default function PatientRecord() {
                       <button
                         type="button"
                         onClick={() => handleClearAgenda()}
-                        className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 border border-red-100 rounded-xl text-xs font-bold hover:bg-red-100 transition-all shadow-sm"
+                        className="btn btn-danger"
                       >
                         <Trash2 size={14} />
                         Limpar Agenda
@@ -1740,7 +1740,7 @@ export default function PatientRecord() {
                     <button
                       type="button"
                       onClick={addAppointmentSlot}
-                      className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-bold hover:bg-slate-900 transition-all shadow-lg shadow-slate-200"
+                      className="btn btn-primary"
                     >
                       <Plus size={14} />
                       Adicionar Horário
