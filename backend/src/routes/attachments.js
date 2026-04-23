@@ -135,7 +135,7 @@ router.get("/patient/:patientId", authMiddleware, async (req, res) => {
 });
 
 // Download de arquivo
-router.get("/attachments/:id/download", authMiddleware, async (req, res) => {
+router.get("/:id/download", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -174,7 +174,7 @@ router.get("/attachments/:id/download", authMiddleware, async (req, res) => {
 });
 
 // Deletar anexo
-router.delete("/attachments/:id", authMiddleware, async (req, res) => {
+router.delete("/:id", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
