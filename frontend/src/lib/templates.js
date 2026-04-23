@@ -623,17 +623,22 @@ export const clinicalTemplates = [
       ]
     }
   },
-  {
-    id: "eq",
-    title: "EQ: Questionário de Descentração",
-    description: "Escala de Descentração - avalia inteligência emocional (33 itens em 5 subescalas).",
+{
+    id: "compact",
+    title: "CompACT: Avaliação Compreensiva de Processos ACT",
+    description: "Comprehensive assessment of ACT - avalia flexibilidade psicológica (36 itens).",
     schema: {
       showProgressBar: true,
       widthMode: "responsive",
+      questionTitleLocation: "underTitle",
       pages: [
-        { name: "intro", elements: [
-          { type: "html", name: "intro", html: "<div style='padding:20px;'><h2>EQ</h2><p>Para cada frase, marque: <strong>1 = Discordo</strong> ate <strong>5 = Concordo</strong></p></div>" }
-        ]},
+        {
+          name: "inicio",
+          title: "Introdução",
+          elements: [
+            { type: "html", name: "intro", html: "<div style='padding:16px;background:#f0fdf4;border-radius:8px;'><h3 style='color:#059669;'>Questionário Compreensivo de Processos ACT</h3><p>Avalia: Abertura à Experiência, Engajamento Atencional e Valores/Ação.</p><p><strong>Escala:</strong> 0=Totalmente diferente a 6=Totalmente igual</p></div>" }
+          ]
+        },
         { name: "autoconsc", title: "Autoconsciencia", elements: [
           { type: "matrix", name: "eq_auto", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"}],
             rows: [
