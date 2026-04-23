@@ -439,7 +439,7 @@ export default function PatientRecord() {
       }
     } catch (error) {
       console.error("Erro ao fazer upload:", error);
-      alert("Erro ao fazer upload do arquivo");
+      alert("Erro ao fazer upload: " + (error.message || "Tente novamente"));
     } finally {
       setUploading(false);
       e.target.value = '';
@@ -453,7 +453,7 @@ export default function PatientRecord() {
       setAttachments(prev => prev.filter(a => a.id !== attachmentId));
     } catch (error) {
       console.error("Erro ao deletar anexo:", error);
-      alert("Erro ao deletar arquivo");
+      alert("Erro ao deletar arquivo: " + (error.message || "Tente novamente"));
     }
   };
 
