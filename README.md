@@ -31,7 +31,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 ## Funcionalidades Principais
 
 - **Home (Visão Geral):** Resumo dinâmico de atividades, estatísticas de pacientes e gráficos de tendências clínicas.
-- **Gestão de Pacientes (Clinical Dashboard):** Painel de controle individual com métricas unificadas de engajamento (Sessões vs Instrumentos) e alertas de aniversário.
+- **Gestão de Pacientes (Clinical Dashboard):** Painel de controle individual com métricas unificadas de engajamento (Sessões vs Instrumentos), alertas de aniversário com visual festivo e tooltip instantâneo.
 - **Agenda Profissional:** Gestão integrada de horários recorrentes, visão mensal/lista e detecção de conflitos.
 - **Histórico de Frequência:** Registro detalhado de presenças, faltas e reagendamentos inteligentes em cadeia.
 - **Gestão Financeira:** Controle de pagamentos por blocos de sessões, conciliação clínica e geração de PDFs profissionais.
@@ -58,6 +58,9 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 
 ### 4. Tecnologia e UX
 - **Navegação Consistente:** Padronização de interatividade em listas e cards. Elementos como Avatares, Nomes e Ícones agora são links diretos para prontuários, edições e visualizações.
+- **Semana de Aniversário (UX Humanizada):** Visual festivo automático (dourado/lança-confetes) ativado em uma janela de 7 dias ao redor do aniversário do paciente (4 dias antes até 3 dias depois).
+- **Métricas de Engajamento Unificadas:** Comparação direta entre assiduidade física (Sessões) e engajamento digital (Instrumentos Clínicos) na capa do card.
+- **Tooltips Instantâneos:** Substituição dos títulos nativos por balões informativos de alta performance (sem delay).
 - **UX de Portals:** Modais de agenda utilizam **React Portals** para cobertura total da tela (100% de largura/altura).
 - **Gestão UTC:** Datas armazenadas em UTC e extraídas conforme fuso local para evitar erros de calendário.
 - **Feedback Moderno:** Toasts flutuantes (Emerald-600) para confirmação de ações.

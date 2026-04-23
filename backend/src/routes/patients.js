@@ -184,14 +184,22 @@ router.put("/:id", async (req, res) => {
     
     console.log("cleanData after processing:", JSON.stringify(cleanData, null, 2));
 
-    if (cleanData.birthDate) {
-      const date = new Date(cleanData.birthDate);
-      cleanData.birthDate = isNaN(date.getTime()) ? null : date;
+    if (cleanData.hasOwnProperty('birthDate')) {
+      if (!cleanData.birthDate) {
+        cleanData.birthDate = null;
+      } else {
+        const date = new Date(cleanData.birthDate);
+        cleanData.birthDate = isNaN(date.getTime()) ? null : date;
+      }
     }
 
-    if (cleanData.nextSession) {
-      const date = new Date(cleanData.nextSession);
-      cleanData.nextSession = isNaN(date.getTime()) ? null : date;
+    if (cleanData.hasOwnProperty('nextSession')) {
+      if (!cleanData.nextSession) {
+        cleanData.nextSession = null;
+      } else {
+        const date = new Date(cleanData.nextSession);
+        cleanData.nextSession = isNaN(date.getTime()) ? null : date;
+      }
     }
 
     if (cleanData.sessionDuration) {
@@ -215,8 +223,17 @@ router.put("/:id", async (req, res) => {
     console.log("Updated patient from DB:", JSON.stringify(updated, null, 2));
     res.json(updated);
   } catch (error) {
-    console.error("Error updating patient:", error.message);
-    res.status(500).json({ error: "Erro ao atualizar paciente" });
+    console.error("Error updating patient:", error);
+    
+    if (error.code === 'P2002') {
+      const target = error.meta?.target || [];
+      const field = target.includes('email') ? 'e-mail' : target.includes('cpf') ? 'CPF' : 'dados';
+      return res.status(400).json({ 
+        error: `Um paciente com este ${field} já está cadastrado.` 
+      });
+    }
+    
+    res.status(500).json({ error: error.message || "Erro ao atualizar paciente" });
   }
 });
 

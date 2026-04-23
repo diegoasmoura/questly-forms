@@ -34,7 +34,9 @@ import {
   Download,
   Trash,
   AlertTriangle,
-  Clock
+  Clock,
+  CakeSlice,
+  PartyPopper
 } from "lucide-react";
 
 export default function Patients() {
@@ -272,30 +274,29 @@ export default function Patients() {
             )}
           </div>
         ) : viewMode === "grid" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pt-6 pb-10 overflow-visible">
             {filteredPatients.map((patient) => (
-            <PatientCard
-              key={patient.id}
-              patient={patient}
-              onDelete={handleDeletePatient}
-              onEdit={() => setEditPatient(patient)}
-            />
-          ))}
+              <PatientCard
+                key={patient.id}
+                patient={patient}
+                onDelete={handleDeletePatient}
+                onEdit={() => setEditPatient(patient)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4 pt-6 pb-10 overflow-visible">
+            {filteredPatients.map((patient) => (
+              <PatientListRow
+                key={patient.id}
+                patient={patient}
+                onDelete={handleDeletePatient}
+                onEdit={() => setEditPatient(patient)}
+              />
+            ))}
+          </div>
+        )}
         </div>
-      ) : (
-        <div className="space-y-3">
-          {filteredPatients.map((patient) => (
-            <PatientListRow
-              key={patient.id}
-              patient={patient}
-              onDelete={handleDeletePatient}
-              onEdit={() => setEditPatient(patient)}
-            />
-          ))}
-        </div>
-      )}
-      </div>
-
       {/* Add Patient Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
@@ -1515,50 +1516,85 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
 }
 
 function calculateDaysUntilBirthday(birthDate) {
-  if (!birthDate) return null;
+  if (!birthDate) return { days: null, isWeek: false };
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const birth = new Date(birthDate);
-  const nextBirthday = new Date(today.getFullYear(), birth.getMonth(), birth.getDate());
   
+  // Criar data do aniversário para este ano
+  const thisYearBirthday = new Date(today.getFullYear(), birth.getMonth(), birth.getDate());
+  
+  // Calcular diferença em dias para o aniversário deste ano (pode ser negativa se já passou)
+  const diffTimeThisYear = thisYearBirthday - today;
+  const diffDaysThisYear = Math.ceil(diffTimeThisYear / (1000 * 60 * 60 * 24));
+  
+  // É a "janela de aniversário" se estiver entre 4 dias antes e 3 dias depois
+  const isWeek = diffDaysThisYear >= -3 && diffDaysThisYear <= 4;
+  
+  // Para o contador de "próximo aniversário", se já passou este ano, calcular para o ano que vem
+  let nextBirthday = new Date(today.getFullYear(), birth.getMonth(), birth.getDate());
   if (nextBirthday < today) {
     nextBirthday.setFullYear(today.getFullYear() + 1);
   }
+  const diffTimeNext = nextBirthday - today;
+  const diffDaysNext = Math.ceil(diffTimeNext / (1000 * 60 * 60 * 24));
   
-  const diffTime = Math.abs(nextBirthday - today);
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  if (diffDaysThisYear === 0) return { days: "Hoje! 🎂", isWeek: true };
   
-  if (diffDays === 0 || diffDays === 365) return "Hoje! 🎂";
-  return diffDays;
+  // Se já passou mas está na janela festiva
+  if (isWeek && diffDaysThisYear < 0) {
+    return { days: `Foi há ${Math.abs(diffDaysThisYear)} dias`, isWeek: true };
+  }
+
+  return { days: diffDaysNext, isWeek };
 }
 
 function PatientCard({ patient, onDelete, onEdit }) {
   const sentCount = patient._count?.shareLinks || 0;
   const responseCount = patient._count?.responses || 0;
   const isActive = patient.isActive !== false;
-  const daysUntilBirthday = calculateDaysUntilBirthday(patient.birthDate);
+  const { days: daysUntilBirthday, isWeek: isBirthdayWeek } = calculateDaysUntilBirthday(patient.birthDate);
   const attendance = patient.attendanceStats || { presente: 0, falta: 0, justificada: 0 };
 
   return (
-    <div className={`card group hover:shadow-xl hover:border-emerald-200 transition-all duration-300 flex flex-col h-full card-bone overflow-hidden border-slate-100 ${!isActive ? 'opacity-70' : ''}`}>
+    <div className={`card group hover:shadow-xl transition-all duration-300 flex flex-col h-full card-bone border-slate-100 relative ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'ring-2 ring-amber-400 border-amber-200 bg-gradient-to-br from-white to-amber-50/30 shadow-lg shadow-amber-100/50' : 'hover:border-emerald-200'}`}>
+      {isBirthdayWeek && (
+        <div className="absolute -top-3 -right-3 w-10 h-10 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-amber-100 animate-bounce z-10">
+          <PartyPopper size={20} className="text-amber-500" />
+        </div>
+      )}
+
       {/* Top Bar: Identity & Context */}
-      <div className="p-5 pb-0 flex items-start justify-between">
+      <div className="p-5 pb-0 flex items-start justify-between relative z-0">
         <div className="flex items-center gap-3">
-          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-xl transition-all duration-300 ${isActive ? 'bg-slate-900 text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white' : 'bg-slate-200 text-slate-500'}`}>
-            {patient.name.charAt(0).toUpperCase()}
+          <div className="relative">
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-xl transition-all duration-300 ${isActive ? (isBirthdayWeek ? 'bg-amber-500 text-white shadow-lg shadow-amber-200' : 'bg-slate-900 text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white') : 'bg-slate-200 text-slate-500'}`}>
+              {patient.name.charAt(0).toUpperCase()}
+            </div>
           </div>
           <div className="flex flex-col gap-1">
-            <h3 className="text-lg font-bold text-slate-900 leading-tight group-hover:text-emerald-700 transition-colors truncate max-w-[160px]">
+            <h3 className={`text-lg font-bold leading-tight transition-colors truncate max-w-[160px] ${isBirthdayWeek ? 'text-amber-900' : 'text-slate-900 group-hover:text-emerald-700'}`}>
               {patient.name}
             </h3>
             <div className="flex items-center gap-2">
-              <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border ${isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+              <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border ${isActive ? (isBirthdayWeek ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-100') : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
                 {isActive ? 'Ativo' : 'Inativo'}
               </span>
               {daysUntilBirthday !== null && (
-                <span className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border ${daysUntilBirthday === "Hoje! 🎂" ? 'bg-amber-100 text-amber-700 border-amber-200 animate-pulse' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
-                  <Calendar size={10} />
-                  {typeof daysUntilBirthday === 'string' ? 'Aniversário!' : `${daysUntilBirthday} dias`}
-                </span>
+                <div className="relative group/tooltip">
+                  <span 
+                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border cursor-pointer ${isBirthdayWeek ? 'bg-amber-500 text-white border-amber-400 animate-pulse' : 'bg-slate-50 text-slate-600 border-slate-200'}`}
+                  >
+                    <CakeSlice size={10} className={isBirthdayWeek ? 'text-white' : 'text-slate-400'} />
+                    {typeof daysUntilBirthday === 'string' ? 'Aniversário!' : `${daysUntilBirthday} dias`}
+                  </span>
+                  
+                  {/* Instant Tooltip */}
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 text-white text-[10px] font-bold rounded shadow-xl opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-100 whitespace-nowrap z-50">
+                    {isBirthdayWeek ? "Semana de aniversário!" : "Dias para o próximo aniversário"}
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900" />
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -1573,35 +1609,35 @@ function PatientCard({ patient, onDelete, onEdit }) {
         <div className="rounded-2xl border border-slate-100 bg-slate-50/50 overflow-hidden">
           <div className="grid grid-cols-2">
             {/* Attendance Section */}
-            <div className="p-3 border-r border-slate-100">
-              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1">
-                <Calendar size={10} className="text-emerald-500" /> Sessões
+            <div className="p-4 border-r border-slate-100">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1">
+                <Calendar size={12} className="text-emerald-500" /> Sessões
               </p>
-              <div className="flex items-end gap-3">
+              <div className="flex items-end gap-4">
                 <div className="flex flex-col">
-                  <span className="text-xl font-black text-slate-900 leading-none">{attendance.presente}</span>
-                  <span className="text-[7px] font-bold text-emerald-600 uppercase mt-1">Pres.</span>
+                  <span className="text-2xl font-black text-slate-900 leading-none">{attendance.presente}</span>
+                  <span className="text-[10px] font-bold text-emerald-600 uppercase mt-1.5">Pres.</span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xl font-black text-slate-400 leading-none">{attendance.falta}</span>
-                  <span className="text-[7px] font-bold text-rose-400 uppercase mt-1">Faltas</span>
+                  <span className="text-2xl font-black text-slate-400 leading-none">{attendance.falta}</span>
+                  <span className="text-[10px] font-bold text-rose-400 uppercase mt-1.5">Faltas</span>
                 </div>
               </div>
             </div>
 
             {/* Forms Section */}
-            <div className="p-3">
-              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1">
-                <FileText size={10} className="text-emerald-500" /> Instrumentos
+            <div className="p-4">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1">
+                <FileText size={12} className="text-emerald-500" /> Instrumentos
               </p>
-              <div className="flex items-end gap-3">
+              <div className="flex items-end gap-4">
                 <div className="flex flex-col">
-                  <span className="text-xl font-black text-slate-900 leading-none">{sentCount}</span>
-                  <span className="text-[7px] font-bold text-slate-500 uppercase mt-1">Env.</span>
+                  <span className="text-2xl font-black text-slate-900 leading-none">{sentCount}</span>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase mt-1.5">Env.</span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xl font-black text-emerald-600 leading-none">{responseCount}</span>
-                  <span className="text-[7px] font-bold text-emerald-600 uppercase mt-1">Resp.</span>
+                  <span className="text-2xl font-black text-emerald-600 leading-none">{responseCount}</span>
+                  <span className="text-[10px] font-bold text-emerald-600 uppercase mt-1.5">Resp.</span>
                 </div>
               </div>
             </div>
@@ -1643,26 +1679,36 @@ function PatientListRow({ patient, onDelete, onEdit }) {
   const sentCount = patient._count?.shareLinks || 0;
   const responseCount = patient._count?.responses || 0;
   const isActive = patient.isActive !== false;
-  const daysUntilBirthday = calculateDaysUntilBirthday(patient.birthDate);
+  const { days: daysUntilBirthday, isWeek: isBirthdayWeek } = calculateDaysUntilBirthday(patient.birthDate);
   const attendance = patient.attendanceStats || { presente: 0, falta: 0, justificada: 0 };
 
   return (
-    <div className={`card p-4 flex items-center gap-5 hover:border-emerald-200 hover:bg-emerald-50/10 transition-all ${!isActive ? 'opacity-70' : ''}`}>
-      <Link to={`/patients/${patient.id}`} className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg shrink-0 transition-all ${isActive ? 'bg-slate-900 text-emerald-400' : 'bg-slate-200 text-slate-500'}`}>
-        {patient.name.charAt(0).toUpperCase()}
+    <div className={`card p-4 flex items-center gap-5 transition-all relative overflow-hidden ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'border-l-4 border-l-amber-400 bg-amber-50/20' : 'hover:border-emerald-200 hover:bg-emerald-50/10'}`}>
+      <Link to={`/patients/${patient.id}`} className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg shrink-0 transition-all ${isActive ? (isBirthdayWeek ? 'bg-amber-500 text-white' : 'bg-slate-900 text-emerald-400') : 'bg-slate-200 text-slate-500'}`}>
+        {isBirthdayWeek ? <PartyPopper size={20} /> : patient.name.charAt(0).toUpperCase()}
       </Link>
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-3 mb-1">
           <Link to={`/patients/${patient.id}`} className="group/name">
-            <h4 className="font-bold text-slate-900 group-hover:text-emerald-600 transition-colors truncate text-base">
+            <h4 className={`font-bold transition-colors truncate text-base ${isBirthdayWeek ? 'text-amber-900' : 'text-slate-900 group-hover:text-emerald-600'}`}>
               {patient.name}
             </h4>
           </Link>
           {daysUntilBirthday !== null && (
-            <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase border ${daysUntilBirthday === "Hoje! 🎂" ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>
-              {typeof daysUntilBirthday === 'string' ? 'Niver Hoje!' : `${daysUntilBirthday}d para niver`}
-            </span>
+            <div className="relative group/tooltip">
+              <span 
+                className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase border flex items-center gap-1 cursor-pointer ${isBirthdayWeek ? 'bg-amber-500 text-white border-amber-400 animate-pulse' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>
+                <CakeSlice size={10} className={isBirthdayWeek ? 'text-white' : 'text-slate-400'} />
+                {typeof daysUntilBirthday === 'string' ? (daysUntilBirthday === "Hoje! 🎂" ? 'Niver Hoje!' : daysUntilBirthday) : `Em ${daysUntilBirthday}d`}
+              </span>
+
+              {/* Instant Tooltip */}
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 text-white text-[9px] font-bold rounded shadow-xl opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-100 whitespace-nowrap z-50">
+                {isBirthdayWeek ? "Semana de aniversário!" : "Dias para o próximo aniversário"}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900" />
+              </div>
+            </div>
           )}
         </div>
         <div className="flex items-center gap-4 text-xs text-slate-500">
@@ -1678,19 +1724,35 @@ function PatientListRow({ patient, onDelete, onEdit }) {
       </div>
 
       {/* Unified Stats for List View */}
-      <div className="flex items-center gap-8 px-6 border-x border-slate-100">
+      <div className="flex items-center gap-10 px-8 border-x border-slate-100">
         <div className="flex flex-col">
-          <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1">Sessões</p>
-          <div className="flex gap-2">
-            <span className="text-sm font-black text-slate-900">{attendance.presente}<span className="text-[8px] text-emerald-600 ml-0.5">P</span></span>
-            <span className="text-sm font-black text-slate-400">{attendance.falta}<span className="text-[8px] text-rose-400 ml-0.5">F</span></span>
+          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1">
+            <Calendar size={10} className="text-emerald-500" /> Sessões
+          </p>
+          <div className="flex gap-4">
+            <div className="flex flex-col">
+              <span className="text-lg font-black text-slate-900 leading-none">{attendance.presente}</span>
+              <span className="text-[9px] font-bold text-emerald-600 uppercase mt-1">Pres.</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-lg font-black text-slate-400 leading-none">{attendance.falta}</span>
+              <span className="text-[9px] font-bold text-rose-400 uppercase mt-1">Faltas</span>
+            </div>
           </div>
         </div>
         <div className="flex flex-col">
-          <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1">Instrumentos</p>
-          <div className="flex gap-2">
-            <span className="text-sm font-black text-slate-900">{sentCount}<span className="text-[8px] text-slate-400 ml-0.5">E</span></span>
-            <span className="text-sm font-black text-emerald-600">{responseCount}<span className="text-[8px] text-emerald-600 ml-0.5">R</span></span>
+          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1">
+            <FileText size={10} className="text-emerald-500" /> Instrumentos
+          </p>
+          <div className="flex gap-4">
+            <div className="flex flex-col">
+              <span className="text-lg font-black text-slate-900 leading-none">{sentCount}</span>
+              <span className="text-[9px] font-bold text-slate-500 uppercase mt-1">Env.</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-lg font-black text-emerald-600 leading-none">{responseCount}</span>
+              <span className="text-[9px] font-bold text-emerald-600 uppercase mt-1">Resp.</span>
+            </div>
           </div>
         </div>
       </div>
