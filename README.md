@@ -31,7 +31,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 ## Funcionalidades Principais
 
 - **Home (Visão Geral):** Resumo dinâmico de atividades, estatísticas de pacientes e gráficos de tendências clínicas.
-- **Gestão de Pacientes:** Cadastro completo com prontuário digital, histórico de respostas e análise de evolução.
+- **Gestão de Pacientes (Clinical Dashboard):** Painel de controle individual com métricas unificadas de engajamento (Sessões vs Instrumentos) e alertas de aniversário.
 - **Agenda Profissional:** Gestão integrada de horários recorrentes, visão mensal/lista e detecção de conflitos.
 - **Histórico de Frequência:** Registro detalhado de presenças, faltas e reagendamentos inteligentes em cadeia.
 - **Gestão Financeira:** Controle de pagamentos por blocos de sessões, conciliação clínica e geração de PDFs profissionais.
@@ -57,9 +57,11 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Status do Recibo:** Controle visual de emissão (Emitido, Com Anexo, Pendente).
 
 ### 4. Tecnologia e UX
+- **Navegação Consistente:** Padronização de interatividade em listas e cards. Elementos como Avatares, Nomes e Ícones agora são links diretos para prontuários, edições e visualizações.
 - **UX de Portals:** Modais de agenda utilizam **React Portals** para cobertura total da tela (100% de largura/altura).
 - **Gestão UTC:** Datas armazenadas em UTC e extraídas conforme fuso local para evitar erros de calendário.
 - **Feedback Moderno:** Toasts flutuantes (Emerald-600) para confirmação de ações.
+- **Clinical Dashboard:** Visualização instantânea de métricas de engajamento (Presenças vs Respostas de Instrumentos) diretamente na capa do card do paciente.
 
 ## Tecnologias
 

@@ -392,13 +392,17 @@ function FormListRow({ form, stats, onDelete, onDuplicate }) {
 
   return (
     <div className="card p-4 flex items-center gap-4 hover:border-emerald-200 transition-all">
-      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${isTemplate ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-slate-900"}`}>
+      <Link to={`/forms/${form.id}/edit`} className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors ${isTemplate ? "bg-amber-50 text-amber-600 hover:bg-amber-100" : "bg-emerald-50 text-slate-900 hover:bg-emerald-100"}`}>
         {isTemplate ? <BookTemplate size={20} /> : <FileText size={20} />}
-      </div>
+      </Link>
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <h4 className="font-bold text-slate-900 truncate">{form.title}</h4>
+          <Link to={`/forms/${form.id}/edit`} className="group/name block min-w-0 truncate">
+            <h4 className="font-bold text-slate-900 group-hover:text-emerald-600 transition-colors truncate">
+              {form.title}
+            </h4>
+          </Link>
           {isTemplate && <span className="text-[10px] font-bold uppercase text-amber-500 bg-amber-50 px-2 py-0.5 rounded">Premium</span>}
         </div>
         <div className="flex items-center gap-3">

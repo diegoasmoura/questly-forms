@@ -249,15 +249,18 @@ export default function FormResponses() {
                   <div className="flex items-center gap-4 flex-1">
                     {/* Patient Info */}
                     {response.patient ? (
-                      <div className="flex items-center gap-3 px-4 py-2 bg-emerald-50/50 rounded-xl border border-emerald-100">
-                        <div className="w-10 h-10 rounded-lg bg-emerald-900 text-white flex items-center justify-center text-xs font-bold">
+                      <Link 
+                        to={`/patients/${response.patient.id}`}
+                        className="flex items-center gap-3 px-4 py-2 bg-emerald-50/50 rounded-xl border border-emerald-100 hover:border-emerald-300 transition-all group/patient"
+                      >
+                        <div className="w-10 h-10 rounded-lg bg-emerald-900 text-white flex items-center justify-center text-xs font-bold group-hover/patient:bg-emerald-700 transition-colors">
                           {response.patient.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-slate-900">{response.patient.name}</p>
+                          <p className="text-sm font-bold text-slate-900 group-hover/patient:text-emerald-700 transition-colors">{response.patient.name}</p>
                           <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-tighter">Paciente Vinculado</p>
                         </div>
-                      </div>
+                      </Link>
                     ) : (
                       <div className="flex items-center gap-3 px-4 py-2 bg-emerald-50 rounded-xl border border-emerald-100">
                         <div className="w-10 h-10 rounded-lg bg-emerald-200 flex items-center justify-center text-slate-600 text-xs">

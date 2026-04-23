@@ -1514,106 +1514,126 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
   );
 }
 
+function calculateDaysUntilBirthday(birthDate) {
+  if (!birthDate) return null;
+  const today = new Date();
+  const birth = new Date(birthDate);
+  const nextBirthday = new Date(today.getFullYear(), birth.getMonth(), birth.getDate());
+  
+  if (nextBirthday < today) {
+    nextBirthday.setFullYear(today.getFullYear() + 1);
+  }
+  
+  const diffTime = Math.abs(nextBirthday - today);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 0 || diffDays === 365) return "Hoje! 🎂";
+  return diffDays;
+}
+
 function PatientCard({ patient, onDelete, onEdit }) {
   const sentCount = patient._count?.shareLinks || 0;
   const responseCount = patient._count?.responses || 0;
   const isActive = patient.isActive !== false;
+  const daysUntilBirthday = calculateDaysUntilBirthday(patient.birthDate);
+  const attendance = patient.attendanceStats || { presente: 0, falta: 0, justificada: 0 };
 
   return (
-    <div className={`card group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full card-bone overflow-hidden border-emerald-100/50 ${!isActive ? 'opacity-70' : ''}`}>
-      <div className="p-6 flex-1">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-lg transition-colors duration-300 ${isActive ? 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white' : 'bg-slate-200 text-slate-500'}`}>
-              {patient.name.charAt(0).toUpperCase()}
+    <div className={`card group hover:shadow-xl hover:border-emerald-200 transition-all duration-300 flex flex-col h-full card-bone overflow-hidden border-slate-100 ${!isActive ? 'opacity-70' : ''}`}>
+      {/* Top Bar: Identity & Context */}
+      <div className="p-5 pb-0 flex items-start justify-between">
+        <div className="flex items-center gap-3">
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-xl transition-all duration-300 ${isActive ? 'bg-slate-900 text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white' : 'bg-slate-200 text-slate-500'}`}>
+            {patient.name.charAt(0).toUpperCase()}
+          </div>
+          <div className="flex flex-col gap-1">
+            <h3 className="text-lg font-bold text-slate-900 leading-tight group-hover:text-emerald-700 transition-colors truncate max-w-[160px]">
+              {patient.name}
+            </h3>
+            <div className="flex items-center gap-2">
+              <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border ${isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+                {isActive ? 'Ativo' : 'Inativo'}
+              </span>
+              {daysUntilBirthday !== null && (
+                <span className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border ${daysUntilBirthday === "Hoje! 🎂" ? 'bg-amber-100 text-amber-700 border-amber-200 animate-pulse' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
+                  <Calendar size={10} />
+                  {typeof daysUntilBirthday === 'string' ? 'Aniversário!' : `${daysUntilBirthday} dias`}
+                </span>
+              )}
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                {isActive ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full">
-                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
-                    ATIVO
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-200 text-slate-500 text-[10px] font-bold rounded-full">
-                    <span className="w-1.5 h-1.5 bg-slate-400 rounded-full"></span>
-                    INATIVO
-                  </span>
-                )}
+          </div>
+        </div>
+        <button onClick={() => onDelete(patient.id)} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
+          <Trash2 size={16} />
+        </button>
+      </div>
+
+      {/* Unified Dashboard: Attendance & Forms */}
+      <div className="px-5 py-6">
+        <div className="rounded-2xl border border-slate-100 bg-slate-50/50 overflow-hidden">
+          <div className="grid grid-cols-2">
+            {/* Attendance Section */}
+            <div className="p-3 border-r border-slate-100">
+              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1">
+                <Calendar size={10} className="text-emerald-500" /> Sessões
+              </p>
+              <div className="flex items-end gap-3">
+                <div className="flex flex-col">
+                  <span className="text-xl font-black text-slate-900 leading-none">{attendance.presente}</span>
+                  <span className="text-[7px] font-bold text-emerald-600 uppercase mt-1">Pres.</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xl font-black text-slate-400 leading-none">{attendance.falta}</span>
+                  <span className="text-[7px] font-bold text-rose-400 uppercase mt-1">Faltas</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="relative">
-            <button
-              onClick={() => onDelete(patient.id)}
-              className="p-2 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors"
-              title="Excluir"
-            >
-              <Trash2 size={18} />
-            </button>
-          </div>
-        </div>
 
-        <Link to={`/patients/${patient.id}`} className="block mb-2 group/title" title={patient.name}>
-          <h3 className="text-xl font-bold text-slate-800 group-hover:text-slate-800 transition-colors truncate">
-            {patient.name}
-          </h3>
-          {patient.birthDate && (
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">
-              {new Date(patient.birthDate).toLocaleDateString('pt-BR')}
-            </p>
-          )}
-        </Link>
-
-        <div className="mt-4 space-y-2 text-xs text-slate-600">
-          {patient.email && (
-            <div className="flex items-center gap-2">
-              <Mail size={12} className="shrink-0 text-emerald-400" />
-              <span className="truncate">{patient.email}</span>
+            {/* Forms Section */}
+            <div className="p-3">
+              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1">
+                <FileText size={10} className="text-emerald-500" /> Instrumentos
+              </p>
+              <div className="flex items-end gap-3">
+                <div className="flex flex-col">
+                  <span className="text-xl font-black text-slate-900 leading-none">{sentCount}</span>
+                  <span className="text-[7px] font-bold text-slate-500 uppercase mt-1">Env.</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xl font-black text-emerald-600 leading-none">{responseCount}</span>
+                  <span className="text-[7px] font-bold text-emerald-600 uppercase mt-1">Resp.</span>
+                </div>
+              </div>
             </div>
-          )}
-          {patient.phone && (
-            <div className="flex items-center gap-2">
-              <Phone size={12} className="shrink-0 text-emerald-400" />
-              <span>{patient.phone}</span>
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center gap-4 mt-4 pt-4 border-t border-emerald-50">
-          <div className="flex flex-col">
-            <span className="text-lg font-black text-slate-800 leading-none">{sentCount}</span>
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">
-              {sentCount <= 1 ? 'Enviado' : 'Enviados'}
-            </span>
-          </div>
-          <div className="flex items-center gap-1">
-            <ChevronRight size={14} className="text-emerald-400" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-lg font-black text-emerald-600 leading-none">{responseCount}</span>
-            <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-1">
-              {responseCount <= 1 ? 'Respondido' : 'Respondidos'}
-            </span>
           </div>
         </div>
       </div>
 
-      <div className="p-4 bg-emerald-50/50 border-t border-emerald-50 flex items-center justify-between gap-2">
-        <Link
-          to={`/patients/${patient.id}`}
-          className="btn btn-secondary text-xs flex-1"
-        >
-          <FileText size={14} />
-          Prontuário
-        </Link>
-        <button
-          onClick={() => onEdit(patient)}
-          className="btn btn-secondary text-xs flex-1"
-        >
-          <Pencil size={14} />
-          Editar
-        </button>
+      {/* Footer Info & Actions */}
+      <div className="px-5 pb-5 mt-auto">
+        <div className="flex flex-col gap-2 mb-4">
+          {patient.phone && (
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <Phone size={12} className="text-emerald-500" />
+              <span className="font-medium">{patient.phone}</span>
+            </div>
+          )}
+          {patient.email && (
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <Mail size={12} className="text-emerald-500" />
+              <span className="font-medium truncate">{patient.email}</span>
+            </div>
+          )}
+        </div>
+        
+        <div className="flex gap-2">
+          <Link to={`/patients/${patient.id}`} className="flex-1 btn bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 text-xs py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
+            <FileText size={14} /> Prontuário
+          </Link>
+          <button onClick={() => onEdit(patient)} className="btn bg-slate-900 text-white hover:bg-slate-800 text-xs px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-slate-200">
+            <Pencil size={14} /> Editar
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -1623,77 +1643,64 @@ function PatientListRow({ patient, onDelete, onEdit }) {
   const sentCount = patient._count?.shareLinks || 0;
   const responseCount = patient._count?.responses || 0;
   const isActive = patient.isActive !== false;
+  const daysUntilBirthday = calculateDaysUntilBirthday(patient.birthDate);
+  const attendance = patient.attendanceStats || { presente: 0, falta: 0, justificada: 0 };
 
   return (
-    <div className={`card p-4 flex items-center gap-4 hover:border-emerald-200 transition-all ${!isActive ? 'opacity-70' : ''}`}>
-      <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg shrink-0 ${isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-200 text-slate-500'}`}>
+    <div className={`card p-4 flex items-center gap-5 hover:border-emerald-200 hover:bg-emerald-50/10 transition-all ${!isActive ? 'opacity-70' : ''}`}>
+      <Link to={`/patients/${patient.id}`} className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg shrink-0 transition-all ${isActive ? 'bg-slate-900 text-emerald-400' : 'bg-slate-200 text-slate-500'}`}>
         {patient.name.charAt(0).toUpperCase()}
-      </div>
+      </Link>
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-3 mb-1">
-          <h4 className="font-bold text-slate-800 truncate">{patient.name}</h4>
-          {!isActive && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-200 text-slate-500 text-[10px] font-bold rounded-full">
-              INATIVO
-            </span>
-          )}
-          {patient.birthDate && (
-            <span className="text-xs text-slate-500">
-              ({(() => {
-                const today = new Date();
-                const birth = new Date(patient.birthDate);
-                let age = today.getFullYear() - birth.getFullYear();
-                const monthDiff = today.getMonth() - birth.getMonth();
-                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-                  age--;
-                }
-                return `${age} anos`;
-              })()})
+          <Link to={`/patients/${patient.id}`} className="group/name">
+            <h4 className="font-bold text-slate-900 group-hover:text-emerald-600 transition-colors truncate text-base">
+              {patient.name}
+            </h4>
+          </Link>
+          {daysUntilBirthday !== null && (
+            <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase border ${daysUntilBirthday === "Hoje! 🎂" ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>
+              {typeof daysUntilBirthday === 'string' ? 'Niver Hoje!' : `${daysUntilBirthday}d para niver`}
             </span>
           )}
         </div>
-        <div className="flex items-center gap-4">
-          {patient.email && (
-            <div className="flex items-center gap-1 text-xs text-slate-600">
-              <Mail size={12} className="shrink-0" />
-              <span className="truncate">{patient.email}</span>
-            </div>
-          )}
-          {patient.phone && (
-            <div className="flex items-center gap-1 text-xs text-slate-600">
-              <Phone size={12} className="shrink-0" />
-              <span>{patient.phone}</span>
-            </div>
-          )}
+        <div className="flex items-center gap-4 text-xs text-slate-500">
+          <div className="flex items-center gap-1.5">
+            <Phone size={12} className="text-emerald-500" />
+            <span>{patient.phone || '--'}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Mail size={12} className="text-emerald-500" />
+            <span className="truncate max-w-[120px]">{patient.email || '--'}</span>
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-3 shrink-0">
-        <div className="flex flex-col items-center">
-          <span className="text-lg font-black text-slate-800">{sentCount}</span>
-          <span className="text-[10px] font-bold text-slate-500 uppercase">
-            {sentCount <= 1 ? 'Enviado' : 'Enviados'}
-          </span>
+      {/* Unified Stats for List View */}
+      <div className="flex items-center gap-8 px-6 border-x border-slate-100">
+        <div className="flex flex-col">
+          <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1">Sessões</p>
+          <div className="flex gap-2">
+            <span className="text-sm font-black text-slate-900">{attendance.presente}<span className="text-[8px] text-emerald-600 ml-0.5">P</span></span>
+            <span className="text-sm font-black text-slate-400">{attendance.falta}<span className="text-[8px] text-rose-400 ml-0.5">F</span></span>
+          </div>
         </div>
-        <ChevronRight size={14} className="text-emerald-400" />
-        <div className="flex flex-col items-center">
-          <span className="text-lg font-black text-emerald-600">{responseCount}</span>
-          <span className="text-[10px] font-bold text-emerald-600 uppercase">
-            {responseCount <= 1 ? 'Respondido' : 'Respondidos'}
-          </span>
+        <div className="flex flex-col">
+          <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1">Instrumentos</p>
+          <div className="flex gap-2">
+            <span className="text-sm font-black text-slate-900">{sentCount}<span className="text-[8px] text-slate-400 ml-0.5">E</span></span>
+            <span className="text-sm font-black text-emerald-600">{responseCount}<span className="text-[8px] text-emerald-600 ml-0.5">R</span></span>
+          </div>
         </div>
       </div>
 
       <div className="flex items-center gap-2">
-        <Link to={`/patients/${patient.id}`} className="btn btn-secondary py-2 px-3 text-xs" title="Ver Paciente">
-          <FileText size={14} />
+        <Link to={`/patients/${patient.id}`} className="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50 transition-all">
+          <FileText size={18} />
         </Link>
-        <button onClick={() => onEdit(patient)} className="btn btn-secondary py-2 px-3 text-xs" title="Editar Paciente">
-          <Pencil size={14} />
-        </button>
-        <button onClick={() => onDelete(patient.id)} className="btn btn-secondary py-2 px-3 text-xs text-red-500 hover:text-red-700" title="Excluir Paciente">
-          <Trash2 size={14} />
+        <button onClick={() => onEdit(patient)} className="p-2.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-md shadow-slate-200">
+          <Pencil size={18} />
         </button>
       </div>
     </div>

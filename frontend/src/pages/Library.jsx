@@ -211,13 +211,25 @@ export default function Library() {
 function LibraryListRow({ template, importing, previewing, onImport, onPreview }) {
   return (
     <div className="card p-4 flex items-center gap-4 hover:border-slate-300 transition-all">
-      <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-emerald-50 text-emerald-700">
+      <button 
+        onClick={onPreview}
+        disabled={previewing}
+        className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
+      >
         <BookTemplate size={20} />
-      </div>
+      </button>
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <h4 className="font-semibold text-slate-900 truncate">{template.title}</h4>
+          <button 
+            onClick={onPreview}
+            disabled={previewing}
+            className="group/name block min-w-0 text-left"
+          >
+            <h4 className="font-semibold text-slate-900 truncate group-hover:text-emerald-600 transition-colors">
+              {template.title}
+            </h4>
+          </button>
           <span className="text-[10px] font-semibold uppercase text-amber-600 bg-amber-50 px-2 py-0.5 rounded">Premium</span>
         </div>
         <div className="flex items-center gap-3">

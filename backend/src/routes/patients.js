@@ -14,10 +14,36 @@ router.get("/", async (req, res) => {
       include: {
         _count: {
           select: { responses: true, shareLinks: true }
+        },
+        attendances: {
+          select: { status: true }
         }
       }
     });
-    res.json(patients);
+
+    // Process attendances to get counts per status
+    const patientsWithStats = patients.map(patient => {
+      const stats = {
+        presente: 0,
+        falta: 0,
+        justificada: 0
+      };
+
+      patient.attendances.forEach(att => {
+        if (stats.hasOwnProperty(att.status)) {
+          stats[att.status]++;
+        }
+      });
+
+      // Remove the full attendances list to keep the response light
+      const { attendances, ...patientData } = patient;
+      return {
+        ...patientData,
+        attendanceStats: stats
+      };
+    });
+
+    res.json(patientsWithStats);
   } catch (error) {
     console.error("Error listing patients:", error.message);
     res.status(500).json({ error: "Erro ao buscar pacientes" });
