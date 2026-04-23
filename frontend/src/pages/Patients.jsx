@@ -170,8 +170,10 @@ export default function Patients() {
       setAddFormTab("identity");
       loadPatients();
       
-      // Redirect to patient record
-      navigate(`/patients/${patient.id}`);
+      // Allow animation to complete before redirect
+      setTimeout(() => {
+        navigate(`/patients/${patient.id}`);
+      }, 300);
     } catch (error) {
       console.error("Erro ao salvar paciente:", error);
     } finally {
