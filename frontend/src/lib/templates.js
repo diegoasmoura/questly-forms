@@ -115,6 +115,100 @@ export const clinicalTemplates = [
     }
   },
   {
+    id: "faaq",
+    title: "FAAQ",
+    description: "Functional Acceptance (16 itens).",
+    schema: {
+      showProgressBar: true,
+      widthMode: "responsive",
+      pages: [
+        { name: "itens", elements: [
+          { type: "matrix", name: "faaq_items", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"},{value:"6",text:"6"},{value:"7",text:"7"}],
+            rows: [
+              {value:"i1",text:"Eu tento evitar sentir emocoes negativas."},
+              {value:"i2",text:"Eu me preocupo com emocoes atrapalhando."},
+              {value:"i3",text:"Passo muito tempo pensando em emocoes."},
+              {value:"i4",text:"Emocoes fazem perder oportunidades."},
+              {value:"i5",text:"Incapaz de fazer quando perturbado."},
+              {value:"i6",text:"Emocoes causam problemas."},
+              {value:"i7",text:"Nao sei o que estou sentindo."},
+              {value:"i8",text:"Esforco para nao sentir emocoes."},
+              {value:"i9",text:"Emocoes interferem na vida."},
+              {value:"i10",text:"Dificuldade em aproveitar."},
+              {value:"i11",text:"Sei quao feliz/infeliz."},
+              {value:"i12",text:"Emocoes nao afetam acoes."},
+              {value:"i13",text:"Posso decidir perturbado."},
+              {value:"i14",text:"Volto apos colapso."},
+              {value:"i15",text:"Sinto bem com negatives."},
+              {value:"i16",text:"Listo emocoes claramente."}
+            ], isAllRowsRequired: true}
+        ]}
+      ]
+    }
+  },
+  {
+    id: "compact",
+    title: "CompACT",
+    description: "Comprehensive ACT (36 itens em 3 dimensoes).",
+    schema: {
+      showProgressBar: true,
+      widthMode: "responsive",
+      pages: [
+        { name: "abertura", title: "Abertura a Experiencia", elements: [
+          { type: "matrix", name: "compact_ab", columns: [{value:"0",text:"0"},{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"},{value:"6",text:"6"}],
+            rows: [
+              {value:"ab1",text:"Posso estar triste e ser produtivo."},
+              {value:"ab2",text:"Sensacoes fisicas guiam decisoes."},
+              {value:"ab3",text:"Nao evito pensamentos."},
+              {value:"ab4",text:"Aceito sentir medo."},
+              {value:"ab5",text:"Permito que neguem quando preciso."},
+              {value:"ab6",text:"Nao preciso me sentir bem."},
+              {value:"ab7",text:"Presto atencao sensacoes corporais."},
+              {value:"ab8",text:"Permito emocoes dificeis."},
+              {value:"ab9",text:"Capaz de sentir varias emocoes."},
+              {value:"ab10",text:"Nao preciso eliminar emocoes."},
+              {value:"ab11",text:"Ouço o que corpo diz."},
+              {value:"ab12",text:"Permito sentimentos."}
+            ], isAllRowsRequired: true}
+        ]},
+        { name: "engajamento", title: "Engajamento", elements: [
+          { type: "matrix", name: "compact_en", columns: [{value:"0",text:"0"},{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"},{value:"6",text:"6"}],
+            rows: [
+              {value:"en1",text:"Mudo atencao quando preciso."},
+              {value:"en2",text:"Vejo opcoes onde outros veem uma."},
+              {value:"en3",text:"Vejo multiplas formas."},
+              {value:"en4",text:"Mantenho foco distraido."},
+              {value:"en5",text:"Mudo perspectiva."},
+              {value:"en6",text:"Foco no momento atual."},
+              {value:"en7",text:"Adapto estrategias."},
+              {value:"en8",text:"Penso em formas diferentes."},
+              {value:"en9",text:"Direciono atencao."},
+              {value:"en10",text:"Recoloco atencao."},
+              {value:"en11",text:"Mudo atencao conscientemente."},
+              {value:"en12",text:"Vejo de diferentes angulos."}
+            ], isAllRowsRequired: true}
+        ]},
+        { name: "valores", title: "Valores", elements: [
+          { type: "matrix", name: "compact_va", columns: [{value:"0",text:"0"},{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"},{value:"6",text:"6"}],
+            rows: [
+              {value:"va1",text:"Sei o que e importante."},
+              {value:"va2",text:"Me comprometo mesmo dificil."},
+              {value:"va3",text:"Tenho direcao clara."},
+              {value:"va4",text:"Trabalho com obstaculos."},
+              {value:"va5",text:"Importo mais com significado."},
+              {value:"va6",text:"Vida tem proposito."},
+              {value:"va7",text:"Continuo apesar de contratempos."},
+              {value:"va8",text:"Sei o que quero."},
+              {value:"va9",text:"Acoes guiadas por valores."},
+              {value:"va10",text:"Mantenho compromissos."},
+              {value:"va11",text:"Tenho objetivos."},
+              {value:"va12",text:"Escolhas aproximam do que importa."}
+            ], isAllRowsRequired: true}
+        ]}
+      ]
+    }
+  },
+  {
     id: "anamnese_infantil",
     title: "Ficha de Anamnese Infantil (Inicial)",
     description: "Modelo para coleta de dados de desenvolvimento e histórico familiar em pediatria/psicologia infantil.",
