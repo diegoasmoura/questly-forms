@@ -72,6 +72,49 @@ export const clinicalTemplates = [
     }
   },
   {
+    id: "aaq_ii",
+    title: "AAQ-II: Aceitacao e Acao",
+    description: "Avaliacao de inflexibilidade experiencial (10 itens). Escala 1-7.",
+    schema: {
+      showProgressBar: true,
+      widthMode: "responsive",
+      pages: [
+        {
+          name: "intro",
+          elements: [
+            { type: "html", name: "intro", html: "<div style='padding:20px;'><h2>AAQ-II</h2><p>Avalie o quanto cada frase e verdadeira para voce.</p><p><strong>1 = Nunca verdade</strong> ate <strong>7 = Sempre verdade</strong></p></div>" }
+          ]
+        },
+        {
+          name: "itens",
+          elements: [
+            {
+              type: "matrix",
+              name: "aaq_items",
+              columns: [
+                { value: "1", text: "1" }, { value: "2", text: "2" }, { value: "3", text: "3" },
+                { value: "4", text: "4" }, { value: "5", text: "5" }, { value: "6", text: "6" }, { value: "7", text: "7" }
+              ],
+              rows: [
+                { value: "i1", text: "Uma experiencia desconfortavel e apenas isso, desconfortavel." },
+                { value: "i2", text: "Eu me preocupo com meus sentimentos." },
+                { value: "i3", text: "Eu percebo que meus pensamentos podem me impedir de fazer coisas." },
+                { value: "i4", text: "E terrivel e posso nunca me sentir bem comigo mesmo." },
+                { value: "i5", text: "Minhas emocoes me incapacitam." },
+                { value: "i6", text: "Sinto-me em paz mesmo quando minhas emocoes estao fora de controle." },
+                { value: "i7", text: "Emocoes desagradaveis sao sempre incapacitantes." },
+                { value: "i8", text: "Preciso controlar emocoes para atingir meus objetivos." },
+                { value: "i9", text: "Controlar emocoes significa sentir-me melhor." },
+                { value: "i10", text: "Quando sinto uma emocao positiva, preciso trabalhar para mantê-la." }
+              ],
+              isAllRowsRequired: true
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
     id: "anamnese_infantil",
     title: "Ficha de Anamnese Infantil (Inicial)",
     description: "Modelo para coleta de dados de desenvolvimento e histórico familiar em pediatria/psicologia infantil.",
