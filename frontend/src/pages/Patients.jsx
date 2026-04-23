@@ -901,7 +901,6 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
               { id: "identity", label: "Identificação", icon: UserCheck },
               { id: "contact", label: "Contato", icon: Contact },
               { id: "address", label: "Endereço", icon: MapPin },
-              { id: "notes", label: "Registros Clínicos", icon: FileText },
             ].map(tab => (
               <button
                 key={tab.id}
