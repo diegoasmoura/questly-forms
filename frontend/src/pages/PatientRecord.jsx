@@ -979,9 +979,9 @@ export default function PatientRecord() {
             </div>
           </div>
 
-          {/* Share Tab */}
+{/* Share Tab */}
           {activeTab === "share" && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-fade-in">
               <div className="card p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
@@ -1037,7 +1037,7 @@ export default function PatientRecord() {
 
           {/* Registro Clínico Tab */}
           {activeTab === "notes" && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-fade-in">
               <div className="card overflow-hidden">
                 <div className="p-6 border-b border-slate-100">
                   <div className="flex items-center justify-between">
@@ -1128,7 +1128,7 @@ export default function PatientRecord() {
 
           {/* Sessions/Frequency Tab */}
           {activeTab === "sessions" && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-fade-in">
               {/* Stats Summary */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="card p-4 flex items-center gap-4 border-l-4 border-emerald-500">
@@ -1293,7 +1293,7 @@ export default function PatientRecord() {
 
           {/* Financial Tab */}
           {activeTab === "financial" && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-fade-in">
               {/* Financial Dashboard */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="card p-4 flex items-center gap-4 border-l-4 border-emerald-500">
@@ -1719,7 +1719,7 @@ export default function PatientRecord() {
 
           {/* Agenda Configuration Tab */}
           {activeTab === "settings" && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-fade-in">
               <div className="card p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
