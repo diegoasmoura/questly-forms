@@ -169,6 +169,9 @@ export default function Patients() {
       setAttachments([]);
       setAddFormTab("identity");
       loadPatients();
+      
+      // Redirect to patient record
+      navigate(`/patients/${patient.id}`);
     } catch (error) {
       console.error("Erro ao salvar paciente:", error);
     } finally {
@@ -319,7 +322,6 @@ export default function Patients() {
                   { id: "identity", label: "Identificação", icon: UserCheck },
                   { id: "contact", label: "Contato", icon: Contact },
                   { id: "address", label: "Endereço", icon: MapPin },
-                  { id: "notes", label: "Registros Clínicos", icon: FileText },
                 ].map(tab => (
                   <button
                     key={tab.id}
@@ -706,8 +708,8 @@ export default function Patients() {
                         </div>
                       )}
                     </div>
-                  </div>
-                )}
+</div>
+                    )}
               </form>
             </div>
 
