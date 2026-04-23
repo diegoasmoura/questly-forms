@@ -73,8 +73,8 @@ export const clinicalTemplates = [
   },
 {
     id: "aaq_ii",
-    title: "AAQ-II: Aceitacao e Acao",
-    description: "Questionario de Aceitacao e Acao - avalia flexibilidade psicologica (10 itens).",
+    title: "AAQ-II: Questionário de Aceitação e Ação",
+    description: "Questionário de Ansiedade Generalizada - avalia inflexibilidade experiencial (10 itens).",
     schema: {
       showProgressBar: true,
       widthMode: "responsive",
@@ -125,8 +125,8 @@ export const clinicalTemplates = [
   },
   {
     id: "faaq",
-    title: "FAAQ: Aceitacao Funcional",
-    description: "Questionário Functional de Aceitação e Ação - avalia flexibilidade psicológica (16 itens).",
+    title: "FAAQ: Questionário de Aceitação e Ação do Craving por comida",
+    description: "Functional Acceptance and Action Questionnaire - avalia flexibilidade psicológica (16 itens).",
     schema: {
       showProgressBar: true,
       widthMode: "responsive",
@@ -183,8 +183,8 @@ export const clinicalTemplates = [
   },
   {
     id: "compact",
-    title: "CompACT: Compreensao ACT",
-    description: "Comprehensive ACT - avaliação de flexibilidade psicológica (36 itens em 3 dimensões).",
+    title: "CompACT: Avaliação Compreensiva de Processos ACT",
+    description: "Comprehensive assessment of ACT processes - avalia flexibilidade psicológica (36 itens em 3 dimensões).",
     schema: {
       showProgressBar: true,
       widthMode: "responsive",
@@ -236,8 +236,8 @@ export const clinicalTemplates = [
   },
   {
     id: "ysq_s",
-    title: "YSQ-S: Triagem de Personalidade",
-    description: "Yale Screener Questionnaire - Short (35 itens). Triagem de transtornos de personalidade.",
+    title: "YSQ-S3: Questionário de Esquemas de Young - Versão Breve",
+    description: "Yale Screener Questionnaire Short - triagem de transtornos de personalidade (35 itens).",
     schema: {
       showProgressBar: true,
       widthMode: "responsive",
@@ -287,8 +287,8 @@ export const clinicalTemplates = [
   },
   {
     id: "ysq_l",
-    title: "YSQ-L: Triagem de PersonalIDADE",
-    description: "Yale Screener Questionnaire - Long (77 itens). Avaliacao completa de transtornos.",
+    title: "YSQ-L3: Questionário de Esquemas de Young - Versão Longa",
+    description: "Yale Screener Questionnaire Long - avaliação completa de transtornos (77 itens).",
     schema: {
       showProgressBar: true,
       widthMode: "responsive",
@@ -385,8 +385,8 @@ export const clinicalTemplates = [
   },
   {
     id: "ders",
-    title: "DERS: Dificuldades Regulacao Emocional",
-    description: "Difficulties in Emotion Regulation Scale (36 itens em 6 subescalas).",
+    title: "DERS: Escala de Dificuldades de Regulação Emocional",
+    description: "Difficulties in Emotion Regulation Scale - avalia dificuldades na regulação emocional (36 itens em 6 subescalas).",
     schema: {
       showProgressBar: true,
       widthMode: "responsive",
@@ -452,10 +452,10 @@ export const clinicalTemplates = [
       ]
     }
   },
-  {
+{
     id: "epm",
-    title: "EPM: Escala de Regulacao Emocional",
-    description: "Escala de Modulacao Emocional (26 itens).",
+    title: "EPM: Escala de Processos de Mudança",
+    description: "Escala de Processos de Mudança - avaliação de estágios de mudança (26 itens).",
     schema: {
       showProgressBar: true,
       widthMode: "responsive",
@@ -496,8 +496,8 @@ export const clinicalTemplates = [
   },
   {
     id: "urica",
-    title: "URICA: Estagios de Mudanca",
-    description: "University of Rhode Island Change (24 itens). Avalia estagios de mudanca.",
+    title: "URICA: Escala de Estágios de Mudança",
+    description: "University of Rhode Island Change Assessment - avalia estágios de mudança (24 itens).",
     schema: {
       showProgressBar: true,
       widthMode: "responsive",
@@ -554,8 +554,8 @@ export const clinicalTemplates = [
   },
   {
     id: "meq",
-    title: "MEQ: Expectativas de Maconha",
-    description: "Marijuana Expectancy Questionnaire (_expectativas sobre maconha).",
+    title: "MEQ: Questionário de Expectativas sobre Maconha",
+    description: "Marijuana Expectancy Questionnaire - avalia expectativas sobre maconha.",
     schema: {
       showProgressBar: true,
       widthMode: "responsive",
@@ -604,8 +604,8 @@ export const clinicalTemplates = [
   },
   {
     id: "eq",
-    title: "EQ: Inteligencia Emocional",
-    description: "Escala de Inteligência Emocional (33 itens).",
+    title: "EQ: Questionário de Descentração",
+    description: "Escala de Descentração - avalia inteligência emocional (33 itens em 5 subescalas).",
     schema: {
       showProgressBar: true,
       widthMode: "responsive",
@@ -698,8 +698,8 @@ export const clinicalTemplates = [
   },
   {
     id: "vlq",
-    title: "VLQ: Qualidades de Vida",
-    description: "Valued Living Questionnaire (16 itens).",
+    title: "VLQ: Questionário de Valores de Vida",
+    description: "Valued Living Questionnaire - avalia valores e ações (16 itens).",
     schema: {
       showProgressBar: true,
       widthMode: "responsive",
