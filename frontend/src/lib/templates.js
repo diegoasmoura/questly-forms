@@ -469,6 +469,114 @@ export const clinicalTemplates = [
     }
   },
   {
+    id: "urica",
+    title: "URICA: Estagios de Mudanca",
+    description: "University of Rhode Island Change (24 itens). Avalia estagios de mudanca.",
+    schema: {
+      showProgressBar: true,
+      widthMode: "responsive",
+      pages: [
+        { name: "pre", elements: [
+          { type: "html", name: "intro", html: "<div style='padding:20px;'><h2>URICA</h2><p>Para cada frase, marque: <strong>1 = Discordo forte</strong> ate <strong>5 = Concordo forte</strong></p></div>" }
+        ]},
+        { name: "precont", title: "Pre-contemplacao", elements: [
+          { type: "matrix", name: "urica_pre", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"}],
+            rows: [
+              {value:"p1",text:"Nao vejo problema."},
+              {value:"p2",text:"Nao preciso mudar."},
+              {value:"p3",text:"Outros tem problema."},
+              {value:"p4",text:"Nao tenho problema."},
+              {value:"p5",text:"Sofre por outros."},
+              {value:"p6",text:"Nao intendi ter problema."}
+            ], isAllRowsRequired: true}
+        ]},
+        { name: "cont", title: "Contemplacao", elements: [
+          { type: "matrix", name: "urica_cont", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"}],
+            rows: [
+              {value:"c1",text:"Pensando em mudar."},
+              {value:"c2",text:"Planeja procurar ajuda."},
+              {value:"c3",text:"Quero mudarmas difficile."},
+              {value:"c4",text:"Considerando mudancas."},
+              {value:"c5",text:"Esperanca que funcione."},
+              {value:"c6",text:"Pensando em tratamento."}
+            ], isAllRowsRequired: true}
+        ]},
+        { name: "acao", title: "Acao", elements: [
+          { type: "matrix", name: "urica_acao", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"}],
+            rows: [
+              {value:"a1",text:"Ja estou mudando."},
+              {value:"a2",text:"Fazendo mudancas."},
+              {value:"a3",text:"Trabalhando em mudanca."},
+              {value:"a4",text:"Ja tem feito mudancas."},
+              {value:"a5",text:"Agindo ativamente."},
+              {value:"a6",text:"Em processo de mudanca."}
+            ], isAllRowsRequired: true}
+        ]},
+        { name: "manut", title: "Manutencao", elements: [
+          { type: "matrix", name: "urica_manut", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"}],
+            rows: [
+              {value:"m1",text:"Consegui manter mudanca."},
+              {value:"m2",text:"Mudanca duradoura."},
+              {value:"m3",text:"Novas formas funcionando."},
+              {value:"m4",text:"Consigo manter."},
+              {value:"m5",text:"Satisfaito com mudanca."},
+              {value:"m6",text:"Continuo novo caminho."}
+            ], isAllRowsRequired: true}
+        ]}
+      ]
+    }
+  },
+  {
+    id: "meq",
+    title: "MEQ: Expectativas de Maconha",
+    description: "Marijuana Expectancy Questionnaire (_expectativas sobre maconha).",
+    schema: {
+      showProgressBar: true,
+      widthMode: "responsive",
+      pages: [
+        { name: "intro", elements: [
+          { type: "html", name: "intro", html: "<div style='padding:20px;'><h2>MEQ</h2><p>Avalie o quanto voce acredita que usar maconha leva a cada efeito: <strong>-3 = Forte descrenca</strong> ate <strong>+3 = Forte crenca</strong></p></div>" }
+        ]},
+        { name: "positivas", title: "Expectativas Positivas", elements: [
+          { type: "matrix", name: "meq_pos", columns: [{value:"-3",text:"-3"},{value:"-2",text:"-2"},{value:"-1",text:"-1"},{value:"0",text:"0"},{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"}],
+            rows: [
+              {value:"pp1",text:"Relaxamento."},
+              {value:"pp2",text:"Euforia."},
+              {value:"pp3",text:"Sentir-se bem."},
+              {value:"pp4",text:"Mais sociavel."},
+              {value:"pp5",text:"Criatividade."},
+              {value:"pp6",text:"Concentracao."},
+              {value:"pp7",text:"Prazer."}
+            ], isAllRowsRequired: true}
+        ]},
+        { name: "negativas", title: "Expectativas Negativas", elements: [
+          { type: "matrix", name: "meq_neg", columns: [{value:"-3",text:"-3"},{value:"-2",text:"-2"},{value:"-1",text:"-1"},{value:"0",text:"0"},{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"}],
+            rows: [
+              {value:"pn1",text:"Perda de controle."},
+              {value:"pn2",text:"Problemas de memoria."},
+              {value:"pn3",text:"Dificuldade pensar."},
+              {value:"pn4",text:"Paranoia."},
+              {value:"pn5",text:"Vicio."},
+              {value:"pn6",text:"Problemas sessoes."},
+              {value:"pn7",text:"Ansiedade."}
+            ], isAllRowsRequired: true}
+        ]},
+        { name: "neg_pess", title: "Efeitos Negativos", elements: [
+          { type: "matrix", name: "meq_neg2", columns: [{value:"-3",text:"-3"},{value:"-2",text:"-2"},{value:"-1",text:"-1"},{value:"0",text:"0"},{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"}],
+            rows: [
+              {value:"pn8",text:"Agressividade."},
+              {value:"pn9",text:"Confusao."},
+              {value:"pn10",text:"Alienacao."},
+              {value:"pn11",text:"Depressao."},
+              {value:"pn12",text:"Descontrole."},
+              {value:"pn13",text:"Letargia."},
+              {value:"pn14",text:"Perda de motivacao."}
+            ], isAllRowsRequired: true}
+        ]}
+      ]
+    }
+  },
+  {
     id: "anamnese_infantil",
     title: "Ficha de Anamnese Infantil (Inicial)",
     description: "Modelo para coleta de dados de desenvolvimento e histórico familiar em pediatria/psicologia infantil.",
