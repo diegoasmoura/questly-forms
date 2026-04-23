@@ -15,10 +15,10 @@ import { motion } from "framer-motion";
 
 const menuItems = [
   { icon: Home, label: "Home", path: "/home" },
-  { icon: Users, label: "Patients", path: "/patients" },
+  { icon: Users, label: "Pacientes", path: "/patients" },
   { icon: Calendar, label: "Agenda", path: "/agenda" },
-  { icon: FileText, label: "My Forms", path: "/my-forms" },
-  { icon: Library, label: "Library", path: "/library" },
+  { icon: FileText, label: "Instrumentos", path: "/my-forms" },
+  { icon: Library, label: "Acervo Clínico", path: "/library" },
 ];
 
 const getInitials = (name) => {

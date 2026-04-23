@@ -35,8 +35,8 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Agenda Profissional:** Gestão integrada de horários recorrentes, visão mensal/lista e detecção de conflitos.
 - **Histórico de Frequência:** Registro detalhado de presenças, faltas e reagendamentos inteligentes em cadeia.
 - **Gestão Financeira:** Controle de pagamentos por blocos de sessões, conciliação clínica e geração de PDFs profissionais.
-- **Biblioteca Clínica:** Modelos validados como PHQ-9, GAD-7 e a **Anamnese Neuropsicológica Adulto (Completa)**.
-- **Construtor de Formulários:** Criação de escalas e anamneses personalizadas com SurveyJS v2.
+- **Acervo Clínico:** Modelos validados como PHQ-9, GAD-7 e a **Anamnese Neuropsicológica Adulto (Completa)**.
+- **Construtor de Instrumentos:** Criação de escalas, testes e anamneses personalizadas com SurveyJS v2.
 
 ## Regras de Negócio e Lógica do Sistema
 

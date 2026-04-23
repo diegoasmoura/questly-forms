@@ -976,7 +976,7 @@ export default function PatientRecord() {
                 active={activeTab === "share"}
                 onClick={() => setActiveTab("share")}
                 icon={<Share2 size={14} />}
-                label="Formulários"
+                label="Instrumentos"
               />
             </div>
           </div>
@@ -987,15 +987,15 @@ export default function PatientRecord() {
               <div className="card p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h3 className="text-lg font-bold text-slate-900">Compartilhar Formulários</h3>
-                    <p className="text-sm text-slate-600 mt-1">Envie formulários para que {patient.name} preencha</p>
+                    <h3 className="text-lg font-bold text-slate-900">Compartilhar Instrumentos</h3>
+                    <p className="text-sm text-slate-600 mt-1">Envie instrumentos para que {patient.name} preencha</p>
                   </div>
                   <button
                     onClick={() => setShowShareModal(true)}
                     className="btn btn-primary"
                   >
                     <Plus size={16} />
-                    Enviar Formulário
+                    Enviar Instrumento
                   </button>
                 </div>
 
@@ -1007,7 +1007,7 @@ export default function PatientRecord() {
                 ) : patientShareLinks.length === 0 ? (
                   <div className="text-center py-12 bg-emerald-50 rounded-lg border border-emerald-100">
                     <Share2 size={40} className="mx-auto text-emerald-400 mb-3" />
-                    <p className="text-sm text-slate-600 font-medium">Nenhum formulário enviado ainda</p>
+                    <p className="text-sm text-slate-600 font-medium">Nenhum instrumento enviado ainda</p>
                     <p className="text-xs text-slate-500 mt-1">Clique no botão acima para começar</p>
                   </div>
                 ) : (
@@ -1398,14 +1398,14 @@ export default function PatientRecord() {
             loadingLinks ? (
               <div className="text-center py-12 text-slate-500">
                 <div className="animate-spin w-6 h-6 border-2 border-emerald-900 border-t-transparent rounded-full mx-auto mb-2" />
-                <p className="text-xs">Carregando formulários...</p>
+                <p className="text-xs">Carregando instrumentos...</p>
               </div>
             ) : patientShareLinks.length === 0 ? (
               <div className="card p-20 text-center border-dashed border-2">
                 <FileText size={48} className="mx-auto text-emerald-200 mb-6" />
                 <h3 className="text-xl font-bold text-slate-900 mb-2">Nenhum registro ainda</h3>
-                <p className="text-slate-600 max-w-sm mx-auto">Envie um formulário ou escala para este paciente para começar a construir seu prontuário digital.</p>
-                <Link to="/my-forms" className="btn btn-primary mt-8">Ir para Meus Formulários</Link>
+                <p className="text-slate-600 max-w-sm mx-auto">Envie um instrumento ou escala para este paciente para começar a construir seu prontuário digital.</p>
+                <Link to="/my-forms" className="btn btn-primary mt-8">Ir para Meus Instrumentos</Link>
               </div>
               ) : (
               <div className="space-y-8">
@@ -2102,8 +2102,8 @@ export default function PatientRecord() {
           <div className="card w-full max-w-2xl p-6 animate-scale-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-xl font-semibold text-slate-900">Enviar Formulário para {patient?.name}</h2>
-                <p className="text-xs text-slate-600 mt-1">Crie um link para que o paciente preencha o formulário</p>
+                <h2 className="text-xl font-semibold text-slate-900">Enviar Instrumento para {patient?.name}</h2>
+                <p className="text-xs text-slate-600 mt-1">Crie um link para que o paciente preencha o instrumento</p>
               </div>
               <button onClick={() => setShowShareModal(false)} className="text-slate-500 hover:text-emerald-600">
                 <Plus size={24} className="rotate-45" />
@@ -2113,7 +2113,7 @@ export default function PatientRecord() {
             <form onSubmit={async (e) => {
               e.preventDefault();
               if (!shareData.formId) {
-                alert("Selecione um formulário");
+                alert("Selecione um instrumento");
                 return;
               }
               if (!shareData.expiresAt) {
@@ -2140,7 +2140,7 @@ export default function PatientRecord() {
               }
             }} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-emerald-700 mb-2">Selecione um Formulário *</label>
+                <label className="block text-sm font-medium text-emerald-700 mb-2">Selecione um Instrumento *</label>
                 {loadingForms ? (
                   <div className="text-center py-4 text-slate-500">
                     <div className="animate-spin w-4 h-4 border-2 border-emerald-900 border-t-transparent rounded-full mx-auto" />
@@ -2157,7 +2157,7 @@ export default function PatientRecord() {
                     }}
                     required
                   >
-                    <option value="">Selecionar formulário...</option>
+                    <option value="">Selecionar instrumento...</option>
                     {forms.map(form => (
                       <option key={form.id} value={form.id}>{form.title}</option>
                     ))}
@@ -2167,7 +2167,7 @@ export default function PatientRecord() {
 
               {existingLinkForForm && !forceCreateNew && (
                 <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <p className="text-sm text-amber-900 font-medium">⏱️ Link já existe para este formulário</p>
+                  <p className="text-sm text-amber-900 font-medium">⏱️ Link já existe para este instrumento</p>
                   <p className="text-xs text-amber-700 mt-1">
                     Este paciente já tem um link pendente para {forms.find(f => f.id === shareData.formId)?.title}.
                     Deseja reutilizá-lo ou criar um novo?

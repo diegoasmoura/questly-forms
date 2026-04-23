@@ -237,8 +237,8 @@ export default function FormResponses() {
             </h3>
             <p className="text-slate-600 max-w-sm mx-auto">
               {selectedPatient !== "all"
-                ? "Este paciente ainda não respondeu este formulário específico."
-                : "Compartilhe este formulário com seus pacientes para começar a coletar dados clínicos."}
+                ? "Este paciente ainda não respondeu este instrumento específico."
+                : "Compartilhe este instrumento com seus pacientes para começar a coletar dados clínicos."}
             </p>
           </div>
         ) : (

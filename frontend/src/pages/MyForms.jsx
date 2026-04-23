@@ -100,7 +100,7 @@ export default function MyForms() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Tem certeza que deseja excluir este formulário?")) return;
+    if (!confirm("Tem certeza que deseja excluir este instrumento?")) return;
     try {
       await api.deleteForm(id);
       setForms(forms.filter((f) => f.id !== id));
@@ -127,7 +127,7 @@ export default function MyForms() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-800">Meus Formulários</h1>
+          <h1 className="text-2xl font-semibold text-slate-800">Meus Instrumentos</h1>
           <p className="text-sm text-slate-500">Gerencie seus modelos personalizados.</p>
         </div>
         <div className="flex items-center gap-2">
@@ -148,7 +148,7 @@ export default function MyForms() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input
             type="text"
-            placeholder="Buscar formulários..."
+            placeholder="Buscar instrumentos..."
             className="input pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -209,15 +209,15 @@ export default function MyForms() {
         <div className="card p-20 text-center border-dashed border-2 border-slate-200">
           <FileText size={48} className="mx-auto text-slate-300 mb-6" />
           <h3 className="text-xl font-semibold text-slate-700 mb-2">
-            {searchQuery ? "Nenhum formulário encontrado" : "Nenhum formulário criado"}
+            {searchQuery ? "Nenhum instrumento encontrado" : "Nenhum instrumento criado"}
           </h3>
           <p className="text-slate-500 mb-8 max-w-sm mx-auto">
-            {searchQuery ? "Tente um termo de busca diferente" : "Comece criando seu primeiro formulário clínico personalizado."}
+            {searchQuery ? "Tente um termo de busca diferente" : "Comece criando seu primeiro instrumento clínico personalizado."}
           </p>
           {!searchQuery && (
             <button onClick={() => setShowCreateModal(true)} className="btn btn-primary">
               <Plus size={18} />
-              Criar Primeiro Formulário
+              Criar Primeiro Instrumento
             </button>
           )}
         </div>
@@ -690,7 +690,7 @@ function CreateFormModal({ onClose, onCreated }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.title.trim()) {
-      alert("Digite um nome para o formulário");
+      alert("Digite um nome para o instrumento");
       return;
     }
 
@@ -714,7 +714,7 @@ function CreateFormModal({ onClose, onCreated }) {
       });
       onCreated(result.id);
     } catch (error) {
-      alert("Erro ao criar formulário: " + error.message);
+      alert("Erro ao criar instrumento: " + error.message);
     } finally {
       setSaving(false);
     }
@@ -725,7 +725,7 @@ function CreateFormModal({ onClose, onCreated }) {
       <div className="card w-full max-w-xl p-8 animate-scale-in">
         <div className="flex items-center justify-between mb-8 bg-white pb-4 border-b border-emerald-50">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Novo Formulário</h2>
+            <h2 className="text-2xl font-bold text-slate-900">Novo Instrumento</h2>
             <p className="text-sm text-emerald-600 mt-1">Defina as informações básicas do seu instrumento.</p>
           </div>
           <button onClick={onClose} className="p-2 rounded-xl hover:bg-emerald-50 text-slate-400 hover:text-slate-900 transition-all">
@@ -860,7 +860,7 @@ function CreateFormModal({ onClose, onCreated }) {
 
           <div>
             <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">
-              Nome do Formulário *
+              Nome do Instrumento *
             </label>
             <input
               type="text"

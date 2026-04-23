@@ -115,7 +115,7 @@ export default function Register() {
               <span className="text-2xl font-semibold">Questly Forms</span>
             </div>
             <h1 className="text-4xl font-semibold leading-tight mb-4">
-              Comece a criar formulários clínicos hoje
+              Comece a criar instrumentos clínicos hoje
             </h1>
             <p className="text-lg text-slate-400 leading-relaxed">
               Junte-se a profissionais de saúde mental que já usam o Questly Forms para otimizar sua prática.

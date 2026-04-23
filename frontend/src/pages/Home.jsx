@@ -129,31 +129,31 @@ export default function Home() {
           icon={<Users size={20} />} 
           label="Pacientes" 
           value={stats.patientCount} 
-          trend="Cadastrados"
+          trend="Ativos"
           color="bg-blue-50 text-blue-600"
           link="/patients"
         />
         <StatCard 
           icon={<FileText size={20} />} 
-          label="Formulários" 
+          label="Instrumentos" 
           value={stats.formCount} 
-          trend="Ativos"
+          trend="Clínicos"
           color="bg-purple-50 text-purple-600"
           link="/my-forms"
         />
         <StatCard 
           icon={<BarChart3 size={20} />} 
-          label="Respostas" 
+          label="Resultados" 
           value={stats.totalResponses} 
-          trend="Total coletado"
+          trend="Coletados"
           color="bg-emerald-50 text-emerald-600"
           link="/my-forms"
         />
         <StatCard 
           icon={<TrendingUp size={20} />} 
-          label="Links Ativos" 
+          label="Avaliações" 
           value={stats.activeLinks} 
-          trend="Aguardando"
+          trend="Em andamento"
           color="bg-orange-50 text-orange-600"
           link="/my-forms"
         />
@@ -172,7 +172,7 @@ export default function Home() {
         <div className="p-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Activity size={18} className="text-emerald-600" />
-            <h2 className="text-base font-bold text-slate-800">Pacientes Atendidos Recentemente</h2>
+            <h2 className="text-base font-bold text-slate-800">Avaliações Recentes</h2>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto custom-scrollbar">
@@ -191,8 +191,8 @@ export default function Home() {
           ) : groupedPatients.length === 0 ? (
             <div className="p-10 text-center">
               <Calendar size={32} className="mx-auto text-slate-300 mb-3" />
-              <p className="text-xs text-slate-500 font-bold uppercase tracking-tight">Nenhum atendimento registrado</p>
-              <p className="text-[10px] text-slate-400 mt-1">Pacientes que responderam formulários aparecerão aqui</p>
+              <p className="text-xs text-slate-500 font-bold uppercase tracking-tight">Nenhuma avaliação registrada</p>
+              <p className="text-[10px] text-slate-400 mt-1">Pacientes que utilizaram instrumentos clínicos aparecerão aqui</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-5">
@@ -216,7 +216,7 @@ export default function Home() {
                     <p className="text-sm font-bold text-slate-700 group-hover:text-slate-900 transition-colors leading-tight">{group.patient.name}</p>
                     {group.count > 1 ? (
                       <p className="text-xs text-emerald-600 font-medium mt-0.5">
-                        {group.count} respostas · <span className="text-slate-500 truncate">{group.responses[0].formTitle}</span>
+                        {group.count} resultados · <span className="text-slate-500 truncate">{group.responses[0].formTitle}</span>
                       </p>
                     ) : (
                       <p className="text-xs text-slate-500 mt-0.5 truncate">{group.responses[0].formTitle}</p>

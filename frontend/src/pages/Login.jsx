@@ -107,7 +107,7 @@ export default function Login() {
               <span className="text-2xl font-semibold">Questly Forms</span>
             </div>
             <h1 className="text-4xl font-semibold leading-tight mb-4">
-              Gerencie seus formulários clínicos com facilidade
+              Gerencie seus instrumentos clínicos com facilidade
             </h1>
             <p className="text-lg text-slate-400 leading-relaxed">
               A plataforma completa para profissionais de saúde mental criarem e analisarem avaliações psicológicas.

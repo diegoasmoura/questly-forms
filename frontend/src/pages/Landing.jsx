@@ -149,7 +149,7 @@ export default function Landing() {
               transition={{ delay: 0.2, duration: 0.6 }}
               className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight"
             >
-              Formulários clínicos,
+              Instrumentos clínicos,
               <br />
               <span className="text-emerald-600">sem fricção</span>
             </motion.h1>
@@ -169,7 +169,7 @@ export default function Landing() {
               transition={{ delay: 0.4, duration: 0.6 }}
               className="text-base text-slate-600 max-w-xl mx-auto"
             >
-              O Questly Forms transforma seus formulários em experiências digitais organizadas, padronizadas e prontas para análise.
+              O Questly Forms transforma seus instrumentos em experiências digitais organizadas, padronizadas e prontas para análise.
             </motion.p>
           </motion.div>
         </div>

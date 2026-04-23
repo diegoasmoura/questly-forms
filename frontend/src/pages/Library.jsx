@@ -55,7 +55,7 @@ export default function Library() {
         validated: true,
         audiences: template.audiences || ["Adulto"]
       });
-      alert("Modelo adicionado aos seus formulários!");
+      alert("Modelo adicionado aos seus instrumentos!");
       navigate("/my-forms");
     } catch (error) {
       alert("Falha ao importar modelo: " + error.message);
@@ -74,8 +74,8 @@ export default function Library() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-800">Biblioteca Clínica</h1>
-          <p className="text-sm text-slate-500">Explore e utilize modelos validados por especialistas.</p>
+          <h1 className="text-2xl font-semibold text-slate-800">Acervo Clínico</h1>
+          <p className="text-sm text-slate-500">Explore e utilize instrumentos validados por especialistas.</p>
         </div>
       </div>
 
@@ -85,7 +85,7 @@ export default function Library() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input
             type="text"
-            placeholder="Buscar na biblioteca..."
+            placeholder="Buscar instrumentos..."
             className="input pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
