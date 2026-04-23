@@ -1002,10 +1002,10 @@ export default function PatientRecord() {
                     <p className="text-xs">Carregando links...</p>
                   </div>
                 ) : patientShareLinks.length === 0 ? (
-                  <div className="text-center py-12 bg-emerald-50 rounded-lg border border-emerald-100">
-                    <Share2 size={40} className="mx-auto text-emerald-400 mb-3" />
-                    <p className="text-sm text-slate-600 font-medium">Nenhum instrumento enviado ainda</p>
-                    <p className="text-xs text-slate-500 mt-1">Clique no botão acima para começar</p>
+                  <div className="text-center py-12 text-slate-400 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
+                    <Share2 size={32} className="mx-auto mb-3 opacity-50" />
+                    <p className="text-sm font-medium">Nenhum instrumento enviado</p>
+                    <p className="text-xs mt-1">Clique em "Enviar Instrumento" para começar</p>
                   </div>
                 ) : (
                   <div className="space-y-4 overflow-visible">
@@ -1037,99 +1037,90 @@ export default function PatientRecord() {
           {/* Registro Clínico Tab */}
           {activeTab === "notes" && (
             <div className="space-y-6">
-              <div className="card p-6">
-                <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
-                  <FileText size={16} />
-                  Registros Clínicos
-                </h3>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-2">Anotações</label>
-                  <textarea 
-                    className="input text-sm min-h-[150px]" 
-                    value={formData?.notes || ''} 
-                    onChange={e => setFormData(prev => prev ? { ...prev, notes: e.target.value } : null)} 
-                    placeholder="Anotações relevantes sobre o paciente..."
-                  />
-                </div>
-              </div>
-
-              <div className="card p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Paperclip size={16} className="text-slate-500" />
-                    <h4 className="text-sm font-semibold text-slate-700">Laudos e Anexos</h4>
-                  </div>
-                  <label className={`flex items-center gap-2 px-3 py-1.5 bg-emerald-900 text-white rounded-lg text-xs font-medium cursor-pointer transition-all ${uploading ? 'opacity-50' : 'hover:bg-emerald-800'}`}>
-                    {uploading ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <Plus size={14} />
-                    )}
-                    {uploading ? 'Enviando...' : 'Anexar'}
-                    <input type="file" multiple className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" disabled={uploading} onChange={handleUploadAttachment} />
-                  </label>
-                </div>
-
-                {loadingAttachments ? (
-                  <div className="text-center py-8 text-slate-400">
-                    <div className="w-6 h-6 border-2 border-slate-300 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                    <p className="text-xs">Carregando anexos...</p>
-                  </div>
-                ) : attachments.length === 0 ? (
-                  <div className="text-center py-8 text-slate-400">
-                    <File size={32} className="mx-auto mb-2 opacity-50" />
-                    <p className="text-xs">Nenhum anexo</p>
-                    <p className="text-[10px] mt-1">PDF, JPG, PNG, DOC (máx. 10MB)</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {attachments.map((att) => (
-                      <div key={att.id} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-200">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <File size={16} className="text-slate-400 shrink-0" />
-                          <div className="min-w-0">
-                            <p className="text-xs font-medium text-slate-700 truncate">{att.filename}</p>
-                            <p className="text-[10px] text-slate-400">{(att.size / 1024).toFixed(1)} KB</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <button type="button" onClick={() => handleDownloadAttachment(att)} className="p-1 hover:bg-emerald-50 rounded text-slate-400 hover:text-emerald-600 transition-colors" title="Baixar">
-                            <Download size={14} />
-                          </button>
-                          <button type="button" onClick={() => handleDeleteAttachment(att.id)} className="p-1 hover:bg-red-50 rounded text-slate-400 hover:text-red-500 transition-colors" title="Excluir">
-                            <Trash size={14} />
-                          </button>
-                        </div>
+              <div className="card overflow-hidden">
+                <div className="p-6 border-b border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                        <FileText size={20} />
                       </div>
-                    ))}
+                      <div>
+                        <h3 className="font-bold text-slate-900">Registro Clínico</h3>
+                        <p className="text-xs text-slate-500">Anotações e documentos</p>
+                      </div>
+                    </div>
                   </div>
-                )}
-              </div>
+                </div>
+                
+                <div className="p-6">
+                  <div className="mb-6">
+                    <label className="block text-xs font-semibold text-slate-600 mb-2">Anotações</label>
+                    <textarea 
+                      className="input text-sm min-h-[150px]" 
+                      value={formData?.notes || ''} 
+                      onChange={e => setFormData(prev => prev ? { ...prev, notes: e.target.value } : null)} 
+                      placeholder="Anotações relevantes sobre o paciente..."
+                    />
+                  </div>
 
-              <div className="flex justify-end">
-                <button 
-                  onClick={async () => {
-                    try {
-                      setSaving(true);
-                      await api.updatePatient(patient.id, { notes: formData?.notes });
-                      await loadPatient();
-                      alert("Registro clínico salvo com sucesso!");
-                    } catch(e) {
-                      alert("Erro ao salvar: " + e.message);
-                    } finally {
-                      setSaving(false);
-                    }
-                  }}
-                  disabled={saving}
-                  className="btn btn-primary flex items-center gap-2"
-                >
-                  {saving ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Check size={16} />
-                  )}
-                  Salvar Registro Clínico
-                </button>
+                  <div className="pt-4 border-t border-slate-100">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <Paperclip size={16} className="text-slate-500" />
+                        <h4 className="text-sm font-semibold text-slate-700">Laudos e Anexos</h4>
+                        {attachments.length > 0 && (
+                          <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
+                            {attachments.length}
+                          </span>
+                        )}
+                      </div>
+                      <label className={`flex items-center gap-2 px-3 py-1.5 bg-emerald-900 text-white rounded-lg text-xs font-medium cursor-pointer transition-all ${uploading ? 'opacity-50' : 'hover:bg-emerald-800'}`}>
+                        {uploading ? (
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Plus size={14} />
+                        )}
+                        {uploading ? 'Enviando...' : 'Anexar'}
+                        <input type="file" multiple className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" disabled={uploading} onChange={handleUploadAttachment} />
+                      </label>
+                    </div>
+
+                    {loadingAttachments ? (
+                      <div className="text-center py-8 text-slate-400">
+                        <div className="w-6 h-6 border-2 border-slate-300 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                        <p className="text-xs">Carregando anexos...</p>
+                      </div>
+                    ) : attachments.length === 0 ? (
+                      <div className="text-center py-8 text-slate-400 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
+                        <File size={32} className="mx-auto mb-2 opacity-50" />
+                        <p className="text-xs">Nenhum anexo</p>
+                        <p className="text-[10px] mt-1">PDF, JPG, PNG, DOC (máx. 10MB)</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {attachments.map((att) => (
+                          <div key={att.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <File size={18} className="text-slate-400 shrink-0" />
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-slate-700 truncate">{att.filename}</p>
+                                <p className="text-xs text-slate-400">{(att.size / 1024).toFixed(1)} KB</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <button type="button" onClick={() => handleDownloadAttachment(att)} className="p-2 hover:bg-emerald-50 rounded text-slate-400 hover:text-emerald-600 transition-colors" title="Baixar">
+                                <Download size={16} />
+                              </button>
+                              <button type="button" onClick={() => handleDeleteAttachment(att.id)} className="p-2 hover:bg-red-50 rounded text-slate-400 hover:text-red-500 transition-colors" title="Excluir">
+                                <Trash size={16} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           )}
