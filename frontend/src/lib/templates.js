@@ -241,9 +241,30 @@ export const clinicalTemplates = [
     schema: {
       showProgressBar: true,
       widthMode: "responsive",
+      questionTitleLocation: "underTitle",
       pages: [
-        { name: "itens", elements: [
-          { type: "matrix", name: "ysq_items", columns: [{value:"1",text:"1"},{value:"2",text:"2"},{value:"3",text:"3"},{value:"4",text:"4"},{value:"5",text:"5"}],
+        {
+          name: "inicio",
+          title: "Instruções",
+          elements: [
+            { type: "html", name: "intro", html: "<div style='padding:24px;background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border-radius:16px;border:2px solid #a7f3d0;'><h2 style='color:#059669;margin-bottom:16px;font-size:20px;'>Questionário de Esquemas de Young - Versão Breve</h2><p style='margin-bottom:16px;line-height:1.6;'>Este questionário ajuda a identificar padrões de pensamento que se repetem ao longo da vida. Cada item descreve algo que algumas pessoas sentem ou pensam sobre si mesmas.</p><p style='font-weight:bold;margin-bottom:12px;'>Como responder:</p><ul style='margin-left:16px;line-height:2;'><li><strong>1 = Discordo totalmente</strong> - Isso NÃO Describes me in any way</li><li><strong>2 = Discordo parcialmente</strong> - Às vezes não é assim</li><li><strong>3 = Nem concordo nem discordo</strong> - É meio caminho sem fundo</li><li><strong>4 = Concordo parcialmente</strong> - Às vezes é assim</li><li><strong>5 = Concordo totalmente</strong> -Isso EM EXACT describe me</li></ul><p style='margin-top:16px;font-style:italic;color:#059669;'>Não há respostas certas ou erradas. Responda com base no que você realmente sente, não no que gostaria de sentir.</p></div>" }
+          ]
+        },
+        {
+          name: "itens",
+          title: "Questionário",
+          elements: [
+            {
+              type: "matrix",
+              name: "ysq_items",
+              title: "Com que frequência cada frase descreve você?",
+              columns: [
+                { value: "1", text: "1\nDiscordo\ntotalmente" },
+                { value: "2", text: "2\nDiscordo" },
+                { value: "3", text: "3\nNeutro" },
+                { value: "4", text: "4\nConcordo" },
+                { value: "5", text: "5\nConcordo\ntotalmente" }
+              ],
             rows: [
               {value:"i1",text:"Outros veem eu diferente do que eu sou."},
               {value:"i2",text:"Dificuldade em fazer amigos."},
