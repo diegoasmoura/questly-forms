@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
+import { useNavigateWithTransition } from "../lib/useNavigateWithTransition";
 import { api } from "../lib/api";
 import { scoreTest } from "../lib/scoring";
 import {
@@ -10,7 +11,7 @@ import {
 
 export default function ResponseDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const navigate = useNavigateWithTransition();
   const location = useLocation();
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(true);

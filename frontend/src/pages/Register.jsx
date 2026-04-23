@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useNavigateWithTransition } from "../lib/useNavigateWithTransition";
 import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -37,7 +38,7 @@ export default function Register() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
-  const navigate = useNavigate();
+  const navigate = useNavigateWithTransition();
 
   const handleSubmit = async (e) => {
     e.preventDefault();

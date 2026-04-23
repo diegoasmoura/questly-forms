@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useNavigateWithTransition } from "../lib/useNavigateWithTransition";
 import { api } from "../lib/api";
 import { formatCPF, formatPhone, formatCEP } from "../lib/utils";
 import { useAuth } from "../context/AuthContext";
@@ -40,7 +41,7 @@ import {
 } from "lucide-react";
 
 export default function Patients() {
-  const navigate = useNavigate();
+  const navigate = useNavigateWithTransition();
   const location = useLocation();
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -170,10 +171,7 @@ export default function Patients() {
       setAddFormTab("identity");
       loadPatients();
       
-      // Allow animation to complete before redirect
-      setTimeout(() => {
-        navigate(`/patients/${patient.id}`);
-      }, 300);
+      navigate(`/patients/${patient.id}`);
     } catch (error) {
       console.error("Erro ao salvar paciente:", error);
     } finally {

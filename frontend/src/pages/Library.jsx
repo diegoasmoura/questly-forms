@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigateWithTransition } from "../lib/useNavigateWithTransition";
 import { api } from "../lib/api";
 import { clinicalTemplates } from "../lib/templates";
 import { 
@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 export default function Library() {
-  const navigate = useNavigate();
+  const navigate = useNavigateWithTransition();
   const [searchQuery, setSearchQuery] = useState("");
   const [importing, setImporting] = useState(null);
   const [viewMode, setViewMode] = useState(() => localStorage.getItem("library-view") || "grid");

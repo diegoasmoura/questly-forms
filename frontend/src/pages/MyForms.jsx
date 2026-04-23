@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useNavigateWithTransition } from "../lib/useNavigateWithTransition";
 import { api } from "../lib/api";
 import { ResponseTrendChart } from "../components/ClinicalCharts";
 import { 
@@ -18,7 +19,7 @@ import {
 } from "lucide-react";
 
 export default function MyForms() {
-  const navigate = useNavigate();
+  const navigate = useNavigateWithTransition();
   const [forms, setForms] = useState([]);
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);

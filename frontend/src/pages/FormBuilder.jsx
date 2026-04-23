@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
+import { useNavigateWithTransition } from "../lib/useNavigateWithTransition";
 import { api } from "../lib/api";
 
 // SurveyJS imports - updated to modern CSS paths
@@ -25,7 +26,7 @@ import { ArrowLeft, Save, Download, Loader2 } from "lucide-react";
 
 export default function FormBuilder() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const navigate = useNavigateWithTransition();
   const [form, setForm] = useState(null);
   const [title, setTitle] = useState("");
   const [saving, setSaving] = useState(false);

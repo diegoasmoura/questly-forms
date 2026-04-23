@@ -57,6 +57,17 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Status do Recibo:** Controle visual de emissão (Emitido, Com Anexo, Pendente).
 
 ### 4. Tecnologia e UX
+- **Navegação Suave:** Hook `useNavigateWithTransition` adiciona delay de 300ms antes detrocas de página, permitindo que a animação de transição do Layout execute. Uso:
+
+```jsx
+import { useNavigateWithTransition } from "../lib/useNavigateWithTransition";
+
+const navigate = useNavigateWithTransition();
+navigate("/path"); // com delay padrão (300ms)
+navigate("/path", { delay: 0 }); // sem delay (ex: logout)
+navigate(-1); // suporta navegação relativa
+```
+
 - **Navegação Consistente:** Padronização de interatividade em listas e cards. Elementos como Avatares, Nomes e Ícones agora são links diretos para prontuários, edições e visualizações.
 - **Semana de Aniversário (UX Humanizada):** Visual festivo automático (dourado/lança-confetes) ativado em uma janela de 7 dias ao redor do aniversário do paciente (4 dias antes até 3 dias depois).
 - **Métricas de Engajamento Unificadas:** Comparação direta entre assiduidade física (Sessões) e engajamento digital (Instrumentos Clínicos) na capa do card.

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useNavigateWithTransition } from "../lib/useNavigateWithTransition";
 import { Model } from "survey-core";
 import { Survey } from "survey-react-ui";
 import "survey-core/survey-core.min.css";
@@ -8,7 +9,7 @@ import { api } from "../lib/api";
 
 export default function PatientForm() {
   const { token } = useParams();
-  const navigate = useNavigate();
+  const navigate = useNavigateWithTransition();
   const surveyRef = useRef(null);
   const [form, setForm] = useState(null);
   const [loading, setLoading] = useState(true);
