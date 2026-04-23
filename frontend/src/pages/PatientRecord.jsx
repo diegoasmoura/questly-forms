@@ -447,6 +447,7 @@ export default function PatientRecord() {
   };
 
   const handleDeleteAttachment = async (attachmentId) => {
+    console.log("Tentando deletar anexo:", attachmentId);
     if (!confirm("Tem certeza que deseja excluir este anexo?")) return;
     try {
       await api.deleteAttachment(attachmentId);
