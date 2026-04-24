@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useNavigateWithTransition } from "../lib/useNavigateWithTransition";
 import { api } from "../lib/api";
 import { formatCPF, formatPhone, formatCEP } from "../lib/utils";
+import { generateExcelTemplate, parseExcelFile } from "../lib/excel";
 import { useAuth } from "../context/AuthContext";
 import {
   Users,
@@ -37,7 +38,10 @@ import {
   AlertTriangle,
   Clock,
   CakeSlice,
-  PartyPopper
+  PartyPopper,
+  ChevronDown,
+  Upload,
+  FileSpreadsheet
 } from "lucide-react";
 
 export default function Patients() {
@@ -53,9 +57,22 @@ export default function Patients() {
     localStorage.setItem("patients-view", mode);
   };
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importedPatients, setImportedPatients] = useState([]);
+  const [showRegistrationDropdown, setShowRegistrationDropdown] = useState(false);
   const [editPatient, setEditPatient] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showRegistrationDropdown && !event.target.closest('.registration-dropdown')) {
+        setShowRegistrationDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showRegistrationDropdown]);
 
   useEffect(() => {
     if (successMessage) {
@@ -231,10 +248,52 @@ export default function Patients() {
           <h1 className="text-2xl font-semibold text-slate-800">Pacientes</h1>
           <p className="text-sm text-slate-500">Gerencie seus pacientes e seus históricos clínicos.</p>
         </div>
-        <button onClick={openAddModal} className="btn btn-primary px-4">
-          <UserPlus size={18} />
-          Cadastrar
-        </button>
+        
+        <div className="relative registration-dropdown">
+          <button 
+            onClick={() => setShowRegistrationDropdown(!showRegistrationDropdown)} 
+            className="btn btn-primary px-4 flex items-center gap-2"
+          >
+            <Plus size={18} />
+            Cadastrar
+            <ChevronDown size={14} className={`transition-transform duration-200 ${showRegistrationDropdown ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {showRegistrationDropdown && (
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-[60] animate-scale-in">
+              <button
+                onClick={() => {
+                  openAddModal();
+                  setShowRegistrationDropdown(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
+              >
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <UserPlus size={18} />
+                </div>
+                <div>
+                  <p className="font-bold">Cadastrar paciente</p>
+                  <p className="text-[10px] text-slate-500">Manual, um por um</p>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  setShowImportModal(true);
+                  setShowRegistrationDropdown(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
+              >
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <FileSpreadsheet size={18} />
+                </div>
+                <div>
+                  <p className="font-bold">Importar dados</p>
+                  <p className="text-[10px] text-slate-500">Planilha Excel/CSV</p>
+                </div>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Search & Filters */}
@@ -329,6 +388,90 @@ export default function Patients() {
           </div>
         )}
         </div>
+
+      {showImportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
+          <div className="card w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-slate-200 shrink-0">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-emerald-600">Importar Dados</h2>
+                  <p className="text-xs text-slate-500 mt-1">Importe sua base em poucos passos</p>
+                </div>
+                <button onClick={() => setShowImportModal(false)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all" aria-label="Fechar">
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {/* Step 1 */}
+              <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 group hover:border-emerald-200 transition-all">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-lg shrink-0 shadow-md">
+                    1
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold text-slate-800 mb-1">Baixe o modelo</h3>
+                    <p className="text-xs text-slate-500 mb-4">
+                      Use a planilha padrão para evitar erros de formatação.
+                    </p>
+                    <button 
+                      onClick={generateExcelTemplate}
+                      className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-sm"
+                    >
+                      <Download size={16} className="text-emerald-500" />
+                      Baixar planilha modelo
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 group hover:border-emerald-200 transition-all">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-lg shrink-0 shadow-md">
+                    2
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold text-slate-800 mb-1">Envie sua planilha preenchida</h3>
+                    <p className="text-xs text-slate-500 mb-4">
+                      Após o upload, você verá uma prévia antes de confirmar.
+                    </p>
+                    <label className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 cursor-pointer">
+                      <Upload size={16} />
+                      Enviar planilha
+                      <input type="file" className="hidden" accept=".xlsx, .xls, .csv" />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Info */}
+              <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-4 flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-blue-600 shadow-sm shrink-0 border border-blue-50">
+                  <AlertTriangle size={16} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-blue-900 mb-0.5">Importante</h4>
+                  <p className="text-[10px] text-blue-700 leading-relaxed">
+                    Certifique-se de que as colunas de CPF e E-mail estejam preenchidas.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-slate-200 bg-slate-50 shrink-0">
+              <button 
+                onClick={() => setShowImportModal(false)}
+                className="btn btn-secondary w-full"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Add Patient Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">

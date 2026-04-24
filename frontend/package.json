@@ -15,6 +15,7 @@
     "@tanstack/react-virtual": "^3.13.23",
     "clsx": "^2.1.0",
     "date-fns": "^4.1.0",
+    "exceljs": "^4.4.0",
     "framer-motion": "^11.18.2",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
@@ -31,7 +32,9 @@
     "survey-creator-react": "^2.5.19",
     "survey-pdf": "^2.5.19",
     "survey-react-ui": "^2.5.19",
-    "tailwind-merge": "^2.2.1"
+    "tailwind-merge": "^2.2.1",
+    "xlsx": "^0.18.5",
+    "xlsx-js-style": "^1.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

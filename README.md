@@ -84,6 +84,10 @@ navigate(-1); // suporta navegação relativa
 - **Clinical Dashboard:** Visualização instantânea de métricas de engajamento (Presenças vs Respostas de Instrumentos) diretamente na capa do card do paciente.
 - **Padronização de Abas (Patient Record):** Todas as abas seguem o mesmo padrão visual com header (título + botão Save) alinhados horizontalmente usando `btn btn-primary`.
 - **UX de Registro Clínico:** Área clicável para upload de anexos com opção "Adicionar mais" após primeiro arquivo.
+- **Importação de Pacientes (Excel):** Modelo geração via **ExcelJS** com:
+  - Cabeçalho verde (Emerald-600)
+  - Larguras padronizadas por coluna
+  - Dropdowns em Gênero e Estado Civil (referenciados na aba "Opções")
 
 ## Tecnologias
 
