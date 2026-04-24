@@ -566,41 +566,59 @@ export default function PatientRecord() {
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 20;
     
-    // Título Centralizado
-    doc.setFontSize(18);
-    doc.setTextColor(51, 51, 51);
-    doc.text('RELATÓRIO FINANCEIRO COMPLETO', pageWidth / 2, 20, { align: 'center' });
-    
-    // Nome do Cliente
-    doc.setFontSize(11);
+    // Título Centralizado (Design Executivo V9)
     doc.setFont("helvetica", "bold");
-    doc.text(`Cliente: ${patient.name}`, margin, 35);
+    doc.setFontSize(22);
+    doc.setTextColor(30, 41, 59); // Slate 800
+    doc.text('RELATÓRIO FINANCEIRO COMPLETO', pageWidth / 2, 25, { align: 'center' });
     
-    // Linha Divisória
-    doc.setDrawColor(204, 204, 204);
-    doc.setLineWidth(0.2);
-    doc.line(margin, 40, pageWidth - margin, 40);
+    // Nome do Cliente em Destaque
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(71, 85, 105); // Slate 600
+    doc.text(`${patient.name}`, pageWidth / 2, 35, { align: 'center' });
+    
+    // Linha Divisória Elegante
+    doc.setDrawColor(226, 232, 240); // Slate 200
+    doc.setLineWidth(0.5);
+    doc.line(margin, 42, pageWidth - margin, 42);
     
     // Cálculos de Resumo
     const totalAmount = payments.reduce((sum, p) => sum + (typeof p.amount === 'number' ? p.amount : 0), 0);
     const totalSessions = payments.reduce((sum, p) => sum + (p.attendances?.length || 0), 0);
     
     // Seção Resumo Financeiro
-    doc.setFontSize(14);
-    doc.setTextColor(85, 85, 85);
-    doc.text('Resumo Financeiro', margin, 50);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(30, 41, 59);
+    doc.text('RESUMO FINANCEIRO', margin, 55);
     
     autoTable(doc, {
-      startY: 55,
+      startY: 60,
       margin: { left: margin, right: margin },
       head: [['Descrição', 'Valor']],
       body: [
-        ['Total de Pagamentos', totalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })],
-        ['Quantidade de Sessões', `${totalSessions} sessões`]
+        ['Total de Pagamentos Realizados', totalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })],
+        ['Quantidade Total de Sessões Liquidadas', `${totalSessions} sessões`]
       ],
       theme: 'grid',
-      headStyles: { fillColor: [242, 242, 242], textColor: [51, 51, 51], fontStyle: 'bold' },
-      styles: { fontSize: 10, cellPadding: 5 }
+      headStyles: { 
+        fillColor: [242, 242, 242], 
+        textColor: [51, 51, 51], 
+        fontStyle: 'bold',
+        lineWidth: 0.1,
+        lineColor: [200, 200, 200]
+      },
+      styles: { 
+        fontSize: 10, 
+        cellPadding: 5,
+        font: "helvetica",
+        lineColor: [226, 232, 240],
+        lineWidth: 0.1
+      },
+      columnStyles: {
+        1: { halign: 'right', fontStyle: 'bold' }
+      }
     });
     
     // Seção Detalhes Consolidados
@@ -610,9 +628,9 @@ export default function PatientRecord() {
     doc.setDrawColor(204, 204, 204);
     doc.line(margin, currentY - 5, pageWidth - margin, currentY - 5);
     
-    doc.setFontSize(14);
-    doc.setTextColor(85, 85, 85);
-    doc.text('Detalhes Consolidados de Pagamentos e Sessões', margin, currentY);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text('DETALHES CONSOLIDADOS DE PAGAMENTOS E SESSÕES', margin, currentY);
     
     const detailedBody = [];
     payments.forEach((payment) => {
@@ -625,18 +643,26 @@ export default function PatientRecord() {
         payment.attendances.forEach((att, index) => {
           const row = [];
           if (index === 0) {
-            row.push({ content: amountFormatted, rowSpan: payment.attendances.length, styles: { valign: 'middle', halign: 'center' } });
+            // Células mescladas (Rowspan) com alinhamento centralizado vertical e horizontal
+            row.push({ content: amountFormatted, rowSpan: payment.attendances.length, styles: { valign: 'middle', halign: 'center', fontStyle: 'bold' } });
             row.push({ content: paymentDate, rowSpan: payment.attendances.length, styles: { valign: 'middle', halign: 'center' } });
             row.push({ content: payment.method, rowSpan: payment.attendances.length, styles: { valign: 'middle', halign: 'center' } });
           }
-          row.push(format(new Date(att.date), 'dd/MM/yyyy'));
-          const statusLabel = att.status === 'presente' ? 'P' : att.status === 'falta' ? 'F' : att.status === 'justificada' ? 'J' : '-';
-          row.push(`${att.sessionTime || '08:00'} ${statusLabel}`);
+          
+          let dateStr = format(new Date(att.date), 'dd/MM/yyyy');
+          if (att.parentId) {
+            const parent = attendances.find(p => p.id === att.parentId);
+            if (parent) dateStr += ` (Ref: ${format(new Date(parent.date), 'dd/MM/yyyy')})`;
+          }
+
+          row.push(dateStr);
+          const statusLabel = att.status === 'presente' ? 'Presente' : att.status === 'falta' ? 'Falta' : 'Justificada';
+          row.push(`${att.sessionTime || '08:00'} (${statusLabel})`);
           detailedBody.push(row);
         });
       } else {
         detailedBody.push([
-          { content: amountFormatted, styles: { halign: 'center' } },
+          { content: amountFormatted, styles: { halign: 'center', fontStyle: 'bold' } },
           { content: paymentDate, styles: { halign: 'center' } },
           { content: payment.method, styles: { halign: 'center' } },
           'N/A',
@@ -648,33 +674,48 @@ export default function PatientRecord() {
     autoTable(doc, {
       startY: currentY + 5,
       margin: { left: margin, right: margin },
-      head: [['Valor do Pagamento', 'Data do Pagamento', 'Método de Pagamento', 'Data da Sessão', 'Horário da Sessão']],
+      head: [['Valor', 'Data Pagto', 'Método', 'Data da Sessão', 'Horário/Status']],
       body: detailedBody,
       theme: 'grid',
-      headStyles: { fillColor: [242, 242, 242], textColor: [51, 51, 51], fontStyle: 'bold' },
-      styles: { fontSize: 9, cellPadding: 3 },
+      headStyles: { 
+        fillColor: [242, 242, 242], 
+        textColor: [51, 51, 51], 
+        fontStyle: 'bold',
+        fontSize: 9,
+        halign: 'center'
+      },
+      styles: { 
+        fontSize: 8, 
+        cellPadding: 4,
+        font: "helvetica",
+        lineColor: [226, 232, 240],
+        lineWidth: 0.1
+      },
       columnStyles: {
         0: { halign: 'center' },
         1: { halign: 'center' },
-        2: { halign: 'center' }
+        2: { halign: 'center' },
+        3: { cellWidth: 'auto' },
+        4: { cellWidth: 40 }
       }
     });
     
-    // Footer em todas as páginas
+    // Rodapé em todas as páginas (Design V9)
     const totalPages = doc.internal.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
-      doc.setFontSize(9);
-      doc.setTextColor(119, 119, 119);
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184); // Slate 400
+      
+      const timestamp = format(new Date(), "dd/MM/yyyy 'às' HH:mm");
       doc.text(
-        `Gerado em: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`,
+        `Documento gerado em: ${timestamp} | Página ${i} de ${totalPages}`,
         pageWidth - margin,
         287,
         { align: 'right' }
       );
       
-      // Linha divisória antes do rodapé
-      doc.setDrawColor(204, 204, 204);
+      doc.setDrawColor(241, 245, 249); // Slate 100
       doc.line(margin, 282, pageWidth - margin, 282);
     }
     
