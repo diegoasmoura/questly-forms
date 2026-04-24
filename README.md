@@ -56,7 +56,13 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Identidade Visual:** Favicon personalizado "Q" e título profissional na aba do navegador.
 - **Status do Recibo:** Controle visual de emissão (Emitido, Com Anexo, Pendente).
 
-### 4. Tecnologia e UX
+### 4. Cadastro de Pacientes e Integridade (v4.4)
+- **Campos Obrigatórios (Ética e Segurança):** Nome, CPF, Data de Nascimento, E-mail, Telefone e Contato de Emergência (Nome e Telefone) são mandatórios para garantir a segurança clínica e conformidade com emissão de documentos.
+- **Validação de Duplicidade:** O sistema impede o cadastro de CPFs duplicados para o mesmo psicólogo, fornecendo feedback visual imediato.
+- **UX de Validação Inteligente:** Em formulários com abas, o sistema detecta campos obrigatórios faltantes e redireciona automaticamente o usuário para a aba correta, exibindo uma mensagem de alerta detalhada.
+- **Feedback Visual de Erros:** Substituição de alertas genéricos por mensagens integradas ao design do modal, com animações de atenção (shake) em caso de falha.
+
+### 5. Tecnologia e UX
 - **Navegação Suave:** Hook `useNavigateWithTransition` adiciona delay de 300ms antes detrocas de página, permitindo que a animação de transição do Layout execute. Uso:
 
 ```jsx

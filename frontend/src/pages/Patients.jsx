@@ -55,6 +55,7 @@ export default function Patients() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editPatient, setEditPatient] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     if (successMessage) {
@@ -62,6 +63,18 @@ export default function Patients() {
       return () => clearTimeout(timer);
     }
   }, [successMessage]);
+
+  useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => setErrorMessage(""), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
+
+  const openAddModal = () => {
+    setErrorMessage("");
+    setShowAddModal(true);
+  };
 
   const [addFormTab, setAddFormTab] = useState("identity");
   const [newPatient, setNewPatient] = useState({
@@ -96,7 +109,7 @@ export default function Patients() {
   useEffect(() => {
     loadPatients();
     if (location.state?.openAddModal) {
-      setShowAddModal(true);
+      openAddModal();
     }
   }, [location.state]);
 
@@ -137,7 +150,22 @@ export default function Patients() {
 
   const handleAddPatient = async (e) => {
     e.preventDefault();
+    
+    // Manual validation to guide user to the right tab
+    if (!newPatient.name || !newPatient.cpf || !newPatient.birthDate) {
+      setAddFormTab("identity");
+      setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Identificação.");
+      return;
+    }
+    
+    if (!newPatient.email || !newPatient.phone || !newPatient.emergencyPhone || !newPatient.emergencyName) {
+      setAddFormTab("contact");
+      setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Contato.");
+      return;
+    }
+
     setSaving(true);
+    setErrorMessage("");
     try {
       const patient = await api.createPatient(newPatient);
       
@@ -174,6 +202,7 @@ export default function Patients() {
       navigate(`/patients/${patient.id}`);
     } catch (error) {
       console.error("Erro ao salvar paciente:", error);
+      setErrorMessage(error.message || "Erro ao salvar paciente");
     } finally {
       setSaving(false);
     }
@@ -202,7 +231,7 @@ export default function Patients() {
           <h1 className="text-2xl font-semibold text-slate-800">Pacientes</h1>
           <p className="text-sm text-slate-500">Gerencie seus pacientes e seus históricos clínicos.</p>
         </div>
-        <button onClick={() => setShowAddModal(true)} className="btn btn-primary px-4">
+        <button onClick={openAddModal} className="btn btn-primary px-4">
           <UserPlus size={18} />
           Cadastrar
         </button>
@@ -270,7 +299,7 @@ export default function Patients() {
               {searchQuery ? "Tente um termo de busca diferente" : "Comece cadastrando seu primeiro paciente para acompanhar sua evolução clínica."}
             </p>
             {!searchQuery && (
-              <button onClick={() => setShowAddModal(true)} className="btn btn-primary">
+              <button onClick={openAddModal} className="btn btn-primary">
                 <UserPlus size={18} />
                 Cadastrar Paciente
               </button>
@@ -337,6 +366,13 @@ export default function Patients() {
                   </button>
                 ))}
               </div>
+
+              {errorMessage && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-600 animate-shake">
+                  <AlertTriangle size={18} className="shrink-0" />
+                  <p className="text-xs font-bold">{errorMessage}</p>
+                </div>
+              )}
             </div>
 
             {/* Form Content */}
@@ -398,9 +434,10 @@ export default function Patients() {
                     {/* Linha 2: CPF | Nascimento | Gênero */}
                     <div className="grid grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">CPF</label>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">CPF *</label>
                         <input
                           type="text"
+                          required
                           className="input text-sm"
                           value={newPatient.cpf}
                           onChange={e => setNewPatient({ ...newPatient, cpf: formatCPF(e.target.value) })}
@@ -409,9 +446,10 @@ export default function Patients() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Nascimento</label>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Nascimento *</label>
                         <input
                           type="date"
+                          required
                           className="input text-sm"
                           value={newPatient.birthDate}
                           onChange={e => setNewPatient({ ...newPatient, birthDate: e.target.value })}
@@ -478,9 +516,10 @@ export default function Patients() {
                 {addFormTab === "contact" && (
                   <div className="space-y-5">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-2">E-mail</label>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">E-mail *</label>
                       <input
                         type="email"
+                        required
                         className="input text-sm"
                         value={newPatient.email}
                         onChange={e => setNewPatient({ ...newPatient, email: e.target.value })}
@@ -490,9 +529,10 @@ export default function Patients() {
                     
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone</label>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone *</label>
                         <input
                           type="tel"
+                          required
                           className="input text-sm"
                           value={newPatient.phone}
                           onChange={e => setNewPatient({ ...newPatient, phone: formatPhone(e.target.value) })}
@@ -501,9 +541,10 @@ export default function Patients() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência</label>
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência *</label>
                         <input
                           type="tel"
+                          required
                           className="input text-sm"
                           value={newPatient.emergencyPhone}
                           onChange={e => setNewPatient({ ...newPatient, emergencyPhone: formatPhone(e.target.value) })}
@@ -514,9 +555,10 @@ export default function Patients() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-2">Nome Emergência</label>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">Nome Emergência *</label>
                       <input
                         type="text"
+                        required
                         className="input text-sm"
                         value={newPatient.emergencyName}
                         onChange={e => setNewPatient({ ...newPatient, emergencyName: e.target.value })}
@@ -799,11 +841,19 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
     isActive: patient.isActive !== false,
   });
   const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [editTab, setEditTab] = useState("identity");
   const [attachments, setAttachments] = useState([]);
   const [loadingAttachments, setLoadingAttachments] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [cleanupModal, setCleanupModal] = useState({ open: false, title: "", message: "", mode: null });
+
+  useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => setErrorMessage(""), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
 
   useEffect(() => {
     loadAttachments();
@@ -823,13 +873,29 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    
+    // Manual validation to guide user to the right tab
+    if (!formData.name || !formData.cpf || !formData.birthDate) {
+      setEditTab("identity");
+      setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Identificação.");
+      return;
+    }
+    
+    if (!formData.email || !formData.phone || !formData.emergencyPhone || !formData.emergencyName) {
+      setEditTab("contact");
+      setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Contato.");
+      return;
+    }
+
     setSaving(true);
+    setErrorMessage("");
     try {
       await api.updatePatient(patient.id, formData);
       setSuccessMessage("Cadastro atualizado com sucesso!");
       onSave();
     } catch (error) {
-      alert("Erro ao salvar: " + error.message);
+      console.error("Erro ao salvar:", error);
+      setErrorMessage(error.message || "Erro ao salvar paciente");
     } finally {
       setSaving(false);
     }
@@ -840,6 +906,7 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
     if (files.length === 0) return;
     
     setUploading(true);
+    setErrorMessage("");
     try {
       for (const file of files) {
         const result = await api.uploadAttachment(patient.id, file);
@@ -847,7 +914,7 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
       }
     } catch (error) {
       console.error("Erro ao fazer upload:", error);
-      alert(error.message || "Erro ao fazer upload do arquivo");
+      setErrorMessage(error.message || "Erro ao fazer upload do arquivo");
     } finally {
       setUploading(false);
       e.target.value = '';
@@ -918,6 +985,13 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
               </button>
             ))}
           </div>
+
+          {errorMessage && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-600 animate-shake">
+              <AlertTriangle size={18} className="shrink-0" />
+              <p className="text-xs font-bold">{errorMessage}</p>
+            </div>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto p-6">
@@ -981,9 +1055,10 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                 {/* Linha 2: CPF | Nascimento | Gênero */}
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">CPF</label>
+                    <label className="block text-xs font-semibold text-slate-600 mb-2">CPF *</label>
                     <input
                       type="text"
+                      required
                       className="input text-sm"
                       value={formData.cpf}
                       onChange={e => setFormData({ ...formData, cpf: formatCPF(e.target.value) })}
@@ -992,9 +1067,10 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">Nascimento</label>
+                    <label className="block text-xs font-semibold text-slate-600 mb-2">Nascimento *</label>
                     <input
                       type="date"
+                      required
                       className="input text-sm"
                       value={formData.birthDate}
                       onChange={e => setFormData({ ...formData, birthDate: e.target.value })}
@@ -1060,9 +1136,10 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
             {editTab === "contact" && (
               <div className="space-y-5">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-2">E-mail</label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-2">E-mail *</label>
                   <input
                     type="email"
+                    required
                     className="input text-sm"
                     value={formData.email}
                     onChange={e => setFormData({ ...formData, email: e.target.value })}
@@ -1072,9 +1149,10 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone</label>
+                    <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone *</label>
                     <input
                       type="tel"
+                      required
                       className="input text-sm"
                       value={formData.phone}
                       onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
@@ -1083,9 +1161,10 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência</label>
+                    <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência *</label>
                     <input
                       type="tel"
+                      required
                       className="input text-sm"
                       value={formData.emergencyPhone}
                       onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })}
@@ -1096,9 +1175,10 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-2">Nome Emergência</label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-2">Nome Emergência *</label>
                   <input
                     type="text"
+                    required
                     className="input text-sm"
                     value={formData.emergencyName}
                     onChange={e => setFormData({ ...formData, emergencyName: e.target.value })}

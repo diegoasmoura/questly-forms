@@ -90,8 +90,20 @@ router.post("/", async (req, res) => {
   try {
     const data = req.body;
 
-    if (!data.name) {
-      return res.status(400).json({ error: "Nome é obrigatório" });
+    const requiredFields = {
+      name: "Nome",
+      cpf: "CPF",
+      birthDate: "Data de Nascimento",
+      email: "E-mail",
+      phone: "Telefone",
+      emergencyName: "Nome do Contato de Emergência",
+      emergencyPhone: "Telefone de Emergência"
+    };
+
+    for (const [field, label] of Object.entries(requiredFields)) {
+      if (!data[field]) {
+        return res.status(400).json({ error: `${label} é obrigatório` });
+      }
     }
 
     const insertData = {
@@ -166,6 +178,22 @@ router.put("/:id", async (req, res) => {
       where: { id: req.params.id, psychologistId: req.user.id },
     });
     if (!patient) return res.status(404).json({ error: "Paciente não encontrado" });
+
+    const requiredFields = {
+      name: "Nome",
+      cpf: "CPF",
+      birthDate: "Data de Nascimento",
+      email: "E-mail",
+      phone: "Telefone",
+      emergencyName: "Nome do Contato de Emergência",
+      emergencyPhone: "Telefone de Emergência"
+    };
+
+    for (const [field, label] of Object.entries(requiredFields)) {
+      if (data.hasOwnProperty(field) && !data[field]) {
+        return res.status(400).json({ error: `${label} não pode ser vazio` });
+      }
+    }
 
     const allowedFields = [
       "name", "email", "phone", "birthDate", "notes", "cpf", "rg",

@@ -78,7 +78,15 @@ export default function PatientRecord() {
   const navigate = useNavigate();
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
   const [selectedResponseId, setSelectedResponseId] = useState(null);
+
+  useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => setErrorMessage(""), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("sessions"); // 'sessions', 'share', 'financial', 'settings'
   const [attendances, setAttendances] = useState([]);
@@ -433,6 +441,7 @@ export default function PatientRecord() {
     if (files.length === 0) return;
     
     setUploading(true);
+    setErrorMessage("");
     try {
       for (const file of files) {
         const result = await api.uploadAttachment(id, file);
@@ -440,7 +449,7 @@ export default function PatientRecord() {
       }
     } catch (error) {
       console.error("Erro ao fazer upload:", error);
-      alert("Erro ao fazer upload: " + (error.message || "Tente novamente"));
+      setErrorMessage(error.message || "Erro ao fazer upload do arquivo");
     } finally {
       setUploading(false);
       e.target.value = '';
@@ -472,6 +481,7 @@ export default function PatientRecord() {
     e.preventDefault();
     console.log("handleSave - Enviando dados:", JSON.stringify(formData, null, 2));
     setSaving(true);
+    setErrorMessage("");
     try {
       const result = await api.updatePatient(patient.id, formData);
       console.log("Resposta do servidor:", JSON.stringify(result, null, 2));
@@ -479,7 +489,7 @@ export default function PatientRecord() {
       setShowEditModal(false);
     } catch (error) {
       console.error("Erro ao salvar:", error);
-      alert("Erro ao salvar: " + error.message);
+      setErrorMessage(error.message || "Erro ao salvar: " + error.message);
     } finally {
       setSaving(false);
     }
@@ -2008,10 +2018,16 @@ export default function PatientRecord() {
                     <tab.icon size={14} />
                     <span className="hidden sm:inline">{tab.label}</span>
                   </button>
-                ))}
-              </div>
-            </div>
+                  ))}
+                  </div>
 
+                  {errorMessage && (
+                  <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-600 animate-shake">
+                  <AlertTriangle size={18} className="shrink-0" />
+                  <p className="text-xs font-bold">{errorMessage}</p>
+                  </div>
+                  )}
+                  </div>
             <div className="flex-1 overflow-y-auto p-6">
               <form id="edit-patient-form-record" onSubmit={handleSave} className="space-y-5">
                 
@@ -2049,12 +2065,12 @@ export default function PatientRecord() {
 
                     <div className="grid grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">CPF</label>
-                        <input type="text" className="input text-sm" value={formData.cpf} onChange={e => setFormData({ ...formData, cpf: formatCPF(e.target.value) })} placeholder="000.000.000-00" maxLength={14} />
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">CPF *</label>
+                        <input type="text" required className="input text-sm" value={formData.cpf} onChange={e => setFormData({ ...formData, cpf: formatCPF(e.target.value) })} placeholder="000.000.000-00" maxLength={14} />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Nascimento</label>
-                        <input type="date" className="input text-sm" value={formData.birthDate} onChange={e => setFormData({ ...formData, birthDate: e.target.value })} />
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Nascimento *</label>
+                        <input type="date" required className="input text-sm" value={formData.birthDate} onChange={e => setFormData({ ...formData, birthDate: e.target.value })} />
                       </div>
                       <div>
                         <label className="block text-xs font-semibold text-slate-600 mb-2">Gênero</label>
@@ -2095,22 +2111,22 @@ export default function PatientRecord() {
                 {editTab === "contact" && (
                   <div className="space-y-5">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-2">E-mail</label>
-                      <input type="email" className="input text-sm" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="email@exemplo.com" />
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">E-mail *</label>
+                      <input type="email" required className="input text-sm" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="email@exemplo.com" />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone</label>
-                        <input type="tel" className="input text-sm" value={formData.phone} onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone *</label>
+                        <input type="tel" required className="input text-sm" value={formData.phone} onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência</label>
-                        <input type="tel" className="input text-sm" value={formData.emergencyPhone} onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
+                        <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência *</label>
+                        <input type="tel" required className="input text-sm" value={formData.emergencyPhone} onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-2">Nome Emergência</label>
-                      <input type="text" className="input text-sm" value={formData.emergencyName} onChange={e => setFormData({ ...formData, emergencyName: e.target.value })} placeholder="Contato de emergência" />
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">Nome Emergência *</label>
+                      <input type="text" required className="input text-sm" value={formData.emergencyName} onChange={e => setFormData({ ...formData, emergencyName: e.target.value })} placeholder="Contato de emergência" />
                     </div>
                   </div>
                 )}
