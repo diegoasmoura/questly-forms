@@ -89,6 +89,11 @@ router.post("/", async (req, res) => {
     });
     
     if (existing) {
+      if (existing.paymentId) {
+        return res.status(400).json({ 
+          error: "Esta sessão já foi paga e não pode ser alterada. Remova o pagamento primeiro se precisar ajustar o status." 
+        });
+      }
       const updated = await prisma.attendance.update({
         where: { id: existing.id },
         data: { 
@@ -120,16 +125,31 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Deletar attendance (Reset com Cascade)
+// Deletar attendance (Reset com Segurança)
 router.delete("/:id", async (req, res) => {
   try {
     const recordToDelete = await prisma.attendance.findUnique({
       where: { id: req.params.id },
-      select: { parentId: true, status: true }
+      include: { 
+        _count: { select: { children: true } },
+        paymentId: true 
+      }
     });
 
     if (!recordToDelete) {
       return res.status(404).json({ error: "Registro não encontrado" });
+    }
+
+    if (recordToDelete._count.children > 0) {
+      return res.status(400).json({ 
+        error: "Não é possível excluir esta sessão pois ela possui reagendamentos vinculados. Exclua os reagendamentos primeiro." 
+      });
+    }
+
+    if (recordToDelete.paymentId) {
+      return res.status(400).json({ 
+        error: "Não é possível excluir uma sessão que já foi paga. Remova o vínculo no financeiro primeiro." 
+      });
     }
 
     // Se tiver um pai, limpamos a menção ao reagendamento nas notas do pai
@@ -139,7 +159,6 @@ router.delete("/:id", async (req, res) => {
       });
 
       if (parent && parent.notes) {
-        // Remover a parte "Reagendado para ..." das notas
         const notesParts = parent.notes.split(/Reagendado para/i);
         const cleanNotes = notesParts[0].trim();
         
@@ -152,7 +171,6 @@ router.delete("/:id", async (req, res) => {
       }
     }
 
-    // A deleção aqui disparará o onDelete: Cascade no banco para todos os filhos
     await prisma.attendance.delete({
       where: { id: req.params.id }
     });

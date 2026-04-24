@@ -155,24 +155,41 @@ router.post("/batch", async (req, res) => {
 router.post("/check-conflict", async (req, res) => {
   const { dayOfWeek, time, duration, excludePatientId } = req.body;
 
+  if (!time || !duration) {
+    return res.json({ hasConflict: false, conflicts: [] });
+  }
+
   try {
-    const conflicts = await prisma.appointment.findMany({
+    // 1. Buscar todos os agendamentos do mesmo dia da semana
+    const existingAppointments = await prisma.appointment.findMany({
       where: {
         psychologistId: req.user.id,
         dayOfWeek: parseInt(dayOfWeek),
         patientId: { not: excludePatientId },
-        // Lógica simples de sobreposição: (Início < FimExistente) && (Fim > InícioExistente)
-        // Como o tempo é string "HH:mm", a comparação de strings funciona para horários
-        time: {
-           // Simplificado para este exemplo: mesmo horário exato
-           equals: time 
-        }
       },
       include: { patient: { select: { name: true } } }
     });
 
+    // 2. Converter horários para minutos para facilitar a comparação
+    const toMinutes = (timeStr) => {
+      const [h, m] = timeStr.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    const newStart = toMinutes(time);
+    const newEnd = newStart + parseInt(duration);
+
+    // 3. Filtrar os que sobrepõem
+    // Overlap: (start1 < end2) && (start2 < end1)
+    const conflicts = existingAppointments.filter(app => {
+      const appStart = toMinutes(app.time);
+      const appEnd = appStart + app.duration;
+      return newStart < appEnd && appStart < newEnd;
+    });
+
     res.json({ hasConflict: conflicts.length > 0, conflicts });
   } catch (error) {
+    console.error("Erro ao verificar conflitos:", error);
     res.status(500).json({ error: "Erro ao verificar conflito" });
   }
 });

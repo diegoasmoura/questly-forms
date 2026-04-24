@@ -176,14 +176,15 @@ export default function PatientRecord() {
     }
   };
 
-  const checkConflict = async (id, dayOfWeek, time) => {
+  const checkConflict = async (id, dayOfWeek, time, duration) => {
     try {
       const result = await api.checkAppointmentConflict({
         dayOfWeek,
         time,
+        duration,
         excludePatientId: patient.id
       });
-      
+
       setConflicts(prev => ({
         ...prev,
         [id]: result.hasConflict ? result.conflicts[0] : null
@@ -203,7 +204,7 @@ export default function PatientRecord() {
       startDate: new Date().toISOString().split('T')[0],
       isNew: true
     }]);
-    checkConflict(newId, 1, "08:00");
+    checkConflict(newId, 1, "08:00", 50);
   };
 
   const removeAppointmentSlot = (id) => {
@@ -216,17 +217,16 @@ export default function PatientRecord() {
   };
 
   const updateAppointmentSlot = (id, field, value) => {
-    const updatedApps = appointments.map(a => 
+    const updatedApps = appointments.map(a =>
       a.id === id ? { ...a, [field]: value } : a
     );
     setAppointments(updatedApps);
 
-    if (field === "dayOfWeek" || field === "time") {
+    if (field === "dayOfWeek" || field === "time" || field === "duration") {
       const slot = updatedApps.find(a => a.id === id);
-      checkConflict(id, slot.dayOfWeek, slot.time);
+      checkConflict(id, slot.dayOfWeek, slot.time, slot.duration);
     }
   };
-
   const handleClearAgenda = (mode = null) => {
     if (!mode) {
       setCleanupModal({
@@ -733,10 +733,20 @@ export default function PatientRecord() {
     doc.text('SESSÕES INCLUÍDAS', margin, 85);
     
     const tableBody = payment.attendances.map((att, index) => {
-      const statusLabel = att.status === 'presente' ? 'PRESENTE' : att.status === 'falta' ? 'FALTA' : att.status === 'justificada' ? 'JUSTIFICADA' : 'PENDENTE';
+      const isFalta = att.status === 'falta';
+      const statusLabel = att.status === 'presente' ? 'PRESENTE' : isFalta ? 'FALTA' : att.status === 'justificada' ? 'JUSTIFICADA' : 'PENDENTE';
+      
+      let dateLabel = format(new Date(att.date), 'dd/MM/yyyy');
+      if (att.parentId) {
+        const parent = attendances.find(p => p.id === att.parentId);
+        if (parent) {
+          dateLabel += ` (Ref: ${format(new Date(parent.date), 'dd/MM/yyyy')})`;
+        }
+      }
+
       return [
         index + 1,
-        format(new Date(att.date), 'dd/MM/yyyy'),
+        dateLabel,
         att.sessionTime || '08:00',
         statusLabel
       ];
@@ -1323,7 +1333,7 @@ export default function PatientRecord() {
                   </div>
                   <div>
                     <p className="text-2xl font-black text-slate-800">
-                      {attendances.filter(a => !a.paymentId && a.status === 'presente').length}
+                      {attendances.filter(a => !a.paymentId && (a.status === 'presente' || a.status === 'falta')).length}
                     </p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sessões Pendentes</p>
                   </div>
@@ -2449,7 +2459,7 @@ export default function PatientRecord() {
                   <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
                     {(() => {
                       const id = paymentFormData.id;
-                      const available = attendances.filter(a => a.status === 'presente' && (!a.paymentId || a.paymentId === id));
+                      const available = attendances.filter(a => (a.status === 'presente' || a.status === 'falta') && (!a.paymentId || a.paymentId === id));
                       const linked = available.filter(a => a.paymentId === id);
                       const pending = available.filter(a => !a.paymentId);
                       const sorted = [...linked, ...pending];
@@ -2483,8 +2493,22 @@ export default function PatientRecord() {
                               {selectedAttendances.includes(att.id) && <Check size={10} className="text-white" />}
                             </div>
                             <div>
-                              <p className="text-xs font-black text-slate-800">{format(new Date(att.date), 'dd/MM/yyyy')}</p>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase">{att.sessionTime}</p>
+                              <p className="text-xs font-black text-slate-800">
+                                {format(new Date(att.date), 'dd/MM/yyyy')}
+                                {att.status === 'falta' && <span className="ml-2 text-[9px] text-red-500 uppercase font-black">Falta</span>}
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase">{att.sessionTime}</p>
+                                {att.parentId && (() => {
+                                  const parent = attendances.find(p => p.id === att.parentId);
+                                  return parent ? (
+                                    <span className="text-[9px] font-black text-amber-500 uppercase flex items-center gap-0.5">
+                                      <RefreshCcw size={8} />
+                                      Pai: {format(new Date(parent.date), 'dd/MM/yyyy')}
+                                    </span>
+                                  ) : null;
+                                })()}
+                              </div>
                             </div>
                           </div>
                         </label>
