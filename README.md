@@ -73,7 +73,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Feedback Visual:** Mensagens detalhadas com linha do erro
 
 ### 6. UX de Visualização de Pacientes
-- **Modo Card:** Botão excluir sempre visível (sem hover)
+- **Modo Card:** Excluir junto com botões de ação (sem botão separado no topo)
 - **Modo Lista:** Ordem de botões: Prontuário (destacado) > Editar > Excluir
 
 ### 7. Navegação Suave

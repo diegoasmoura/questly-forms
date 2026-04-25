@@ -413,7 +413,7 @@ const resetImportModal = () => {
                 </div>
                 <div>
                   <p className="font-bold">Importar dados</p>
-                  <p className="text-[10px] text-slate-500">Planilha Excel/CSV</p>
+                  <p className="text-[10px] text-slate-500">Planilha Excel</p>
                 </div>
               </button>
             </div>
@@ -2013,9 +2013,6 @@ function PatientCard({ patient, onDelete, onEdit }) {
             </div>
           </div>
         </div>
-        <button onClick={() => onDelete(patient.id)} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all absolute top-5 right-5 z-10">
-          <Trash2 size={16} />
-        </button>
       </div>
 
       {/* Unified Dashboard: Attendance & Forms */}
