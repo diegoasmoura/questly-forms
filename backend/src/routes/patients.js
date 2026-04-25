@@ -165,7 +165,7 @@ router.post("/", async (req, res) => {
       });
     }
     
-    res.status(500).json({ error: "Erro ao salvar paciente" });
+    res.status(500).json({ error: error.message || "Erro ao salvar paciente" });
   }
 });
 

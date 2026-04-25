@@ -62,8 +62,22 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **UX de Validação Inteligente:** Em formulários com abas, o sistema detecta campos obrigatórios faltantes e redireciona automaticamente o usuário para a aba correta, exibindo uma mensagem de alerta detalhada.
 - **Feedback Visual de Erros:** Substituição de alertas genéricos por mensagens integradas ao design do modal, com animações de atenção (shake) em caso de falha.
 
-### 5. Tecnologia e UX
-- **Navegação Suave:** Hook `useNavigateWithTransition` adiciona delay de 300ms antes detrocas de página, permitindo que a animação de transição do Layout execute. Uso:
+### 5. Cadastro de Pacientes e Importação Excel (v4.5)
+- **Importação via Excel:** Modelo geração via **ExcelJS** com suporte a 3 formatos de data:
+  - **DD-MM-YYYY** (ex: 15-01-1990) - formato brasileiro
+  - **YYYY-MM-DD** (ex: 1990-01-15)
+  - **Serial do Excel** (ex: 32874)
+- **Cabeçalho verde** (Emerald-600)
+- **Larguras padronizadas** por coluna
+- **Dropdowns** em Gênero e Estado Civil
+- **Feedback Visual:** Mensagens detalhadas com linha do erro
+
+### 6. UX de Visualização de Pacientes
+- **Modo Card:** Botão excluir sempre visível (sem hover)
+- **Modo Lista:** Ordem de botões: Prontuário (destacado) > Editar > Excluir
+
+### 7. Navegação Suave
+- Hook `useNavigateWithTransition` adiciona delay de 300ms antes de trocas de página:
 
 ```jsx
 import { useNavigateWithTransition } from "../lib/useNavigateWithTransition";
@@ -74,20 +88,17 @@ navigate("/path", { delay: 0 }); // sem delay (ex: logout)
 navigate(-1); // suporta navegação relativa
 ```
 
-- **Navegação Consistente:** Padronização de interatividade em listas e cards. Elementos como Avatares, Nomes e Ícones agora são links diretos para prontuários, edições e visualizações.
-- **Semana de Aniversário (UX Humanizada):** Visual festivo automático (dourado/lança-confetes) ativado em uma janela de 7 dias ao redor do aniversário do paciente (4 dias antes até 3 dias depois).
-- **Métricas de Engajamento Unificadas:** Comparação direta entre assiduidade física (Sessões) e engajamento digital (Instrumentos Clínicos) na capa do card.
-- **Tooltips Instantâneos:** Substituição dos títulos nativos por balões informativos de alta performance (sem delay).
-- **UX de Portals:** Modais de agenda utilizam **React Portals** para cobertura total da tela (100% de largura/altura).
-- **Gestão UTC:** Datas armazenadas em UTC e extraídas conforme fuso local para evitar erros de calendário.
-- **Feedback Moderno:** Toasts flutuantes (Emerald-600) para confirmação de ações.
-- **Clinical Dashboard:** Visualização instantânea de métricas de engajamento (Presenças vs Respostas de Instrumentos) diretamente na capa do card do paciente.
-- **Padronização de Abas (Patient Record):** Todas as abas seguem o mesmo padrão visual com header (título + botão Save) alinhados horizontalmente usando `btn btn-primary`.
-- **UX de Registro Clínico:** Área clicável para upload de anexos com opção "Adicionar mais" após primeiro arquivo.
-- **Importação de Pacientes (Excel):** Modelo geração via **ExcelJS** com:
-  - Cabeçalho verde (Emerald-600)
-  - Larguras padronizadas por coluna
-  - Dropdowns em Gênero e Estado Civil (referenciados na aba "Opções")
+### 8. outras UX
+- **Navegação Consistente:** Elementos como Avatares, Nomes e Ícones são links diretos para prontuários.
+- **Semana de Aniversário:** Visual festivo automático (dourado/confetes) em janela de 7 dias.
+- **Métricas de Engajamento:** Comparação entre assiduidade física (Sessões) e digital (Instrumentos).
+- **Tooltips Instantâneos:** Balões informativos sem delay.
+- **UX de Portals:** Modais cobrem 100% da tela.
+- **Gestão UTC:** Datas em UTC, extraídas conforme fuso local.
+- **Toasts Flutuantes:** Confirmações em Emerald-600.
+- **Clinical Dashboard:** Métricas de engajamento na capa do card.
+- **Patient Record:** Padronização de abas com header e botão Save.
+- **UX de Registro:** Área clicável para upload de anexos.
 
 ## Tecnologias
 

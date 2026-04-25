@@ -17,6 +17,71 @@ export const EXCEL_COLUMNS = [
 const GENDER_OPTIONS  = ["Masculino", "Feminino", "Nao-Binario", "Outro"];
 const MARITAL_OPTIONS = ["Solteiro", "Casado", "Uniao Estavel", "Divorciado", "Viuvo"];
 
+// Validações
+const CPF_REGEX = /^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/;
+const PHONE_REGEX = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export const validatePatient = (patient, index) => {
+  const errors = [];
+  const rowNum = index + 2;
+  
+  if (!patient.name || patient.name.toString().trim() === '') {
+    errors.push(`Linha ${rowNum}: Nome é obrigatório`);
+  }
+  
+  if (!patient.cpf) {
+    errors.push(`Linha ${rowNum}: CPF é obrigatório`);
+  } else {
+    const cpfClean = patient.cpf.toString().replace(/\D/g, '');
+    if (cpfClean.length !== 11) {
+      errors.push(`Linha ${rowNum}: CPF deve ter 11 dígitos`);
+    }
+  }
+  
+  if (!patient.birthDate) {
+    errors.push(`Linha ${rowNum}: Data de Nascimento é obrigatória`);
+  }
+  
+  if (!patient.email) {
+    errors.push(`Linha ${rowNum}: E-mail é obrigatório`);
+  } else if (!EMAIL_REGEX.test(patient.email.toString())) {
+    errors.push(`Linha ${rowNum}: E-mail inválido`);
+  }
+  
+  if (!patient.phone) {
+    errors.push(`Linha ${rowNum}: Telefone é obrigatório`);
+  }
+  
+  if (!patient.emergencyName) {
+    errors.push(`Linha ${rowNum}: Nome de Emergência é obrigatório`);
+  }
+  if (!patient.emergencyPhone) {
+    errors.push(`Linha ${rowNum}: Telefone de Emergência é obrigatório`);
+  }
+  
+  const genderVal = patient.gender?.toString();
+  if (genderVal && !GENDER_OPTIONS.includes(genderVal)) {
+    errors.push(`Linha ${rowNum}: Gênero deve ser um dos: ${GENDER_OPTIONS.join(', ')}`);
+  }
+  
+  const maritalVal = patient.maritalStatus?.toString();
+  if (maritalVal && !MARITAL_OPTIONS.includes(maritalVal)) {
+    errors.push(`Linha ${rowNum}: Estado Civil deve ser um dos: ${MARITAL_OPTIONS.join(', ')}`);
+  }
+  
+  return errors;
+};
+
+export const validateImport = (patients) => {
+  const allErrors = [];
+  patients.forEach((patient, index) => {
+    const errors = validatePatient(patient, index);
+    allErrors.push(...errors);
+  });
+  return allErrors;
+};
+
 const buildXlsx = async () => {
   const zip = new JSZip();
 
@@ -189,19 +254,38 @@ export const parseExcelFile = (file) => {
         const ws   = wb.Sheets['Pacientes'];
         const json = utils.sheet_to_json(ws);
 
-        const patients = json.map(row => ({
-          name:           row['Nome'],
-          cpf:            row['CPF'],
-          birthDate:      row['Data de Nascimento'],
-          email:          row['E-mail'],
-          phone:          row['Telefone'],
-          emergencyName:  row['Nome Emergência'],
-          emergencyPhone: row['Telefone Emergência'],
-          rg:             row['RG'],
-          gender:         row['Gênero'],
-          maritalStatus:  row['Estado Civil'],
-          profession:     row['Profissão'],
-        }));
+        const patients = json.map(row => {
+          let birthDate = row['Data de Nascimento'];
+          if (birthDate) {
+            const num = parseInt(birthDate);
+            if (!isNaN(num) && num > 0) {
+              const date = new Date((num - 25569) * 86400 * 1000);
+              if (!isNaN(date.getTime())) {
+                birthDate = date.toISOString().split('T')[0];
+              }
+            } else if (typeof birthDate === 'string') {
+              const match = birthDate.match(/(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})/);
+              if (match) {
+                const [, d, m, y] = match;
+                const year = y.length === 2 ? (parseInt(y) > 50 ? '19' + y : '20' + y) : y;
+                birthDate = `${year}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+              }
+            }
+          }
+          return {
+            name:           row['Nome'],
+            cpf:            row['CPF'],
+            birthDate,
+            email:          row['E-mail'],
+            phone:          row['Telefone'],
+            emergencyName:  row['Nome Emergência'],
+            emergencyPhone: row['Telefone Emergência'],
+            rg:             row['RG'],
+            gender:         row['Gênero'],
+            maritalStatus:  row['Estado Civil'],
+            profession:     row['Profissão'],
+          };
+        });
 
         resolve(patients);
       } catch (err) {

@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useNavigateWithTransition } from "../lib/useNavigateWithTransition";
 import { api } from "../lib/api";
 import { formatCPF, formatPhone, formatCEP } from "../lib/utils";
-import { generateExcelTemplate, parseExcelFile } from "../lib/excel";
+import { generateExcelTemplate } from "../lib/excel";
 import { useAuth } from "../context/AuthContext";
 import {
   Users,
@@ -32,7 +32,7 @@ import {
   Settings,
   Check,
   File,
-  Paperclip,
+Paperclip,
   Download,
   Trash,
   AlertTriangle,
@@ -63,6 +63,131 @@ export default function Patients() {
   const [editPatient, setEditPatient] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [importStep, setImportStep] = useState('idle');
+  const [importErrors, setImportErrors] = useState([]);
+  const [importResults, setImportResults] = useState([]);
+  const [importProgress, setImportProgress] = useState(0);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImportStep('parsing');
+    setImportErrors([]);
+    
+    try {
+      const { read, utils } = await import('xlsx');
+      const data = await file.arrayBuffer();
+      const wb = read(data, { type: 'array' });
+      const ws = wb.Sheets['Pacientes'] || wb.Sheets[wb.SheetNames[0]];
+      if (!ws) {
+        setImportStep('idle');
+        return;
+      }
+      
+      const json = utils.sheet_to_json(ws);
+      if (json.length === 0) {
+        setImportStep('empty');
+        return;
+      }
+      
+      const parsed = json.map(row => {
+        let birthDate = row['Data de Nascimento']?.toString().trim() || '';
+        
+        if (birthDate) {
+          const num = parseInt(birthDate);
+          if (!isNaN(num) && num > 0) {
+            const date = new Date((num - 25569) * 86400 * 1000);
+            if (!isNaN(date.getTime())) {
+              birthDate = date.toISOString().split('T')[0];
+            }
+          } else {
+            const match = birthDate.match(/(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})/);
+            if (match) {
+              const [, d, m, y] = match;
+              const year = y.length === 2 ? (parseInt(y) > 50 ? '19' + y : '20' + y) : y;
+              birthDate = `${year}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+            }
+          }
+        }
+        
+        return {
+          name: row['Nome']?.toString().trim() || '',
+          cpf: row['CPF']?.toString().trim() || '',
+          birthDate,
+          email: row['E-mail']?.toString().trim() || '',
+          phone: row['Telefone']?.toString().trim() || '',
+          emergencyName: row['Nome Emergência']?.toString().trim() || '',
+          emergencyPhone: row['Telefone Emergência']?.toString().trim() || '',
+          rg: row['RG']?.toString().trim() || '',
+          gender: row['Gênero']?.toString().trim() || '',
+          maritalStatus: row['Estado Civil']?.toString().trim() || '',
+          profession: row['Profissão']?.toString().trim() || '',
+        };
+      });
+      
+      const errors = [];
+      parsed.forEach((p, i) => {
+        const n = i + 2;
+        if (!p.name) errors.push(' Linha ' + n + ': Nome obrigatorio');
+        if (!p.cpf) errors.push(' Linha ' + n + ': CPF obrigatorio');
+        else if (p.cpf.replace(/\D/g,'').length !== 11) errors.push(' Linha ' + n + ': CPF invalido');
+        if (!p.birthDate) errors.push(' Linha ' + n + ': Data obrigatoria');
+        else if (!/^\d{4}-\d{2}-\d{2}$/.test(p.birthDate)) errors.push(' Linha ' + n + ': Data invalida (use DD-MM-YYYY)');
+        if (!p.email) errors.push(' Linha ' + n + ': E-mail obrigatorio');
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email)) errors.push(' Linha ' + n + ': E-mail invalido');
+        if (!p.phone) errors.push(' Linha ' + n + ': Telefone obrigatorio');
+        if (!p.emergencyName) errors.push(' Linha ' + n + ': Nome emergencia obrigatorio');
+        if (!p.emergencyPhone) errors.push(' Linha ' + n + ': Telefone emergencia obrigatorio');
+      });
+      
+      setImportedPatients(parsed);
+      setImportErrors(errors);
+      setImportStep('preview');
+    } catch (err) {
+      alert('Erro: ' + err.message);
+      setImportStep('idle');
+    }
+    
+    e.target.value = '';
+  };
+
+  const handleImportPatients = async () => {
+    if (importErrors.length > 0) return;
+    setImportStep('importing');
+    setImportProgress(0);
+    setImportResults([]);
+    
+    let success = 0;
+    const total = importedPatients.length;
+    
+    for (const p of importedPatients) {
+      try {
+        await api.createPatient(p);
+        success++;
+      } catch (err) {
+        setImportResults(prev => [...prev, 'Erro: ' + p.name + ' (' + (err.message || 'ja cadastrado') + ')']);
+      }
+      setImportProgress(Math.round(((success + importResults.length) / total) * 100));
+    }
+    
+    if (importResults.length > 0) {
+      setImportStep('preview');
+      setSuccessMessage(success + ' importado(s)!');
+    } else {
+      loadPatients();
+      setImportStep('done');
+      setSuccessMessage(success + ' paciente(s) importado(s)!');
+    }
+  };
+
+const resetImportModal = () => {
+    setShowImportModal(false);
+    setImportedPatients([]);
+    setImportStep('idle');
+    setImportErrors([]);
+    setImportResults([]);
+    setImportProgress(0);
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -396,78 +521,143 @@ export default function Patients() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-xl font-bold text-emerald-600">Importar Dados</h2>
-                  <p className="text-xs text-slate-500 mt-1">Importe sua base em poucos passos</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {importStep === 'idle' && 'Baixe o modelo, preencha e envie'}
+                    {importStep === 'parsing' && 'Lendo arquivo...'}
+                    {importStep === 'empty' && 'Nenhum dado encontrado'}
+                    {importStep === 'preview' && importedPatients.length + ' paciente(s) encontrado(s)'}
+                    {importStep === 'importing' && 'Importando... ' + importProgress + '%'}
+                    {importStep === 'done' && 'Concluido'}
+                  </p>
                 </div>
-                <button onClick={() => setShowImportModal(false)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all" aria-label="Fechar">
+                <button onClick={resetImportModal} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600">
                   <X size={20} />
                 </button>
               </div>
+              {importStep === 'importing' && (
+                <div className="mt-3 h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: importProgress + '%' }} />
+                </div>
+              )}
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {/* Step 1 */}
-              <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 group hover:border-emerald-200 transition-all">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-lg shrink-0 shadow-md">
-                    1
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {importStep === 'idle' && (
+                <>
+                  <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200">
+                    <div className="flex items-start gap-4">
+                      <div className="w-9 h-9 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold shrink-0">1</div>
+                      <div className="flex-1">
+                        <h3 className="text-sm font-bold text-slate-800 mb-1">Baixe o modelo</h3>
+                        <p className="text-xs text-slate-500 mb-3">Use a planilha padrao.</p>
+                        <button onClick={generateExcelTemplate} className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50">
+                          <Download size={14} className="text-emerald-500" />
+                          Baixar modelo
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-slate-800 mb-1">Baixe o modelo</h3>
-                    <p className="text-xs text-slate-500 mb-4">
-                      Use a planilha padrão para evitar erros de formatação.
-                    </p>
-                    <button 
-                      onClick={generateExcelTemplate}
-                      className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-sm"
-                    >
-                      <Download size={16} className="text-emerald-500" />
-                      Baixar planilha modelo
-                    </button>
+                  <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200">
+                    <div className="flex items-start gap-4">
+                      <div className="w-9 h-9 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold shrink-0">2</div>
+                      <div className="flex-1">
+                        <h3 className="text-sm font-bold text-slate-800 mb-1">Envie sua planilha</h3>
+                        <p className="text-xs text-slate-500 mb-3">Faça upload para validar.</p>
+                        <label className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 cursor-pointer">
+                          <Upload size={14} />
+                          Enviar
+                          <input type="file" className="hidden" accept=".xlsx,.xls,.csv" onChange={handleFileChange} />
+                        </label>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                  <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-start gap-2">
+                    <AlertTriangle size={14} className="text-blue-500 shrink-0 mt-0.5" />
+                    <p className="text-xs text-blue-700">Campos obrigatorios: Nome, CPF, Data, E-mail, Telefone, Nome e Telefone Emergencia.</p>
+                  </div>
+                </>
+              )}
 
-              {/* Step 2 */}
-              <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 group hover:border-emerald-200 transition-all">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-lg shrink-0 shadow-md">
-                    2
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-slate-800 mb-1">Envie sua planilha preenchida</h3>
-                    <p className="text-xs text-slate-500 mb-4">
-                      Após o upload, você verá uma prévia antes de confirmar.
-                    </p>
-                    <label className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 cursor-pointer">
-                      <Upload size={16} />
-                      Enviar planilha
-                      <input type="file" className="hidden" accept=".xlsx, .xls, .csv" />
-                    </label>
-                  </div>
+              {importStep === 'parsing' && (
+                <div className="py-16 flex flex-col items-center gap-4">
+                  <div className="w-10 h-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                  <p className="text-sm text-slate-500">Lendo arquivo...</p>
                 </div>
-              </div>
+              )}
 
-              {/* Info */}
-              <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-4 flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-blue-600 shadow-sm shrink-0 border border-blue-50">
-                  <AlertTriangle size={16} />
+              {importStep === 'empty' && (
+                <div className="py-16 flex flex-col items-center gap-4 text-center">
+                  <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center">
+                    <File size={32} className="text-slate-400" />
+                  </div>
+                  <p className="text-sm text-slate-600 font-medium">Nenhum dado encontrado na planilha</p>
+                  <p className="text-xs text-slate-500">Verifique se a aba "Pacientes" tem dados</p>
+                  <button onClick={() => setImportStep('idle')} className="btn btn-secondary mt-2">Tentar novamente</button>
                 </div>
-                <div>
-                  <h4 className="text-xs font-bold text-blue-900 mb-0.5">Importante</h4>
-                  <p className="text-[10px] text-blue-700 leading-relaxed">
-                    Certifique-se de que as colunas de CPF e E-mail estejam preenchidas.
-                  </p>
+              )}
+
+              {(importStep === 'preview' || importStep === 'done') && (
+                <>
+                  {importResults.length > 0 && (
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertTriangle size={14} className="text-red-500" />
+                        <p className="text-xs font-bold text-red-700">{importResults.length} problema(s)</p>
+                      </div>
+                      <ul className="space-y-1 max-h-24 overflow-y-auto">
+                        {importResults.slice(0, 5).map((err, i) => (
+                          <li key={i} className="text-xs text-red-600">- {err}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <div className="rounded-xl border border-slate-200 overflow-hidden">
+                    <div className="bg-slate-50 px-4 py-2 border-b border-slate-200 flex items-center justify-between">
+                      <p className="text-xs font-bold text-slate-600">Prévia - {importedPatients.length}</p>
+                      {importErrors.length === 0 && importResults.length === 0 && <span className="text-xs font-bold text-emerald-600">OK</span>}
+                    </div>
+                    <div className="overflow-x-auto max-h-56">
+                      <table className="w-full text-xs">
+                        <thead className="bg-slate-50 sticky top-0">
+                          <tr>{['Nome', 'CPF', 'E-mail', 'Telefone'].map(h => (
+                            <th key={h} className="text-left px-3 py-2 text-slate-500 font-bold">{h}</th>
+                          ))}</tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {importedPatients.slice(0, 10).map((p, i) => (
+                            <tr key={i} className="hover:bg-slate-50">
+                              <td className="px-3 py-2">{p.name || '-'}</td>
+                              <td className="px-3 py-2">{p.cpf || '-'}</td>
+                              <td className="px-3 py-2">{p.email || '-'}</td>
+                              <td className="px-3 py-2">{p.phone || '-'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {importStep === 'importing' && (
+                <div className="py-16 flex flex-col items-center gap-4">
+                  <div className="w-10 h-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                  <p className="text-sm text-slate-500">Cadastrando...</p>
                 </div>
-              </div>
+              )}
             </div>
 
             <div className="p-6 border-t border-slate-200 bg-slate-50 shrink-0">
-              <button 
-                onClick={() => setShowImportModal(false)}
-                className="btn btn-secondary w-full"
-              >
-                Fechar
-              </button>
+              {importStep === 'idle' && <button onClick={resetImportModal} className="btn btn-secondary w-full">Fechar</button>}
+              {importStep === 'preview' && (
+                <div className="flex gap-3">
+                  <button onClick={() => { setImportStep('idle'); setImportedPatients([]); }} className="btn btn-secondary flex-1">Voltar</button>
+                  <button onClick={handleImportPatients} disabled={importErrors.length > 0} className="btn btn-primary flex-1 disabled:opacity-50">
+                    <Check size={16} /> Confirmar ({importedPatients.length})
+                  </button>
+                </div>
+              )}
+              {importStep === 'done' && <button onClick={resetImportModal} className="btn btn-secondary w-full">Fechar</button>}
             </div>
           </div>
         </div>
@@ -1823,7 +2013,7 @@ function PatientCard({ patient, onDelete, onEdit }) {
             </div>
           </div>
         </div>
-        <button onClick={() => onDelete(patient.id)} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
+        <button onClick={() => onDelete(patient.id)} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all absolute top-5 right-5 z-10">
           <Trash2 size={16} />
         </button>
       </div>
@@ -1887,11 +2077,14 @@ function PatientCard({ patient, onDelete, onEdit }) {
         </div>
         
         <div className="flex gap-2">
-          <Link to={`/patients/${patient.id}`} className="flex-1 btn bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 text-xs py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
+          <Link to={`/patients/${patient.id}`} className="flex-1 btn bg-slate-900 text-white hover:bg-slate-800 text-xs py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-slate-200">
             <FileText size={14} /> Prontuário
           </Link>
-          <button onClick={() => onEdit(patient)} className="btn bg-slate-900 text-white hover:bg-slate-800 text-xs px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-slate-200">
+          <button onClick={() => onEdit(patient)} className="btn bg-white border border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50 text-xs px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
             <Pencil size={14} /> Editar
+          </button>
+          <button onClick={() => onDelete(patient.id)} className="btn bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 text-xs px-3 py-2.5 rounded-xl font-bold flex items-center justify-center gap-1 transition-all">
+            <Trash2 size={14} />
           </button>
         </div>
       </div>
@@ -1982,11 +2175,14 @@ function PatientListRow({ patient, onDelete, onEdit }) {
       </div>
 
       <div className="flex items-center gap-2">
-        <Link to={`/patients/${patient.id}`} className="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50 transition-all">
+        <Link to={`/patients/${patient.id}`} className="p-2.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-md shadow-slate-200">
           <FileText size={18} />
         </Link>
-        <button onClick={() => onEdit(patient)} className="p-2.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-md shadow-slate-200">
+        <button onClick={() => onEdit(patient)} className="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50 transition-all">
           <Pencil size={18} />
+        </button>
+        <button onClick={() => onDelete(patient.id)} className="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all">
+          <Trash2 size={18} />
         </button>
       </div>
     </div>
