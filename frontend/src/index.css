@@ -106,18 +106,7 @@
     padding-bottom: max(env(safe-area-inset-bottom, 20px), 20px);
   }
   
-  /* Garantir que BottomNav fique colado no final da tela */
-  .bottom-nav-container {
-    bottom: 0 !important;
-    transform: translateY(0) !important;
-    margin-bottom: calc(env(safe-area-inset-bottom, 0px) * -1);
-    margin-bottom: -20px; /* Fallback for browsers without env() */
-  }
-  
-  /* Force bottom nav to end of screen on all devices */
-  .md\:hidden {
-    bottom: 0 !important;
-  }
+
   
   /* Margem para BottomNav em mobile */
   .mobile-bottom-margin {
