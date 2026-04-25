@@ -1,6 +1,8 @@
 import Sidebar from "./Sidebar";
+import BottomNav from "./BottomNav";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
+import { useIsDesktop } from "../hooks/useMediaQuery";
 
 const BackgroundGrid = ({ color = '#10b981', cellSize = '40px', strokeWidth = '0.5', fade = false, className = '' }) => {
   const svg = `
@@ -31,18 +33,23 @@ const BackgroundGrid = ({ color = '#10b981', cellSize = '40px', strokeWidth = '0
 
 export default function Layout({ children }) {
   const location = useLocation();
+  const isDesktop = useIsDesktop();
   
   return (
     <div className="flex min-h-screen bg-slate-100 font-sans relative">
       {/* Background Grid */}
       <BackgroundGrid color="#10b981" cellSize="40px" strokeWidth="0.5" fade={false} />
       
-      {/* Fixed Sidebar */}
-      <Sidebar />
+      {/* Desktop Sidebar | Mobile BottomNav */}
+      {isDesktop ? (
+        <Sidebar />
+      ) : (
+        <BottomNav />
+      )}
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative z-10">
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">
+      <div className={`flex-1 flex flex-col min-w-0 min-h-screen overflow-hidden relative z-10 ${!isDesktop ? 'pb-24' : ''}`}>
+        <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-screen">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}

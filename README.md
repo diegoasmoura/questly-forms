@@ -28,6 +28,35 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 | **Erro** | red | erros, perigo |
 | **Neutro** | slate | elementos secundários |
 
+## Design Responsivo Mobile-First
+
+### Estratégia
+O projeto segue o padrão **mobile-first** com experiência otimizada para smartphone:
+
+- **Desktop (≥1024px)**: Sidebar lateral fixa
+- **Mobile (<768px)**: Bottom Navigation Bar moderna
+
+### Bottom Navigation
+- Barra de navegação inferior com 5 ícones principais
+- Indicador visual animado para item ativo
+- Animações suaves de entrada
+- Suporte a safe-area (notch iPhone/Android)
+- Conteúdo principal com padding adequado
+
+### Hooks de Responsividade
+```javascript
+useIsMobile()   // < 768px
+useIsTablet()   // 768px - 1023px
+useIsDesktop()  // ≥ 1024px
+useIsLargeDesktop() // ≥ 1280px
+```
+
+### Próximas Melhorias Planejadas
+- Grid de pacientes responsivo (1-4 colunas)
+- Agenda com visualização semanal/lista em mobile
+- Modais full-screen em mobile
+- Cards touch-friendly
+
 ## Funcionalidades Principais
 
 - **Home (Visão Geral):** Resumo dinâmico de atividades, estatísticas de pacientes e gráficos de tendências clínicas.

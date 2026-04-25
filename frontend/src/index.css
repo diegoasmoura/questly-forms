@@ -78,7 +78,52 @@
   }
   body {
     @apply bg-slate-100 text-slate-700 font-sans antialiased;
+    /* Suporte para viewportheight dinâmico em mobile */
+    min-height: 100dvh;
+    min-height: 100vh;
   }
+
+  /* Safe area para dispositivos mobile (iPhone notch, etc) */
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  
+  .safe-area-pt {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  
+  .safe-area-pl {
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+  
+  .safe-area-pr {
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  
+  /* Safe area para BottomNav em mobile */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+    padding-bottom: max(env(safe-area-inset-bottom, 20px), 20px);
+  }
+  
+  /* Garantir que BottomNav fique colado no final da tela */
+  .bottom-nav-container {
+    bottom: 0 !important;
+    transform: translateY(0) !important;
+    margin-bottom: calc(env(safe-area-inset-bottom, 0px) * -1);
+    margin-bottom: -20px; /* Fallback for browsers without env() */
+  }
+  
+  /* Force bottom nav to end of screen on all devices */
+  .md\:hidden {
+    bottom: 0 !important;
+  }
+  
+  /* Margem para BottomNav em mobile */
+  .mobile-bottom-margin {
+    margin-bottom: 72px;
+  }
+
   ::selection {
     @apply bg-emerald-200 text-emerald-900;
   }
