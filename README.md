@@ -77,7 +77,12 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Modo Lista:** Ordem de botões: Prontuário (destacado) > Editar > Excluir
 - **Dropdown de Cadastro:** Cada botão ("Cadastrar" / "Cadastrar Paciente") tem seu próprio estado independente; dropdown centralizado embaixo do botão
 
-### 7. Navegação Suave
+### 7. UX do Calendário (Agenda)
+- **Visual melhorado:** Cabeçalhos mais legíveis (fundo mais claro, texto maior), título do mês maior
+- **Células dinâmicas:** Sem height fixo; scroll quando > 4 sessões por dia
+- **Melhor contraste:** Bordas e texto mais escuros para facilitar leitura
+
+### 8. Navegação Suave
 - Hook `useNavigateWithTransition` adiciona delay de 300ms antes de trocas de página:
 
 ```jsx
@@ -89,7 +94,7 @@ navigate("/path", { delay: 0 }); // sem delay (ex: logout)
 navigate(-1); // suporta navegação relativa
 ```
 
-### 8. outras UX
+### 9. outras UX
 - **Navegação Consistente:** Elementos como Avatares, Nomes e Ícones são links diretos para prontuários.
 - **Semana de Aniversário:** Visual festivo automático (dourado/confetes) em janela de 7 dias.
 - **Métricas de Engajamento:** Comparação entre assiduidade física (Sessões) e digital (Instrumentos).

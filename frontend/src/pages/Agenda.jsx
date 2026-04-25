@@ -263,9 +263,9 @@ function MonthView({ currentDate, appointments, attendances, onStatus, setJustMo
   
   return (
     <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-      <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50/50">
+      <div className="grid grid-cols-7 border-b border-slate-300 bg-slate-100">
         {DAYS_OF_WEEK.map((day, idx) => (
-          <div key={idx} className="p-3 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">
+          <div key={idx} className="p-3 text-center text-[11px] font-black text-slate-600 uppercase tracking-widest">
             {day.slice(0, 3)}
           </div>
         ))}
@@ -305,14 +305,17 @@ function MonthView({ currentDate, appointments, attendances, onStatus, setJustMo
           });
           
           return (
-            <div key={idx} className={`min-h-[120px] p-2 border-r border-b border-slate-100 ${!isCurrentMonth ? 'bg-slate-50/50 opacity-40' : ''}`}>
+            <div key={idx} className={`p-2 border-r border-b border-slate-300 ${!isCurrentMonth ? 'bg-slate-100/70 opacity-50' : 'bg-white'}`}>
               <div className="flex justify-end mb-1">
-                <span className={`text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-lg ${isToday ? 'bg-slate-800 text-white shadow-md' : 'text-slate-400'}`}>
+                <span className={`text-[11px] font-bold w-6 h-6 flex items-center justify-center rounded-lg ${isToday ? 'bg-slate-800 text-white shadow-md' : 'text-slate-600'}`}>
                   {format(day, 'd')}
                 </span>
               </div>
-              <div className="space-y-2 mt-1">
-                {allSessions.slice(0, 3).map((session, i) => {
+              <div 
+                className="space-y-1 mt-1 overflow-y-auto"
+                style={{ maxHeight: allSessions.length > 4 ? '160px' : 'auto' }}
+              >
+                {allSessions.map((session, i) => {
                   const att = session.att;
                   
                   const statusStyles = {
@@ -328,7 +331,7 @@ function MonthView({ currentDate, appointments, attendances, onStatus, setJustMo
                   const hasFilho = attendances.some(a => a.parentId === att?.id);
                   
                   return (
-                    <div key={session.app.id + i} className="flex items-center gap-1">
+                    <div key={session.app.id + '-' + i} className="flex items-center gap-1">
                       <div className={`text-[10px] px-1.5 py-1 rounded truncate flex-1 font-bold border transition-all ${style} 
                         ${session.type === 'extra' || isFilho ? 'border-dashed border-2' : ''} 
                         ${isReagendado ? 'opacity-70 grayscale-[0.3]' : ''}
@@ -724,7 +727,7 @@ export default function Agenda() {
       {/* Navigation */}
       <div className="flex items-center justify-between bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
         <div className="flex items-center gap-4">
-          <h2 className="font-black text-slate-800 uppercase tracking-widest text-sm">
+          <h2 className="font-black text-slate-800 uppercase tracking-widest text-base">
             {view === 'list' ? format(currentDate, 'EEEE, d MMMM', { locale: ptBR }) : format(currentDate, 'MMMM yyyy', { locale: ptBR })}
           </h2>
           <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200">
