@@ -1,13 +1,15 @@
-import { useState, useEffect, useCallback } from "react";
+import { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
 import { ActivityHeatmap } from "../components/ActivityHeatmap";
-import { 
-  Users, 
-  FileText, 
-  BarChart3, 
-  ArrowRight, 
+import { useIsMobile } from "../hooks/useMediaQuery";
+import {
+  Users,
+  FileText,
+  BarChart3,
+  ArrowRight,
   Calendar,
   Clock,
   TrendingUp,
@@ -16,6 +18,7 @@ import {
 
 export default function Home() {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [stats, setStats] = useState({
     patientCount: 0,
     formCount: 0,
@@ -51,7 +54,6 @@ export default function Home() {
         .filter(r => r.patient)
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-      // Group by patient
       const grouped = [];
       const seenPatients = new Set();
       
@@ -114,19 +116,18 @@ export default function Home() {
   }, [loadHomeData]);
 
   return (
-    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in">
+    <div className="p-4 md:p-6 flex flex-col gap-4 md:gap-6 animate-fade-in">
+
       {/* Header */}
-      <header className="mb-6 shrink-0">
-        <h1 className="text-2xl font-display font-bold text-slate-800">
-          Painel Clínico
-        </h1>
+      <header>
+        <h1 className="text-xl md:text-2xl font-bold text-slate-800">Painel Clínico</h1>
         <p className="text-sm text-slate-500">Visão geral da sua clínica.</p>
       </header>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 shrink-0">
+      {/* Quick Stats — 2 cols mobile, 4 cols desktop */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard 
-          icon={<Users size={20} />} 
+          icon={<Users size={18} />} 
           label="Pacientes" 
           value={stats.patientCount} 
           trend="Ativos"
@@ -134,7 +135,7 @@ export default function Home() {
           link="/patients"
         />
         <StatCard 
-          icon={<FileText size={20} />} 
+          icon={<FileText size={18} />} 
           label="Instrumentos" 
           value={stats.formCount} 
           trend="Clínicos"
@@ -142,7 +143,7 @@ export default function Home() {
           link="/my-forms"
         />
         <StatCard 
-          icon={<BarChart3 size={20} />} 
+          icon={<BarChart3 size={18} />} 
           label="Resultados" 
           value={stats.totalResponses} 
           trend="Coletados"
@@ -150,7 +151,7 @@ export default function Home() {
           link="/my-forms"
         />
         <StatCard 
-          icon={<TrendingUp size={20} />} 
+          icon={<TrendingUp size={18} />} 
           label="Avaliações" 
           value={stats.activeLinks} 
           trend="Em andamento"
@@ -159,28 +160,22 @@ export default function Home() {
         />
       </div>
 
-      {/* Activity Heatmap - Full Width */}
-      <div className="min-h-[200px] mb-6">
-        <ActivityHeatmap 
-          data={aggregateData} 
-          title="Atividade Clínica" 
-        />
-      </div>
+      {/* Activity Heatmap */}
+      <ActivityHeatmap data={aggregateData} title="Atividade Clínica" />
 
-      {/* Recent Activity Section */}
-      <section className="card flex-1 min-h-0 overflow-hidden">
-        <div className="p-5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Activity size={18} className="text-emerald-600" />
-            <h2 className="text-base font-bold text-slate-800">Avaliações Recentes</h2>
-          </div>
+      {/* Recent Activity */}
+      <section className="card overflow-hidden">
+        <div className="p-4 md:p-5 flex items-center gap-3 border-b border-slate-100">
+          <Activity size={16} className="text-emerald-600" />
+          <h2 className="text-sm font-bold text-slate-800">Avaliações Recentes</h2>
         </div>
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
+
+        <div className="overflow-y-auto">
           {loading ? (
             <div className="p-5 space-y-4">
-              {[1, 2, 3, 4].map(i => (
+              {[1, 2, 3].map(i => (
                 <div key={i} className="flex items-center gap-3 animate-pulse">
-                  <div className="w-10 h-10 rounded-xl bg-slate-200" />
+                  <div className="w-10 h-10 rounded-xl bg-slate-200 shrink-0" />
                   <div className="flex-1 space-y-2">
                     <div className="h-3 bg-slate-200 rounded w-1/2" />
                     <div className="h-2 bg-slate-100 rounded w-1/3" />
@@ -190,43 +185,45 @@ export default function Home() {
             </div>
           ) : groupedPatients.length === 0 ? (
             <div className="p-10 text-center">
-              <Calendar size={32} className="mx-auto text-slate-300 mb-3" />
-              <p className="text-xs text-slate-500 font-bold uppercase tracking-tight">Nenhuma avaliação registrada</p>
-              <p className="text-[10px] text-slate-400 mt-1">Pacientes que utilizaram instrumentos clínicos aparecerão aqui</p>
+              <Calendar size={28} className="mx-auto text-slate-300 mb-3" />
+              <p className="text-xs text-slate-500 font-bold uppercase tracking-tight">
+                Nenhuma avaliação registrada
+              </p>
+              <p className="text-[10px] text-slate-400 mt-1">
+                Pacientes que utilizaram instrumentos clínicos aparecerão aqui
+              </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-5">
-              {groupedPatients.map((group, idx) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 p-4 md:p-5">
+              {groupedPatients.map((group) => (
                 <Link 
                   key={group.patient.id} 
                   to={`/patients/${group.patient.id}`}
-                  className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all group border border-slate-200 hover:border-slate-300 hover:shadow-sm"
+                  className="flex items-center gap-3 p-3 md:p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all group border border-slate-200 hover:border-slate-300 hover:shadow-sm"
                 >
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 font-black shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
+                  <div className="relative shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 font-black group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300 text-sm">
                       {group.patient.name.charAt(0)}
                     </div>
                     {group.count > 1 && (
-                      <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white text-[9px] font-black flex items-center justify-center">
+                      <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 text-white text-[8px] font-black flex items-center justify-center">
                         {group.count}
                       </div>
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-slate-700 group-hover:text-slate-900 transition-colors leading-tight">{group.patient.name}</p>
-                    {group.count > 1 ? (
-                      <p className="text-xs text-emerald-600 font-medium mt-0.5">
-                        {group.count} resultados · <span className="text-slate-500 truncate">{group.responses[0].formTitle}</span>
-                      </p>
-                    ) : (
-                      <p className="text-xs text-slate-500 mt-0.5 truncate">{group.responses[0].formTitle}</p>
-                    )}
-                    <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-1">
-                      <Clock size={10} />
+                    <p className="text-sm font-bold text-slate-700 group-hover:text-slate-900 transition-colors leading-tight truncate">
+                      {group.patient.name}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5 truncate">
+                      {group.responses[0].formTitle}
+                    </p>
+                    <div className="flex items-center gap-1 text-[10px] text-slate-400 mt-0.5">
+                      <Clock size={9} />
                       <span>{group.latestDate.toLocaleDateString('pt-BR')}</span>
                     </div>
                   </div>
-                  <ArrowRight size={14} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all shrink-0" />
+                  <ArrowRight size={13} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all shrink-0" />
                 </Link>
               ))}
             </div>
@@ -239,35 +236,34 @@ export default function Home() {
 
 function StatCard({ icon, label, value, trend, color, link }) {
   const content = (
-    <div className="flex items-center gap-4">
-      <div className={`p-3 rounded-2xl ${color} shrink-0 shadow-sm`}>
+    <>
+      {/* Ícone */}
+      <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center shrink-0 ${color}`}>
         {icon}
       </div>
-      <div className="min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 leading-none mb-1.5">{label}</p>
-        <div className="flex items-baseline gap-2">
-          <h3 className="text-xl font-bold text-slate-800 leading-none">{value}</h3>
-          {trend && (
-            <span className="text-[9px] font-medium text-slate-400 truncate">
-              {trend}
-            </span>
-          )}
-        </div>
+
+      {/* Texto — vertical no mobile para não vazar */}
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 leading-none mb-1 truncate">
+          {label}
+        </p>
+        <p className="text-lg md:text-xl font-bold text-slate-800 leading-none">
+          {value}
+        </p>
+        {trend && (
+          <p className="text-[9px] font-medium text-slate-400 mt-0.5 truncate">
+            {trend}
+          </p>
+        )}
       </div>
-    </div>
+    </>
   );
+
+  const classes = "card p-3 md:p-4 flex items-center gap-2 md:gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200";
 
   if (link) {
-    return (
-      <Link to={link} className="card p-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-        {content}
-      </Link>
-    );
+    return <Link to={link} className={classes}>{content}</Link>;
   }
 
-  return (
-    <div className="card p-4">
-      {content}
-    </div>
-  );
+  return <div className={classes}>{content}</div>;
 }
