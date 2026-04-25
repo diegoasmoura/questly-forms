@@ -389,7 +389,7 @@ const resetImportModal = () => {
           </button>
           
           {showRegistrationDropdown && (
-            <div className="absolute left-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-[60] animate-scale-in">
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-[60] animate-scale-in">
               <button
                 onClick={() => {
                   openAddModal();

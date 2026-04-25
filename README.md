@@ -75,7 +75,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 ### 6. UX de Visualização de Pacientes
 - **Modo Card:** Excluir junto com botões de ação (sem botão separado no topo)
 - **Modo Lista:** Ordem de botões: Prontuário (destacado) > Editar > Excluir
-- **Dropdown de Cadastro:** Cada botão ("Cadastrar" / "Cadastrar Paciente") tem seu próprio estado independente; dropdown centralizado embaixo do botão
+- **Dropdown de Cadastro:** Cada botão com estado independente; "Cadastrar" (topo) alinhado à direita, "Cadastrar Paciente" (vazio) centralizado
 
 ### 7. UX do Calendário (Agenda)
 - **Visual melhorado:** Cabeçalhos mais legíveis (fundo mais claro, texto maior), título do mês maior
