@@ -60,6 +60,7 @@ export default function Patients() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importedPatients, setImportedPatients] = useState([]);
   const [showRegistrationDropdown, setShowRegistrationDropdown] = useState(false);
+  const [showEmptyRegistrationDropdown, setShowEmptyRegistrationDropdown] = useState(false);
   const [editPatient, setEditPatient] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -194,10 +195,13 @@ const resetImportModal = () => {
       if (showRegistrationDropdown && !event.target.closest('.registration-dropdown')) {
         setShowRegistrationDropdown(false);
       }
+      if (showEmptyRegistrationDropdown && !event.target.closest('.empty-registration-dropdown')) {
+        setShowEmptyRegistrationDropdown(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showRegistrationDropdown]);
+  }, [showRegistrationDropdown, showEmptyRegistrationDropdown]);
 
   useEffect(() => {
     if (successMessage) {
@@ -385,7 +389,7 @@ const resetImportModal = () => {
           </button>
           
           {showRegistrationDropdown && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-[60] animate-scale-in">
+            <div className="absolute left-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-[60] animate-scale-in">
               <button
                 onClick={() => {
                   openAddModal();
@@ -483,10 +487,48 @@ const resetImportModal = () => {
               {searchQuery ? "Tente um termo de busca diferente" : "Comece cadastrando seu primeiro paciente para acompanhar sua evolução clínica."}
             </p>
             {!searchQuery && (
-              <button onClick={openAddModal} className="btn btn-primary">
-                <UserPlus size={18} />
-                Cadastrar Paciente
-              </button>
+              <div className="relative empty-registration-dropdown">
+                <button onClick={() => setShowEmptyRegistrationDropdown(!showEmptyRegistrationDropdown)} className="btn btn-primary">
+                  <UserPlus size={18} />
+                  Cadastrar Paciente
+                  <ChevronDown size={14} className={`transition-transform duration-200 ${showEmptyRegistrationDropdown ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {showEmptyRegistrationDropdown && (
+<div className="absolute left-1/2 -translate-x-1/2 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-[60] animate-scale-in">
+                    <button
+                      onClick={() => {
+                        openAddModal();
+                        setShowEmptyRegistrationDropdown(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                        <UserPlus size={18} />
+                      </div>
+                      <div>
+                        <p className="font-bold">Cadastrar paciente</p>
+                        <p className="text-[10px] text-slate-500">Manual, um por um</p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowImportModal(true);
+                        setShowEmptyRegistrationDropdown(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <FileSpreadsheet size={18} />
+                      </div>
+                      <div>
+                        <p className="font-bold">Importar pacientes</p>
+                        <p className="text-[10px] text-slate-500">Via planilha Excel</p>
+                      </div>
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         ) : viewMode === "grid" ? (

@@ -75,6 +75,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 ### 6. UX de Visualização de Pacientes
 - **Modo Card:** Excluir junto com botões de ação (sem botão separado no topo)
 - **Modo Lista:** Ordem de botões: Prontuário (destacado) > Editar > Excluir
+- **Dropdown de Cadastro:** Cada botão ("Cadastrar" / "Cadastrar Paciente") tem seu próprio estado independente; dropdown centralizado embaixo do botão
 
 ### 7. Navegação Suave
 - Hook `useNavigateWithTransition` adiciona delay de 300ms antes de trocas de página:
