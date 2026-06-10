@@ -176,6 +176,24 @@
   width: 100% !important;
 }
 
+.svc-creator-wrapper {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden !important;
+}
+
+/* Fix flickering add question buttons */
+.svc-tabbed-menu-item-container {
+  will-change: transform;
+}
+
+.svc-creator__banner {
+  display: none !important;
+}
+
 /* Property grid styling */
 .svc-property-grid {
   background: #ffffff !important;
@@ -189,16 +207,6 @@
 }
 
 /* Survey Preview - Allow dynamic width */
-.sd-root-modern {
-  width: 100% !important;
-  max-width: none !important;
-}
-
-.sd-question {
-  width: 100% !important;
-  max-width: none !important;
-}
-
 .sd-table {
   width: 100% !important;
   display: table !important;

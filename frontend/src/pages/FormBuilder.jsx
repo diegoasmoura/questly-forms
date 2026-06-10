@@ -3,161 +3,113 @@ import { useParams, Link } from "react-router-dom";
 import { useNavigateWithTransition } from "../lib/useNavigateWithTransition";
 import { api } from "../lib/api";
 
-// SurveyJS imports - updated to modern CSS paths
+// SurveyJS imports
 import "survey-core/survey-core.min.css";
 import "survey-creator-core/survey-creator-core.min.css";
 import { SurveyCreator, SurveyCreatorComponent } from "survey-creator-react";
 
-// Import themes for theme selector
-import {
-  DefaultLight, DefaultDark, DefaultLightPanelless, DefaultDarkPanelless,
-  SharpLight, SharpDark, SharpLightPanelless, SharpDarkPanelless,
-  BorderlessLight, BorderlessDark, BorderlessLightPanelless, BorderlessDarkPanelless,
-  FlatLight, FlatDark, FlatLightPanelless, FlatDarkPanelless,
-  PlainLight, PlainDark, PlainLightPanelless, PlainDarkPanelless,
-  DoubleBorderLight, DoubleBorderDark, DoubleBorderLightPanelless, DoubleBorderDarkPanelless,
-  LayeredLight, LayeredDark, LayeredLightPanelless, LayeredDarkPanelless,
-  SolidLight, SolidDark, SolidLightPanelless, SolidDarkPanelless,
-  ThreeDimensionalLight, ThreeDimensionalDark, ThreeDimensionalLightPanelless, ThreeDimensionalDarkPanelless,
-  ContrastLight, ContrastDark, ContrastLightPanelless, ContrastDarkPanelless
-} from "survey-core/themes";
-
 import { ArrowLeft, Save, Download, Loader2 } from "lucide-react";
+
+// Move options outside to keep it stable
+const creatorOptions = {
+  showThemeTab: true,
+  showLogicTab: true,
+  showTranslationTab: true,
+  showJSONEditorTab: true,
+  showEmbeddedSurveyTab: false,
+  isAutoSave: false,
+  showSidebar: true,
+  propertyGridNavigationMode: "accordion",
+  showDesignerTab: true,
+  showPreviewTab: true,
+};
 
 export default function FormBuilder() {
   const { id } = useParams();
   const navigate = useNavigateWithTransition();
-  const [form, setForm] = useState(null);
-  const [title, setTitle] = useState("");
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savingSuccess, setSavingSuccess] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const titleInputRef = useRef(null);
-  const formLoadedRef = useRef(false);
+  
+  // Use a ref for title to avoid re-renders of the entire page while typing
+  const titleRef = useRef("");
+  const [displayTitle, setDisplayTitle] = useState("");
 
-  // Initialize SurveyJS Creator with v2.x options
+  // Initialize Creator - memoized to prevent re-creation
   const creator = useMemo(() => {
-    const options = {
-      showThemeTab: true,
-      showLogicTab: true,
-      showTranslationTab: true,
-      showJSONEditorTab: true,
-      showEmbeddedSurveyTab: false,
-      isAutoSave: false,
-      showSidebar: true,
-      propertyGridNavigationMode: "accordion",
-      showOneCategoryInPropertyGrid: false,
-    };
-    
-    const c = new SurveyCreator(options);
-
-    c.showDesignerTab = true;
-    c.showPreviewTab = true;
-    c.showOneCategoryInPropertyGrid = false;
-
-    // Add themes to the theme selector (including Panelless versions)
-    if (c.themeEditor) {
-      c.themeEditor.addTheme(DefaultLight, true);
-      c.themeEditor.addTheme(DefaultDark);
-      c.themeEditor.addTheme(DefaultLightPanelless);
-      c.themeEditor.addTheme(DefaultDarkPanelless);
-      c.themeEditor.addTheme(SharpLight);
-      c.themeEditor.addTheme(SharpDark);
-      c.themeEditor.addTheme(SharpLightPanelless);
-      c.themeEditor.addTheme(SharpDarkPanelless);
-      c.themeEditor.addTheme(BorderlessLight);
-      c.themeEditor.addTheme(BorderlessDark);
-      c.themeEditor.addTheme(BorderlessLightPanelless);
-      c.themeEditor.addTheme(BorderlessDarkPanelless);
-      c.themeEditor.addTheme(FlatLight);
-      c.themeEditor.addTheme(FlatDark);
-      c.themeEditor.addTheme(FlatLightPanelless);
-      c.themeEditor.addTheme(FlatDarkPanelless);
-      c.themeEditor.addTheme(PlainLight);
-      c.themeEditor.addTheme(PlainDark);
-      c.themeEditor.addTheme(PlainLightPanelless);
-      c.themeEditor.addTheme(PlainDarkPanelless);
-      c.themeEditor.addTheme(DoubleBorderLight);
-      c.themeEditor.addTheme(DoubleBorderDark);
-      c.themeEditor.addTheme(DoubleBorderLightPanelless);
-      c.themeEditor.addTheme(DoubleBorderDarkPanelless);
-      c.themeEditor.addTheme(LayeredLight);
-      c.themeEditor.addTheme(LayeredDark);
-      c.themeEditor.addTheme(LayeredLightPanelless);
-      c.themeEditor.addTheme(LayeredDarkPanelless);
-      c.themeEditor.addTheme(SolidLight);
-      c.themeEditor.addTheme(SolidDark);
-      c.themeEditor.addTheme(SolidLightPanelless);
-      c.themeEditor.addTheme(SolidDarkPanelless);
-      c.themeEditor.addTheme(ThreeDimensionalLight);
-      c.themeEditor.addTheme(ThreeDimensionalDark);
-      c.themeEditor.addTheme(ThreeDimensionalLightPanelless);
-      c.themeEditor.addTheme(ThreeDimensionalDarkPanelless);
-      c.themeEditor.addTheme(ContrastLight);
-      c.themeEditor.addTheme(ContrastDark);
-      c.themeEditor.addTheme(ContrastLightPanelless);
-      c.themeEditor.addTheme(ContrastDarkPanelless);
-    }
-
+    const c = new SurveyCreator(creatorOptions);
     return c;
   }, []);
 
-  // Load existing form - waits for creator to be ready
+  // Load data
   useEffect(() => {
-    if (!id) {
-      // New form
-      creator.JSON = {
-        title: "Novo Formulário",
-        pages: [{ elements: [] }],
-      };
-      setLoading(false);
-      return;
-    }
+    let isMounted = true;
 
-    // Existing form - fetch and load
-    api.getForm(id)
-      .then((data) => {
-        setForm(data);
-        setTitle(data.title);
-        formLoadedRef.current = data;
-        
-        // Set JSON after a small delay to ensure creator is ready
-        const timeoutId = setTimeout(() => {
-          if (data.schema) {
-            creator.JSON = data.schema;
-          }
-          if (titleInputRef.current) {
-            titleInputRef.current.value = data.title;
-          }
+    async function loadForm() {
+      try {
+        if (!id) {
+          creator.JSON = {
+            title: "Novo Formulário",
+            pages: [{ elements: [] }],
+          };
+          titleRef.current = "Novo Formulário";
+          setDisplayTitle("Novo Formulário");
           setLoading(false);
-        }, 100);
+          return;
+        }
+
+        const data = await api.getForm(id);
+        if (!isMounted) return;
+
+        titleRef.current = data.title;
+        setDisplayTitle(data.title);
         
-        return () => clearTimeout(timeoutId);
-      })
-      .catch(() => {
-        navigate("/dashboard");
-      });
-  }, [id, navigate, creator]);
-
-  // Sync title input with state
-  useEffect(() => {
-    if (titleInputRef.current && formLoadedRef.current) {
-      titleInputRef.current.value = title;
+        if (data.schema) {
+          creator.JSON = data.schema;
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error("Error loading form:", error);
+        if (isMounted) navigate("/my-forms");
+      }
     }
-  }, [title]);
 
-  // Listen for title changes in the survey
+    loadForm();
+    return () => { isMounted = false; };
+  }, [id, creator, navigate]);
+
+  // Handle title changes from Creator
   useEffect(() => {
-    if (!creator.survey) return;
-    
-    const onPropertyChanged = (_, options) => {
-      if (options.name === "title" && titleInputRef.current) {
-        setTitle(options.newValue || "");
-        titleInputRef.current.value = options.newValue || "";
+    const onPropertyChanged = (sender, options) => {
+      if (options.name === "title") {
+        const newTitle = options.newValue || "";
+        titleRef.current = newTitle;
+        setDisplayTitle(newTitle);
       }
     };
-    creator.survey.onPropertyChanged.add(onPropertyChanged);
-    return () => creator.survey?.onPropertyChanged?.remove(onPropertyChanged);
+
+    creator.onModified.add((sender, options) => {
+      // General modification listener if needed
+    });
+
+    // We can also sync title from creator.survey if it exists
+    const syncTitle = () => {
+      if (creator.survey) {
+        creator.survey.onPropertyChanged.add(onPropertyChanged);
+      }
+    };
+
+    syncTitle();
+    // Re-sync if survey changes (e.g. JSON assigned)
+    creator.onActiveTabChanged.add(syncTitle);
+
+    return () => {
+      creator.onActiveTabChanged.remove(syncTitle);
+      if (creator.survey) {
+        creator.survey.onPropertyChanged.remove(onPropertyChanged);
+      }
+    };
   }, [creator]);
 
   const handleSave = useCallback(async () => {
@@ -166,33 +118,23 @@ export default function FormBuilder() {
     setSavingSuccess(false);
     try {
       const json = creator.JSON;
-      const surveyTitle = titleInputRef.current?.value || title || "Untitled Form";
+      const currentTitle = titleRef.current || "Sem Título";
+      
       if (id) {
-        await api.updateForm(id, { title: surveyTitle, schema: json });
+        await api.updateForm(id, { title: currentTitle, schema: json });
       } else {
-        const newForm = await api.createForm({ title: surveyTitle, schema: json });
+        const newForm = await api.createForm({ title: currentTitle, schema: json });
         navigate(`/forms/${newForm.id}/edit`);
       }
+      
       setSavingSuccess(true);
       setTimeout(() => setSavingSuccess(false), 2000);
     } catch (error) {
-      alert("Failed to save: " + error.message);
+      alert("Erro ao salvar: " + error.message);
     } finally {
       setSaving(false);
     }
-  }, [id, title, navigate, saving, creator]);
-
-  // Keyboard shortcut Ctrl+S
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
-        e.preventDefault();
-        handleSave();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleSave]);
+  }, [id, navigate, saving, creator]);
 
   const handleExport = () => {
     const json = JSON.stringify(creator.JSON, null, 2);
@@ -200,73 +142,78 @@ export default function FormBuilder() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${title || "form"}.json`;
+    a.download = `${titleRef.current || "form"}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
   return (
-    <div className="h-full flex flex-col animate-fade-in overflow-hidden">
-      {/* Toolbar */}
-      <header className="bg-white border-b border-emerald-100 h-16 shrink-0 z-10">
-        <div className="flex items-center justify-between h-full px-6">
-          <div className="flex items-center gap-4">
-            <Link to="/my-forms" className="p-2 rounded-xl hover:bg-emerald-50 text-slate-500 hover:text-emerald-900 transition-all">
-              <ArrowLeft size={20} />
-            </Link>
-            <div className="flex flex-col">
-              <input
-                ref={titleInputRef}
-                type="text"
-                defaultValue={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Título do Formulário..."
-                className="text-lg font-bold text-slate-900 bg-transparent border-none focus:outline-none placeholder:text-emerald-200 w-80"
-              />
-              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest px-0.5">Editor Clínico</span>
-            </div>
+    <div className="flex flex-col h-full bg-white">
+      {/* Header */}
+      <header className="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-6 shrink-0 z-20">
+        <div className="flex items-center gap-4">
+          <Link to="/my-forms" className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors">
+            <ArrowLeft size={20} />
+          </Link>
+          <div className="flex flex-col">
+            <input
+              type="text"
+              value={displayTitle}
+              onChange={(e) => {
+                const val = e.target.value;
+                setDisplayTitle(val);
+                titleRef.current = val;
+                // Update creator title too so they stay in sync
+                if (creator.survey) creator.survey.title = val;
+              }}
+              className="text-lg font-bold text-slate-900 bg-transparent border-none focus:outline-none w-64 md:w-96"
+              placeholder="Título do formulário..."
+            />
+            <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">Editor de Instrumentos</span>
           </div>
+        </div>
 
-          <div className="flex items-center gap-3">
-            <button onClick={handleExport} className="btn btn-secondary text-xs px-4">
-              <Download size={16} />
-              Exportar JSON
-            </button>
-            <button
-              onClick={handleSave}
-              className="btn btn-primary text-xs px-6 py-2.5 shadow-lg shadow-emerald-900/10"
-              disabled={saving}
-            >
-              {saving ? (
-                <Loader2 className="animate-spin" size={16} />
-              ) : savingSuccess ? (
-                "✓ Salvo"
-              ) : (
-                <>
-                  <Save size={16} />
-                  Salvar Alterações
-                </>
-              )}
-            </button>
-          </div>
+        <div className="flex items-center gap-3">
+          <button onClick={handleExport} className="hidden md:flex btn btn-secondary text-xs py-2">
+            <Download size={14} />
+            Exportar
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className={`btn btn-primary text-xs px-6 py-2 min-w-[120px] ${savingSuccess ? 'bg-emerald-500' : ''}`}
+          >
+            {saving ? <Loader2 size={16} className="animate-spin" /> : savingSuccess ? "✓ Salvo" : "Salvar"}
+          </button>
         </div>
       </header>
 
-      {/* Creator Container */}
-      <div className="flex-1 relative w-full overflow-hidden">
-        {loading ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-slate-50">
-            <div className="flex flex-col items-center gap-4">
+      {/* Creator Area */}
+      <main className="flex-1 relative overflow-hidden bg-slate-50">
+        {loading && (
+          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-30 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-3">
               <Loader2 className="animate-spin text-emerald-600" size={32} />
-              <span className="text-sm text-slate-500 font-medium">Carregando formulário...</span>
+              <p className="text-sm font-medium text-slate-600">Carregando editor...</p>
             </div>
           </div>
-        ) : (
-          <div className="absolute inset-0">
-            <SurveyCreatorComponent creator={creator} />
-          </div>
         )}
-      </div>
+        
+        {/* Important: Fixed positioning/sizing for the component container */}
+        <div className="absolute inset-0 w-full h-full survey-creator-container">
+          <SurveyCreatorComponent creator={creator} />
+        </div>
+      </main>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .survey-creator-container .svc-creator-component {
+          height: 100% !important;
+        }
+        /* Hide the banner explicitly in this refactored version too */
+        .svc-creator__non-commercial-text, .svc-creator__banner {
+          display: none !important;
+        }
+      `}} />
     </div>
   );
 }
