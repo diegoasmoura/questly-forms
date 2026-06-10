@@ -24,7 +24,10 @@ const allowedOrigins = [
   'http://127.0.0.1:5173', 
   'http://127.0.0.1:3000', 
   'http://127.0.0.1:3002',
-  'http://127.0.0.1:3005'
+  'http://127.0.0.1:3005',
+  'https://questlyforms.com.br',
+  'http://questlyforms.com.br',
+  'http://192.168.0.2:3002'
 ];
 
 if (process.env.ALLOWED_ORIGINS) {
