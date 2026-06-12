@@ -1,8 +1,12 @@
 # Stage 1: Build
 FROM node:20-alpine as build-stage
 WORKDIR /app
+
+# Accept API URL as build argument
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 COPY package.json ./
-# Limpar cache e instalar do zero (sem depender do lock que está falhando no git)
 RUN npm install
 COPY . .
 RUN npm run build
@@ -10,7 +14,10 @@ RUN npm run build
 # Stage 2: Production
 FROM nginx:stable-alpine
 COPY --from=build-stage /app/dist /usr/share/nginx/html
-# Se houver roteamento SPA, precisamos de uma config de nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
+
+# Em produção no Dockerfile geralmente expomos a porta padrão do nginx, 
+# mas seu NAS redireciona 3002:3002, então vamos garantir que o nginx ouça na 3002
+# se o seu nginx.conf estiver configurado para isso.
+EXPOSE 3002
 CMD ["nginx", "-g", "daemon off;"]
