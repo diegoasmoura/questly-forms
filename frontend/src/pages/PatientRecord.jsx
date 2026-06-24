@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { api } from "../lib/api";
 import { formatCPF, formatPhone, formatCEP } from "../lib/utils";
@@ -36,6 +36,7 @@ import {
   Clock,
   FileText,
   ExternalLink,
+  ChevronLeft,
   ChevronRight,
   Trash2,
   Trash,
@@ -107,6 +108,67 @@ export default function PatientRecord() {
     existingReceiptAttachmentId: null,
     existingReceiptFilename: null
   });
+
+  // Filtro de Período (Sessões e Financeiro)
+  const [periodFilter, setPeriodFilter] = useState("thisMonth");
+  const [customMonth, setCustomMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  });
+
+  const filteredAttendances = useMemo(() => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    return attendances.filter(a => {
+      const d = new Date(a.date);
+      switch (periodFilter) {
+        case "thisMonth": return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+        case "lastMonth": {
+          const lm = currentMonth === 0 ? 11 : currentMonth - 1;
+          const ly = currentMonth === 0 ? currentYear - 1 : currentYear;
+          return d.getFullYear() === ly && d.getMonth() === lm;
+        }
+        case "last3Months": {
+          const threeMonthsAgo = new Date(now);
+          threeMonthsAgo.setMonth(now.getMonth() - 3);
+          return d >= threeMonthsAgo;
+        }
+        case "custom": {
+          const [year, month] = customMonth.split("-").map(Number);
+          return d.getFullYear() === year && d.getMonth() === month - 1;
+        }
+        default: return true;
+      }
+    });
+  }, [attendances, periodFilter, customMonth]);
+
+  const filteredPayments = useMemo(() => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    return payments.filter(p => {
+      const d = new Date(p.paymentDate);
+      switch (periodFilter) {
+        case "thisMonth": return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+        case "lastMonth": {
+          const lm = currentMonth === 0 ? 11 : currentMonth - 1;
+          const ly = currentMonth === 0 ? currentYear - 1 : currentYear;
+          return d.getFullYear() === ly && d.getMonth() === lm;
+        }
+        case "last3Months": {
+          const threeMonthsAgo = new Date(now);
+          threeMonthsAgo.setMonth(now.getMonth() - 3);
+          return d >= threeMonthsAgo;
+        }
+        case "custom": {
+          const [year, month] = customMonth.split("-").map(Number);
+          return d.getFullYear() === year && d.getMonth() === month - 1;
+        }
+        default: return true;
+      }
+    });
+  }, [payments, periodFilter, customMonth]);
 
   // Agenda (Recurring)
   const [appointments, setAppointments] = useState([]);
@@ -1004,7 +1066,7 @@ export default function PatientRecord() {
             <div>
               <h2 className="text-2xl font-bold text-slate-900">Histórico Clínico</h2>
               <p className="text-sm text-slate-600 mt-1">
-                Acompanhe a evolução e todas as respostas coletadas.
+                Evolução e respostas do paciente
               </p>
             </div>
             <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-emerald-100 shadow-sm">
@@ -1012,7 +1074,7 @@ export default function PatientRecord() {
                 active={activeTab === "sessions"}
                 onClick={() => setActiveTab("sessions")}
                 icon={<Clock size={14} />}
-                label="Sessões e Histórico"
+                label="Frequência"
               />
               <TabButton
                 active={activeTab === "financial"}
@@ -1036,7 +1098,7 @@ export default function PatientRecord() {
                 active={activeTab === "notes"}
                 onClick={() => setActiveTab("notes")}
                 icon={<FileText size={14} />}
-                label="Registro Clínico"
+                label="Prontuário"
               />
             </div>
           </div>
@@ -1097,7 +1159,7 @@ export default function PatientRecord() {
             </div>
           )}
 
-          {/* Registro Clínico Tab */}
+          {/* Prontuário Tab */}
           {activeTab === "notes" && (
             <div className="space-y-6 animate-fade-in">
               <div className="card overflow-hidden">
@@ -1108,7 +1170,7 @@ export default function PatientRecord() {
                         <FileText size={20} />
                       </div>
                       <div>
-                        <h3 className="font-bold text-slate-900">Registro Clínico</h3>
+                        <h3 className="font-bold text-slate-900">Prontuário</h3>
                         <p className="text-xs text-slate-500">Anotações e documentos</p>
                       </div>
                     </div>
@@ -1200,6 +1262,46 @@ export default function PatientRecord() {
           {/* Sessions/Frequency Tab */}
           {activeTab === "sessions" && (
             <div className="space-y-6 animate-fade-in">
+              {/* Filtro de Período */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Período</span>
+                {[
+                  { key: "thisMonth", label: "Este Mês" },
+                  { key: "lastMonth", label: "Mês Anterior" },
+                  { key: "last3Months", label: "Últimos 3 Meses" },
+                  { key: "all", label: "Todo Histórico" },
+                  { key: "custom", label: "Personalizado" },
+                ].map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => setPeriodFilter(opt.key)}
+                    className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
+                      periodFilter === opt.key
+                        ? "bg-emerald-600 text-white shadow-md"
+                        : "bg-white text-slate-500 border border-slate-200 hover:border-emerald-200 hover:text-emerald-600"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+                {periodFilter === "custom" && (
+                  <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronLeft size={16} /></button>
+                    <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
+                      {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
+                        const monthVal = i + 1;
+                        const currentYear = customMonth.split("-")[0];
+                        return <option key={`${currentYear}-${String(monthVal).padStart(2, "0")}`} value={`${currentYear}-${String(monthVal).padStart(2, "0")}`}>{name}</option>;
+                      })}
+                    </select>
+                    <select value={customMonth.split("-")[0]} onChange={e => { const month = customMonth.split("-")[1]; setCustomMonth(`${e.target.value}-${month}`); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
+                      {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year}>{year}</option>; })}
+                    </select>
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronRight size={16} /></button>
+                  </div>
+                )}
+              </div>
+
               {/* Stats Summary */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="card p-4 flex items-center gap-4 border-l-4 border-emerald-500">
@@ -1207,7 +1309,7 @@ export default function PatientRecord() {
                     <UserCheck size={24} />
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-slate-800">{attendances.filter(a => a.status === 'presente').length}</p>
+                    <p className="text-2xl font-black text-slate-800">{filteredAttendances.filter(a => a.status === 'presente').length}</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Presenças</p>
                   </div>
                 </div>
@@ -1216,7 +1318,7 @@ export default function PatientRecord() {
                     <UserX size={24} />
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-slate-800">{attendances.filter(a => a.status === 'falta').length}</p>
+                    <p className="text-2xl font-black text-slate-800">{filteredAttendances.filter(a => a.status === 'falta').length}</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Faltas</p>
                   </div>
                 </div>
@@ -1225,7 +1327,7 @@ export default function PatientRecord() {
                     <AlertCircle size={24} />
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-slate-800">{attendances.filter(a => a.status === 'justificada').length}</p>
+                    <p className="text-2xl font-black text-slate-800">{filteredAttendances.filter(a => a.status === 'justificada').length}</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Justificadas</p>
                   </div>
                 </div>
@@ -1249,15 +1351,15 @@ export default function PatientRecord() {
                     <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                     <p className="text-sm font-bold uppercase tracking-widest">Carregando histórico...</p>
                   </div>
-                ) : attendances.length === 0 ? (
+                ) : filteredAttendances.length === 0 ? (
                   <div className="text-center py-20 opacity-30">
                     <Calendar size={48} className="mx-auto mb-4" />
-                    <p className="text-sm font-bold uppercase tracking-widest">Nenhum registro de presença ainda</p>
+                    <p className="text-sm font-bold uppercase tracking-widest">Nenhum registro no período</p>
                     <p className="text-xs mt-2">Os registros aparecerão conforme você marcar na Agenda.</p>
                   </div>
                 ) : (
                   <div className="space-y-0 relative before:absolute before:left-[19px] before:top-2 before:bottom-0 before:w-0.5 before:bg-slate-100">
-                    {attendances.map((att, idx) => {
+                    {filteredAttendances.map((att, idx) => {
                       const isReagendado = att.notes?.includes('Reagendado');
                       const isFilho = !!att.parentId;
                       const hasFilho = attendances.some(a => a.parentId === att.id);
@@ -1365,15 +1467,55 @@ export default function PatientRecord() {
           {/* Financial Tab */}
           {activeTab === "financial" && (
             <div className="space-y-6 animate-fade-in">
+              {/* Filtro de Período */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Período</span>
+                {[
+                  { key: "thisMonth", label: "Este Mês" },
+                  { key: "lastMonth", label: "Mês Anterior" },
+                  { key: "last3Months", label: "Últimos 3 Meses" },
+                  { key: "all", label: "Todo Histórico" },
+                  { key: "custom", label: "Personalizado" },
+                ].map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => setPeriodFilter(opt.key)}
+                    className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
+                      periodFilter === opt.key
+                        ? "bg-emerald-600 text-white shadow-md"
+                        : "bg-white text-slate-500 border border-slate-200 hover:border-emerald-200 hover:text-emerald-600"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+                {periodFilter === "custom" && (
+                  <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronLeft size={16} /></button>
+                    <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
+                      {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
+                        const monthVal = i + 1;
+                        const currentYear = customMonth.split("-")[0];
+                        return <option key={`${currentYear}-${String(monthVal).padStart(2, "0")}`} value={`${currentYear}-${String(monthVal).padStart(2, "0")}`}>{name}</option>;
+                      })}
+                    </select>
+                    <select value={customMonth.split("-")[0]} onChange={e => { const month = customMonth.split("-")[1]; setCustomMonth(`${e.target.value}-${month}`); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
+                      {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year}>{year}</option>; })}
+                    </select>
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronRight size={16} /></button>
+                  </div>
+                )}
+              </div>
+
               {/* Financial Dashboard */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="card p-4 flex items-center gap-4 border-l-4 border-emerald-500">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="md:col-start-2 card p-4 flex items-center gap-4 border-l-4 border-emerald-500">
                   <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                     <DollarSign size={24} />
                   </div>
                   <div>
                     <p className="text-2xl font-black text-slate-800">
-                      R$ {payments.reduce((acc, p) => acc + p.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      R$ {filteredPayments.reduce((acc, p) => acc + p.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Pago</p>
                   </div>
@@ -1410,7 +1552,7 @@ export default function PatientRecord() {
                     <Plus size={24} />
                   </div>
                   <div>
-                    <p className="text-lg font-black uppercase tracking-tight">Lançar Pagamento</p>
+                    <p className="text-lg font-black uppercase tracking-tight">Lançar</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Novo bloco de sessões</p>
                   </div>
                 </button>
@@ -1436,10 +1578,10 @@ export default function PatientRecord() {
                     <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                     <p className="text-sm font-bold uppercase tracking-widest">Carregando financeiro...</p>
                   </div>
-                ) : payments.length === 0 ? (
+                ) : filteredPayments.length === 0 ? (
                   <div className="text-center py-20 opacity-30">
                     <CreditCard size={48} className="mx-auto mb-4" />
-                    <p className="text-sm font-bold uppercase tracking-widest">Nenhum pagamento registrado</p>
+                    <p className="text-sm font-bold uppercase tracking-widest">Nenhum pagamento no período</p>
                     <p className="text-xs mt-2">Os blocos de pagamento aparecerão aqui.</p>
                   </div>
                 ) : (
