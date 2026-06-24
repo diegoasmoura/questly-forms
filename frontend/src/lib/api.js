@@ -193,6 +193,9 @@ export const api = {
     method: "PUT", 
     body: JSON.stringify(data) 
   }),
+  deleteAppointment: (id) => request(`/appointments/${id}`, { 
+    method: "DELETE" 
+  }),
   checkAppointmentConflict: (data) => request("/appointments/check-conflict", { 
     method: "POST", 
     body: JSON.stringify(data) 

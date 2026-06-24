@@ -301,4 +301,22 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+// Excluir um agendamento individual
+router.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const existing = await prisma.appointment.findFirst({
+      where: { id, psychologistId: req.user.id }
+    });
+    if (!existing) {
+      return res.status(404).json({ error: "Agendamento não encontrado" });
+    }
+    await prisma.appointment.delete({ where: { id } });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting appointment:", error);
+    res.status(500).json({ error: "Erro ao excluir agendamento" });
+  }
+});
+
 export default router;

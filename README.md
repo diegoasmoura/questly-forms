@@ -56,13 +56,20 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Identidade Visual:** Favicon personalizado "Q" e título profissional na aba do navegador.
 - **Status do Recibo:** Controle visual de emissão (Emitido, Com Anexo, Pendente).
 
-### 4. Cadastro de Pacientes e Integridade (v4.4)
+### 4. Operações Individuais (Agenda)
+- **DELETE /:id** — exclui um agendamento individual (sem cascata em attendances)
+- **POST /** — cria um agendamento individual
+- **PUT /:id** — atualiza um agendamento individual (campos parciais)
+- **POST /batch** — usado APENAS para salvar configuração completa de slots (settings), não para operações individuais
+- **Integridade:** Appointments e Attendances NÃO têm FK direta; excluir um agendamento não afeta registros de presença
+
+### 5. Cadastro de Pacientes e Integridade (v4.4)
 - **Campos Obrigatórios (Ética e Segurança):** Nome, CPF, Data de Nascimento, E-mail, Telefone e Contato de Emergência (Nome e Telefone) são mandatórios para garantir a segurança clínica e conformidade com emissão de documentos.
 - **Validação de Duplicidade:** O sistema impede o cadastro de CPFs duplicados para o mesmo psicólogo, fornecendo feedback visual imediato.
 - **UX de Validação Inteligente:** Em formulários com abas, o sistema detecta campos obrigatórios faltantes e redireciona automaticamente o usuário para a aba correta, exibindo uma mensagem de alerta detalhada.
 - **Feedback Visual de Erros:** Substituição de alertas genéricos por mensagens integradas ao design do modal, com animações de atenção (shake) em caso de falha.
 
-### 5. Cadastro de Pacientes e Importação Excel (v4.5)
+### 6. Cadastro de Pacientes e Importação Excel (v4.5)
 - **Importação via Excel:** Modelo geração via **ExcelJS** com suporte a 3 formatos de data:
   - **DD-MM-YYYY** (ex: 15-01-1990) - formato brasileiro
   - **YYYY-MM-DD** (ex: 1990-01-15)
@@ -72,12 +79,12 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Dropdowns** em Gênero e Estado Civil
 - **Feedback Visual:** Mensagens detalhadas com linha do erro
 
-### 6. UX de Visualização de Pacientes
+### 7. UX de Visualização de Pacientes
 - **Modo Card:** Excluir junto com botões de ação (sem botão separado no topo)
 - **Modo Lista:** Ordem de botões: Prontuário (destacado) > Editar > Excluir
 - **Dropdown de Cadastro:** Cada botão com estado independente; "Cadastrar" (topo) alinhado à direita, "Cadastrar Paciente" (vazio) centralizado
 
-### 7. UX do Calendário (Agenda)
+### 8. UX do Calendário (Agenda)
 - **Layout duas colunas:** Calendário (`w-[60%]`) + Agenda (`w-[40%]`) lado a lado com `flex gap-6`
 - **react-day-picker v9** com DayButton customizado, tintas de fundo (verde/âmbar/vermelho) e barra verde inferior para sessões do paciente
 - **Células dinâmicas:** Linhas com `h-0` distribuem altura igualmente via `flex-1 table-fixed`; botões preenchem com `h-full`
@@ -85,7 +92,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Cards:** `flex gap-2` com `flex-1` no texto, sem `justify-between` — nome/descrição e horário/botões ficam próximos
 - **Frame-wrapper:** Calendário envolto em `p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col h-full`
 
-### 8. Navegação Suave
+### 9. Navegação Suave
 - Hook `useNavigateWithTransition` adiciona delay de 300ms antes de trocas de página:
 
 ```jsx
@@ -97,7 +104,7 @@ navigate("/path", { delay: 0 }); // sem delay (ex: logout)
 navigate(-1); // suporta navegação relativa
 ```
 
-### 9. outras UX
+### 10. outras UX
 - **Navegação Consistente:** Elementos como Avatares, Nomes e Ícones são links diretos para prontuários.
 - **Semana de Aniversário:** Visual festivo automático (dourado/confetes) em janela de 7 dias.
 - **Métricas de Engajamento:** Comparação entre assiduidade física (Sessões) e digital (Instrumentos).
@@ -108,7 +115,7 @@ navigate(-1); // suporta navegação relativa
 - **Clinical Dashboard:** Métricas de engajamento na capa do card.
 - **Patient Record:** Padronização de abas com header e botão Save.
 
-### 10. Layout do PatientRecord (Regras para evitar scrollbar externa)
+### 11. Layout do PatientRecord (Regras para evitar scrollbar externa)
 
 A página `PatientRecord.jsx` usa uma estrutura de layout específica que deve ser mantida para evitar que a barra de rolagem externa apareça ao alternar entre abas:
 

@@ -283,23 +283,15 @@ export default function PatientRecord() {
       await handleSaveEditedSlot();
       return;
     }
-    const baseSlot = { dayOfWeek, time: agendaFormTime, duration: agendaFormDuration, startDate };
+    const baseSlot = { patientId: id, dayOfWeek, time: agendaFormTime, duration: agendaFormDuration, startDate };
     if (!agendaFormRecurring) {
       baseSlot.scheduledDate = startDate;
     } else if (agendaFormMaxSessions > 0) {
       baseSlot.maxSessions = agendaFormMaxSessions;
     }
-    const allSlots = [...appointments.map(a => {
-      const s = { dayOfWeek: a.dayOfWeek, time: a.time, duration: a.duration, startDate: a.startDate };
-      if (a.maxSessions) s.maxSessions = a.maxSessions;
-      if (a.scheduledDate) s.scheduledDate = a.scheduledDate;
-      if (a.endDate) s.endDate = a.endDate;
-      if (a.skipDates) s.skipDates = a.skipDates;
-      return s;
-    }), baseSlot];
     setSavingAgenda(true);
     try {
-      await api.saveAppointmentsBatch(id, allSlots);
+      await api.createAppointment(baseSlot);
       await loadPatientAppointments(showAllAppointments);
       setShowAgendaModal(false);
     } catch (error) {
@@ -310,18 +302,10 @@ export default function PatientRecord() {
   };
 
   const handleRemoveSlot = async (slotId) => {
-    const updated = appointments.filter(a => a.id !== slotId);
-    const slots = updated.map(a => {
-      const s = { dayOfWeek: a.dayOfWeek, time: a.time, duration: a.duration, startDate: a.startDate };
-      if (a.maxSessions) s.maxSessions = a.maxSessions;
-      if (a.scheduledDate) s.scheduledDate = a.scheduledDate;
-      if (a.endDate) s.endDate = a.endDate;
-      if (a.skipDates) s.skipDates = a.skipDates;
-      return s;
-    });
+    if (!window.confirm("Tem certeza que deseja excluir este horário?")) return;
     setSavingAgenda(true);
     try {
-      await api.saveAppointmentsBatch(id, slots);
+      await api.deleteAppointment(slotId);
       await loadPatientAppointments(showAllAppointments);
     } catch (error) {
       alert("Erro ao remover: " + error.message);
