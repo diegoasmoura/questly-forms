@@ -2449,7 +2449,7 @@ export default function PatientRecord() {
                               Novo
                             </button>
                           </div>
-                          <div className="space-y-1.5">
+                          <div className="space-y-1.5 flex-1 overflow-y-auto min-h-0">
                             {appointments
                               .filter(a => {
                                 if (!myAppointmentIds.has(a.id)) return false;
@@ -2567,7 +2567,7 @@ export default function PatientRecord() {
                               Novo
                             </button>
                           </div>
-                          <div className="space-y-1.5">
+                          <div className="space-y-1.5 flex-1 overflow-y-auto min-h-0">
                             {[...new Set(appointments.filter(a => myAppointmentIds.has(a.id)).map(a => a.time))].sort().map(time => {
                               const slotsAtTime = appointments.filter(a => myAppointmentIds.has(a.id) && a.time === time);
                               return (
