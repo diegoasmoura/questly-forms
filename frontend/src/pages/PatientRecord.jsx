@@ -983,12 +983,13 @@ export default function PatientRecord() {
         Voltar para Lista de Pacientes
       </Link>
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="flex-1 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full min-h-0">
+
           {/* Left Column: Patient Profile */}
-          <div className="lg:col-span-1">
-            <div className="card p-6">
-              <div className="flex flex-col items-center text-center mb-6">
+          <div className="lg:col-span-1 flex flex-col min-h-0">
+            <div className="card p-6 flex-1 flex flex-col min-h-0">
+              <div className="flex flex-col items-center text-center mb-6 shrink-0">
                 <div className="w-20 h-20 rounded-2xl bg-emerald-900 flex items-center justify-center text-white font-bold text-3xl mb-3 shadow-xl shadow-emerald-900/20">
                   {patient.name.charAt(0).toUpperCase()}
                 </div>
@@ -996,117 +997,120 @@ export default function PatientRecord() {
                 <p className="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-widest">Prontuário #{patient.id.slice(0, 8).toUpperCase()}</p>
               </div>
 
-              <div className="space-y-3 pt-4 border-t border-emerald-50">
+              <div className="flex-1 space-y-3 overflow-y-auto min-h-0">
                 {patient.email && (
                   <div className="flex items-center justify-between px-2 py-1.5">
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Email</p>
                       <p className="text-xs text-emerald-700 font-medium truncate">{patient.email}</p>
                     </div>
-                    <a
-                      href={`mailto:${patient.email}`}
-                      className="btn btn-ghost text-[10px] py-1 px-2 shrink-0 ml-2"
-                      title="Enviar Email"
-                    >
-                      Enviar
-                    </a>
                   </div>
                 )}
-              {patient.phone && (
-                <div className="flex items-center justify-between px-2 py-1.5">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Telefone</p>
-                    <p className="text-xs text-emerald-700 font-medium truncate">{patient.phone}</p>
+                {patient.phone && (
+                  <div className="flex items-center justify-between px-2 py-1.5">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Telefone</p>
+                      <p className="text-xs text-emerald-700 font-medium truncate">{patient.phone}</p>
+                    </div>
                   </div>
-                  <a
-                    href={`tel:${patient.phone.replace(/\D/g, '')}`}
-                    className="btn btn-ghost text-[10px] py-1 px-2 shrink-0 ml-2"
-                    title="Ligar"
-                  >
-                    Ligar
-                  </a>
+                )}
+                <div className="px-2 py-1.5">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nascimento</p>
+                  <p className="text-xs text-emerald-700 font-medium">
+                    {patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : "Não informado"}
+                    {patient.birthDate && (() => {
+                      const today = new Date();
+                      const birth = new Date(patient.birthDate);
+                      let age = today.getFullYear() - birth.getFullYear();
+                      const monthDiff = today.getMonth() - birth.getMonth();
+                      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+                      return <span className="ml-1 text-slate-500">({age} anos)</span>;
+                    })()}
+                  </p>
                 </div>
-              )}
-              <div className="px-2 py-1.5">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nascimento</p>
-                <p className="text-xs text-emerald-700 font-medium">
-                  {patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : "Não informado"}
-                  {patient.birthDate && (() => {
-                    const today = new Date();
-                    const birth = new Date(patient.birthDate);
-                    let age = today.getFullYear() - birth.getFullYear();
-                    const monthDiff = today.getMonth() - birth.getMonth();
-                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-                      age--;
-                    }
-                    return <span className="ml-1 text-slate-500">({age} anos)</span>;
-                  })()}
+                <div className="px-2 py-1.5">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Paciente desde</p>
+                  <p className="text-xs text-emerald-700 font-medium">{new Date(patient.createdAt).toLocaleDateString('pt-BR')}</p>
+                </div>
+
+                {/* Anotações Rápidas */}
+                <div className="px-2 py-1.5">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Anotações</p>
+                  <p className="text-xs text-slate-600 leading-relaxed line-clamp-4">
+                    {patient.notes || "Nenhuma anotação registrada."}
+                  </p>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="border-t border-emerald-50 pt-4 mt-4 space-y-2">
+                {patient.cpf && (
+                  <div className="text-[10px] text-slate-400">
+                    <span className="font-bold uppercase">CPF: </span>
+                    {patient.cpf}
+                  </div>
+                )}
+                <button onClick={() => { setEditTab("identity"); loadAttachments(); setShowEditModal(true); }} className="w-full btn btn-primary text-xs py-3">
+                  <Edit size={14} />
+                  Ver Dados Completos
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: History */}
+          <div className="lg:col-span-3 flex flex-col min-h-0 gap-8">
+
+          {/* Tabs */}
+          <div className="shrink-0">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900">Histórico Clínico</h2>
+                <p className="text-sm text-slate-600 mt-1">
+                  Evolução e respostas do paciente
                 </p>
               </div>
-              <div className="px-2 py-1.5">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Paciente desde</p>
-                <p className="text-xs text-emerald-700 font-medium">{new Date(patient.createdAt).toLocaleDateString('pt-BR')}</p>
+              <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-emerald-100 shadow-sm">
+                <TabButton
+                  active={activeTab === "sessions"}
+                  onClick={() => setActiveTab("sessions")}
+                  icon={<Clock size={14} />}
+                  label="Frequência"
+                />
+                <TabButton
+                  active={activeTab === "financial"}
+                  onClick={() => setActiveTab("financial")}
+                  icon={<DollarSign size={14} />}
+                  label="Financeiro"
+                />
+                <TabButton
+                  active={activeTab === "settings"}
+                  onClick={() => setActiveTab("settings")}
+                  icon={<Calendar size={14} />}
+                  label="Agenda"
+                />
+                <TabButton
+                  active={activeTab === "share"}
+                  onClick={() => setActiveTab("share")}
+                  icon={<Share2 size={14} />}
+                  label="Instrumentos"
+                />
+                <TabButton
+                  active={activeTab === "notes"}
+                  onClick={() => setActiveTab("notes")}
+                  icon={<FileText size={14} />}
+                  label="Prontuário"
+                />
               </div>
-              
-              <button
-                onClick={() => { setEditTab("identity"); loadAttachments(); setShowEditModal(true); }}
-                className="w-full mt-4 btn btn-primary text-xs py-3"
-              >
-                <Edit size={14} />
-                Ver Dados Completos
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: History */}
-        <div className="lg:col-span-3 space-y-8">
-          {/* Tabs */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900">Histórico Clínico</h2>
-              <p className="text-sm text-slate-600 mt-1">
-                Evolução e respostas do paciente
-              </p>
-            </div>
-            <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-emerald-100 shadow-sm">
-              <TabButton
-                active={activeTab === "sessions"}
-                onClick={() => setActiveTab("sessions")}
-                icon={<Clock size={14} />}
-                label="Frequência"
-              />
-              <TabButton
-                active={activeTab === "financial"}
-                onClick={() => setActiveTab("financial")}
-                icon={<DollarSign size={14} />}
-                label="Financeiro"
-              />
-              <TabButton
-                active={activeTab === "settings"}
-                onClick={() => setActiveTab("settings")}
-                icon={<Calendar size={14} />}
-                label="Agenda"
-              />
-              <TabButton
-                active={activeTab === "share"}
-                onClick={() => setActiveTab("share")}
-                icon={<Share2 size={14} />}
-                label="Instrumentos"
-              />
-              <TabButton
-                active={activeTab === "notes"}
-                onClick={() => setActiveTab("notes")}
-                icon={<FileText size={14} />}
-                label="Prontuário"
-              />
             </div>
           </div>
 
+          {/* Tab Content */}
+          <div className="flex-1 flex flex-col min-h-0">
 {/* Share Tab */}
           {activeTab === "share" && (
-            <div className="space-y-6 animate-fade-in">
-              <div className="card p-6">
+            <div className="flex flex-col flex-1 min-h-0">
+              <div className="card p-6 flex-1 min-h-0 overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h3 className="text-lg font-bold text-slate-900">Compartilhar Instrumentos</h3>
@@ -1161,9 +1165,9 @@ export default function PatientRecord() {
 
           {/* Prontuário Tab */}
           {activeTab === "notes" && (
-            <div className="space-y-6 animate-fade-in">
-              <div className="card overflow-hidden">
-                <div className="p-6 border-b border-slate-100">
+            <div className="flex flex-col flex-1 min-h-0">
+              <div className="card flex-1 min-h-0 overflow-y-auto">
+                <div className="p-6 border-b border-slate-100 shrink-0">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
@@ -1261,7 +1265,7 @@ export default function PatientRecord() {
 
           {/* Sessions/Frequency Tab */}
           {activeTab === "sessions" && (
-            <div className="space-y-6 animate-fade-in">
+            <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Filtro de Período */}
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Período</span>
@@ -1303,37 +1307,37 @@ export default function PatientRecord() {
               </div>
 
               {/* Stats Summary */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="card p-4 flex items-center gap-4 border-l-4 border-emerald-500">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                    <UserCheck size={24} />
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-500">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <UserCheck size={18} />
                   </div>
                   <div>
                     <p className="text-2xl font-black text-slate-800">{filteredAttendances.filter(a => a.status === 'presente').length}</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Presenças</p>
                   </div>
                 </div>
-                <div className="card p-4 flex items-center gap-4 border-l-4 border-red-500">
-                  <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-600">
-                    <UserX size={24} />
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-red-500">
+                  <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-600">
+                    <UserX size={18} />
                   </div>
                   <div>
                     <p className="text-2xl font-black text-slate-800">{filteredAttendances.filter(a => a.status === 'falta').length}</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Faltas</p>
                   </div>
                 </div>
-                <div className="card p-4 flex items-center gap-4 border-l-4 border-amber-500">
-                  <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
-                    <AlertCircle size={24} />
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-500">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                    <AlertCircle size={18} />
                   </div>
                   <div>
                     <p className="text-2xl font-black text-slate-800">{filteredAttendances.filter(a => a.status === 'justificada').length}</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Justificadas</p>
                   </div>
                 </div>
-                <div className="card p-4 flex items-center gap-4 border-l-4 border-slate-500">
-                  <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
-                    <Activity size={24} />
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-500">
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
+                    <Activity size={18} />
                   </div>
                   <div>
                     <p className="text-2xl font-black text-slate-800">{attendances.length}</p>
@@ -1343,22 +1347,24 @@ export default function PatientRecord() {
               </div>
 
               {/* Timeline List */}
-              <div className="card p-8">
-                <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight mb-8">Histórico de Sessões</h3>
+              <div className="card p-8 flex-1 flex flex-col min-h-0">
+                <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight mb-8 shrink-0">Histórico de Sessões</h3>
                 
                 {loadingAttendances ? (
-                  <div className="text-center py-20 opacity-50">
+                  <div className="text-center py-20 opacity-50 flex-1 flex items-center justify-center">
                     <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                     <p className="text-sm font-bold uppercase tracking-widest">Carregando histórico...</p>
                   </div>
                 ) : filteredAttendances.length === 0 ? (
-                  <div className="text-center py-20 opacity-30">
-                    <Calendar size={48} className="mx-auto mb-4" />
-                    <p className="text-sm font-bold uppercase tracking-widest">Nenhum registro no período</p>
-                    <p className="text-xs mt-2">Os registros aparecerão conforme você marcar na Agenda.</p>
+                  <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
+                    <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mb-5">
+                      <Calendar size={32} className="text-emerald-300" />
+                    </div>
+                    <p className="text-sm font-bold text-slate-700 uppercase tracking-widest">Nenhum registro no período</p>
+                    <p className="text-xs text-slate-400 mt-2 max-w-xs leading-relaxed">Registros de presença aparecerão aqui conforme você marcar as sessões na agenda do paciente.</p>
                   </div>
                 ) : (
-                  <div className="space-y-0 relative before:absolute before:left-[19px] before:top-2 before:bottom-0 before:w-0.5 before:bg-slate-100">
+                  <div className="space-y-0 relative before:absolute before:left-[19px] before:top-2 before:bottom-0 before:w-0.5 before:bg-slate-100 overflow-y-auto flex-1 min-h-0">
                     {filteredAttendances.map((att, idx) => {
                       const isReagendado = att.notes?.includes('Reagendado');
                       const isFilho = !!att.parentId;
@@ -1466,7 +1472,7 @@ export default function PatientRecord() {
 
           {/* Financial Tab */}
           {activeTab === "financial" && (
-            <div className="space-y-6 animate-fade-in">
+            <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Filtro de Período */}
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Período</span>
@@ -1508,10 +1514,10 @@ export default function PatientRecord() {
               </div>
 
               {/* Financial Dashboard */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="md:col-start-2 card p-4 flex items-center gap-4 border-l-4 border-emerald-500">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                    <DollarSign size={24} />
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="md:col-start-2 card p-3 flex items-center gap-3 border-l-4 border-emerald-500">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <DollarSign size={18} />
                   </div>
                   <div>
                     <p className="text-2xl font-black text-slate-800">
@@ -1520,9 +1526,9 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Pago</p>
                   </div>
                 </div>
-                <div className="card p-4 flex items-center gap-4 border-l-4 border-amber-500">
-                  <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
-                    <Clock size={24} />
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-500">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                    <Clock size={18} />
                   </div>
                   <div>
                     <p className="text-2xl font-black text-slate-800">
@@ -1546,10 +1552,10 @@ export default function PatientRecord() {
                     setSelectedAttendances([]);
                     setShowPaymentModal(true);
                   }}
-                  className="card p-4 flex items-center gap-4 border-l-4 border-slate-900 bg-slate-900 text-white hover:bg-slate-800 transition-all text-left group"
+                  className="card p-3 flex items-center gap-3 border-l-4 border-slate-900 bg-slate-900 text-white hover:bg-slate-800 transition-all text-left group"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
-                    <Plus size={24} />
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                    <Plus size={18} />
                   </div>
                   <div>
                     <p className="text-lg font-black uppercase tracking-tight">Lançar</p>
@@ -1559,8 +1565,8 @@ export default function PatientRecord() {
               </div>
 
               {/* Payments History Table */}
-              <div className="card overflow-hidden">
-                <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+              <div className="card p-8 flex-1 flex flex-col min-h-0 overflow-hidden">
+                <div className="flex items-center justify-between mb-8 shrink-0">
                   <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Histórico de Lançamentos</h3>
                   {payments.length > 0 && (
                     <button 
@@ -1579,13 +1585,15 @@ export default function PatientRecord() {
                     <p className="text-sm font-bold uppercase tracking-widest">Carregando financeiro...</p>
                   </div>
                 ) : filteredPayments.length === 0 ? (
-                  <div className="text-center py-20 opacity-30">
-                    <CreditCard size={48} className="mx-auto mb-4" />
-                    <p className="text-sm font-bold uppercase tracking-widest">Nenhum pagamento no período</p>
-                    <p className="text-xs mt-2">Os blocos de pagamento aparecerão aqui.</p>
+                  <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
+                    <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mb-5">
+                      <CreditCard size={32} className="text-amber-300" />
+                    </div>
+                    <p className="text-sm font-bold text-slate-700 uppercase tracking-widest">Nenhum pagamento no período</p>
+                    <p className="text-xs text-slate-400 mt-2 max-w-xs leading-relaxed">Lançamentos de pagamento aparecerão aqui conforme você registrar os blocos de sessões.</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto overflow-y-auto flex-1 min-h-0">
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
@@ -1932,8 +1940,8 @@ export default function PatientRecord() {
 
           {/* Agenda Configuration Tab */}
           {activeTab === "settings" && (
-            <div className="space-y-6 animate-fade-in">
-              <div className="card p-6">
+            <div className="flex flex-col flex-1 min-h-0">
+              <div className="card p-6 flex-1 min-h-0 overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Configurar Agenda Recorrente</h3>
@@ -2124,6 +2132,7 @@ export default function PatientRecord() {
               )}
             </div>
           )}
+          </div>
         </div>
       </div>
 
