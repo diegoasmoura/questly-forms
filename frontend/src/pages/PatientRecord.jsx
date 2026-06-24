@@ -1597,19 +1597,19 @@ export default function PatientRecord() {
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                          <th className="px-6 py-4">Período das Sessões</th>
-                          <th className="px-6 py-4">Valor Pago</th>
-                          <th className="px-6 py-4">Data do Pagamento</th>
-                          <th className="px-6 py-4">Recibo</th>
-                          <th className="px-6 py-4 text-right">Ações</th>
+                          <th className="px-4 py-3 min-w-[180px]">Período das Sessões</th>
+                          <th className="px-4 py-3 whitespace-nowrap">Valor Pago</th>
+                          <th className="px-4 py-3 whitespace-nowrap">Data do Pagamento</th>
+                          <th className="px-4 py-3">Recibo</th>
+                          <th className="px-4 py-3 text-right">Ações</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {payments.map(payment => (
                           <tr key={payment.id} className="hover:bg-slate-50/50 transition-colors">
-                            <td className="px-6 py-4">
+                            <td className="px-4 py-3">
                               <div className="flex flex-col">
-                                <span className="text-sm font-bold text-slate-700">
+                                <span className="text-sm font-bold text-slate-700 whitespace-nowrap">
                                   {payment.attendances.length > 0 
                                     ? `${format(new Date(payment.attendances[0].date), 'dd/MM/yy')} a ${format(new Date(payment.attendances[payment.attendances.length-1].date), 'dd/MM/yy')}`
                                     : 'Sem sessões vinculadas'}
@@ -1619,51 +1619,51 @@ export default function PatientRecord() {
                                 </span>
                               </div>
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-4 py-3 whitespace-nowrap">
                               <span className="text-sm font-black text-slate-800">
                                 R$ {payment.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                               </span>
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-4 py-3 whitespace-nowrap">
                               <span className="text-sm text-slate-600 font-medium">
                                 {format(new Date(payment.paymentDate), 'dd/MM/yyyy')}
                               </span>
                             </td>
-                            <td className="px-6 py-4">
-                              <div className="flex flex-col gap-1">
-                                <div>
-                                  {payment.receiptIssued ? (
-                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-lg border border-emerald-200">
-                                      <Check size={10} />
-                                      NOTA DE SERVIÇO
-                                    </span>
-                                  ) : payment.receiptAttachment ? (
-                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg border border-amber-200">
-                                      <Paperclip size={10} />
-                                      COM ANEXO
-                                    </span>
-                                  ) : (
-                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-lg border border-slate-200">
-                                      PENDENTE
-                                    </span>
-                                  )}
-                                </div>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2 flex-wrap min-w-0">
+                                {payment.receiptIssued ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-lg border border-emerald-200 whitespace-nowrap">
+                                    <Check size={10} />
+                                    NOTA DE SERVIÇO
+                                  </span>
+                                ) : payment.receiptAttachment ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg border border-amber-200 whitespace-nowrap">
+                                    <Paperclip size={10} />
+                                    COM ANEXO
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-lg border border-slate-200 whitespace-nowrap">
+                                    PENDENTE
+                                  </span>
+                                )}
                                 {payment.receiptAttachment && (
                                   <button 
                                     onClick={() => handleDownloadReceipt(payment.receiptAttachment.id, payment.receiptAttachment.originalName || payment.receiptAttachment.filename)}
-                                    className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors w-fit"
+                                    className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors whitespace-nowrap max-w-[140px]"
                                     title="Baixar arquivo anexado"
                                   >
                                     <Download size={10} />
-                                    {(payment.receiptAttachment.originalName || payment.receiptAttachment.filename)?.length > 25 
-                                      ? (payment.receiptAttachment.originalName || payment.receiptAttachment.filename).slice(0, 25) + '...' 
-                                      : payment.receiptAttachment.originalName || payment.receiptAttachment.filename}
+                                    <span className="truncate">
+                                      {(payment.receiptAttachment.originalName || payment.receiptAttachment.filename)?.length > 18 
+                                        ? (payment.receiptAttachment.originalName || payment.receiptAttachment.filename).slice(0, 18) + '...' 
+                                        : payment.receiptAttachment.originalName || payment.receiptAttachment.filename}
+                                    </span>
                                   </button>
                                 )}
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-right">
-                              <div className="flex items-center justify-end gap-2">
+                            <td className="px-4 py-3 text-right whitespace-nowrap">
+                              <div className="flex items-center justify-end gap-1">
                                 <button 
                                   onClick={() => openEditPayment(payment)}
                                   className="p-2 text-slate-500 hover:bg-slate-50 rounded-lg transition-all"
