@@ -104,6 +104,33 @@ navigate(-1); // suporta navegação relativa
 - **Toasts Flutuantes:** Confirmações em Emerald-600.
 - **Clinical Dashboard:** Métricas de engajamento na capa do card.
 - **Patient Record:** Padronização de abas com header e botão Save.
+
+### 10. Layout do PatientRecord (Regras para evitar scrollbar externa)
+
+A página `PatientRecord.jsx` usa uma estrutura de layout específica que deve ser mantida para evitar que a barra de rolagem externa apareça ao alternar entre abas:
+
+**Estrutura do Grid:**
+- Ambas as colunas (sidebar + conteúdo) DEVEM estar DENTRO do mesmo grid: `<div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full min-h-0">`
+- O container externo usa `overflow-hidden` para eliminar a scrollbar da página
+- Cada coluna usa `flex flex-col min-h-0` para permitir encolhimento
+
+**Sidebar (coluna esquerda):**
+- Card usa `flex-1 flex flex-col min-h-0`
+- Conteúdo do paciente usa `flex-1 space-y-3 overflow-y-auto min-h-0` para scroll interno
+- Footer (CPF + botão) fica fora da área scrollável, após o `flex-1`
+- Email e Telefone são exibidos apenas como texto, SEM botões Enviar/Ligar
+
+**Abas (coluna direita):**
+- Header das abas (`shrink-0`) + wrapper de conteúdo (`flex-1 flex flex-col min-h-0`)
+- Cada aba usa `flex flex-col flex-1 min-h-0` como wrapper
+- O card principal de cada aba (ex: timeline, tabela) usa `flex-1 min-h-0 overflow-y-auto` para scroll interno
+- NUNCA usar `overflow-y-auto` no container externo ou na coluna direita
+
+**Cards de estatísticas:**
+- Todos os stat cards (Presenças, Faltas, Total Pago, Lançar) usam `p-3 w-10 h-10 gap-3 size={18}` (compacto)
+
+**Headers dos cards:**
+- Headers usam `mb-8 shrink-0` em vez de `border-b` e ficam dentro do `p-8` do card
 - **UX de Registro:** Área clicável para upload de anexos.
 
 ## Tecnologias
