@@ -2188,11 +2188,13 @@ export default function PatientRecord() {
                 )}
                 <button
                   onClick={() => handleOpenNewSlotModal(new Date())}
-                  className="card p-3 flex items-center gap-3 border-l-4 border-slate-900 bg-slate-900 text-white hover:bg-slate-800 transition-all text-left group"
+                  className="card p-3 flex items-center gap-3 border-l-4 border-emerald-500 bg-white text-emerald-600 hover:bg-emerald-50 transition-all text-left group"
                 >
-                  <Plus size={18} className="text-white/70 group-hover:scale-110 transition-transform" />
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
+                    <Plus size={18} />
+                  </div>
                   <div>
-                    <p className="text-lg font-black uppercase tracking-tight">Adicionar Horário</p>
+                    <p className="text-sm font-black uppercase tracking-tight">Adicionar Horário</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Novo agendamento</p>
                   </div>
                 </button>
@@ -2432,13 +2434,6 @@ export default function PatientRecord() {
                                 {format(selectedCalendarDay, "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
                               </p>
                             </div>
-                            <button
-                              onClick={() => handleOpenNewSlotModal(selectedCalendarDay)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-all text-[10px] font-black uppercase tracking-widest"
-                            >
-                              <Plus size={14} />
-                              Novo
-                            </button>
                           </div>
                           <div className="space-y-1.5 flex-1 overflow-y-auto min-h-0">
                             {appointments
@@ -2555,13 +2550,6 @@ export default function PatientRecord() {
                               <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Agenda Completa</h4>
                               <p className="text-xs font-bold text-slate-500 mt-0.5">Todos os horários do mês</p>
                             </div>
-                            <button
-                              onClick={() => handleOpenNewSlotModal(new Date())}
-                              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-all text-[10px] font-black uppercase tracking-widest"
-                            >
-                              <Plus size={14} />
-                              Novo
-                            </button>
                           </div>
                           <div className="space-y-1.5 flex-1 overflow-y-auto min-h-0">
                             {[...new Set(appointments.filter(a => myAppointmentIds.has(a.id)).map(a => a.time))].sort().map(time => {
