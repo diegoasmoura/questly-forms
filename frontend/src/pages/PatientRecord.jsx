@@ -301,11 +301,18 @@ export default function PatientRecord() {
     }
   };
 
-  const handleRemoveSlot = async (slotId) => {
+  const handleRemoveSlot = async (slotId, date) => {
     if (!window.confirm("Tem certeza que deseja excluir este horário?")) return;
     setSavingAgenda(true);
     try {
-      await api.deleteAppointment(slotId);
+      const app = appointments.find(a => a.id === slotId);
+      if (app && !app.scheduledDate && date) {
+        const dateStr = format(date, "yyyy-MM-dd");
+        const skipDates = [...(app.skipDates || []), dateStr];
+        await api.updateAppointment(slotId, { skipDates });
+      } else {
+        await api.deleteAppointment(slotId);
+      }
       await loadPatientAppointments(showAllAppointments);
     } catch (error) {
       alert("Erro ao remover: " + error.message);
@@ -2500,14 +2507,14 @@ export default function PatientRecord() {
                                       {!isOtherPatient && (
                                         <button
                                           type="button"
-                                          onClick={() => handleRemoveSlot(app.id)}
+                                          onClick={() => handleRemoveSlot(app.id, selectedCalendarDay)}
                                           className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all border border-slate-200 hover:border-red-200"
                                           title="Remover"
                                         >
                                           <Trash2 size={13} />
                                         </button>
                                       )}
-                                    </div>
+                                    </div> {/* closes right side buttons */}
                                   </div>
                                 );
                               })}
