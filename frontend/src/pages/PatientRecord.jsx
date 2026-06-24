@@ -2188,13 +2188,13 @@ export default function PatientRecord() {
                 )}
                 <button
                   onClick={() => handleOpenNewSlotModal(new Date())}
-                  className="card p-3 flex items-center gap-3 border-l-4 border-emerald-500 bg-white text-emerald-600 hover:bg-emerald-50 transition-all text-left group"
+                  className="card p-3 flex items-center gap-3 border-l-4 border-slate-900 bg-slate-900 text-white hover:bg-slate-800 transition-all text-left group"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
                     <Plus size={18} />
                   </div>
                   <div>
-                    <p className="text-sm font-black uppercase tracking-tight">Adicionar Horário</p>
+                    <p className="text-lg font-black uppercase tracking-tight">Adicionar Horário</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Novo agendamento</p>
                   </div>
                 </button>
