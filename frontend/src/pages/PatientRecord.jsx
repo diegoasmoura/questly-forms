@@ -2462,7 +2462,7 @@ export default function PatientRecord() {
                               .map(app => {
                                 const conflict = conflicts[app.id];
                                 const appPatientId = app.patient?.id ?? app.patientId;
-                                const isOtherPatient = appPatientId && Number(appPatientId) !== Number(id);
+                                const isOtherPatient = appPatientId && appPatientId !== id;
                                 return (
                                   <div key={app.id} className={`flex items-center gap-2 p-2.5 rounded-xl border ${
                                     conflict ? "border-red-200 bg-red-50/30" : isOtherPatient ? "border-amber-200 bg-amber-50/30" : "border-slate-200 bg-white"
@@ -2726,7 +2726,7 @@ export default function PatientRecord() {
                                           Conflito
                                         </span>
                                       )}
-                                      {(!showAllAppointments || app.patientId === undefined || app.patientId === parseInt(id)) && (
+                                      {(!showAllAppointments || app.patientId === undefined || app.patientId === id) && (
                                         <button
                                           type="button"
                                           onClick={() => handleRemoveSlot(app.id)}
