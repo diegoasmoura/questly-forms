@@ -2436,7 +2436,6 @@ export default function PatientRecord() {
                           <div className="space-y-1.5 flex-1 overflow-y-auto min-h-0">
                             {appointments
                               .filter(a => {
-                                if (!myAppointmentIds.has(a.id)) return false;
                                 const dateStr = format(selectedCalendarDay, "yyyy-MM-dd");
                                 if (a.scheduledDate) {
                                   if (dateStr !== a.scheduledDate.split("T")[0]) return false;
@@ -2462,19 +2461,21 @@ export default function PatientRecord() {
                               .sort((a, b) => (a.time || "").localeCompare(b.time || ""))
                               .map(app => {
                                 const conflict = conflicts[app.id];
+                                const appPatientId = app.patient?.id ?? app.patientId;
+                                const isOtherPatient = appPatientId && Number(appPatientId) !== Number(id);
                                 return (
                                   <div key={app.id} className={`flex items-center gap-2 p-2.5 rounded-xl border ${
-                                    conflict ? "border-red-200 bg-red-50/30" : "border-slate-200 bg-white"
+                                    conflict ? "border-red-200 bg-red-50/30" : isOtherPatient ? "border-amber-200 bg-amber-50/30" : "border-slate-200 bg-white"
                                   }`}>
                                     <div className="flex items-center gap-2 min-w-0 flex-1">
                                       <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] shrink-0 ${
-                                        conflict ? "bg-red-100 text-red-600" : "bg-emerald-50 text-emerald-600"
+                                        conflict ? "bg-red-100 text-red-600" : isOtherPatient ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
                                       }`}>
                                         <Clock size={14} />
                                       </div>
                                       <div className="min-w-0">
-                                        <p className="text-xs font-bold truncate text-emerald-700">
-                                          {patient?.name?.split(" ")[0] || "Paciente"}
+                                        <p className={`text-xs font-bold truncate ${isOtherPatient ? "text-amber-600" : "text-emerald-700"}`}>
+                                          {(isOtherPatient ? app.patient?.name : patient?.name)?.split(" ")[0] || "Paciente"}
                                         </p>
                                         <p className="text-[9px] font-bold text-slate-500">{app.maxSessions ? `${app.maxSessions} sessões` : app.startDate ? `Desde ${format(new Date(app.startDate), "dd/MM/yy")}` : "Avulso"}</p>
                                       </div>
@@ -2486,22 +2487,26 @@ export default function PatientRecord() {
                                           Conflito
                                         </span>
                                       )}
-                                      <button
-                                        type="button"
-                                        onClick={() => handleEditClick(app, selectedCalendarDay)}
-                                        className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all border border-slate-200 hover:border-emerald-200"
-                                        title="Editar"
-                                      >
-                                        <Pencil size={13} />
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleRemoveSlot(app.id)}
-                                        className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all border border-slate-200 hover:border-red-200"
-                                        title="Remover"
-                                      >
-                                        <Trash2 size={13} />
-                                      </button>
+                                      {!isOtherPatient && (
+                                        <button
+                                          type="button"
+                                          onClick={() => handleEditClick(app, selectedCalendarDay)}
+                                          className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all border border-slate-200 hover:border-emerald-200"
+                                          title="Editar"
+                                        >
+                                          <Pencil size={13} />
+                                        </button>
+                                      )}
+                                      {!isOtherPatient && (
+                                        <button
+                                          type="button"
+                                          onClick={() => handleRemoveSlot(app.id)}
+                                          className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all border border-slate-200 hover:border-red-200"
+                                          title="Remover"
+                                        >
+                                          <Trash2 size={13} />
+                                        </button>
+                                      )}
                                     </div>
                                   </div>
                                 );
