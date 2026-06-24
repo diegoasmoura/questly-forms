@@ -41,7 +41,11 @@ router.get("/patient/:patientId", async (req, res) => {
       dayOfWeek: a.dayOfWeek,
       time: a.time,
       duration: a.duration,
-      startDate: a.startDate ? a.startDate.toISOString().split('T')[0] : null
+      startDate: a.startDate ? a.startDate.toISOString().split('T')[0] : null,
+      maxSessions: a.maxSessions,
+      scheduledDate: a.scheduledDate ? a.scheduledDate.toISOString().split('T')[0] : null,
+      endDate: a.endDate ? a.endDate.toISOString().split('T')[0] : null,
+      skipDates: a.skipDates
     }));
     res.json(formatted);
   } catch (error) {
@@ -93,7 +97,7 @@ router.delete("/patient/:patientId", async (req, res) => {
 
 // Salvar/Atualizar horários de um paciente (Lógica para 1x, 2x por semana etc)
 router.post("/batch", async (req, res) => {
-  const { patientId, slots } = req.body; // slots: [{ dayOfWeek, time, duration, startDate }]
+  const { patientId, slots } = req.body; // slots: [{ dayOfWeek, time, duration, startDate, maxSessions, scheduledDate, endDate, skipDates }]
   
   console.log("batch slots received:", JSON.stringify(slots, null, 2));
 
@@ -104,7 +108,7 @@ router.post("/batch", async (req, res) => {
   let missingDate = null;
   for (let i = 0; i < slots.length; i++) {
     const slot = slots[i];
-    if (!slot.startDate) {
+    if (!slot.startDate && !slot.scheduledDate) {
       missingDate = i + 1;
       break;
     }
@@ -126,9 +130,12 @@ router.post("/batch", async (req, res) => {
     // 2. Criar novos horários (cada um com sua própria data de início)
     const newAppointments = [];
     for (const slot of slots) {
-      const datePart = slot.startDate.split('T')[0];
-      const start = new Date(datePart + 'T00:00:00Z');
-      console.log("Creating slot:", { dayOfWeek: slot.dayOfWeek, time: slot.time, startDate: start });
+      const datePart = slot.startDate ? slot.startDate.split('T')[0] : null;
+      const start = datePart ? new Date(datePart + 'T00:00:00Z') : null;
+      const schedPart = slot.scheduledDate ? slot.scheduledDate.split('T')[0] : null;
+      const schedDate = schedPart ? new Date(schedPart + 'T00:00:00Z') : null;
+      const endPart = slot.endDate ? slot.endDate.split('T')[0] : null;
+      const endDate = endPart ? new Date(endPart + 'T00:00:00Z') : null;
       
       const created = await prisma.appointment.create({
         data: {
@@ -136,6 +143,10 @@ router.post("/batch", async (req, res) => {
           time: slot.time,
           duration: slot.duration,
           startDate: start,
+          maxSessions: slot.maxSessions ?? null,
+          scheduledDate: schedDate,
+          endDate: endDate,
+          skipDates: slot.skipDates ?? null,
           patientId,
           psychologistId: req.user.id
         }
@@ -191,6 +202,102 @@ router.post("/check-conflict", async (req, res) => {
   } catch (error) {
     console.error("Erro ao verificar conflitos:", error);
     res.status(500).json({ error: "Erro ao verificar conflito" });
+  }
+});
+
+// Criar um agendamento avulso (com scheduledDate)
+router.post("/", async (req, res) => {
+  const { patientId, dayOfWeek, time, duration, startDate, maxSessions, scheduledDate, endDate, skipDates } = req.body;
+
+  try {
+    const schedPart = scheduledDate ? scheduledDate.split('T')[0] : null;
+    const schedDate = schedPart ? new Date(schedPart + 'T00:00:00Z') : null;
+    const startPart = startDate ? startDate.split('T')[0] : null;
+    const start = startPart ? new Date(startPart + 'T00:00:00Z') : schedDate;
+    const endPart = endDate ? endDate.split('T')[0] : null;
+    const end = endPart ? new Date(endPart + 'T00:00:00Z') : null;
+
+    const created = await prisma.appointment.create({
+      data: {
+        dayOfWeek,
+        time,
+        duration,
+        startDate: start,
+        maxSessions: maxSessions ?? null,
+        scheduledDate: schedDate,
+        endDate: end,
+        skipDates: skipDates ?? null,
+        patientId,
+        psychologistId: req.user.id
+      }
+    });
+
+    res.status(201).json({
+      id: created.id,
+      dayOfWeek: created.dayOfWeek,
+      time: created.time,
+      duration: created.duration,
+      startDate: created.startDate ? created.startDate.toISOString().split('T')[0] : null,
+      maxSessions: created.maxSessions,
+      scheduledDate: created.scheduledDate ? created.scheduledDate.toISOString().split('T')[0] : null,
+      endDate: created.endDate ? created.endDate.toISOString().split('T')[0] : null,
+      skipDates: created.skipDates
+    });
+  } catch (error) {
+    console.error("Error creating appointment:", error);
+    res.status(500).json({ error: "Erro ao criar agendamento: " + error.message });
+  }
+});
+
+// Atualizar um agendamento
+router.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  const { dayOfWeek, time, duration, startDate, maxSessions, scheduledDate, endDate, skipDates } = req.body;
+
+  try {
+    const existing = await prisma.appointment.findFirst({
+      where: { id, psychologistId: req.user.id }
+    });
+
+    if (!existing) {
+      return res.status(404).json({ error: "Agendamento não encontrado" });
+    }
+
+    const startPart = startDate ? startDate.split('T')[0] : null;
+    const start = startPart ? new Date(startPart + 'T00:00:00Z') : undefined;
+    const schedPart = scheduledDate ? scheduledDate.split('T')[0] : null;
+    const schedDate = schedPart ? new Date(schedPart + 'T00:00:00Z') : undefined;
+    const endPart = endDate ? endDate.split('T')[0] : null;
+    const end = endPart ? new Date(endPart + 'T00:00:00Z') : undefined;
+
+    const updated = await prisma.appointment.update({
+      where: { id },
+      data: {
+        ...(dayOfWeek !== undefined && { dayOfWeek }),
+        ...(time !== undefined && { time }),
+        ...(duration !== undefined && { duration }),
+        ...(start !== undefined && { startDate: start }),
+        ...(maxSessions !== undefined && { maxSessions }),
+        ...(schedDate !== undefined && { scheduledDate: schedDate }),
+        ...(end !== undefined && { endDate: end }),
+        ...(skipDates !== undefined && { skipDates })
+      }
+    });
+
+    res.json({
+      id: updated.id,
+      dayOfWeek: updated.dayOfWeek,
+      time: updated.time,
+      duration: updated.duration,
+      startDate: updated.startDate ? updated.startDate.toISOString().split('T')[0] : null,
+      maxSessions: updated.maxSessions,
+      scheduledDate: updated.scheduledDate ? updated.scheduledDate.toISOString().split('T')[0] : null,
+      endDate: updated.endDate ? updated.endDate.toISOString().split('T')[0] : null,
+      skipDates: updated.skipDates
+    });
+  } catch (error) {
+    console.error("Error updating appointment:", error);
+    res.status(500).json({ error: "Erro ao atualizar agendamento: " + error.message });
   }
 });
 

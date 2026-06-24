@@ -75,9 +75,13 @@ model Appointment {
   patientId       String
   dayOfWeek       Int      // 0 (Dom) a 6 (Sab)
   time            String   // HH:mm
-  duration      Int      // em minutos
-  startDate     DateTime // Data de início (não permite retroativo)
-  
+  duration        Int      // em minutos
+  startDate       DateTime // Data de início (não permite retroativo)
+  maxSessions     Int?     // Número máximo de sessões (0 = ilimitado)
+  scheduledDate   DateTime? // Data específica para agendamento avulso
+  endDate         DateTime? // Data de fim da recorrência
+  skipDates       Json?    // Datas a pular (array de "YYYY-MM-DD")
+
   patient        Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
   psychologistId String
 

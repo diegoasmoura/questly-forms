@@ -185,6 +185,14 @@ export const api = {
     method: "POST", 
     body: JSON.stringify({ patientId, slots }) 
   }),
+  createAppointment: (data) => request("/appointments", { 
+    method: "POST", 
+    body: JSON.stringify(data) 
+  }),
+  updateAppointment: (id, data) => request(`/appointments/${id}`, { 
+    method: "PUT", 
+    body: JSON.stringify(data) 
+  }),
   checkAppointmentConflict: (data) => request("/appointments/check-conflict", { 
     method: "POST", 
     body: JSON.stringify(data) 

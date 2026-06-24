@@ -10,8 +10,9 @@ import { useShareLinkStatus, getStatusBadge } from "../lib/useShareLinkStatus";
 import ShareLinkCard, { ShareLinkStats } from "../components/ShareLinkCard";
 import FormResponsesView from "../components/FormResponsesView";
 import DataTable from "../components/DataTable";
-import { format } from "date-fns";
+import { format, addMonths, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { DayPicker } from "react-day-picker";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -26,6 +27,16 @@ const extractUTCDate = (dateStr) => {
   const month = String(d.getUTCMonth() + 1).padStart(2, '0');
   const day = String(d.getUTCDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+};
+
+// Encontra a próxima ocorrência de um dayOfWeek a partir de uma data base
+const findNextDayOfWeek = (fromDate, targetDayOfWeek) => {
+  const date = new Date(fromDate);
+  const currentDay = date.getDay();
+  let diff = targetDayOfWeek - currentDay;
+  if (diff < 0) diff += 7;
+  date.setDate(date.getDate() + diff);
+  return date;
 };
 
 import {
@@ -170,13 +181,238 @@ export default function PatientRecord() {
     });
   }, [payments, periodFilter, customMonth]);
 
-  // Agenda (Recurring)
+  const [calendarDate, setCalendarDate] = useState(new Date());
+  const [selectedCalendarDay, setSelectedCalendarDay] = useState(new Date());
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
+
   const [appointments, setAppointments] = useState([]);
+  const [myAppointmentIds, setMyAppointmentIds] = useState(new Set());
   const [loadingAppointments, setLoadingAppointments] = useState(false);
-  const [conflicts, setConflicts] = useState({}); // { slotId: conflictData }
+  const [conflicts, setConflicts] = useState({});
+  const [showAllAppointments, setShowAllAppointments] = useState(true);
+
+  const sessionModifiers = useMemo(() => {
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const mine = [];
+    const others = [];
+    const conflictDates = [];
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(year, month, d);
+      let hasMine = false;
+      let hasOthers = false;
+      let hasConflict = false;
+      for (const app of appointments) {
+        const dateStr = format(date, "yyyy-MM-dd");
+        // If scheduled for a specific date, only match that date
+        if (app.scheduledDate) {
+          if (dateStr !== app.scheduledDate.split("T")[0]) continue;
+        } else {
+          if (date.getDay() !== app.dayOfWeek) continue;
+        }
+        // Check endDate
+        if (app.endDate && dateStr > app.endDate.split("T")[0]) continue;
+        // Check skipDates
+        if (app.skipDates && Array.isArray(app.skipDates) && app.skipDates.includes(dateStr)) continue;
+        // Check startDate
+        if (app.startDate && dateStr < app.startDate.split("T")[0]) continue;
+        // Check maxSessions
+        if (app.maxSessions && app.maxSessions > 0 && app.startDate) {
+          const start = new Date(app.startDate.split("T")[0]);
+          let count = 0;
+          const cursor = new Date(start);
+          while (cursor <= date) {
+            if (cursor.getDay() === app.dayOfWeek) count++;
+            cursor.setDate(cursor.getDate() + 7);
+          }
+          if (count > app.maxSessions) continue;
+        }
+        if (conflicts[app.id]) {
+          hasConflict = true;
+        } else if (myAppointmentIds.has(app.id)) {
+          hasMine = true;
+        } else {
+          hasOthers = true;
+        }
+      }
+      if (hasConflict) conflictDates.push(date);
+      else {
+        if (hasMine) mine.push(date);
+        if (hasOthers) others.push(date);
+      }
+    }
+    return { mine, others, conflictDates };
+  }, [calendarDate, appointments, conflicts, myAppointmentIds, showAllAppointments]);
+
   const [clearMode, setClearMode] = useState(null);
   const [cleanupModal, setCleanupModal] = useState({ open: false, title: "", message: "", mode: null });
   const [savingAgenda, setSavingAgenda] = useState(false);
+  const [showAgendaModal, setShowAgendaModal] = useState(false);
+  const [agendaFormDate, setAgendaFormDate] = useState(null);
+  const [agendaFormDayOfWeek, setAgendaFormDayOfWeek] = useState(null);
+  const [agendaFormTime, setAgendaFormTime] = useState("08:00");
+  const [agendaFormDuration, setAgendaFormDuration] = useState(50);
+  const [agendaFormRecurring, setAgendaFormRecurring] = useState(true);
+  const [agendaFormMaxSessions, setAgendaFormMaxSessions] = useState(0);
+  const [editingAppointment, setEditingAppointment] = useState(null);
+  const [showEditChoice, setShowEditChoice] = useState(false);
+  const [editChoiceDate, setEditChoiceDate] = useState(null);
+  const [editMode, setEditMode] = useState(null); // "single" | "future"
+
+  const handleDayClick = (day) => {
+    setSelectedCalendarDay(day);
+  };
+
+  const handleOpenNewSlotModal = (day) => {
+    setSelectedCalendarDay(day || new Date());
+    setAgendaFormDate(day || new Date());
+    setAgendaFormDayOfWeek((day || new Date()).getDay());
+    setAgendaFormTime("08:00");
+    setAgendaFormDuration(50);
+    setAgendaFormRecurring(true);
+    setAgendaFormMaxSessions(0);
+    setShowAgendaModal(true);
+  };
+
+  const handleSaveNewSlot = async () => {
+    if (!agendaFormDate) return;
+    const dayOfWeek = agendaFormDayOfWeek ?? agendaFormDate.getDay();
+    const startDate = format(agendaFormDate, "yyyy-MM-dd");
+    if (editingAppointment) {
+      await handleSaveEditedSlot();
+      return;
+    }
+    const baseSlot = { dayOfWeek, time: agendaFormTime, duration: agendaFormDuration, startDate };
+    if (!agendaFormRecurring) {
+      baseSlot.scheduledDate = startDate;
+    } else if (agendaFormMaxSessions > 0) {
+      baseSlot.maxSessions = agendaFormMaxSessions;
+    }
+    const allSlots = [...appointments.map(a => {
+      const s = { dayOfWeek: a.dayOfWeek, time: a.time, duration: a.duration, startDate: a.startDate };
+      if (a.maxSessions) s.maxSessions = a.maxSessions;
+      if (a.scheduledDate) s.scheduledDate = a.scheduledDate;
+      if (a.endDate) s.endDate = a.endDate;
+      if (a.skipDates) s.skipDates = a.skipDates;
+      return s;
+    }), baseSlot];
+    setSavingAgenda(true);
+    try {
+      await api.saveAppointmentsBatch(id, allSlots);
+      await loadPatientAppointments(showAllAppointments);
+      setShowAgendaModal(false);
+    } catch (error) {
+      alert("Erro ao salvar: " + error.message);
+    } finally {
+      setSavingAgenda(false);
+    }
+  };
+
+  const handleRemoveSlot = async (slotId) => {
+    const updated = appointments.filter(a => a.id !== slotId);
+    const slots = updated.map(a => {
+      const s = { dayOfWeek: a.dayOfWeek, time: a.time, duration: a.duration, startDate: a.startDate };
+      if (a.maxSessions) s.maxSessions = a.maxSessions;
+      if (a.scheduledDate) s.scheduledDate = a.scheduledDate;
+      if (a.endDate) s.endDate = a.endDate;
+      if (a.skipDates) s.skipDates = a.skipDates;
+      return s;
+    });
+    setSavingAgenda(true);
+    try {
+      await api.saveAppointmentsBatch(id, slots);
+      await loadPatientAppointments(showAllAppointments);
+    } catch (error) {
+      alert("Erro ao remover: " + error.message);
+    } finally {
+      setSavingAgenda(false);
+    }
+  };
+
+  const handleEditClick = (app, date) => {
+    const isRecurring = !app.scheduledDate;
+    if (isRecurring) {
+      setEditingAppointment(app);
+      setEditChoiceDate(date);
+      setShowEditChoice(true);
+      setEditMode(null);
+    } else {
+      openEditModal(app, date);
+    }
+  };
+
+  const openEditModal = (app, date) => {
+    setAgendaFormDate(date);
+    setAgendaFormDayOfWeek(app.dayOfWeek);
+    setAgendaFormTime(app.time);
+    setAgendaFormDuration(app.duration);
+    setAgendaFormRecurring(!app.scheduledDate);
+    setAgendaFormMaxSessions(app.maxSessions || 0);
+    setEditingAppointment(app);
+    setShowEditChoice(false);
+    setShowAgendaModal(true);
+  };
+
+  const handleEditSingle = () => {
+    setEditMode("single");
+    openEditModal(editingAppointment, editChoiceDate);
+  };
+
+  const handleEditFuture = () => {
+    setEditMode("future");
+    openEditModal(editingAppointment, editChoiceDate);
+  };
+
+  const handleSaveEditedSlot = async () => {
+    if (!editingAppointment || !agendaFormDate) return;
+    const dayOfWeek = agendaFormDayOfWeek ?? agendaFormDate.getDay();
+    const dateStr = format(agendaFormDate, "yyyy-MM-dd");
+    setSavingAgenda(true);
+    try {
+      if (editMode === "single") {
+        const skipDates = [...(editingAppointment.skipDates || []), dateStr];
+        await api.updateAppointment(editingAppointment.id, { skipDates });
+        // If dayOfWeek changed, find the next occurrence of the new dayOfWeek
+        const targetDate = dayOfWeek !== editingAppointment.dayOfWeek
+          ? findNextDayOfWeek(agendaFormDate, dayOfWeek)
+          : agendaFormDate;
+        await api.createAppointment({
+          patientId: id,
+          dayOfWeek,
+          time: agendaFormTime,
+          duration: agendaFormDuration,
+          scheduledDate: format(targetDate, "yyyy-MM-dd")
+        });
+      } else if (editMode === "future") {
+        const prevDate = new Date(agendaFormDate);
+        prevDate.setDate(prevDate.getDate() - 1);
+        await api.updateAppointment(editingAppointment.id, { endDate: format(prevDate, "yyyy-MM-dd") });
+        await api.createAppointment({
+          patientId: id,
+          dayOfWeek,
+          time: agendaFormTime,
+          duration: agendaFormDuration,
+          startDate: dateStr,
+          maxSessions: agendaFormMaxSessions || null
+        });
+      } else if (editingAppointment.scheduledDate) {
+        await api.updateAppointment(editingAppointment.id, {
+          dayOfWeek,
+          time: agendaFormTime,
+          duration: agendaFormDuration
+        });
+      }
+      await loadPatientAppointments(showAllAppointments);
+      setShowAgendaModal(false);
+      setEditingAppointment(null);
+      setEditMode(null);
+    } catch (error) {
+      alert("Erro ao salvar: " + error.message);
+    } finally {
+      setSavingAgenda(false);
+    }
+  };
   const [showEditModal, setShowEditModal] = useState(false);
   const [editTab, setEditTab] = useState("identity");
   const [attachments, setAttachments] = useState([]);
@@ -234,11 +470,15 @@ export default function PatientRecord() {
     }
   };
 
-  const loadPatientAppointments = async () => {
+  const loadPatientAppointments = async (showAll) => {
     setLoadingAppointments(true);
     try {
-      const data = await api.getPatientAppointments(id);
-      setAppointments(data || []);
+      const [allData, myData] = await Promise.all([
+        showAll ? api.getAppointments() : Promise.resolve(null),
+        api.getPatientAppointments(id)
+      ]);
+      setAppointments(showAll ? (allData || []) : (myData || []));
+      setMyAppointmentIds(new Set((myData || []).map(a => a.id)));
     } catch (error) {
       console.error("Erro ao carregar agendamentos:", error);
     } finally {
@@ -352,9 +592,9 @@ export default function PatientRecord() {
       loadPatientAttendances();
     }
     if (activeTab === "settings") {
-      loadPatientAppointments();
+      loadPatientAppointments(showAllAppointments);
     }
-  }, [activeTab]);
+  }, [activeTab, showAllAppointments]);
 
   const loadForms = async () => {
     setLoadingForms(true);
@@ -1938,150 +2178,634 @@ export default function PatientRecord() {
             )
           )}
 
-          {/* Agenda Configuration Tab */}
+          {/* Agenda Tab */}
           {activeTab === "settings" && (
-            <div className="flex flex-col flex-1 min-h-0">
-              <div className="card p-6 flex-1 min-h-0 overflow-y-auto">
-                <div className="flex items-center justify-between mb-6">
+            <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-3 shrink-0">
+                {appointments.length > 0 && (
+                  <button
+                    onClick={() => handleClearAgenda()}
+                    className="card p-3 flex items-center gap-3 border-l-4 border-red-500 bg-white text-red-600 hover:bg-red-50 transition-all text-left group"
+                  >
+                    <Trash2 size={18} className="text-red-400 group-hover:scale-110 transition-transform" />
+                    <div>
+                      <p className="text-sm font-black uppercase tracking-tight">Limpar Agenda</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Remover horários</p>
+                    </div>
+                  </button>
+                )}
+                <button
+                  onClick={() => handleOpenNewSlotModal(new Date())}
+                  className="card p-3 flex items-center gap-3 border-l-4 border-slate-900 bg-slate-900 text-white hover:bg-slate-800 transition-all text-left group"
+                >
+                  <Plus size={18} className="text-white/70 group-hover:scale-110 transition-transform" />
                   <div>
-                    <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Configurar Agenda Recorrente</h3>
-                    <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Defina os horários fixos semanais do paciente</p>
+                    <p className="text-lg font-black uppercase tracking-tight">Adicionar Horário</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Novo agendamento</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {appointments.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => handleClearAgenda()}
-                        className="btn btn-danger"
-                      >
-                        <Trash2 size={14} />
-                        Limpar Agenda
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={addAppointmentSlot}
-                      className="btn btn-primary"
-                    >
-                      <Plus size={14} />
-                      Adicionar Horário
-                    </button>
-                  </div>
-                </div>
+                </button>
+              </div>
 
+              {/* Calendar Card */}
+              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden">
                 {loadingAppointments ? (
-                  <div className="text-center py-20 opacity-50">
-                    <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                    <p className="text-sm font-bold uppercase tracking-widest">Carregando agenda...</p>
-                  </div>
-                ) : appointments.length === 0 ? (
-                  <div className="text-center py-20 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                    <Calendar size={48} className="mx-auto text-slate-300 mb-4" />
-                    <p className="text-sm font-bold text-slate-500 uppercase tracking-widest text-center">Nenhum horário fixo configurado</p>
-                    <p className="text-xs text-slate-400 mt-2">Clique em "Adicionar Horário" para definir a grade semanal.</p>
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                      <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Carregando agenda...</p>
+                    </div>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4">
-                      {appointments.map((app) => {
-                        const conflict = conflicts[app.id];
-                        return (
-                          <div key={app.id} className={`p-4 bg-white border rounded-2xl shadow-sm group transition-all ${conflict ? 'border-red-200 bg-red-50/30' : 'border-slate-100 hover:border-emerald-200 hover:shadow-md'}`}>
-                            <div className="flex items-center justify-between mb-4">
-                              <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-tight ${conflict ? 'bg-red-100 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                                {conflict ? '⚠️ Horário Ocupado' : 'Slot Semanal'}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => removeAppointmentSlot(app.id)}
-                                className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                              >
-                                <Trash2 size={16} />
+                  <div className="flex-1 flex gap-6 min-h-0">
+                    {/* Left: Calendar */}
+                    <div className="w-1/2 overflow-y-auto pr-2">
+                      {/* Toggle + Header */}
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Calendário de Sessões</h3>
+                        <div className="flex items-center gap-3">
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <button
+                              role="switch"
+                              aria-checked={showAllAppointments}
+                              onClick={() => setShowAllAppointments(prev => !prev)}
+                              className={`relative w-9 h-5 rounded-full transition-all ${
+                                showAllAppointments ? "bg-emerald-600" : "bg-slate-300"
+                              }`}
+                            >
+                              <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${
+                                showAllAppointments ? "translate-x-4" : ""
+                              }`} />
+                            </button>
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                              {showAllAppointments ? "Mostrar todos" : "Apenas este paciente"}
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+
+                      <DayPicker
+                        month={calendarDate}
+                        onMonthChange={setCalendarDate}
+                        onDayClick={(day) => handleDayClick(day)}
+                        locale={ptBR}
+                        modifiers={{
+                          mine: sessionModifiers.mine,
+                          others: sessionModifiers.others,
+                          conflict: sessionModifiers.conflictDates,
+                        }}
+                        modifiersClassNames={{}}
+                        classNames={{
+                          months: "flex flex-col",
+                          month: "w-full",
+                          month_grid: "w-full table-fixed border border-slate-300 rounded-xl overflow-hidden",
+                          weekdays: "bg-slate-100",
+                          weekday: "py-3 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-b border-slate-200 last:border-r-0",
+                          week: "",
+                          day: "text-center border-r border-b border-slate-200 last:border-r-0 p-0",
+                          day_button: "relative w-full h-12 flex items-center justify-center text-sm font-bold text-slate-700 cursor-pointer transition-colors",
+                          today: "font-black",
+                          outside: "text-slate-300",
+                          disabled: "cursor-default opacity-40",
+                        }}
+                        components={{
+                          DayButton: ({ day, modifiers, children, ...props }) => {
+                            const date = day.date;
+                            const isToday = modifiers?.today;
+                            const dayStr = format(date, "yyyy-MM-dd");
+                            const selectedStr = selectedCalendarDay ? format(selectedCalendarDay, "yyyy-MM-dd") : null;
+
+                            let bgClass = "";
+                            if (modifiers?.conflict) bgClass = "bg-red-50";
+                            else if (modifiers?.others) bgClass = "bg-amber-50";
+                            else if (modifiers?.mine) bgClass = "bg-emerald-50";
+
+                            return (
+                              <button {...props} className={`relative w-full h-12 flex items-center justify-center text-sm font-bold cursor-pointer transition-colors ${isToday ? "" : "hover:bg-slate-100"} ${bgClass}`}>
+                                {modifiers?.mine && showAllAppointments && (
+                                  <div className="absolute bottom-1 left-1.5 right-1.5 h-[3px] rounded-full bg-emerald-500" />
+                                )}
+                                <span className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-black ${
+                                  isToday ? "bg-slate-800 text-white" : dayStr === selectedStr ? "ring-2 ring-slate-400" : "text-slate-700"
+                                }`}>
+                                  {date.getDate()}
+                                </span>
                               </button>
+                            );
+                          },
+                          MonthCaption: ({ calendarMonth }) => (
+                            <div className="relative">
+                              <div className="flex items-center justify-between bg-slate-100 rounded-xl p-1 mb-4 select-none">
+                                <button
+                                  onClick={() => { setCalendarDate(prev => subMonths(prev, 1)); setShowMonthPicker(false); }}
+                                  className="p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all text-slate-400 hover:text-slate-700"
+                                >
+                                  <ChevronLeft size={18} />
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setShowMonthPicker(prev => !prev); }}
+                                  className="text-sm font-black text-slate-700 uppercase tracking-tight hover:text-slate-900 transition-colors px-2 py-1 rounded-lg hover:bg-white/60"
+                                >
+                                  {format(calendarMonth.date, "MMMM 'de' yyyy", { locale: ptBR })}
+                                </button>
+                                <button
+                                  onClick={() => { setCalendarDate(prev => addMonths(prev, 1)); setShowMonthPicker(false); }}
+                                  className="p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all text-slate-400 hover:text-slate-700"
+                                >
+                                  <ChevronRight size={18} />
+                                </button>
+                              </div>
+                              {showMonthPicker && (
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 z-10 mt-1 bg-white rounded-xl shadow-xl border border-slate-200 p-4 w-64 animate-scale-in" onClick={e => e.stopPropagation()}>
+                                  <div className="grid grid-cols-3 gap-1 mb-3">
+                                    {["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"].map((m, i) => (
+                                      <button
+                                        key={m}
+                                        onClick={() => {
+                                          const d = new Date(calendarDate);
+                                          d.setMonth(i);
+                                          setCalendarDate(d);
+                                          setShowMonthPicker(false);
+                                        }}
+                                        className={`text-[11px] font-black py-2 rounded-lg transition-all ${
+                                          calendarDate.getMonth() === i
+                                            ? "bg-slate-900 text-white"
+                                            : "text-slate-600 hover:bg-slate-100"
+                                        }`}
+                                      >
+                                        {m}
+                                      </button>
+                                    ))}
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => {
+                                        const d = new Date(calendarDate);
+                                        d.setFullYear(d.getFullYear() - 1);
+                                        setCalendarDate(d);
+                                      }}
+                                      className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400"
+                                    >
+                                      <ChevronLeft size={14} />
+                                    </button>
+                                    <select
+                                      value={calendarDate.getFullYear()}
+                                      onChange={e => {
+                                        const d = new Date(calendarDate);
+                                        d.setFullYear(parseInt(e.target.value));
+                                        setCalendarDate(d);
+                                      }}
+                                      className="flex-1 text-center text-sm font-black text-slate-700 bg-slate-50 rounded-lg py-2 border border-slate-200 outline-none cursor-pointer"
+                                    >
+                                      {Array.from({length: 21}, (_, i) => new Date().getFullYear() - 10 + i).map(y => (
+                                        <option key={y} value={y}>{y}</option>
+                                      ))}
+                                    </select>
+                                    <button
+                                      onClick={() => {
+                                        const d = new Date(calendarDate);
+                                        d.setFullYear(d.getFullYear() + 1);
+                                        setCalendarDate(d);
+                                      }}
+                                      className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400"
+                                    >
+                                      <ChevronRight size={14} />
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
                             </div>
-                            
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                              <div>
-                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 px-1">Início</label>
-                                <input 
-                                  type="date"
-                                  className={`input text-xs font-black py-2 ${conflict ? 'border-red-300' : ''}`}
-                                  value={app.startDate || ''}
-                                  onChange={e => updateAppointmentSlot(app.id, "startDate", e.target.value)}
-                                  min={new Date().toISOString().split('T')[0]}
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 px-1">Dia</label>
-                                <select
-                                  className={`input text-xs font-black py-2 ${conflict ? 'border-red-300' : ''}`}
-                                  value={app.dayOfWeek}
-                                  onChange={e => updateAppointmentSlot(app.id, "dayOfWeek", parseInt(e.target.value))}
-                                >
-                                  {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((day, i) => (
-                                    <option key={i} value={i}>{day}</option>
-                                  ))}
-                                </select>
-                              </div>
-                              <div>
-                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 px-1">Hora</label>
-                                <select
-                                  className={`input text-xs font-black py-2 ${conflict ? 'border-red-300' : ''}`}
-                                  value={app.time}
-                                  onChange={e => updateAppointmentSlot(app.id, "time", e.target.value)}
-                                >
-                                  {["07:00", "07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00"].map(t => (
-                                    <option key={t} value={t}>{t}</option>
-                                  ))}
-                                </select>
-                              </div>
-                              <div>
-                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 px-1">Duração</label>
-                                <select
-                                  className="input text-xs font-black py-2"
-                                  value={app.duration}
-                                  onChange={e => updateAppointmentSlot(app.id, "duration", parseInt(e.target.value))}
-                                >
-                                  <option value={30}>30m</option>
-                                  <option value={45}>45m</option>
-                                  <option value={50}>50m</option>
-                                  <option value={60}>60m</option>
-                                  <option value={90}>90m</option>
-                                </select>
-                              </div>
+                          ),
+                          Nav: () => null,
+                          Root: ({ children, ...props }) => (
+                            <div {...props} onClick={() => showMonthPicker && setShowMonthPicker(false)}>
+                              {children}
                             </div>
-                            
-                            {conflict && (
-                              <p className="mt-3 text-[10px] text-red-600 font-bold italic leading-tight px-1">
-                                * Conflito com: {conflict.patient?.name}
-                              </p>
-                            )}
+                          ),
+                        }}
+                      />
+
+                      {/* Legend */}
+                      <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-slate-100">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-3 h-3 rounded bg-emerald-50 border border-emerald-300" />
+                          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{patient?.name?.split(" ")[0] || "Paciente"}</span>
+                        </div>
+                        {showAllAppointments && (
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3 h-3 rounded bg-amber-50 border border-amber-300" />
+                            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Outros</span>
                           </div>
-                        );
-                      })}
+                        )}
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-3 h-3 rounded bg-red-50 border border-red-300" />
+                          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Conflito</span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="pt-6 border-t border-slate-100 flex justify-end">
-                      <button
-                        onClick={handleSaveAgenda}
-                        disabled={savingAgenda}
-                        className="btn btn-primary px-8 py-3 flex items-center justify-center gap-2"
-                      >
-                        {savingAgenda ? (
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <>
-                            <Check size={16} />
-                            Salvar Configurações de Agenda
-                          </>
-                        )}
-                      </button>
+                    {/* Right: Agenda */}
+                    <div className="w-1/2 overflow-y-auto pr-2">
+                      {/* Edit choice modal */}
+                      {showEditChoice && editingAppointment && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm" onClick={() => { setShowEditChoice(false); setEditingAppointment(null); }}>
+                          <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
+                            <div className="text-center mb-6">
+                              <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                                <Pencil size={22} className="text-slate-700" />
+                              </div>
+                              <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Editar horário</h3>
+                              <p className="text-sm text-slate-500 font-bold mt-1">
+                                {format(editChoiceDate, "EEEE, d 'de' MMMM", { locale: ptBR })} às {editingAppointment.time}
+                              </p>
+                              <p className="text-xs text-slate-400 mt-2">
+                                Este horário se repete semanalmente. Como deseja editar?
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              <button
+                                onClick={handleEditSingle}
+                                className="w-full py-3 px-4 bg-slate-100 text-slate-700 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                              >
+                                Apenas esta data
+                              </button>
+                              <button
+                                onClick={handleEditFuture}
+                                className="w-full py-3 px-4 bg-slate-900 text-white rounded-xl text-sm font-black uppercase tracking-widest hover:bg-slate-800 transition-all"
+                              >
+                                Esta e todas futuras
+                              </button>
+                            </div>
+                            <button
+                              onClick={() => { setShowEditChoice(false); setEditingAppointment(null); }}
+                              className="w-full mt-3 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Day details panel or full agenda */}
+                      {selectedCalendarDay ? (
+                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                          <div className="flex items-start justify-between mb-3">
+                            <div>
+                              <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">
+                                {format(selectedCalendarDay, "EEEE", { locale: ptBR })}
+                              </h4>
+                              <p className="text-xs font-bold text-slate-500 mt-0.5">
+                                {format(selectedCalendarDay, "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleOpenNewSlotModal(selectedCalendarDay)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-all text-[10px] font-black uppercase tracking-widest"
+                            >
+                              <Plus size={14} />
+                              Novo
+                            </button>
+                          </div>
+                          <div className="space-y-1.5">
+                            {appointments
+                              .filter(a => {
+                                const dateStr = format(selectedCalendarDay, "yyyy-MM-dd");
+                                if (a.scheduledDate) {
+                                  if (dateStr !== a.scheduledDate.split("T")[0]) return false;
+                                } else {
+                                  const dayOfWeek = selectedCalendarDay.getDay();
+                                  if (a.dayOfWeek !== dayOfWeek) return false;
+                                }
+                                if (a.endDate && dateStr > a.endDate.split("T")[0]) return false;
+                                if (a.skipDates && Array.isArray(a.skipDates) && a.skipDates.includes(dateStr)) return false;
+                                if (a.startDate && dateStr < a.startDate.split("T")[0]) return false;
+                                if (a.maxSessions && a.maxSessions > 0 && a.startDate) {
+                                  const start = new Date(a.startDate.split("T")[0]);
+                                  let count = 0;
+                                  const cursor = new Date(start);
+                                  while (cursor <= selectedCalendarDay) {
+                                    if (cursor.getDay() === a.dayOfWeek) count++;
+                                    cursor.setDate(cursor.getDate() + 7);
+                                  }
+                                  if (count > a.maxSessions) return false;
+                                }
+                                return true;
+                              })
+                              .sort((a, b) => (a.time || "").localeCompare(b.time || ""))
+                              .map(app => {
+                                const conflict = conflicts[app.id];
+                                const appPatientId = app.patient?.id ?? app.patientId;
+                                const isOtherPatient = showAllAppointments && appPatientId && Number(appPatientId) !== Number(id);
+                                return (
+                                  <div key={app.id} className={`flex items-center justify-between p-2.5 rounded-xl border ${
+                                    conflict ? "border-red-200 bg-red-50/30" : "border-slate-200 bg-white"
+                                  }`}>
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] shrink-0 ${
+                                        conflict ? "bg-red-100 text-red-600" : isOtherPatient ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
+                                      }`}>
+                                        <Clock size={14} />
+                                      </div>
+                                      <div className="min-w-0">
+                                        <p className="text-xs font-bold text-slate-800 truncate">{app.time} • {app.duration}min</p>
+                                        {isOtherPatient && app.patient ? (
+                                          <p className="text-[9px] font-bold text-amber-600 truncate">{app.patient.name}</p>
+                                        ) : app.maxSessions ? (
+                                          <p className="text-[9px] font-bold text-slate-600">{app.maxSessions} sessões</p>
+                                        ) : app.startDate ? (
+                                          <p className="text-[9px] font-bold text-slate-600">Desde {format(new Date(app.startDate), "dd/MM/yy")}</p>
+                                        ) : null}
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                                      {conflict && (
+                                        <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-200">
+                                          Conflito
+                                        </span>
+                                      )}
+                                      {!isOtherPatient && (
+                                        <button
+                                          type="button"
+                                          onClick={() => handleEditClick(app, selectedCalendarDay)}
+                                          className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all border border-slate-200 hover:border-emerald-200"
+                                          title="Editar"
+                                        >
+                                          <Pencil size={13} />
+                                        </button>
+                                      )}
+                                      {!isOtherPatient && (
+                                        <button
+                                          type="button"
+                                          onClick={() => handleRemoveSlot(app.id)}
+                                          className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all border border-slate-200 hover:border-red-200"
+                                          title="Remover"
+                                        >
+                                          <Trash2 size={13} />
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            {appointments.filter(a => {
+                              const dateStr = format(selectedCalendarDay, "yyyy-MM-dd");
+                              if (a.scheduledDate) {
+                                if (dateStr !== a.scheduledDate.split("T")[0]) return false;
+                              } else {
+                                const dayOfWeek = selectedCalendarDay.getDay();
+                                if (a.dayOfWeek !== dayOfWeek) return false;
+                              }
+                              if (a.endDate && dateStr > a.endDate.split("T")[0]) return false;
+                              if (a.skipDates && Array.isArray(a.skipDates) && a.skipDates.includes(dateStr)) return false;
+                              if (a.startDate && dateStr < a.startDate.split("T")[0]) return false;
+                              if (a.maxSessions && a.maxSessions > 0 && a.startDate) {
+                                const start = new Date(a.startDate.split("T")[0]);
+                                let count = 0;
+                                const cursor = new Date(start);
+                                while (cursor <= selectedCalendarDay) {
+                                  if (cursor.getDay() === a.dayOfWeek) count++;
+                                  cursor.setDate(cursor.getDate() + 7);
+                                }
+                                if (count > a.maxSessions) return false;
+                              }
+                              return true;
+                            }).length === 0 && (
+                              <div className="text-center py-4">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nenhum horário neste dia</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                          <div className="flex items-start justify-between mb-3">
+                            <div>
+                              <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Agenda Completa</h4>
+                              <p className="text-xs font-bold text-slate-500 mt-0.5">Todos os horários do mês</p>
+                            </div>
+                            <button
+                              onClick={() => handleOpenNewSlotModal(new Date())}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-all text-[10px] font-black uppercase tracking-widest"
+                            >
+                              <Plus size={14} />
+                              Novo
+                            </button>
+                          </div>
+                          <div className="space-y-1.5">
+                            {[...new Set(appointments.map(a => a.time))].sort().map(time => {
+                              const slotsAtTime = appointments.filter(a => a.time === time);
+                              return (
+                                <div key={time} className="p-2.5 rounded-xl border border-slate-200 bg-white">
+                                  <p className="text-xs font-bold text-slate-800">{time} • {slotsAtTime[0]?.duration}min</p>
+                                  <p className="text-[9px] font-bold text-slate-500">{slotsAtTime.length} horário{slotsAtTime.length > 1 ? 's' : ''}</p>
+                                </div>
+                              );
+                            })}
+                            {appointments.length === 0 && (
+                              <div className="text-center py-4">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nenhum horário cadastrado</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Cleanup Selection Modal */}
+              {/* Agenda Modal */}
+              {showAgendaModal && agendaFormDate && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm" onClick={() => { setShowAgendaModal(false); setEditingAppointment(null); setEditMode(null); }}>
+                  <div className="bg-white rounded-3xl p-8 w-full max-w-lg mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">{editingAppointment ? "Editar Agendamento" : "Novo Agendamento"}</h3>
+                        <p className="text-sm text-slate-500 font-bold mt-1">
+                          {format(agendaFormDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => { setShowAgendaModal(false); setEditingAppointment(null); setEditMode(null); }}
+                        className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+
+                    <div className="space-y-4 mb-6">
+                      <div className="grid grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Dia</label>
+                          <select
+                            className="input text-sm font-black py-2.5"
+                            value={agendaFormDayOfWeek ?? (agendaFormDate?.getDay() ?? 1)}
+                            onChange={e => setAgendaFormDayOfWeek(parseInt(e.target.value))}
+                          >
+                            {["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"].map((d, i) => (
+                              <option key={i} value={i}>{d}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Horário</label>
+                          <select
+                            className="input text-sm font-black py-2.5"
+                            value={agendaFormTime}
+                            onChange={e => setAgendaFormTime(e.target.value)}
+                          >
+                            {["07:00", "07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00"].map(t => (
+                              <option key={t} value={t}>{t}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Duração</label>
+                          <select
+                            className="input text-sm font-black py-2.5"
+                            value={agendaFormDuration}
+                            onChange={e => setAgendaFormDuration(parseInt(e.target.value))}
+                          >
+                            <option value={30}>30 minutos</option>
+                            <option value={45}>45 minutos</option>
+                            <option value={50}>50 minutos</option>
+                            <option value={60}>60 minutos</option>
+                            <option value={90}>90 minutos</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <label className="flex items-center gap-3 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={agendaFormRecurring}
+                            onChange={e => setAgendaFormRecurring(e.target.checked)}
+                            className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                          />
+                          <div>
+                            <span className="text-sm font-bold text-slate-700">
+                              Repetir semanalmente
+                            </span>
+                            <p className="text-[10px] text-slate-500 font-medium">
+                              Toda {["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"][agendaFormDate.getDay()]}
+                            </p>
+                          </div>
+                        </label>
+                        {agendaFormRecurring && (
+                          <div className="w-28">
+                            <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nº Sessões</label>
+                            <input
+                              type="number"
+                              min={0}
+                              className="input text-xs font-black py-2 text-center"
+                              value={agendaFormMaxSessions || ""}
+                              onChange={e => setAgendaFormMaxSessions(Math.max(0, parseInt(e.target.value) || 0))}
+                              placeholder="0 = ilimitado"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Existing slots for this day-of-week */}
+                    {appointments.filter(a => {
+                      if (a.scheduledDate) {
+                        const sched = a.scheduledDate.split("T")[0];
+                        const formDate = format(agendaFormDate, "yyyy-MM-dd");
+                        return sched === formDate;
+                      }
+                      return a.dayOfWeek === (agendaFormDayOfWeek ?? agendaFormDate.getDay());
+                    }).length > 0 && (
+                      <div className="mb-6">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                          Horários já configurados para {["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"][agendaFormDayOfWeek ?? agendaFormDate.getDay()]}
+                        </p>
+                        <div className="space-y-1.5">
+                          {appointments
+                            .filter(a => {
+                              if (a.scheduledDate) {
+                                const sched = a.scheduledDate.split("T")[0];
+                                const formDate = format(agendaFormDate, "yyyy-MM-dd");
+                                return sched === formDate;
+                              }
+                              return a.dayOfWeek === (agendaFormDayOfWeek ?? agendaFormDate.getDay());
+                            })
+                            .map(app => {
+                              const conflict = conflicts[app.id];
+                              return (
+                                <div key={app.id} className={`flex items-center justify-between p-2.5 rounded-xl border ${
+                                  conflict ? "border-red-200 bg-red-50/30" : "border-slate-200 bg-white"
+                                }`}>
+                                  <div className="flex items-center gap-2.5">
+                                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] ${
+                                      conflict ? "bg-red-100 text-red-600" : "bg-emerald-50 text-emerald-600"
+                                    }`}>
+                                      <Clock size={14} />
+                                    </div>
+                                        <div>
+                                          <p className="text-xs font-bold text-slate-800">{app.time} • {app.duration}min</p>
+                                          {app.maxSessions ? (
+                                            <p className="text-[9px] font-bold text-slate-600">{app.maxSessions} sessões</p>
+                                          ) : app.startDate ? (
+                                            <p className="text-[9px] font-bold text-slate-600">Desde {format(new Date(app.startDate), "dd/MM/yy")}</p>
+                                          ) : null}
+                                          {showAllAppointments && app.patient && (
+                                            <p className="text-[9px] font-bold text-slate-500">{app.patient.name}</p>
+                                          )}
+                                    </div>
+                                  </div>
+                                    <div className="flex items-center gap-1.5">
+                                      {conflict && (
+                                        <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-200">
+                                          Conflito
+                                        </span>
+                                      )}
+                                      {(!showAllAppointments || app.patientId === undefined || app.patientId === parseInt(id)) && (
+                                        <button
+                                          type="button"
+                                          onClick={() => handleRemoveSlot(app.id)}
+                                          className="p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                          title="Remover"
+                                        >
+                                          <Trash2 size={13} />
+                                        </button>
+                                      )}
+                                    </div>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                      <button
+                        onClick={() => { setShowAgendaModal(false); setEditingAppointment(null); setEditMode(null); }}
+                        className="px-5 py-2.5 text-xs font-black text-slate-500 hover:text-slate-700 uppercase tracking-widest transition-all"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        onClick={handleSaveNewSlot}
+                        disabled={savingAgenda}
+                        className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-emerald-200"
+                      >
+                        {savingAgenda ? (
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <>
+                            <Check size={15} />
+                            {editingAppointment ? "Salvar alterações" : agendaFormRecurring ? "Agendar Recorrência" : "Agendar"}
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Cleanup Modal */}
               {cleanupModal.open && (
                 <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[9999]" onClick={() => setCleanupModal({ ...cleanupModal, open: false })}>
                   <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
@@ -2090,13 +2814,13 @@ export default function PatientRecord() {
                     </div>
                     <h3 className="text-xl font-black text-slate-800 text-center uppercase tracking-tight mb-3">{cleanupModal.title}</h3>
                     <p className="text-sm text-slate-500 text-center leading-relaxed font-medium mb-8">{cleanupModal.message}</p>
-                    
+
                     <div className="flex flex-col gap-3">
-                      <button 
+                      <button
                         onClick={async () => {
                           setCleanupModal({ open: false, title: "", message: "" });
                           await api.deletePatientAppointments(id, 'future');
-                          alert("Agenda futura limpa. Histórico preservationo.");
+                          alert("Agenda futura limpa. Histórico mantido.");
                           loadPatientAppointments();
                         }}
                         className="w-full py-4 bg-slate-800 text-white rounded-2xl hover:bg-slate-900 shadow-lg shadow-slate-200 transition-all text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2"
@@ -2104,7 +2828,7 @@ export default function PatientRecord() {
                         <Calendar size={16} />
                         Limpar Futuro (Manter Histórico)
                       </button>
-                      <button 
+                      <button
                         onClick={async () => {
                           if (!confirm("Tem certeza? Isso removerá TODOS os agendamentos e histórico de sessões deste paciente.")) return;
                           setCleanupModal({ open: false, title: "", message: "" });
@@ -2118,7 +2842,7 @@ export default function PatientRecord() {
                         <Trash2 size={16} />
                         Apagar Tudo (Limpeza Total)
                       </button>
-                      <button 
+                      <button
                         onClick={() => {
                           setCleanupModal({ open: false, title: "", message: "", mode: null });
                         }}
