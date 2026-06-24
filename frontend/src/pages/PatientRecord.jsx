@@ -2507,17 +2507,14 @@ export default function PatientRecord() {
                                         <Clock size={14} />
                                       </div>
                                       <div className="min-w-0">
-                                        <p className="text-xs font-bold text-slate-800 truncate">{app.time} • {app.duration}min</p>
-                                        {isOtherPatient && app.patient ? (
-                                          <p className="text-[9px] font-bold text-amber-600 truncate">{app.patient.name}</p>
-                                        ) : app.maxSessions ? (
-                                          <p className="text-[9px] font-bold text-slate-600">{app.maxSessions} sessões</p>
-                                        ) : app.startDate ? (
-                                          <p className="text-[9px] font-bold text-slate-600">Desde {format(new Date(app.startDate), "dd/MM/yy")}</p>
-                                        ) : null}
+                                        <p className={`text-xs font-bold truncate ${isOtherPatient ? "text-amber-600" : "text-slate-800"}`}>
+                                          {(isOtherPatient ? app.patient?.name : patient?.name)?.split(" ")[0] || "Paciente"}
+                                        </p>
+                                        <p className="text-[9px] font-bold text-slate-500">{app.maxSessions ? `${app.maxSessions} sessões` : app.startDate ? `Desde ${format(new Date(app.startDate), "dd/MM/yy")}` : "Avulso"}</p>
                                       </div>
                                     </div>
-                                    <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                                    <div className="flex items-center gap-2 shrink-0 ml-2">
+                                      <span className="text-xs font-black text-slate-700 whitespace-nowrap">{app.time} • {app.duration}min</span>
                                       {conflict && (
                                         <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-200">
                                           Conflito
