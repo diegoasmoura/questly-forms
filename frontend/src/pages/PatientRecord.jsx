@@ -2217,35 +2217,17 @@ export default function PatientRecord() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex-1 flex gap-6 min-h-0">
+                  <div className="flex-1 flex gap-6 min-h-0 overflow-hidden">
                     {/* Left: Calendar */}
-                    <div className="w-1/2 overflow-y-auto pr-2">
-                      {/* Toggle + Header */}
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Calendário de Sessões</h3>
-                        <div className="flex items-center gap-3">
-                          <label className="flex items-center gap-2 cursor-pointer select-none">
-                            <button
-                              role="switch"
-                              aria-checked={showAllAppointments}
-                              onClick={() => setShowAllAppointments(prev => !prev)}
-                              className={`relative w-9 h-5 rounded-full transition-all ${
-                                showAllAppointments ? "bg-emerald-600" : "bg-slate-300"
-                              }`}
-                            >
-                              <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${
-                                showAllAppointments ? "translate-x-4" : ""
-                              }`} />
-                            </button>
-                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                              {showAllAppointments ? "Mostrar todos" : "Apenas este paciente"}
-                            </span>
-                          </label>
+                      <div className="w-[60%] flex flex-col min-h-0">
+                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col h-full">
+                        {/* Header */}
+                        <div className="flex items-center justify-between mb-4 shrink-0">
+                          <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Calendário de Sessões</h3>
                         </div>
-                      </div>
 
-                      <DayPicker
-                        month={calendarDate}
+                        <DayPicker
+                          month={calendarDate}
                         onMonthChange={setCalendarDate}
                         onDayClick={(day) => handleDayClick(day)}
                         locale={ptBR}
@@ -2256,14 +2238,14 @@ export default function PatientRecord() {
                         }}
                         modifiersClassNames={{}}
                         classNames={{
-                          months: "flex flex-col",
-                          month: "w-full",
-                          month_grid: "w-full table-fixed border border-slate-300 rounded-xl overflow-hidden",
+                          months: "flex flex-col flex-1 min-h-0",
+                          month: "w-full flex flex-col flex-1 min-h-0",
+                          month_grid: "w-full flex-1 table-fixed border border-slate-300 rounded-xl overflow-hidden",
                           weekdays: "bg-slate-100",
                           weekday: "py-3 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-b border-slate-200 last:border-r-0",
-                          week: "",
-                          day: "text-center border-r border-b border-slate-200 last:border-r-0 p-0",
-                          day_button: "relative w-full h-12 flex items-center justify-center text-sm font-bold text-slate-700 cursor-pointer transition-colors",
+                          week: "h-0",
+                          day: "text-center border-r border-b border-slate-200 last:border-r-0 p-0 h-0",
+                          day_button: "relative w-full h-full flex items-center justify-center text-sm font-bold text-slate-700 cursor-pointer transition-colors",
                           today: "font-black",
                           outside: "text-slate-300",
                           disabled: "cursor-default opacity-40",
@@ -2281,7 +2263,7 @@ export default function PatientRecord() {
                             else if (modifiers?.mine) bgClass = "bg-emerald-50";
 
                             return (
-                              <button {...props} className={`relative w-full h-12 flex items-center justify-center text-sm font-bold cursor-pointer transition-colors ${isToday ? "" : "hover:bg-slate-100"} ${bgClass}`}>
+                              <button {...props} className={`relative w-full h-full flex items-center justify-center text-sm font-bold cursor-pointer transition-colors ${isToday ? "" : "hover:bg-slate-100"} ${bgClass}`}>
                                 {modifiers?.mine && showAllAppointments && (
                                   <div className="absolute bottom-1 left-1.5 right-1.5 h-[3px] rounded-full bg-emerald-500" />
                                 )}
@@ -2294,7 +2276,7 @@ export default function PatientRecord() {
                             );
                           },
                           MonthCaption: ({ calendarMonth }) => (
-                            <div className="relative">
+                            <div className="relative shrink-0">
                               <div className="flex items-center justify-between bg-slate-100 rounded-xl p-1 mb-4 select-none">
                                 <button
                                   onClick={() => { setCalendarDate(prev => subMonths(prev, 1)); setShowMonthPicker(false); }}
@@ -2378,7 +2360,7 @@ export default function PatientRecord() {
                           ),
                           Nav: () => null,
                           Root: ({ children, ...props }) => (
-                            <div {...props} onClick={() => showMonthPicker && setShowMonthPicker(false)}>
+                            <div {...props} className="flex-1 flex flex-col min-h-0" onClick={() => showMonthPicker && setShowMonthPicker(false)}>
                               {children}
                             </div>
                           ),
@@ -2386,7 +2368,7 @@ export default function PatientRecord() {
                       />
 
                       {/* Legend */}
-                      <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-slate-100">
+                      <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-slate-100 shrink-0">
                         <div className="flex items-center gap-1.5">
                           <div className="w-3 h-3 rounded bg-emerald-50 border border-emerald-300" />
                           <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{patient?.name?.split(" ")[0] || "Paciente"}</span>
@@ -2401,11 +2383,12 @@ export default function PatientRecord() {
                           <div className="w-3 h-3 rounded bg-red-50 border border-red-300" />
                           <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Conflito</span>
                         </div>
+                        </div>
                       </div>
-                    </div>
+                      </div>
 
                     {/* Right: Agenda */}
-                    <div className="w-1/2 overflow-y-auto pr-2">
+                    <div className="w-[40%] overflow-y-auto pr-2 flex flex-col">
                       {/* Edit choice modal */}
                       {showEditChoice && editingAppointment && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm" onClick={() => { setShowEditChoice(false); setEditingAppointment(null); }}>
@@ -2448,7 +2431,7 @@ export default function PatientRecord() {
 
                       {/* Day details panel or full agenda */}
                       {selectedCalendarDay ? (
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 h-full flex flex-col">
                           <div className="flex items-start justify-between mb-3">
                             <div>
                               <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">
@@ -2469,6 +2452,7 @@ export default function PatientRecord() {
                           <div className="space-y-1.5">
                             {appointments
                               .filter(a => {
+                                if (!myAppointmentIds.has(a.id)) return false;
                                 const dateStr = format(selectedCalendarDay, "yyyy-MM-dd");
                                 if (a.scheduledDate) {
                                   if (dateStr !== a.scheduledDate.split("T")[0]) return false;
@@ -2494,21 +2478,19 @@ export default function PatientRecord() {
                               .sort((a, b) => (a.time || "").localeCompare(b.time || ""))
                               .map(app => {
                                 const conflict = conflicts[app.id];
-                                const appPatientId = app.patient?.id ?? app.patientId;
-                                const isOtherPatient = showAllAppointments && appPatientId && Number(appPatientId) !== Number(id);
                                 return (
-                                  <div key={app.id} className={`flex items-center justify-between p-2.5 rounded-xl border ${
+                                  <div key={app.id} className={`flex items-center gap-2 p-2.5 rounded-xl border ${
                                     conflict ? "border-red-200 bg-red-50/30" : "border-slate-200 bg-white"
                                   }`}>
-                                    <div className="flex items-center gap-2.5 min-w-0">
+                                    <div className="flex items-center gap-2 min-w-0 flex-1">
                                       <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] shrink-0 ${
-                                        conflict ? "bg-red-100 text-red-600" : isOtherPatient ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
+                                        conflict ? "bg-red-100 text-red-600" : "bg-emerald-50 text-emerald-600"
                                       }`}>
                                         <Clock size={14} />
                                       </div>
                                       <div className="min-w-0">
-                                        <p className={`text-xs font-bold truncate ${isOtherPatient ? "text-amber-600" : "text-slate-800"}`}>
-                                          {(isOtherPatient ? app.patient?.name : patient?.name)?.split(" ")[0] || "Paciente"}
+                                        <p className="text-xs font-bold truncate text-emerald-700">
+                                          {patient?.name?.split(" ")[0] || "Paciente"}
                                         </p>
                                         <p className="text-[9px] font-bold text-slate-500">{app.maxSessions ? `${app.maxSessions} sessões` : app.startDate ? `Desde ${format(new Date(app.startDate), "dd/MM/yy")}` : "Avulso"}</p>
                                       </div>
@@ -2520,31 +2502,28 @@ export default function PatientRecord() {
                                           Conflito
                                         </span>
                                       )}
-                                      {!isOtherPatient && (
-                                        <button
-                                          type="button"
-                                          onClick={() => handleEditClick(app, selectedCalendarDay)}
-                                          className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all border border-slate-200 hover:border-emerald-200"
-                                          title="Editar"
-                                        >
-                                          <Pencil size={13} />
-                                        </button>
-                                      )}
-                                      {!isOtherPatient && (
-                                        <button
-                                          type="button"
-                                          onClick={() => handleRemoveSlot(app.id)}
-                                          className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all border border-slate-200 hover:border-red-200"
-                                          title="Remover"
-                                        >
-                                          <Trash2 size={13} />
-                                        </button>
-                                      )}
+                                      <button
+                                        type="button"
+                                        onClick={() => handleEditClick(app, selectedCalendarDay)}
+                                        className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all border border-slate-200 hover:border-emerald-200"
+                                        title="Editar"
+                                      >
+                                        <Pencil size={13} />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveSlot(app.id)}
+                                        className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all border border-slate-200 hover:border-red-200"
+                                        title="Remover"
+                                      >
+                                        <Trash2 size={13} />
+                                      </button>
                                     </div>
                                   </div>
                                 );
                               })}
                             {appointments.filter(a => {
+                              if (!myAppointmentIds.has(a.id)) return false;
                               const dateStr = format(selectedCalendarDay, "yyyy-MM-dd");
                               if (a.scheduledDate) {
                                 if (dateStr !== a.scheduledDate.split("T")[0]) return false;
@@ -2574,7 +2553,7 @@ export default function PatientRecord() {
                           </div>
                         </div>
                       ) : (
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 h-full flex flex-col">
                           <div className="flex items-start justify-between mb-3">
                             <div>
                               <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Agenda Completa</h4>
@@ -2589,8 +2568,8 @@ export default function PatientRecord() {
                             </button>
                           </div>
                           <div className="space-y-1.5">
-                            {[...new Set(appointments.map(a => a.time))].sort().map(time => {
-                              const slotsAtTime = appointments.filter(a => a.time === time);
+                            {[...new Set(appointments.filter(a => myAppointmentIds.has(a.id)).map(a => a.time))].sort().map(time => {
+                              const slotsAtTime = appointments.filter(a => myAppointmentIds.has(a.id) && a.time === time);
                               return (
                                 <div key={time} className="p-2.5 rounded-xl border border-slate-200 bg-white">
                                   <p className="text-xs font-bold text-slate-800">{time} • {slotsAtTime[0]?.duration}min</p>
@@ -2598,7 +2577,7 @@ export default function PatientRecord() {
                                 </div>
                               );
                             })}
-                            {appointments.length === 0 && (
+                            {appointments.filter(a => myAppointmentIds.has(a.id)).length === 0 && (
                               <div className="text-center py-4">
                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nenhum horário cadastrado</p>
                               </div>

@@ -78,9 +78,12 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Dropdown de Cadastro:** Cada botão com estado independente; "Cadastrar" (topo) alinhado à direita, "Cadastrar Paciente" (vazio) centralizado
 
 ### 7. UX do Calendário (Agenda)
-- **Visual melhorado:** Cabeçalhos mais legíveis (fundo mais claro, texto maior), título do mês maior
-- **Células dinâmicas:** Sem height fixo; scroll quando > 4 sessões por dia
-- **Melhor contraste:** Bordas e texto mais escuros para facilitar leitura
+- **Layout duas colunas:** Calendário (`w-[60%]`) + Agenda (`w-[40%]`) lado a lado com `flex gap-6`
+- **react-day-picker v9** com DayButton customizado, tintas de fundo (verde/âmbar/vermelho) e barra verde inferior para sessões do paciente
+- **Células dinâmicas:** Linhas com `h-0` distribuem altura igualmente via `flex-1 table-fixed`; botões preenchem com `h-full`
+- **Filtro permanente:** Painel direito sempre exibe apenas horários do paciente atual via `myAppointmentIds`
+- **Cards:** `flex gap-2` com `flex-1` no texto, sem `justify-between` — nome/descrição e horário/botões ficam próximos
+- **Frame-wrapper:** Calendário envolto em `p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col h-full`
 
 ### 8. Navegação Suave
 - Hook `useNavigateWithTransition` adiciona delay de 300ms antes de trocas de página:
