@@ -2173,15 +2173,17 @@ export default function PatientRecord() {
           {activeTab === "settings" && (
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Action Buttons */}
-              <div className="flex items-center justify-end gap-3 shrink-0">
+              <div className="grid grid-cols-2 gap-3 shrink-0">
                 {appointments.length > 0 && (
                   <button
                     onClick={() => handleClearAgenda()}
                     className="card p-3 flex items-center gap-3 border-l-4 border-red-500 bg-white text-red-600 hover:bg-red-50 transition-all text-left group"
                   >
-                    <Trash2 size={18} className="text-red-400 group-hover:scale-110 transition-transform" />
+                    <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
+                      <Trash2 size={18} />
+                    </div>
                     <div>
-                      <p className="text-sm font-black uppercase tracking-tight">Limpar Agenda</p>
+                      <p className="text-lg font-black uppercase tracking-tight">Limpar Agenda</p>
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Remover horários</p>
                     </div>
                   </button>
