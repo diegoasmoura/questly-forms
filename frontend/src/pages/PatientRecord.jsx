@@ -295,9 +295,10 @@ export default function PatientRecord() {
     }
 
     // Find next session
+    const today = new Date();
     let nextSession = null;
     for (let daysAhead = 0; daysAhead < 365; daysAhead++) {
-      const dateObj = new Date(now);
+      const dateObj = new Date(today);
       dateObj.setDate(dateObj.getDate() + daysAhead);
       const dateStr = format(dateObj, "yyyy-MM-dd");
       for (const app of myActiveSlots) {
