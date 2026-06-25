@@ -184,6 +184,7 @@ export default function PatientRecord() {
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedCalendarDay, setSelectedCalendarDay] = useState(new Date());
   const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [calendarPeriodFilter, setCalendarPeriodFilter] = useState("thisMonth");
 
   const [appointments, setAppointments] = useState([]);
   const [myAppointmentIds, setMyAppointmentIds] = useState(new Set());
@@ -2170,6 +2171,37 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Novo agendamento</p>
                   </div>
                 </button>
+              </div>
+
+              {/* Filtro de Período */}
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Período</span>
+                {[
+                  { key: "thisMonth", label: "Este Mês" },
+                  { key: "lastMonth", label: "Mês Anterior" },
+                  { key: "last3Months", label: "Últimos 3 Meses" },
+                  { key: "all", label: "Todo Histórico" },
+                  { key: "custom", label: "Personalizado" },
+                ].map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => {
+                      setCalendarPeriodFilter(opt.key);
+                      if (opt.key === "thisMonth") setCalendarDate(new Date());
+                      else if (opt.key === "lastMonth") setCalendarDate(subMonths(new Date(), 1));
+                      else if (opt.key === "last3Months") setCalendarDate(subMonths(new Date(), 2));
+                      else if (opt.key === "custom") setShowMonthPicker(true);
+                      setShowMonthPicker(false);
+                    }}
+                    className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
+                      calendarPeriodFilter === opt.key
+                        ? "bg-emerald-600 text-white shadow-md"
+                        : "bg-white text-slate-500 border border-slate-200 hover:border-emerald-200 hover:text-emerald-600"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
               </div>
 
               {/* Calendar Card */}
