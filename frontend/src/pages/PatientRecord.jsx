@@ -2179,19 +2179,15 @@ export default function PatientRecord() {
                 {[
                   { key: "thisMonth", label: "Este Mês" },
                   { key: "lastMonth", label: "Mês Anterior" },
-                  { key: "last3Months", label: "Últimos 3 Meses" },
-                  { key: "all", label: "Todo Histórico" },
                   { key: "custom", label: "Personalizado" },
                 ].map(opt => (
                   <button
                     key={opt.key}
                     onClick={() => {
                       setCalendarPeriodFilter(opt.key);
-                      if (opt.key === "thisMonth") setCalendarDate(new Date());
-                      else if (opt.key === "lastMonth") setCalendarDate(subMonths(new Date(), 1));
-                      else if (opt.key === "last3Months") setCalendarDate(subMonths(new Date(), 2));
+                      if (opt.key === "thisMonth") { setCalendarDate(new Date()); setShowMonthPicker(false); }
+                      else if (opt.key === "lastMonth") { setCalendarDate(subMonths(new Date(), 1)); setShowMonthPicker(false); }
                       else if (opt.key === "custom") setShowMonthPicker(true);
-                      setShowMonthPicker(false);
                     }}
                     className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
                       calendarPeriodFilter === opt.key
