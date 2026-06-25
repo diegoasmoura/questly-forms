@@ -180,7 +180,7 @@ export const api = {
   // Appointments (Agenda)
   getAppointments: () => request("/appointments"),
   getPatientAppointments: (patientId) => request(`/appointments/patient/${patientId}`),
-  deletePatientAppointments: (patientId, mode = 'future') => request(`/appointments/patient/${patientId}?mode=${mode}`, { method: "DELETE" }),
+  deletePatientAppointments: (patientId) => request(`/appointments/patient/${patientId}`, { method: "DELETE" }),
   saveAppointmentsBatch: (patientId, slots) => request("/appointments/batch", { 
     method: "POST", 
     body: JSON.stringify({ patientId, slots }) 

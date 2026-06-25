@@ -54,40 +54,21 @@ router.get("/patient/:patientId", async (req, res) => {
   }
 });
 
-// Excluir agendamentos e registros de presença de um paciente (com filtro de data)
+// Excluir todos os agendamentos de um paciente
 router.delete("/patient/:patientId", async (req, res) => {
-  const { mode } = req.query; // 'all' ou 'future'
   const { patientId } = req.params;
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
 
   try {
-    // 1. Remover registros de presença (Attendances)
-    const attendanceWhere = { 
-      patientId,
-      psychologistId: req.user.id
-    };
-
-    // Se for 'future', só apaga o que for hoje ou depois
-    if (mode === 'future') {
-      attendanceWhere.date = { gte: today };
-    }
-
-    await prisma.attendance.deleteMany({ where: attendanceWhere });
-
-    // 2. Remover agendamentos fixos (Appointments)
-    // Note: Appointments são regras recorrentes. Se removermos, eles somem de todo o calendário.
-    // Presumimos que ao limpar a agenda, o profissional quer parar a recorrência.
     await prisma.appointment.deleteMany({
-      where: { 
+      where: {
         patientId,
         psychologistId: req.user.id
       }
     });
 
-    res.json({ 
-      success: true, 
-      message: mode === 'future' ? "Agenda futura limpa. Histórico passado preservado." : "Agenda e histórico removidos completamente." 
+    res.json({
+      success: true,
+      message: "Agenda removida completamente."
     });
   } catch (error) {
     console.error("Erro ao excluir agenda:", error);

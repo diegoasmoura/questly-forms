@@ -245,8 +245,6 @@ export default function PatientRecord() {
     return { mine, others, conflictDates };
   }, [calendarDate, appointments, conflicts, myAppointmentIds, showAllAppointments]);
 
-  const [clearMode, setClearMode] = useState(null);
-  const [cleanupModal, setCleanupModal] = useState({ open: false, title: "", message: "", mode: null });
   const [savingAgenda, setSavingAgenda] = useState(false);
   const [showAgendaModal, setShowAgendaModal] = useState(false);
   const [agendaFormDate, setAgendaFormDate] = useState(null);
@@ -528,49 +526,14 @@ export default function PatientRecord() {
       checkConflict(id, slot.dayOfWeek, slot.time, slot.duration);
     }
   };
-  const handleClearAgenda = (mode = null) => {
-    if (!mode) {
-      setCleanupModal({
-        open: true,
-        title: "Limpar Agenda",
-        message: "Como você deseja limpiar a agenda deste paciente? Escolha uma opção abaixo para proseguix."
-      });
-      return;
-    }
-    setClearMode(mode);
-    setAppointments([]);
-    setAppointmentStartDate("");
-    setCleanupModal({ ...cleanupModal, open: false });
-  };
-
-  const handleSaveAgenda = async () => {
-    setSavingAgenda(true);
+  const handleClearAgenda = async () => {
+    if (!confirm("Tem certeza? Todos os horários recorrentes e avulsos deste paciente serão removidos. Registros de presença e financeiros não são afetados.")) return;
     try {
-      if (appointments.length === 0 && clearMode) {
-        await api.deletePatientAppointments(id, clearMode);
-        alert(clearMode === 'future' ? "Agenda futura limpa." : "Agenda removida completamente.");
-      } else if (appointments.length > 0) {
-        const missingStartDate = appointments.find(a => !a.startDate);
-        if (missingStartDate) {
-          alert("Por favor, informe a data de início para todos os horários");
-          setSavingAgenda(false);
-          return;
-        }
-        const slots = appointments.map(({ dayOfWeek, time, duration, startDate }) => ({
-          dayOfWeek: parseInt(dayOfWeek),
-          time,
-          duration: parseInt(duration),
-          startDate
-        }));
-        await api.saveAppointmentsBatch(id, slots);
-        alert("Agenda atualizada com sucesso!");
-      }
-      setClearMode(null);
+      await api.deletePatientAppointments(id);
+      alert("Agenda removida com sucesso.");
       loadPatientAppointments(showAllAppointments);
     } catch (error) {
-      alert("Erro ao salvar agenda: " + error.message);
-    } finally {
-      setSavingAgenda(false);
+      alert("Erro ao limpar agenda: " + error.message);
     }
   };
 
@@ -2774,54 +2737,6 @@ export default function PatientRecord() {
                 </div>
               )}
 
-              {/* Cleanup Modal */}
-              {cleanupModal.open && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[9999]" onClick={() => setCleanupModal({ ...cleanupModal, open: false })}>
-                  <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
-                    <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-6 mx-auto">
-                      <Trash2 size={32} />
-                    </div>
-                    <h3 className="text-xl font-black text-slate-800 text-center uppercase tracking-tight mb-3">{cleanupModal.title}</h3>
-                    <p className="text-sm text-slate-500 text-center leading-relaxed font-medium mb-8">{cleanupModal.message}</p>
-
-                    <div className="flex flex-col gap-3">
-                      <button
-                        onClick={async () => {
-                          setCleanupModal({ open: false, title: "", message: "" });
-                          await api.deletePatientAppointments(id, 'future');
-                          alert("Agenda futura limpa. Histórico mantido.");
-                          loadPatientAppointments(showAllAppointments);
-                        }}
-                        className="w-full py-4 bg-slate-800 text-white rounded-2xl hover:bg-slate-900 shadow-lg shadow-slate-200 transition-all text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2"
-                      >
-                        <Calendar size={16} />
-                        Limpar Futuro (Manter Histórico)
-                      </button>
-                      <button
-                        onClick={async () => {
-                          if (!confirm("Tem certeza? Isso removerá TODOS os agendamentos e histórico de sessões deste paciente.")) return;
-                          setCleanupModal({ open: false, title: "", message: "" });
-                          await api.deletePatientAppointments(id, 'all');
-                          alert("Agenda e histórico removidos completamente.");
-                          loadPatientAppointments(showAllAppointments);
-                        }}
-                        className="w-full py-4 bg-white text-red-600 border border-red-100 rounded-2xl hover:bg-red-50 transition-all text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2"
-                      >
-                        <Trash2 size={16} />
-                        Apagar Tudo (Limpeza Total)
-                      </button>
-                      <button
-                        onClick={() => {
-                          setCleanupModal({ open: false, title: "", message: "", mode: null });
-                        }}
-                        className="w-full py-3 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-all"
-                      >
-                        Cancelar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           )}
           </div>
