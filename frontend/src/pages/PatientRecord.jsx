@@ -566,7 +566,7 @@ export default function PatientRecord() {
         alert("Agenda atualizada com sucesso!");
       }
       setClearMode(null);
-      loadPatientAppointments();
+      loadPatientAppointments(showAllAppointments);
     } catch (error) {
       alert("Erro ao salvar agenda: " + error.message);
     } finally {
@@ -2790,7 +2790,7 @@ export default function PatientRecord() {
                           setCleanupModal({ open: false, title: "", message: "" });
                           await api.deletePatientAppointments(id, 'future');
                           alert("Agenda futura limpa. Histórico mantido.");
-                          loadPatientAppointments();
+                          loadPatientAppointments(showAllAppointments);
                         }}
                         className="w-full py-4 bg-slate-800 text-white rounded-2xl hover:bg-slate-900 shadow-lg shadow-slate-200 transition-all text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2"
                       >
@@ -2803,8 +2803,7 @@ export default function PatientRecord() {
                           setCleanupModal({ open: false, title: "", message: "" });
                           await api.deletePatientAppointments(id, 'all');
                           alert("Agenda e histórico removidos completamente.");
-                          setAppointments([]);
-                          loadPatientAppointments();
+                          loadPatientAppointments(showAllAppointments);
                         }}
                         className="w-full py-4 bg-white text-red-600 border border-red-100 rounded-2xl hover:bg-red-50 transition-all text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2"
                       >
