@@ -2177,7 +2177,7 @@ export default function PatientRecord() {
                 {appointments.length > 0 && (
                   <button
                     onClick={() => handleClearAgenda()}
-                    className="card p-3 flex items-center gap-3 border-l-4 border-red-500 bg-white text-red-600 hover:bg-red-50 transition-all text-left group"
+                    className="md:col-start-3 card p-3 flex items-center gap-3 border-l-4 border-red-500 bg-white text-red-600 hover:bg-red-50 transition-all text-left group"
                   >
                     <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
                       <Trash2 size={18} />
@@ -2190,7 +2190,7 @@ export default function PatientRecord() {
                 )}
                 <button
                   onClick={() => handleOpenNewSlotModal(new Date())}
-                  className="card p-3 flex items-center gap-3 border-l-4 border-slate-900 bg-slate-900 text-white hover:bg-slate-800 transition-all text-left group"
+                  className={`card p-3 flex items-center gap-3 border-l-4 border-slate-900 bg-slate-900 text-white hover:bg-slate-800 transition-all text-left group ${appointments.length === 0 ? "md:col-start-4" : ""}`}
                 >
                   <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
                     <Plus size={18} />
