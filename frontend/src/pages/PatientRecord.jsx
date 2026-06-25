@@ -1340,20 +1340,27 @@ export default function PatientRecord() {
           <div className="flex-1 flex flex-col min-h-0">
 {/* Share Tab */}
           {activeTab === "share" && (
-            <div className="flex flex-col flex-1 min-h-0">
-              <div className="card p-6 flex-1 min-h-0 overflow-y-auto">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-900">Compartilhar Instrumentos</h3>
-                    <p className="text-sm text-slate-600 mt-1">Envie instrumentos para que {patient.name} preencha</p>
+            <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
+              {/* Action Buttons */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 shrink-0">
+                <button
+                  onClick={() => setShowShareModal(true)}
+                  className="md:col-start-4 card p-3 flex items-center gap-3 border-l-4 border-slate-900 bg-slate-900 text-white hover:bg-slate-800 transition-all text-left group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                    <Plus size={18} />
                   </div>
-                  <button
-                    onClick={() => setShowShareModal(true)}
-                    className="btn btn-primary"
-                  >
-                    <Plus size={16} />
-                    Enviar Instrumento
-                  </button>
+                  <div>
+                    <p className="text-lg font-black uppercase tracking-tight">Enviar</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Novo instrumento</p>
+                  </div>
+                </button>
+              </div>
+
+              <div className="card p-6 flex-1 min-h-0 overflow-y-auto">
+                <div className="mb-6">
+                  <h3 className="text-lg font-bold text-slate-900">Compartilhar Instrumentos</h3>
+                  <p className="text-sm text-slate-600 mt-1">Envie instrumentos para que {patient.name} preencha</p>
                 </div>
 
                 {loadingLinks ? (
