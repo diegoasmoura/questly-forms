@@ -2173,7 +2173,7 @@ export default function PatientRecord() {
           {activeTab === "settings" && (
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Action Buttons */}
-              <div className="grid grid-cols-2 gap-3 shrink-0">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 shrink-0">
                 {appointments.length > 0 && (
                   <button
                     onClick={() => handleClearAgenda()}
