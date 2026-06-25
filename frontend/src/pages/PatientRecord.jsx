@@ -39,6 +39,30 @@ const findNextDayOfWeek = (fromDate, targetDayOfWeek) => {
   return date;
 };
 
+const appointmentOccursOnDate = (app, dateStr) => {
+  if (app.scheduledDate) {
+    if (dateStr !== app.scheduledDate.split("T")[0]) return false;
+  } else {
+    const d = new Date(dateStr + "T00:00:00");
+    if (d.getDay() !== app.dayOfWeek) return false;
+  }
+  const dateObj = new Date(dateStr + "T00:00:00");
+  if (app.endDate && dateStr > app.endDate.split("T")[0]) return false;
+  if (app.skipDates && Array.isArray(app.skipDates) && app.skipDates.includes(dateStr)) return false;
+  if (app.startDate && dateStr < app.startDate.split("T")[0]) return false;
+  if (app.maxSessions && app.maxSessions > 0 && app.startDate) {
+    const start = new Date(app.startDate.split("T")[0]);
+    let count = 0;
+    const cursor = new Date(start);
+    while (cursor <= dateObj) {
+      if (cursor.getDay() === app.dayOfWeek) count++;
+      cursor.setDate(cursor.getDate() + 7);
+    }
+    if (count > app.maxSessions) return false;
+  }
+  return true;
+};
+
 import {
   ArrowLeft,
   Mail,
@@ -249,6 +273,55 @@ export default function PatientRecord() {
     }
     return { mine, others, conflictDates };
   }, [calendarDate, appointments, conflicts, myAppointmentIds, showAllAppointments]);
+
+  const agendaStats = useMemo(() => {
+    const now = new Date();
+    const thisYear = now.getFullYear();
+    const thisMonth = now.getMonth();
+    const daysInMonth = new Date(thisYear, thisMonth + 1, 0).getDate();
+    let thisMonthCount = 0;
+    const myActiveSlots = appointments.filter(a => myAppointmentIds.has(a.id));
+    const recurringDaysSet = new Set();
+
+    // Count occurrences this month
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateObj = new Date(thisYear, thisMonth, d);
+      const dateStr = format(dateObj, "yyyy-MM-dd");
+      for (const app of myActiveSlots) {
+        if (appointmentOccursOnDate(app, dateStr)) {
+          thisMonthCount++;
+          recurringDaysSet.add(app.dayOfWeek);
+        }
+      }
+    }
+
+    // Find next session
+    let nextSession = null;
+    for (let daysAhead = 0; daysAhead < 365; daysAhead++) {
+      const dateObj = new Date(now);
+      dateObj.setDate(dateObj.getDate() + daysAhead);
+      const dateStr = format(dateObj, "yyyy-MM-dd");
+      for (const app of myActiveSlots) {
+        if (appointmentOccursOnDate(app, dateStr)) {
+          nextSession = { date: dateObj, time: app.time, duration: app.duration };
+          break;
+        }
+      }
+      if (nextSession) break;
+    }
+
+    const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+    const sortedDays = [...recurringDaysSet].sort();
+    const recurringSummary = sortedDays.map(d => dayNames[d]).join(", ");
+
+    return {
+      totalActive: myActiveSlots.length,
+      thisMonthCount,
+      nextSession,
+      recurringSummary,
+      recurringCount: sortedDays.length,
+    };
+  }, [appointments, myAppointmentIds]);
 
   const [savingAgenda, setSavingAgenda] = useState(false);
   const [showAgendaModal, setShowAgendaModal] = useState(false);
@@ -2175,6 +2248,52 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Novo agendamento</p>
                   </div>
                 </button>
+              </div>
+
+              {/* Stats Summary */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-500">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <Calendar size={18} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">{agendaStats.totalActive}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Horários Ativos</p>
+                  </div>
+                </div>
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-sky-500">
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-600">
+                    <Activity size={18} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">{agendaStats.thisMonthCount}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sessões no Mês</p>
+                  </div>
+                </div>
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-violet-500">
+                  <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600">
+                    <Clock size={18} />
+                  </div>
+                  <div>
+                    <p className="text-lg font-black text-slate-800 truncate">
+                      {agendaStats.nextSession
+                        ? format(agendaStats.nextSession.date, "dd/MM", { locale: ptBR }) + " • " + agendaStats.nextSession.time
+                        : "—"}
+                    </p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Próxima Sessão</p>
+                  </div>
+                </div>
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-500">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                    <RefreshCcw size={18} />
+                  </div>
+                  <div>
+                    <p className="text-lg font-black text-slate-800 truncate">
+                      {agendaStats.recurringSummary || "—"}
+                    </p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Frequência Semanal</p>
+                  </div>
+                </div>
               </div>
 
               {/* Filtro de Período */}
