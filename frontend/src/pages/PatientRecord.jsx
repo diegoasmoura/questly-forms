@@ -2242,24 +2242,25 @@ export default function PatientRecord() {
                           },
                           MonthCaption: ({ calendarMonth }) => (
                             <div className="relative shrink-0">
-                              <div className="flex items-center justify-between bg-slate-100 rounded-xl p-1 mb-4 select-none">
+                              <div className="flex items-center gap-2 mb-4">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Mês</span>
                                 <button
                                   onClick={() => { setCalendarDate(prev => subMonths(prev, 1)); setShowMonthPicker(false); }}
-                                  className="p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all text-slate-400 hover:text-slate-700"
+                                  className="text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all bg-white text-slate-500 border border-slate-200 hover:border-emerald-200 hover:text-emerald-600"
                                 >
-                                  <ChevronLeft size={18} />
+                                  <ChevronLeft size={14} />
                                 </button>
                                 <button
                                   onClick={(e) => { e.stopPropagation(); setShowMonthPicker(prev => !prev); }}
-                                  className="text-sm font-black text-slate-700 uppercase tracking-tight hover:text-slate-900 transition-colors px-2 py-1 rounded-lg hover:bg-white/60"
+                                  className="text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all bg-emerald-600 text-white shadow-md"
                                 >
                                   {format(calendarMonth.date, "MMMM 'de' yyyy", { locale: ptBR })}
                                 </button>
                                 <button
                                   onClick={() => { setCalendarDate(prev => addMonths(prev, 1)); setShowMonthPicker(false); }}
-                                  className="p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all text-slate-400 hover:text-slate-700"
+                                  className="text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all bg-white text-slate-500 border border-slate-200 hover:border-emerald-200 hover:text-emerald-600"
                                 >
-                                  <ChevronRight size={18} />
+                                  <ChevronRight size={14} />
                                 </button>
                               </div>
                               {showMonthPicker && (
