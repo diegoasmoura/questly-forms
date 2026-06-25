@@ -16,6 +16,21 @@ import { DayPicker } from "react-day-picker";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
+// Retorna o primeiro dia útil de um mês (seg-sex)
+const getFirstBusinessDay = (year, month) => {
+  const date = new Date(year, month, 1);
+  if (date.getDay() === 0) date.setDate(2);   // domingo → segunda
+  else if (date.getDay() === 6) date.setDate(3); // sábado → segunda
+  return date;
+};
+
+// Parse "YYYY-MM-DD" como data local (evita timezone UTC do new Date(string))
+const parseLocalDateStr = (dateStr) => {
+  if (!dateStr) return null;
+  const [y, m, d] = dateStr.split("T")[0].split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+
 // Extrai data UTC de string ISO (para comparação com dados do banco)
 const extractUTCDate = (dateStr) => {
   if (!dateStr) return "";
@@ -51,7 +66,7 @@ const appointmentOccursOnDate = (app, dateStr) => {
   if (app.skipDates && Array.isArray(app.skipDates) && app.skipDates.includes(dateStr)) return false;
   if (app.startDate && dateStr < app.startDate.split("T")[0]) return false;
   if (app.maxSessions && app.maxSessions > 0 && app.startDate) {
-    const start = new Date(app.startDate.split("T")[0]);
+    const start = parseLocalDateStr(app.startDate);
     let count = 0;
     const cursor = new Date(start);
     while (cursor <= dateObj) {
@@ -150,6 +165,18 @@ export default function PatientRecord() {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
+  // Reseta os filtros ao trocar de aba para evitar que "Personalizado" persista entre abas
+  useEffect(() => {
+    setPeriodFilter("thisMonth");
+    setCalendarPeriodFilter("thisMonth");
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    setCustomMonth(currentMonth);
+    setCalendarCustomMonth(currentMonth);
+    if (activeTab === "settings" || activeTab === "sessions" || activeTab === "financial") {
+      setCalendarDate(new Date());
+    }
+  }, [activeTab]);
 
   const filteredAttendances = useMemo(() => {
     const now = new Date();
@@ -248,7 +275,7 @@ export default function PatientRecord() {
         if (app.startDate && dateStr < app.startDate.split("T")[0]) continue;
         // Check maxSessions
         if (app.maxSessions && app.maxSessions > 0 && app.startDate) {
-          const start = new Date(app.startDate.split("T")[0]);
+          const start = parseLocalDateStr(app.startDate);
           let count = 0;
           const cursor = new Date(start);
           while (cursor <= date) {
@@ -341,9 +368,27 @@ export default function PatientRecord() {
   };
 
   const handleOpenNewSlotModal = (day) => {
-    setSelectedCalendarDay(day || new Date());
-    setAgendaFormDate(day || new Date());
-    setAgendaFormDayOfWeek((day || new Date()).getDay());
+    let targetDate = day;
+    if (!targetDate) {
+      const displayedYear = calendarDate.getFullYear();
+      const displayedMonth = calendarDate.getMonth();
+      const selectedYear = selectedCalendarDay.getFullYear();
+      const selectedMonth = selectedCalendarDay.getMonth();
+      const isSelectedInDisplayedMonth = displayedYear === selectedYear && displayedMonth === selectedMonth;
+      if (isSelectedInDisplayedMonth) {
+        targetDate = selectedCalendarDay;
+      } else {
+        const now = new Date();
+        if (displayedYear === now.getFullYear() && displayedMonth === now.getMonth()) {
+          targetDate = now;
+        } else {
+          targetDate = getFirstBusinessDay(displayedYear, displayedMonth);
+        }
+      }
+    }
+    setSelectedCalendarDay(targetDate);
+    setAgendaFormDate(targetDate);
+    setAgendaFormDayOfWeek(targetDate.getDay());
     setAgendaFormTime("08:00");
     setAgendaFormDuration(50);
     setAgendaFormRecurring(true);
@@ -2508,7 +2553,7 @@ export default function PatientRecord() {
                                 if (a.skipDates && Array.isArray(a.skipDates) && a.skipDates.includes(dateStr)) return false;
                                 if (a.startDate && dateStr < a.startDate.split("T")[0]) return false;
                                 if (a.maxSessions && a.maxSessions > 0 && a.startDate) {
-                                  const start = new Date(a.startDate.split("T")[0]);
+                                  const start = parseLocalDateStr(a.startDate);
                                   let count = 0;
                                   const cursor = new Date(start);
                                   while (cursor <= selectedCalendarDay) {
@@ -2585,7 +2630,7 @@ export default function PatientRecord() {
                               if (a.skipDates && Array.isArray(a.skipDates) && a.skipDates.includes(dateStr)) return false;
                               if (a.startDate && dateStr < a.startDate.split("T")[0]) return false;
                               if (a.maxSessions && a.maxSessions > 0 && a.startDate) {
-                                const start = new Date(a.startDate.split("T")[0]);
+                                const start = parseLocalDateStr(a.startDate);
                                 let count = 0;
                                 const cursor = new Date(start);
                                 while (cursor <= selectedCalendarDay) {
@@ -2637,7 +2682,7 @@ export default function PatientRecord() {
                             <Trash2 size={14} /> Limpar Agenda
                           </button>
                         )}
-                        <button onClick={() => handleOpenNewSlotModal(new Date())} className="btn btn-primary text-xs">
+                        <button onClick={() => handleOpenNewSlotModal()} className="btn btn-primary text-xs">
                           <Plus size={14} /> Lançar
                         </button>
                       </div>

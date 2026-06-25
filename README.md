@@ -56,6 +56,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Identidade Visual:** Favicon personalizado "Q" e título profissional na aba do navegador.
 - **Status do Recibo:** Controle visual de emissão (Emitido, Com Anexo, Pendente).
 - **Botões no Card Financeiro:** "Lançar" e "Gerar Relatório Completo" realocados para fora do quadrante cinza, alinhados à direita com `justify-end` (mesmo padrão da aba Agenda).
+- **Filtro de Período Compartilhado:** Os filtros "Personalizado" das abas Frequência, Financeiro e Agenda são resetados para "Este Mês" sempre que o usuário alterna entre abas, evitando que um mês selecionado em uma aba persista ao mudar de contexto.
 
 ### 4. Operações Individuais (Agenda)
 - **DELETE /:id** — exclui um agendamento individual (sem cascata em attendances)
@@ -63,6 +64,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **PUT /:id** — atualiza um agendamento individual (campos parciais)
 - **POST /batch** — usado APENAS para salvar configuração completa de slots (settings), não para operações individuais
 - **Integridade:** Appointments e Attendances NÃO têm FK direta; excluir um agendamento não afeta registros de presença
+- **maxSessions e Timezone:** A função `appointmentOccursOnDate` (e duplicatas) usava `new Date(app.startDate.split("T")[0])`, que interpreta "YYYY-MM-DD" como UTC. No Brasil (UTC-3), `getDay()` retornava o dia errado, impedindo o contador de sessões de incrementar. Corrigido com `parseLocalDateStr` que usa o construtor `Date(year, monthIndex, day)` no timezone local.
 
 ### 5. Cadastro de Pacientes e Integridade (v4.4)
 - **Campos Obrigatórios (Ética e Segurança):** Nome, CPF, Data de Nascimento, E-mail, Telefone e Contato de Emergência (Nome e Telefone) são mandatórios para garantir a segurança clínica e conformidade com emissão de documentos.
@@ -96,6 +98,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
   - Wrapper scrollável: `flex-1 min-h-0 overflow-y-auto flex flex-col` — contém o card de detalhes do dia (quadro cinza com `bg-slate-50`, `flex-1` para preencher espaço)
   - Botões de ação: fora do scroll, em div `shrink-0` com `justify-end`, usando `btn btn-primary` (verde, "Lançar") e `btn btn-danger` (vermelho, "Limpar Agenda")
   - Espaçamento: `gap-3` no painel direito separa o quadro cinza dos botões
+- **Data do "Lançar":** O botão "Lançar" considera o dia selecionado no calendário. Se o dia clicado estiver no mês exibido, usa esse dia. Caso contrário (navegou para outro mês sem clicar em nenhum dia): se for o mês atual, usa a data de hoje; se for um mês futuro, usa o primeiro dia útil do mês (`getFirstBusinessDay`).
 - **Modal de Agendamento (Novo/Editar):**
   - Renderizado fora do container `animate-fade-in` (que aplica `transform`, criando um containing block para `position: fixed`) para que o overlay `backdrop-blur-sm` cubra a viewport inteira, não apenas o painel direito
   - O `return` do componente usa fragmento `<>...</>` para permitir que o modal e o grid de layout coexistam no mesmo nível
