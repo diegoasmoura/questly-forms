@@ -2292,87 +2292,10 @@ export default function PatientRecord() {
                             );
                           },
                           MonthCaption: ({ calendarMonth }) => (
-                            <div className="relative shrink-0">
-                              <div className="flex items-center gap-2 mb-4">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Mês</span>
-                                <button
-                                  onClick={() => { setCalendarDate(prev => subMonths(prev, 1)); setShowMonthPicker(false); }}
-                                  className="text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all bg-white text-slate-500 border border-slate-200 hover:border-emerald-200 hover:text-emerald-600"
-                                >
-                                  <ChevronLeft size={14} />
-                                </button>
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); setShowMonthPicker(prev => !prev); }}
-                                  className="text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all bg-emerald-600 text-white shadow-md"
-                                >
-                                  {format(calendarMonth.date, "MMMM 'de' yyyy", { locale: ptBR })}
-                                </button>
-                                <button
-                                  onClick={() => { setCalendarDate(prev => addMonths(prev, 1)); setShowMonthPicker(false); }}
-                                  className="text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all bg-white text-slate-500 border border-slate-200 hover:border-emerald-200 hover:text-emerald-600"
-                                >
-                                  <ChevronRight size={14} />
-                                </button>
-                              </div>
-                              {showMonthPicker && (
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 z-10 mt-1 bg-white rounded-xl shadow-xl border border-slate-200 p-4 w-64 animate-scale-in" onClick={e => e.stopPropagation()}>
-                                  <div className="grid grid-cols-3 gap-1 mb-3">
-                                    {["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"].map((m, i) => (
-                                      <button
-                                        key={m}
-                                        onClick={() => {
-                                          const d = new Date(calendarDate);
-                                          d.setMonth(i);
-                                          setCalendarDate(d);
-                                          setShowMonthPicker(false);
-                                        }}
-                                        className={`text-[11px] font-black py-2 rounded-lg transition-all ${
-                                          calendarDate.getMonth() === i
-                                            ? "bg-slate-900 text-white"
-                                            : "text-slate-600 hover:bg-slate-100"
-                                        }`}
-                                      >
-                                        {m}
-                                      </button>
-                                    ))}
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <button
-                                      onClick={() => {
-                                        const d = new Date(calendarDate);
-                                        d.setFullYear(d.getFullYear() - 1);
-                                        setCalendarDate(d);
-                                      }}
-                                      className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400"
-                                    >
-                                      <ChevronLeft size={14} />
-                                    </button>
-                                    <select
-                                      value={calendarDate.getFullYear()}
-                                      onChange={e => {
-                                        const d = new Date(calendarDate);
-                                        d.setFullYear(parseInt(e.target.value));
-                                        setCalendarDate(d);
-                                      }}
-                                      className="flex-1 text-center text-sm font-black text-slate-700 bg-slate-50 rounded-lg py-2 border border-slate-200 outline-none cursor-pointer"
-                                    >
-                                      {Array.from({length: 21}, (_, i) => new Date().getFullYear() - 10 + i).map(y => (
-                                        <option key={y} value={y}>{y}</option>
-                                      ))}
-                                    </select>
-                                    <button
-                                      onClick={() => {
-                                        const d = new Date(calendarDate);
-                                        d.setFullYear(d.getFullYear() + 1);
-                                        setCalendarDate(d);
-                                      }}
-                                      className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400"
-                                    >
-                                      <ChevronRight size={14} />
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
+                            <div className="shrink-0 mb-3">
+                              <p className="text-sm font-bold text-slate-600 capitalize">
+                                {format(calendarMonth.date, "MMMM 'de' yyyy", { locale: ptBR })}
+                              </p>
                             </div>
                           ),
                           Nav: () => null,
