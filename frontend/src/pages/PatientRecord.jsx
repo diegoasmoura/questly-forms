@@ -2196,7 +2196,7 @@ export default function PatientRecord() {
                     <Plus size={18} />
                   </div>
                   <div>
-                    <p className="text-lg font-black uppercase tracking-tight">Adicionar Horário</p>
+                      <p className="text-lg font-black uppercase tracking-tight">Lançar</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Novo agendamento</p>
                   </div>
                 </button>
