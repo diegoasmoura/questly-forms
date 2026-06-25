@@ -275,9 +275,8 @@ export default function PatientRecord() {
   }, [calendarDate, appointments, conflicts, myAppointmentIds, showAllAppointments]);
 
   const agendaStats = useMemo(() => {
-    const now = new Date();
-    const thisYear = now.getFullYear();
-    const thisMonth = now.getMonth();
+    const thisYear = calendarDate.getFullYear();
+    const thisMonth = calendarDate.getMonth();
     const daysInMonth = new Date(thisYear, thisMonth + 1, 0).getDate();
     let thisMonthCount = 0;
     const myActiveSlots = appointments.filter(a => myAppointmentIds.has(a.id));
@@ -321,7 +320,7 @@ export default function PatientRecord() {
       recurringSummary,
       recurringCount: sortedDays.length,
     };
-  }, [appointments, myAppointmentIds]);
+  }, [appointments, myAppointmentIds, calendarDate]);
 
   const [savingAgenda, setSavingAgenda] = useState(false);
   const [showAgendaModal, setShowAgendaModal] = useState(false);
