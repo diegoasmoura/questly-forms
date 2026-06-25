@@ -1535,8 +1535,9 @@ export default function PatientRecord() {
                           <input type="file" multiple className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" disabled={uploading} onChange={handleUploadAttachment} />
                         </label>
                       </div>
-                    )}
-                  </div>
+                      )}
+
+                    </div>
                 </div>
               </div>
             </div>
@@ -1626,9 +1627,9 @@ export default function PatientRecord() {
               </div>
 
               {/* Timeline List */}
-              <div className="card p-8 flex-1 flex flex-col min-h-0">
-                <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight mb-8 shrink-0">Histórico de Sessões</h3>
-                
+              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden">
+                <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight mb-6 shrink-0">Histórico de Sessões</h3>
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
                 {loadingAttendances ? (
                   <div className="text-center py-20 opacity-50 flex-1 flex items-center justify-center">
                     <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
@@ -1745,6 +1746,7 @@ export default function PatientRecord() {
                     })}
                   </div>
                 )}
+                </div>
               </div>
             </div>
           )}
@@ -1752,6 +1754,86 @@ export default function PatientRecord() {
           {/* Financial Tab */}
           {activeTab === "financial" && (
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
+              {/* Financial Dashboard */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-500">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <DollarSign size={18} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">
+                      R$ {filteredPayments.reduce((acc, p) => acc + p.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Pago</p>
+                  </div>
+                </div>
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-500">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                    <Clock size={18} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">
+                      {attendances.filter(a => !a.paymentId && (a.status === 'presente' || a.status === 'falta')).length}
+                    </p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sessões Pendentes</p>
+                  </div>
+                </div>
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-sky-500">
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-600">
+                    <Receipt size={18} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">{filteredPayments.length}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lançamentos Realizados</p>
+                  </div>
+                </div>
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-violet-500">
+                  <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600">
+                    <CreditCard size={18} />
+                  </div>
+                  <div>
+                    <p className="text-lg font-black text-slate-800 truncate">
+                      {filteredPayments.length > 0
+                        ? (() => {
+                            const last = [...filteredPayments].sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate))[0];
+                            return format(new Date(last.paymentDate), "dd/MM", { locale: ptBR }) + " • R$ " + Number(last.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                          })()
+                        : "—"}
+                    </p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Último Recebimento</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 shrink-0">
+                <button
+                  onClick={() => {
+                    setPaymentFormData({
+                      amount: "",
+                      paymentDate: new Date().toISOString().split('T')[0],
+                      method: "Pix",
+                      notes: "",
+                      receiptIssued: false,
+                      receiptFile: null,
+                      existingReceiptAttachmentId: null,
+                      existingReceiptFilename: null
+                    });
+                    setSelectedAttendances([]);
+                    setShowPaymentModal(true);
+                  }}
+                  className="md:col-start-4 card p-3 flex items-center gap-3 border-l-4 border-slate-900 bg-slate-900 text-white hover:bg-slate-800 transition-all text-left group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                    <Plus size={18} />
+                  </div>
+                  <div>
+                    <p className="text-lg font-black uppercase tracking-tight">Lançar</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Novo bloco de sessões</p>
+                  </div>
+                </button>
+              </div>
+
               {/* Filtro de Período */}
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Período</span>
@@ -1792,60 +1874,9 @@ export default function PatientRecord() {
                 )}
               </div>
 
-              {/* Financial Dashboard */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div className="md:col-start-2 card p-3 flex items-center gap-3 border-l-4 border-emerald-500">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                    <DollarSign size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-black text-slate-800">
-                      R$ {filteredPayments.reduce((acc, p) => acc + p.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Pago</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-500">
-                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
-                    <Clock size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-black text-slate-800">
-                      {attendances.filter(a => !a.paymentId && (a.status === 'presente' || a.status === 'falta')).length}
-                    </p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sessões Pendentes</p>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => {
-                    setPaymentFormData({
-                      amount: "",
-                      paymentDate: new Date().toISOString().split('T')[0],
-                      method: "Pix",
-                      notes: "",
-                      receiptIssued: false,
-                      receiptFile: null,
-                      existingReceiptAttachmentId: null,
-                      existingReceiptFilename: null
-                    });
-                    setSelectedAttendances([]);
-                    setShowPaymentModal(true);
-                  }}
-                  className="card p-3 flex items-center gap-3 border-l-4 border-slate-900 bg-slate-900 text-white hover:bg-slate-800 transition-all text-left group"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
-                    <Plus size={18} />
-                  </div>
-                  <div>
-                    <p className="text-lg font-black uppercase tracking-tight">Lançar</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Novo bloco de sessões</p>
-                  </div>
-                </button>
-              </div>
-
               {/* Payments History Table */}
-              <div className="card p-8 flex-1 flex flex-col min-h-0 overflow-hidden">
-                <div className="flex items-center justify-between mb-8 shrink-0">
+              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden">
+                <div className="flex items-center justify-between mb-6 shrink-0">
                   <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Histórico de Lançamentos</h3>
                   {payments.length > 0 && (
                     <button 
@@ -1857,7 +1888,7 @@ export default function PatientRecord() {
                     </button>
                   )}
                 </div>
-                
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
                 {loadingPayments ? (
                   <div className="text-center py-20 opacity-50">
                     <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
@@ -1978,6 +2009,7 @@ export default function PatientRecord() {
                     </table>
                   </div>
                 )}
+                </div>
               </div>
             </div>
           )}
@@ -2220,36 +2252,6 @@ export default function PatientRecord() {
           {/* Agenda Tab */}
           {activeTab === "settings" && (
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
-              {/* Action Buttons */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 shrink-0">
-                {appointments.length > 0 && (
-                  <button
-                    onClick={() => handleClearAgenda()}
-                    className="md:col-start-3 card p-3 flex items-center gap-3 border-l-4 border-red-500 bg-white text-red-600 hover:bg-red-50 transition-all text-left group"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
-                      <Trash2 size={18} />
-                    </div>
-                    <div>
-                      <p className="text-lg font-black uppercase tracking-tight">Limpar Agenda</p>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Remover horários</p>
-                    </div>
-                  </button>
-                )}
-                <button
-                  onClick={() => handleOpenNewSlotModal(new Date())}
-                  className={`card p-3 flex items-center gap-3 border-l-4 border-slate-900 bg-slate-900 text-white hover:bg-slate-800 transition-all text-left group ${appointments.length === 0 ? "md:col-start-4" : ""}`}
-                >
-                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
-                    <Plus size={18} />
-                  </div>
-                  <div>
-                      <p className="text-lg font-black uppercase tracking-tight">Lançar</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Novo agendamento</p>
-                  </div>
-                </button>
-              </div>
-
               {/* Stats Summary */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-500">
@@ -2447,7 +2449,8 @@ export default function PatientRecord() {
                       </div>
 
                     {/* Right: Agenda */}
-                    <div className="w-[40%] overflow-y-auto pr-2 flex flex-col">
+                    <div className="w-[40%] flex flex-col pr-2 gap-3">
+                      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
                       {/* Edit choice modal */}
                       {showEditChoice && editingAppointment && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm" onClick={() => { setShowEditChoice(false); setEditingAppointment(null); }}>
@@ -2490,8 +2493,8 @@ export default function PatientRecord() {
 
                       {/* Day details panel or full agenda */}
                       {selectedCalendarDay ? (
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 h-full flex flex-col">
-                          <div className="flex items-start justify-between mb-3">
+                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
+                          <div className="flex items-start justify-between mb-3 shrink-0">
                             <div>
                               <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">
                                 {format(selectedCalendarDay, "EEEE", { locale: ptBR })}
@@ -2501,7 +2504,7 @@ export default function PatientRecord() {
                               </p>
                             </div>
                           </div>
-                          <div className="space-y-1.5 flex-1 overflow-y-auto min-h-0">
+                          <div className="space-y-1.5 overflow-y-auto min-h-0">
                             {appointments
                               .filter(a => {
                                 const dateStr = format(selectedCalendarDay, "yyyy-MM-dd");
@@ -2610,14 +2613,14 @@ export default function PatientRecord() {
                           </div>
                         </div>
                       ) : (
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 h-full flex flex-col">
-                          <div className="flex items-start justify-between mb-3">
+                          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
+                            <div className="flex items-start justify-between mb-3 shrink-0">
                             <div>
                               <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Agenda Completa</h4>
                               <p className="text-xs font-bold text-slate-500 mt-0.5">Todos os horários do mês</p>
                             </div>
                           </div>
-                          <div className="space-y-1.5 flex-1 overflow-y-auto min-h-0">
+                          <div className="space-y-1.5 overflow-y-auto min-h-0">
                             {[...new Set(appointments.filter(a => myAppointmentIds.has(a.id)).map(a => a.time))].sort().map(time => {
                               const slotsAtTime = appointments.filter(a => myAppointmentIds.has(a.id) && a.time === time);
                               return (
@@ -2635,6 +2638,19 @@ export default function PatientRecord() {
                           </div>
                         </div>
                       )}
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex items-center gap-3 shrink-0 justify-end">
+                        {appointments.length > 0 && (
+                          <button onClick={() => handleClearAgenda()} className="btn btn-danger text-xs">
+                            <Trash2 size={14} /> Limpar Agenda
+                          </button>
+                        )}
+                        <button onClick={() => handleOpenNewSlotModal(new Date())} className="btn btn-primary text-xs">
+                          <Plus size={14} /> Lançar
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}

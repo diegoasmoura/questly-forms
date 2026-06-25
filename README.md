@@ -84,13 +84,17 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Modo Lista:** Ordem de botões: Prontuário (destacado) > Editar > Excluir
 - **Dropdown de Cadastro:** Cada botão com estado independente; "Cadastrar" (topo) alinhado à direita, "Cadastrar Paciente" (vazio) centralizado
 
-### 8. UX do Calendário (Agenda)
+### 8. UX do Calendário (Agenda) e Painel Direito
 - **Layout duas colunas:** Calendário (`w-[60%]`) + Agenda (`w-[40%]`) lado a lado com `flex gap-6`
 - **react-day-picker v9** com DayButton customizado, tintas de fundo (verde/âmbar/vermelho) e barra verde inferior para sessões do paciente
 - **Células dinâmicas:** Linhas com `h-0` distribuem altura igualmente via `flex-1 table-fixed`; botões preenchem com `h-full`
 - **Filtro permanente:** Painel direito sempre exibe apenas horários do paciente atual via `myAppointmentIds`
 - **Cards:** `flex gap-2` com `flex-1` no texto, sem `justify-between` — nome/descrição e horário/botões ficam próximos
 - **Frame-wrapper:** Calendário envolto em `p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col h-full`
+- **Painel Direito (Agenda):** Estrutura em duas camadas:
+  - Wrapper scrollável: `flex-1 min-h-0 overflow-y-auto flex flex-col` — contém o card de detalhes do dia (quadro cinza com `bg-slate-50`, `flex-1` para preencher espaço)
+  - Botões de ação: fora do scroll, em div `shrink-0` com `justify-end`, usando `btn btn-primary` (verde, "Lançar") e `btn btn-danger` (vermelho, "Limpar Agenda")
+  - Espaçamento: `gap-3` no painel direito separa o quadro cinza dos botões
 
 ### 9. Navegação Suave
 - Hook `useNavigateWithTransition` adiciona delay de 300ms antes de trocas de página:
@@ -136,8 +140,17 @@ A página `PatientRecord.jsx` usa uma estrutura de layout específica que deve s
 - O card principal de cada aba (ex: timeline, tabela) usa `flex-1 min-h-0 overflow-y-auto` para scroll interno
 - NUNCA usar `overflow-y-auto` no container externo ou na coluna direita
 
-**Cards de estatísticas:**
-- Todos os stat cards (Presenças, Faltas, Total Pago, Lançar) usam `p-3 w-10 h-10 gap-3 size={18}` (compacto)
+**Cards de estatísticas (overview):**
+- Todos os stat cards usam `p-3`, ícone `w-10 h-10 rounded-xl`, número `text-2xl font-black`, label `text-[10px] font-bold uppercase tracking-widest`
+- Dispostos em `grid grid-cols-1 md:grid-cols-4 gap-3`
+
+**Cards de conteúdo (Frequência, Financeiro, Agenda):**
+- Padrão de duas camadas: card branco externo (`card p-6`) + quadro cinza interno (`p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0`)
+- O `flex-1` no quadro cinza faz ele preencher o espaço disponível até os botões de ação
+
+**Botões de ação:**
+- Botões simplificados: `btn btn-primary` (verde) e `btn btn-danger` (vermelho)
+- Posicionados fora do quadro cinza, alinhados à direita com `justify-end`
 
 **Headers dos cards:**
 - Headers usam `mb-8 shrink-0` em vez de `border-b` e ficam dentro do `p-8` do card
