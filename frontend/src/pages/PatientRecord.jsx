@@ -1249,6 +1249,7 @@ export default function PatientRecord() {
   }
 
   return (
+    <>
     <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in">
       <Link to="/patients" className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-4 group transition-colors shrink-0">
         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
@@ -2357,11 +2358,8 @@ export default function PatientRecord() {
                   <div className="flex-1 flex gap-6 min-h-0 overflow-hidden">
                     {/* Left: Calendar */}
                       <div className="w-[60%] flex flex-col min-h-0">
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col h-full">
-                        {/* Header */}
-                        <div className="flex items-center justify-between mb-4 shrink-0">
-                          <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Calendário de Sessões</h3>
-                        </div>
+                        <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight mb-3 shrink-0">Calendário de Sessões</h3>
+                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col flex-1 min-h-0 overflow-hidden">
 
                         <DayPicker
                           month={calendarDate}
@@ -2450,6 +2448,7 @@ export default function PatientRecord() {
 
                     {/* Right: Agenda */}
                     <div className="w-[40%] flex flex-col pr-2 gap-3">
+                      <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight shrink-0">Agendamentos</h3>
                       <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
                       {/* Edit choice modal */}
                       {showEditChoice && editingAppointment && (
@@ -2548,7 +2547,7 @@ export default function PatientRecord() {
                                         <p className={`text-xs font-bold truncate ${isOtherPatient ? "text-amber-600" : "text-emerald-700"}`}>
                                           {(isOtherPatient ? app.patient?.name : patient?.name)?.split(" ")[0] || "Paciente"}
                                         </p>
-                                        <p className="text-[9px] font-bold text-slate-500">{app.maxSessions ? `${app.maxSessions} sessões` : app.startDate ? `Desde ${format(new Date(app.startDate), "dd/MM/yy")}` : "Avulso"}</p>
+                                        <p className="text-[9px] font-bold text-slate-500">{app.maxSessions ? `${app.maxSessions} sessões` : app.startDate ? "Semanal" : app.scheduledDate ? format(new Date(app.scheduledDate), "dd/MM/yy") : "Avulso"}</p>
                                       </div>
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0 ml-2">
@@ -2656,202 +2655,133 @@ export default function PatientRecord() {
                 )}
               </div>
 
-              {/* Agenda Modal */}
-              {showAgendaModal && agendaFormDate && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm" onClick={() => { setShowAgendaModal(false); setEditingAppointment(null); setEditMode(null); }}>
-                  <div className="bg-white rounded-3xl p-8 w-full max-w-lg mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
-                    <div className="flex items-center justify-between mb-6">
-                      <div>
-                        <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">{editingAppointment ? "Editar Agendamento" : "Novo Agendamento"}</h3>
-                        <p className="text-sm text-slate-500 font-bold mt-1">
-                          {format(agendaFormDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => { setShowAgendaModal(false); setEditingAppointment(null); setEditMode(null); }}
-                        className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all"
-                      >
-                        <X size={20} />
-                      </button>
-                    </div>
-
-                    <div className="space-y-4 mb-6">
-                      <div className="grid grid-cols-3 gap-3">
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Dia</label>
-                          <select
-                            className="input text-sm font-black py-2.5"
-                            value={agendaFormDayOfWeek ?? (agendaFormDate?.getDay() ?? 1)}
-                            onChange={e => setAgendaFormDayOfWeek(parseInt(e.target.value))}
-                          >
-                            {["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"].map((d, i) => (
-                              <option key={i} value={i}>{d}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Horário</label>
-                          <select
-                            className="input text-sm font-black py-2.5"
-                            value={agendaFormTime}
-                            onChange={e => setAgendaFormTime(e.target.value)}
-                          >
-                            {["07:00", "07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00"].map(t => (
-                              <option key={t} value={t}>{t}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Duração</label>
-                          <select
-                            className="input text-sm font-black py-2.5"
-                            value={agendaFormDuration}
-                            onChange={e => setAgendaFormDuration(parseInt(e.target.value))}
-                          >
-                            <option value={30}>30 minutos</option>
-                            <option value={45}>45 minutos</option>
-                            <option value={50}>50 minutos</option>
-                            <option value={60}>60 minutos</option>
-                            <option value={90}>90 minutos</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
-                        <label className="flex items-center gap-3 cursor-pointer select-none">
-                          <input
-                            type="checkbox"
-                            checked={agendaFormRecurring}
-                            onChange={e => setAgendaFormRecurring(e.target.checked)}
-                            className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                          />
-                          <div>
-                            <span className="text-sm font-bold text-slate-700">
-                              Repetir semanalmente
-                            </span>
-                            <p className="text-[10px] text-slate-500 font-medium">
-                              Toda {["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"][agendaFormDate.getDay()]}
-                            </p>
-                          </div>
-                        </label>
-                        {agendaFormRecurring && (
-                          <div className="w-28">
-                            <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nº Sessões</label>
-                            <input
-                              type="number"
-                              min={0}
-                              className="input text-xs font-black py-2 text-center"
-                              value={agendaFormMaxSessions || ""}
-                              onChange={e => setAgendaFormMaxSessions(Math.max(0, parseInt(e.target.value) || 0))}
-                              placeholder="0 = ilimitado"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Existing slots for this day-of-week */}
-                    {appointments.filter(a => {
-                      if (a.scheduledDate) {
-                        const sched = a.scheduledDate.split("T")[0];
-                        const formDate = format(agendaFormDate, "yyyy-MM-dd");
-                        return sched === formDate;
-                      }
-                      return a.dayOfWeek === (agendaFormDayOfWeek ?? agendaFormDate.getDay());
-                    }).length > 0 && (
-                      <div className="mb-6">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                          Horários já configurados para {["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"][agendaFormDayOfWeek ?? agendaFormDate.getDay()]}
-                        </p>
-                        <div className="space-y-1.5">
-                          {appointments
-                            .filter(a => {
-                              if (a.scheduledDate) {
-                                const sched = a.scheduledDate.split("T")[0];
-                                const formDate = format(agendaFormDate, "yyyy-MM-dd");
-                                return sched === formDate;
-                              }
-                              return a.dayOfWeek === (agendaFormDayOfWeek ?? agendaFormDate.getDay());
-                            })
-                            .map(app => {
-                              const conflict = conflicts[app.id];
-                              return (
-                                <div key={app.id} className={`flex items-center justify-between p-2.5 rounded-xl border ${
-                                  conflict ? "border-red-200 bg-red-50/30" : "border-slate-200 bg-white"
-                                }`}>
-                                  <div className="flex items-center gap-2.5">
-                                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] ${
-                                      conflict ? "bg-red-100 text-red-600" : "bg-emerald-50 text-emerald-600"
-                                    }`}>
-                                      <Clock size={14} />
-                                    </div>
-                                        <div>
-                                          <p className="text-xs font-bold text-slate-800">{app.time} • {app.duration}min</p>
-                                          {app.maxSessions ? (
-                                            <p className="text-[9px] font-bold text-slate-600">{app.maxSessions} sessões</p>
-                                          ) : app.startDate ? (
-                                            <p className="text-[9px] font-bold text-slate-600">Desde {format(new Date(app.startDate), "dd/MM/yy")}</p>
-                                          ) : null}
-                                          {showAllAppointments && app.patient && (
-                                            <p className="text-[9px] font-bold text-slate-500">{app.patient.name}</p>
-                                          )}
-                                    </div>
-                                  </div>
-                                    <div className="flex items-center gap-1.5">
-                                      {conflict && (
-                                        <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-200">
-                                          Conflito
-                                        </span>
-                                      )}
-                                      {(!showAllAppointments || app.patientId === undefined || app.patientId === id) && (
-                                        <button
-                                          type="button"
-                                          onClick={() => handleRemoveSlot(app.id)}
-                                          className="p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                          title="Remover"
-                                        >
-                                          <Trash2 size={13} />
-                                        </button>
-                                      )}
-                                    </div>
-                                </div>
-                              );
-                            })}
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                      <button
-                        onClick={() => { setShowAgendaModal(false); setEditingAppointment(null); setEditMode(null); }}
-                        className="px-5 py-2.5 text-xs font-black text-slate-500 hover:text-slate-700 uppercase tracking-widest transition-all"
-                      >
-                        Cancelar
-                      </button>
-                      <button
-                        onClick={handleSaveNewSlot}
-                        disabled={savingAgenda}
-                        className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-emerald-200"
-                      >
-                        {savingAgenda ? (
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <>
-                            <Check size={15} />
-                            {editingAppointment ? "Salvar alterações" : agendaFormRecurring ? "Agendar Recorrência" : "Agendar"}
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
             </div>
           )}
           </div>
         </div>
       </div>
+      </div>
+    </div>
+
+      {/* Agenda Modal */}
+      {showAgendaModal && agendaFormDate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm" onClick={() => { setShowAgendaModal(false); setEditingAppointment(null); setEditMode(null); }}>
+          <div className="bg-white rounded-3xl p-8 w-full max-w-lg mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">{editingAppointment ? "Editar Agendamento" : "Novo Agendamento"}</h3>
+                <p className="text-sm text-slate-500 font-bold mt-1">
+                  {format(agendaFormDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                </p>
+              </div>
+              <button
+                onClick={() => { setShowAgendaModal(false); setEditingAppointment(null); setEditMode(null); }}
+                className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Dia</label>
+                  <select
+                    className="input text-sm font-black py-2.5"
+                    value={agendaFormDayOfWeek ?? (agendaFormDate?.getDay() ?? 1)}
+                    onChange={e => setAgendaFormDayOfWeek(parseInt(e.target.value))}
+                  >
+                    {["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"].map((d, i) => (
+                      <option key={i} value={i}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Horário</label>
+                  <select
+                    className="input text-sm font-black py-2.5"
+                    value={agendaFormTime}
+                    onChange={e => setAgendaFormTime(e.target.value)}
+                  >
+                    {["07:00", "07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00"].map(t => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Duração</label>
+                  <select
+                    className="input text-sm font-black py-2.5"
+                    value={agendaFormDuration}
+                    onChange={e => setAgendaFormDuration(parseInt(e.target.value))}
+                  >
+                    <option value={30}>30 minutos</option>
+                    <option value={45}>45 minutos</option>
+                    <option value={50}>50 minutos</option>
+                    <option value={60}>60 minutos</option>
+                    <option value={90}>90 minutos</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <label className="flex items-center gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={agendaFormRecurring}
+                    onChange={e => setAgendaFormRecurring(e.target.checked)}
+                    className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                  />
+                  <div>
+                    <span className="text-sm font-bold text-slate-700">
+                      Repetir semanalmente
+                    </span>
+                    <p className="text-[10px] text-slate-500 font-medium">
+                      Toda {["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"][agendaFormDate.getDay()]}
+                    </p>
+                  </div>
+                </label>
+                {agendaFormRecurring && (
+                  <div className="w-28">
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nº Sessões</label>
+                    <input
+                      type="number"
+                      min={0}
+                      className="input text-xs font-black py-2 text-center"
+                      value={agendaFormMaxSessions || ""}
+                      onChange={e => setAgendaFormMaxSessions(Math.max(0, parseInt(e.target.value) || 0))}
+                      placeholder="0 = ilimitado"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+              <button
+                onClick={() => { setShowAgendaModal(false); setEditingAppointment(null); setEditMode(null); }}
+                className="px-5 py-2.5 text-xs font-black text-slate-500 hover:text-slate-700 uppercase tracking-widest transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSaveNewSlot}
+                disabled={savingAgenda}
+                className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-emerald-200"
+              >
+                {savingAgenda ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Check size={15} />
+                    {editingAppointment ? "Salvar alterações" : agendaFormRecurring ? "Agendar Recorrência" : "Agendar"}
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit Patient Modal */}
       {showEditModal && formData && (
@@ -3473,8 +3403,7 @@ export default function PatientRecord() {
           </div>
         </div>
       )}
-      </div>
-    </div>
+    </>
   );
 }
 

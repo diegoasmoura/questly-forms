@@ -95,6 +95,11 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
   - Wrapper scrollável: `flex-1 min-h-0 overflow-y-auto flex flex-col` — contém o card de detalhes do dia (quadro cinza com `bg-slate-50`, `flex-1` para preencher espaço)
   - Botões de ação: fora do scroll, em div `shrink-0` com `justify-end`, usando `btn btn-primary` (verde, "Lançar") e `btn btn-danger` (vermelho, "Limpar Agenda")
   - Espaçamento: `gap-3` no painel direito separa o quadro cinza dos botões
+- **Modal de Agendamento (Novo/Editar):**
+  - Renderizado fora do container `animate-fade-in` (que aplica `transform`, criando um containing block para `position: fixed`) para que o overlay `backdrop-blur-sm` cubra a viewport inteira, não apenas o painel direito
+  - O `return` do componente usa fragmento `<>...</>` para permitir que o modal e o grid de layout coexistam no mesmo nível
+  - Slots já configurados são exibidos apenas no painel direito (a seção "Horários já configurados para X" foi removida do modal para evitar duplicação de informação)
+  - Cada slot no modal exibe apenas horário e duração (sem label "Semanal" nem nome do paciente)
 
 ### 9. Navegação Suave
 - Hook `useNavigateWithTransition` adiciona delay de 300ms antes de trocas de página:
@@ -113,7 +118,7 @@ navigate(-1); // suporta navegação relativa
 - **Semana de Aniversário:** Visual festivo automático (dourado/confetes) em janela de 7 dias.
 - **Métricas de Engajamento:** Comparação entre assiduidade física (Sessões) e digital (Instrumentos).
 - **Tooltips Instantâneos:** Balões informativos sem delay.
-- **UX de Portals:** Modais cobrem 100% da tela.
+- **UX de Portals:** Modais usam fragmento na raiz do componente para evitar containing blocks com `transform`; o backdrop cobre 100% da viewport.
 - **Gestão UTC:** Datas em UTC, extraídas conforme fuso local.
 - **Toasts Flutuantes:** Confirmações em Emerald-600.
 - **Clinical Dashboard:** Métricas de engajamento na capa do card.
