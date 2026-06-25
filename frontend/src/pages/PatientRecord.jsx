@@ -185,6 +185,10 @@ export default function PatientRecord() {
   const [selectedCalendarDay, setSelectedCalendarDay] = useState(new Date());
   const [showMonthPicker, setShowMonthPicker] = useState(false);
   const [calendarPeriodFilter, setCalendarPeriodFilter] = useState("thisMonth");
+  const [calendarCustomMonth, setCalendarCustomMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  });
 
   const [appointments, setAppointments] = useState([]);
   const [myAppointmentIds, setMyAppointmentIds] = useState(new Set());
@@ -2185,9 +2189,12 @@ export default function PatientRecord() {
                     key={opt.key}
                     onClick={() => {
                       setCalendarPeriodFilter(opt.key);
-                      if (opt.key === "thisMonth") { setCalendarDate(new Date()); setShowMonthPicker(false); }
-                      else if (opt.key === "lastMonth") { setCalendarDate(subMonths(new Date(), 1)); setShowMonthPicker(false); }
-                      else if (opt.key === "custom") setShowMonthPicker(true);
+                      if (opt.key === "thisMonth") { setCalendarDate(new Date()); }
+                      else if (opt.key === "lastMonth") { setCalendarDate(subMonths(new Date(), 1)); }
+                      else if (opt.key === "custom") {
+                        const [y, m] = calendarCustomMonth.split("-").map(Number);
+                        setCalendarDate(new Date(y, m - 1, 1));
+                      }
                     }}
                     className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
                       calendarPeriodFilter === opt.key
@@ -2198,6 +2205,22 @@ export default function PatientRecord() {
                     {opt.label}
                   </button>
                 ))}
+                {calendarPeriodFilter === "custom" && (
+                  <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                    <button onClick={() => { const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronLeft size={16} /></button>
+                    <select value={calendarCustomMonth} onChange={e => { setCalendarCustomMonth(e.target.value); const [y, m] = e.target.value.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
+                      {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
+                        const monthVal = i + 1;
+                        const currentYear = calendarCustomMonth.split("-")[0];
+                        return <option key={`${currentYear}-${String(monthVal).padStart(2, "0")}`} value={`${currentYear}-${String(monthVal).padStart(2, "0")}`}>{name}</option>;
+                      })}
+                    </select>
+                    <select value={calendarCustomMonth.split("-")[0]} onChange={e => { const month = calendarCustomMonth.split("-")[1]; const val = `${e.target.value}-${month}`; setCalendarCustomMonth(val); const [y, m] = val.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
+                      {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year}>{year}</option>; })}
+                    </select>
+                    <button onClick={() => { const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronRight size={16} /></button>
+                  </div>
+                )}
               </div>
 
               {/* Calendar Card */}
