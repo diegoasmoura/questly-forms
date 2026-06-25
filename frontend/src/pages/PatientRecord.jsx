@@ -1806,35 +1806,6 @@ export default function PatientRecord() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 shrink-0">
-                <button
-                  onClick={() => {
-                    setPaymentFormData({
-                      amount: "",
-                      paymentDate: new Date().toISOString().split('T')[0],
-                      method: "Pix",
-                      notes: "",
-                      receiptIssued: false,
-                      receiptFile: null,
-                      existingReceiptAttachmentId: null,
-                      existingReceiptFilename: null
-                    });
-                    setSelectedAttendances([]);
-                    setShowPaymentModal(true);
-                  }}
-                  className="md:col-start-4 card p-3 flex items-center gap-3 border-l-4 border-slate-900 bg-slate-900 text-white hover:bg-slate-800 transition-all text-left group"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
-                    <Plus size={18} />
-                  </div>
-                  <div>
-                    <p className="text-lg font-black uppercase tracking-tight">Lançar</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Novo bloco de sessões</p>
-                  </div>
-                </button>
-              </div>
-
               {/* Filtro de Período */}
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Período</span>
@@ -1876,18 +1847,9 @@ export default function PatientRecord() {
               </div>
 
               {/* Payments History Table */}
-              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden">
-                <div className="flex items-center justify-between mb-6 shrink-0">
+              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-3">
+                <div className="flex items-center justify-between shrink-0">
                   <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Histórico de Lançamentos</h3>
-                  {payments.length > 0 && (
-                    <button 
-                      onClick={() => handleGenerateAllReceipts()}
-                      className="btn btn-primary flex items-center gap-2 text-xs"
-                    >
-                      <File size={14} />
-                      Gerar Relatório Completo
-                    </button>
-                  )}
                 </div>
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
                 {loadingPayments ? (
@@ -2010,6 +1972,35 @@ export default function PatientRecord() {
                     </table>
                   </div>
                 )}
+                </div>
+                {/* Action Buttons */}
+                <div className="flex items-center gap-3 shrink-0 justify-end">
+                  {payments.length > 0 && (
+                    <button onClick={() => handleGenerateAllReceipts()} className="btn btn-primary flex items-center gap-2 text-xs">
+                      <File size={14} />
+                      Gerar Relatório Completo
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      setPaymentFormData({
+                        amount: "",
+                        paymentDate: new Date().toISOString().split('T')[0],
+                        method: "Pix",
+                        notes: "",
+                        receiptIssued: false,
+                        receiptFile: null,
+                        existingReceiptAttachmentId: null,
+                        existingReceiptFilename: null
+                      });
+                      setSelectedAttendances([]);
+                      setShowPaymentModal(true);
+                    }}
+                    className="btn btn-primary flex items-center gap-2 text-xs"
+                  >
+                    <Plus size={14} />
+                    Lançar
+                  </button>
                 </div>
               </div>
             </div>

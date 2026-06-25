@@ -55,6 +55,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Relatórios Avançados:** Uso de `jspdf-autotable` para relatórios consolidados com agrupamento por `rowSpan`.
 - **Identidade Visual:** Favicon personalizado "Q" e título profissional na aba do navegador.
 - **Status do Recibo:** Controle visual de emissão (Emitido, Com Anexo, Pendente).
+- **Botões no Card Financeiro:** "Lançar" e "Gerar Relatório Completo" realocados para fora do quadrante cinza, alinhados à direita com `justify-end` (mesmo padrão da aba Agenda).
 
 ### 4. Operações Individuais (Agenda)
 - **DELETE /:id** — exclui um agendamento individual (sem cascata em attendances)
