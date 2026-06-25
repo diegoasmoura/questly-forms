@@ -1467,6 +1467,46 @@ export default function PatientRecord() {
           {/* Sessions/Frequency Tab */}
           {activeTab === "sessions" && (
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
+              {/* Stats Summary */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-500">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <UserCheck size={18} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">{filteredAttendances.filter(a => a.status === 'presente').length}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Presenças</p>
+                  </div>
+                </div>
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-red-500">
+                  <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-600">
+                    <UserX size={18} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">{filteredAttendances.filter(a => a.status === 'falta').length}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Faltas</p>
+                  </div>
+                </div>
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-500">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                    <AlertCircle size={18} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">{filteredAttendances.filter(a => a.status === 'justificada').length}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Justificadas</p>
+                  </div>
+                </div>
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-500">
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
+                    <Activity size={18} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">{attendances.length}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Sessões</p>
+                  </div>
+                </div>
+              </div>
+
               {/* Filtro de Período */}
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Período</span>
@@ -1505,46 +1545,6 @@ export default function PatientRecord() {
                     <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronRight size={16} /></button>
                   </div>
                 )}
-              </div>
-
-              {/* Stats Summary */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-500">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                    <UserCheck size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-black text-slate-800">{filteredAttendances.filter(a => a.status === 'presente').length}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Presenças</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-red-500">
-                  <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-600">
-                    <UserX size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-black text-slate-800">{filteredAttendances.filter(a => a.status === 'falta').length}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Faltas</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-500">
-                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
-                    <AlertCircle size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-black text-slate-800">{filteredAttendances.filter(a => a.status === 'justificada').length}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Justificadas</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-500">
-                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
-                    <Activity size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-black text-slate-800">{attendances.length}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Sessões</p>
-                  </div>
-                </div>
               </div>
 
               {/* Timeline List */}
