@@ -1430,7 +1430,7 @@ export default function PatientRecord() {
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Stats Summary */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-500">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-400">
                   <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                     <UserCheck size={18} />
                   </div>
@@ -1439,7 +1439,7 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Presenças</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-red-500">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-red-400">
                   <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-600">
                     <UserX size={18} />
                   </div>
@@ -1448,7 +1448,7 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Faltas</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-500">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-400">
                   <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
                     <AlertCircle size={18} />
                   </div>
@@ -1457,7 +1457,7 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Justificadas</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-500">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-400">
                   <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
                     <Activity size={18} />
                   </div>
@@ -1647,7 +1647,7 @@ export default function PatientRecord() {
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Stats Summary */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-500">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-400">
                   <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                     <Calendar size={18} />
                   </div>
@@ -1656,7 +1656,7 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Horários Ativos</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-blue-500">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-blue-400">
                   <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
                     <Activity size={18} />
                   </div>
@@ -1665,7 +1665,7 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sessões no Mês</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-500">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-400">
                   <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
                     <Clock size={18} />
                   </div>
@@ -1678,7 +1678,7 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Próxima Sessão</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-500">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-400">
                   <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
                     <RefreshCcw size={18} />
                   </div>
@@ -2058,7 +2058,7 @@ export default function PatientRecord() {
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Financial Dashboard */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-500">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-400">
                   <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                     <DollarSign size={18} />
                   </div>
@@ -2069,7 +2069,7 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Pago</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-500">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-400">
                   <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
                     <Clock size={18} />
                   </div>
@@ -2080,7 +2080,7 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sessões Pendentes</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-blue-500">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-blue-400">
                   <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
                     <Receipt size={18} />
                   </div>
@@ -2089,7 +2089,7 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lançamentos Realizados</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-500">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-400">
                   <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
                     <CreditCard size={18} />
                   </div>
@@ -2321,7 +2321,7 @@ export default function PatientRecord() {
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Stats Summary */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-500">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-400">
                   <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
                     <Send size={18} />
                   </div>
@@ -2330,7 +2330,7 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pendentes</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-500">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-400">
                   <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                     <Check size={18} />
                   </div>
@@ -2339,7 +2339,7 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Respondidos</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-blue-500">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-blue-400">
                   <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
                     <TrendingUp size={18} />
                   </div>
