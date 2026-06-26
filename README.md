@@ -56,7 +56,8 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Identidade Visual:** Favicon personalizado "Q" e título profissional na aba do navegador.
 - **Status do Recibo:** Controle visual de emissão (Emitido, Com Anexo, Pendente).
 - **Botões no Card Financeiro:** "Lançar" e "Gerar Relatório Completo" realocados para fora do quadrante cinza, alinhados à direita com `justify-end` (mesmo padrão da aba Agenda).
-- **Filtro de Período Compartilhado:** Os filtros "Personalizado" das abas Frequência, Financeiro e Agenda são resetados para "Este Mês" sempre que o usuário alterna entre abas, evitando que um mês selecionado em uma aba persista ao mudar de contexto.
+- **Reset de Filtro entre Abas:** Os filtros "Personalizado" das abas Frequência, Financeiro e Agenda são resetados sincronamente via `handleTabChange` ao trocar de aba, evitando que um mês selecionado persista entre contextos.
+- **Reset do Seletor Custom:** Ao clicar em "Este Mês" ou "Mês Anterior", o valor interno do seletor "Personalizado" (`customMonth`/`calendarCustomMonth`) também é atualizado. Assim, ao reabrir "Personalizado", o mês exibido corresponde ao filtro ativo.
 
 ### 4. Operações Individuais (Agenda)
 - **DELETE /:id** — exclui um agendamento individual (sem cascata em attendances)

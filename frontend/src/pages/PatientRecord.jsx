@@ -166,17 +166,16 @@ export default function PatientRecord() {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
   // Reseta os filtros ao trocar de aba para evitar que "Personalizado" persista entre abas
-  useEffect(() => {
+  const handleTabChange = (tab) => {
     setPeriodFilter("thisMonth");
     setCalendarPeriodFilter("thisMonth");
     const now = new Date();
     const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
     setCustomMonth(currentMonth);
     setCalendarCustomMonth(currentMonth);
-    if (activeTab === "settings" || activeTab === "sessions" || activeTab === "financial") {
-      setCalendarDate(new Date());
-    }
-  }, [activeTab]);
+    setCalendarDate(new Date());
+    setActiveTab(tab);
+  };
 
   const filteredAttendances = useMemo(() => {
     const now = new Date();
@@ -548,7 +547,7 @@ export default function PatientRecord() {
     loadForms();
     const params = new URLSearchParams(location.search);
     const tab = params.get("tab");
-    if (tab) setActiveTab(tab);
+    if (tab) handleTabChange(tab);
   }, [id, location.search]);
 
   useEffect(() => {
@@ -1391,31 +1390,31 @@ export default function PatientRecord() {
               <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-emerald-100 shadow-sm">
                 <TabButton
                   active={activeTab === "sessions"}
-                  onClick={() => setActiveTab("sessions")}
+                  onClick={() => handleTabChange("sessions")}
                   icon={<Clock size={14} />}
                   label="Frequência"
                 />
                 <TabButton
                   active={activeTab === "financial"}
-                  onClick={() => setActiveTab("financial")}
+                  onClick={() => handleTabChange("financial")}
                   icon={<DollarSign size={14} />}
                   label="Financeiro"
                 />
                 <TabButton
                   active={activeTab === "settings"}
-                  onClick={() => setActiveTab("settings")}
+                  onClick={() => handleTabChange("settings")}
                   icon={<Calendar size={14} />}
                   label="Agenda"
                 />
                 <TabButton
                   active={activeTab === "share"}
-                  onClick={() => setActiveTab("share")}
+                  onClick={() => handleTabChange("share")}
                   icon={<Share2 size={14} />}
                   label="Instrumentos"
                 />
                 <TabButton
                   active={activeTab === "notes"}
-                  onClick={() => setActiveTab("notes")}
+                  onClick={() => handleTabChange("notes")}
                   icon={<FileText size={14} />}
                   label="Prontuário"
                 />
@@ -1644,7 +1643,16 @@ export default function PatientRecord() {
                 ].map(opt => (
                   <button
                     key={opt.key}
-                    onClick={() => setPeriodFilter(opt.key)}
+                    onClick={() => {
+                      setPeriodFilter(opt.key);
+                      const now = new Date();
+                      if (opt.key === "thisMonth") {
+                        setCustomMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
+                      } else if (opt.key === "lastMonth") {
+                        const d = subMonths(now, 1);
+                        setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+                      }
+                    }}
                     className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
                       periodFilter === opt.key
                         ? "bg-emerald-600 text-white shadow-md"
@@ -1863,7 +1871,16 @@ export default function PatientRecord() {
                 ].map(opt => (
                   <button
                     key={opt.key}
-                    onClick={() => setPeriodFilter(opt.key)}
+                    onClick={() => {
+                      setPeriodFilter(opt.key);
+                      const now = new Date();
+                      if (opt.key === "thisMonth") {
+                        setCustomMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
+                      } else if (opt.key === "lastMonth") {
+                        const d = subMonths(now, 1);
+                        setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+                      }
+                    }}
                     className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
                       periodFilter === opt.key
                         ? "bg-emerald-600 text-white shadow-md"
@@ -2347,9 +2364,15 @@ export default function PatientRecord() {
                     key={opt.key}
                     onClick={() => {
                       setCalendarPeriodFilter(opt.key);
-                      if (opt.key === "thisMonth") { setCalendarDate(new Date()); }
-                      else if (opt.key === "lastMonth") { setCalendarDate(subMonths(new Date(), 1)); }
-                      else if (opt.key === "custom") {
+                      const now = new Date();
+                      if (opt.key === "thisMonth") {
+                        setCalendarDate(now);
+                        setCalendarCustomMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
+                      } else if (opt.key === "lastMonth") {
+                        const d = subMonths(now, 1);
+                        setCalendarDate(d);
+                        setCalendarCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+                      } else if (opt.key === "custom") {
                         const [y, m] = calendarCustomMonth.split("-").map(Number);
                         setCalendarDate(new Date(y, m - 1, 1));
                       }
