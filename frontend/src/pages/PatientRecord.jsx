@@ -121,7 +121,8 @@ import {
   DollarSign,
   CreditCard,
   Receipt,
-  Save
+  Save,
+  Send
 } from "lucide-react";
 
 export default function PatientRecord() {
@@ -230,33 +231,6 @@ export default function PatientRecord() {
       }
     });
   }, [payments, periodFilter, customMonth]);
-
-  const filteredLinks = useMemo(() => {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-    return patientShareLinks.filter(l => {
-      const d = new Date(l.createdAt);
-      switch (periodFilter) {
-        case "thisMonth": return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
-        case "lastMonth": {
-          const lm = currentMonth === 0 ? 11 : currentMonth - 1;
-          const ly = currentMonth === 0 ? currentYear - 1 : currentYear;
-          return d.getFullYear() === ly && d.getMonth() === lm;
-        }
-        case "last3Months": {
-          const threeMonthsAgo = new Date(now);
-          threeMonthsAgo.setMonth(now.getMonth() - 3);
-          return d >= threeMonthsAgo;
-        }
-        case "custom": {
-          const [year, month] = customMonth.split("-").map(Number);
-          return d.getFullYear() === year && d.getMonth() === month - 1;
-        }
-        default: return true;
-      }
-    });
-  }, [patientShareLinks, periodFilter, customMonth]);
 
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedCalendarDay, setSelectedCalendarDay] = useState(new Date());
@@ -566,6 +540,33 @@ export default function PatientRecord() {
   const [loadingLinks, setLoadingLinks] = useState(false);
   const [existingLinkForForm, setExistingLinkForForm] = useState(null);
   const [forceCreateNew, setForceCreateNew] = useState(false);
+
+  const filteredLinks = useMemo(() => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    return patientShareLinks.filter(l => {
+      const d = new Date(l.createdAt);
+      switch (periodFilter) {
+        case "thisMonth": return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+        case "lastMonth": {
+          const lm = currentMonth === 0 ? 11 : currentMonth - 1;
+          const ly = currentMonth === 0 ? currentYear - 1 : currentYear;
+          return d.getFullYear() === ly && d.getMonth() === lm;
+        }
+        case "last3Months": {
+          const threeMonthsAgo = new Date(now);
+          threeMonthsAgo.setMonth(now.getMonth() - 3);
+          return d >= threeMonthsAgo;
+        }
+        case "custom": {
+          const [year, month] = customMonth.split("-").map(Number);
+          return d.getFullYear() === year && d.getMonth() === month - 1;
+        }
+        default: return true;
+      }
+    });
+  }, [patientShareLinks, periodFilter, customMonth]);
 
   const location = useLocation();
 
