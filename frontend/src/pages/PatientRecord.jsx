@@ -1422,16 +1422,16 @@ export default function PatientRecord() {
                   label="Frequência"
                 />
                 <TabButton
-                  active={activeTab === "financial"}
-                  onClick={() => handleTabChange("financial")}
-                  icon={<DollarSign size={14} />}
-                  label="Financeiro"
-                />
-                <TabButton
                   active={activeTab === "settings"}
                   onClick={() => handleTabChange("settings")}
                   icon={<Calendar size={14} />}
                   label="Agenda"
+                />
+                <TabButton
+                  active={activeTab === "financial"}
+                  onClick={() => handleTabChange("financial")}
+                  icon={<DollarSign size={14} />}
+                  label="Financeiro"
                 />
                 <TabButton
                   active={activeTab === "share"}
@@ -1451,245 +1451,7 @@ export default function PatientRecord() {
 
           {/* Tab Content */}
           <div className="flex-1 flex flex-col min-h-0">
-{/* Share Tab */}
-          {activeTab === "share" && (
-            <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
-              {/* Stats Summary */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-500">
-                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
-                    <Send size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-black text-slate-800">{patientShareLinks.filter(l => l.status === "PENDENTE").length}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pendentes</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-500">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                    <Check size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-black text-slate-800">{patientShareLinks.filter(l => l.status === "RESPONDIDO").length}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Respondidos</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-500">
-                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
-                    <AlertCircle size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-black text-slate-800">{patientShareLinks.filter(l => l.status === "EXPIRADO").length}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expirados</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-violet-500">
-                  <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600">
-                    <TrendingUp size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-black text-slate-800">
-                      {patientShareLinks.length > 0
-                        ? Math.round((patientShareLinks.filter(l => l.status === "RESPONDIDO").length / patientShareLinks.length) * 100)
-                        : 0}%
-                    </p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Adesão</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Filtro de Período */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Período</span>
-                {[
-                  { key: "thisMonth", label: "Este Mês" },
-                  { key: "lastMonth", label: "Mês Anterior" },
-                  { key: "last3Months", label: "Últimos 3 Meses" },
-                  { key: "all", label: "Todo Histórico" },
-                  { key: "custom", label: "Personalizado" },
-                ].map(opt => (
-                  <button
-                    key={opt.key}
-                    onClick={() => {
-                      setPeriodFilter(opt.key);
-                      const now = new Date();
-                      if (opt.key === "thisMonth") {
-                        setCustomMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
-                      } else if (opt.key === "lastMonth") {
-                        const d = subMonths(now, 1);
-                        setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-                      }
-                    }}
-                    className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
-                      periodFilter === opt.key
-                        ? "bg-emerald-600 text-white shadow-md"
-                        : "bg-white text-slate-500 border border-slate-200 hover:border-emerald-200 hover:text-emerald-600"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-                {periodFilter === "custom" && (
-                  <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronLeft size={16} /></button>
-                    <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
-                      {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
-                        const monthVal = i + 1;
-                        const currentYear = customMonth.split("-")[0];
-                        return <option key={`${currentYear}-${String(monthVal).padStart(2, "0")}`} value={`${currentYear}-${String(monthVal).padStart(2, "0")}`}>{name}</option>;
-                      })}
-                    </select>
-                    <select value={customMonth.split("-")[0]} onChange={e => { const month = customMonth.split("-")[1]; setCustomMonth(`${e.target.value}-${month}`); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
-                      {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year}>{year}</option>; })}
-                    </select>
-                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronRight size={16} /></button>
-                  </div>
-                )}
-              </div>
-
-              {/* Instrumentos List */}
-              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-3">
-                <div className="flex items-center justify-between shrink-0">
-                  <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Compartilhar Instrumentos</h3>
-                </div>
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
-                {loadingLinks ? (
-                  <div className="text-center py-20 opacity-50 flex-1 flex items-center justify-center">
-                    <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                    <p className="text-sm font-bold uppercase tracking-widest">Carregando instrumentos...</p>
-                  </div>
-                ) : filteredLinks.length === 0 ? (
-                  <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
-                    <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-5">
-                      <Share2 size={32} className="text-slate-300" />
-                    </div>
-                    <h4 className="text-lg font-black text-slate-800 mb-1">Nenhum registro no período</h4>
-                    <p className="text-xs font-bold text-slate-500 max-w-[240px] leading-relaxed">
-                      Registros de instrumentos aparecerão aqui conforme você enviar instrumentos para este paciente.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4 overflow-y-auto min-h-0">
-                    {filteredLinks.map(link => (
-                      <ShareLinkCard
-                        key={link.id}
-                        link={link}
-                        onExtend={handleExtendLink}
-                        onRevoke={handleRevokeLink}
-                        onCopy={handleCopyLink}
-                      />
-                    ))}
-                  </div>
-                )}
-                </div>
-                {/* Action Buttons */}
-                <div className="flex items-center gap-3 shrink-0 justify-end">
-                  <button onClick={() => setShowShareModal(true)} className="btn btn-primary text-xs">
-                    <Plus size={14} /> Enviar
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Prontuário Tab */}
-          {activeTab === "notes" && (
-            <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
-              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-3">
-                <div className="flex items-center justify-between shrink-0">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                      <FileText size={20} />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Prontuário</h3>
-                      <p className="text-xs text-slate-500">Anotações e documentos</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
-                  <div className="flex-1 flex flex-col min-h-0">
-                    <div className="shrink-0">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <Paperclip size={14} className="text-slate-400" />
-                          <h4 className="text-xs font-bold text-slate-600 uppercase tracking-widest">Laudos e Anexos</h4>
-                          {attachments.length > 0 && (
-                            <span className="px-2 py-0.5 bg-white text-slate-500 text-[10px] font-bold rounded-full">
-                              {attachments.length}
-                            </span>
-                          )}
-                        </div>
-                        <label className="text-[11px] font-bold uppercase text-emerald-600 hover:text-emerald-700 cursor-pointer transition-colors flex items-center gap-1">
-                          <Plus size={14} />
-                          {uploading ? 'Enviando...' : 'Anexar'}
-                          <input type="file" multiple className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" disabled={uploading} onChange={handleUploadAttachment} />
-                        </label>
-                      </div>
-
-                      {loadingAttachments ? (
-                        <div className="text-center py-6 text-slate-400">
-                          <div className="w-5 h-5 border-2 border-slate-300 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                          <p className="text-[10px] font-bold uppercase tracking-widest">Carregando anexos...</p>
-                        </div>
-                      ) : attachments.length === 0 ? (
-                        <div className="text-center py-6 text-slate-400 bg-white/60 rounded-xl border-2 border-dashed border-slate-200">
-                          <File size={24} className="mx-auto mb-2 opacity-50" />
-                          <p className="text-xs font-medium">Nenhum anexo</p>
-                          <p className="text-[10px] mt-0.5">PDF, JPG, PNG, DOC (máx. 10MB)</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-2 max-h-40 overflow-y-auto">
-                          {attachments.map((att) => (
-                            <div key={att.id} className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200">
-                              <div className="flex items-center gap-2.5 min-w-0">
-                                <File size={16} className="text-slate-400 shrink-0" />
-                                <div className="min-w-0">
-                                  <p className="text-xs font-medium text-slate-700 truncate">{att.filename}</p>
-                                  <p className="text-[10px] text-slate-400">{(att.size / 1024).toFixed(1)} KB</p>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-0.5">
-                                <button type="button" onClick={() => handleDownloadAttachment(att)} className="p-1.5 hover:bg-emerald-50 rounded text-slate-400 hover:text-emerald-600 transition-colors" title="Baixar">
-                                  <Download size={14} />
-                                </button>
-                                <button type="button" onClick={() => handleDeleteAttachment(att.id)} className="p-1.5 hover:bg-red-50 rounded text-slate-400 hover:text-red-500 transition-colors" title="Excluir">
-                                  <Trash2 size={14} />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                          <label className="flex items-center justify-center gap-1.5 py-2.5 text-xs text-slate-500 hover:text-emerald-600 cursor-pointer transition-colors rounded-lg border border-dashed border-slate-200 bg-white/60">
-                            <Plus size={14} />
-                            <span className="font-medium">Adicionar mais</span>
-                            <input type="file" multiple className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" disabled={uploading} onChange={handleUploadAttachment} />
-                          </label>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="mt-4 pt-4 border-t border-slate-200/60 flex-1 flex flex-col min-h-0">
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Anotações</label>
-                      <textarea 
-                        className="input text-sm flex-1 resize-none" 
-                        value={formData?.notes || ''} 
-                        onChange={e => setFormData(prev => prev ? { ...prev, notes: e.target.value } : null)} 
-                        placeholder="Anotações relevantes sobre o paciente..."
-                      />
-                    </div>
-                  </div>
-                </div>
-                {/* Action Buttons */}
-                <div className="flex items-center gap-3 shrink-0 justify-end">
-                  <button className="btn btn-primary text-xs">
-                    <Save size={14} /> Salvar
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Sessions/Frequency Tab */}
+           {/* Sessions/Frequency Tab */}
           {activeTab === "sessions" && (
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Stats Summary */}
@@ -1820,12 +1582,10 @@ export default function PatientRecord() {
 
                       return (
                         <div key={att.id} className="relative pl-12 pb-10 group last:pb-0">
-                          {/* Timeline Line Connector for Chain */}
                           {hasFilho && (
                             <div className="absolute left-[19px] top-10 bottom-0 w-0.5 bg-amber-400/40 z-0" />
                           )}
                           
-                          {/* Timeline Dot */}
                           <div className={`absolute left-0 top-1 w-10 h-10 rounded-full border-4 border-white shadow-sm flex items-center justify-center z-10 transition-transform group-hover:scale-110 ${config.color} text-white ${isFilho ? 'ring-2 ring-amber-400 ring-offset-2' : ''}`}>
                             {config.icon}
                           </div>
@@ -1905,6 +1665,417 @@ export default function PatientRecord() {
                 )}
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Agenda Tab */}
+          {activeTab === "settings" && (
+            <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
+              {/* Stats Summary */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-500">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <Calendar size={18} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">{agendaStats.totalActive}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Horários Ativos</p>
+                  </div>
+                </div>
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-sky-500">
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-600">
+                    <Activity size={18} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">{agendaStats.thisMonthCount}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sessões no Mês</p>
+                  </div>
+                </div>
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-violet-500">
+                  <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600">
+                    <Clock size={18} />
+                  </div>
+                  <div>
+                    <p className="text-lg font-black text-slate-800 truncate">
+                      {agendaStats.nextSession
+                        ? format(agendaStats.nextSession.date, "dd/MM", { locale: ptBR }) + " • " + agendaStats.nextSession.time
+                        : "—"}
+                    </p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Próxima Sessão</p>
+                  </div>
+                </div>
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-500">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                    <RefreshCcw size={18} />
+                  </div>
+                  <div>
+                    <p className="text-lg font-black text-slate-800 truncate">
+                      {agendaStats.recurringSummary || "—"}
+                    </p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Frequência Semanal</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Filtro de Período */}
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Período</span>
+                {[
+                  { key: "thisMonth", label: "Este Mês" },
+                  { key: "lastMonth", label: "Mês Anterior" },
+                  { key: "custom", label: "Personalizado" },
+                ].map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => {
+                      setCalendarPeriodFilter(opt.key);
+                      const now = new Date();
+                      if (opt.key === "thisMonth") {
+                        setCalendarDate(now);
+                        setCalendarCustomMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
+                      } else if (opt.key === "lastMonth") {
+                        const d = subMonths(now, 1);
+                        setCalendarDate(d);
+                        setCalendarCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+                      } else if (opt.key === "custom") {
+                        const [y, m] = calendarCustomMonth.split("-").map(Number);
+                        setCalendarDate(new Date(y, m - 1, 1));
+                      }
+                    }}
+                    className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
+                      calendarPeriodFilter === opt.key
+                        ? "bg-emerald-600 text-white shadow-md"
+                        : "bg-white text-slate-500 border border-slate-200 hover:border-emerald-200 hover:text-emerald-600"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+                {calendarPeriodFilter === "custom" && (
+                  <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                    <button onClick={() => { const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronLeft size={16} /></button>
+                    <select value={calendarCustomMonth} onChange={e => { setCalendarCustomMonth(e.target.value); const [y, m] = e.target.value.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
+                      {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
+                        const monthVal = i + 1;
+                        const currentYear = calendarCustomMonth.split("-")[0];
+                        return <option key={`${currentYear}-${String(monthVal).padStart(2, "0")}`} value={`${currentYear}-${String(monthVal).padStart(2, "0")}`}>{name}</option>;
+                      })}
+                    </select>
+                    <select value={calendarCustomMonth.split("-")[0]} onChange={e => { const month = calendarCustomMonth.split("-")[1]; const val = `${e.target.value}-${month}`; setCalendarCustomMonth(val); const [y, m] = val.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
+                      {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year}>{year}</option>; })}
+                    </select>
+                    <button onClick={() => { const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronRight size={16} /></button>
+                  </div>
+                )}
+              </div>
+
+              {/* Calendar Card */}
+              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden">
+                {loadingAppointments ? (
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                      <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Carregando agenda...</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex-1 flex gap-6 min-h-0 overflow-hidden">
+                    {/* Left: Calendar */}
+                      <div className="w-[60%] flex flex-col min-h-0">
+                        <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight mb-3 shrink-0">Calendário de Sessões</h3>
+                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col flex-1 min-h-0 overflow-hidden">
+
+                        <DayPicker
+                          month={calendarDate}
+                        onMonthChange={setCalendarDate}
+                        onDayClick={(day) => handleDayClick(day)}
+                        locale={ptBR}
+                        modifiers={{
+                          mine: sessionModifiers.mine,
+                          others: sessionModifiers.others,
+                          conflict: sessionModifiers.conflictDates,
+                        }}
+                        modifiersClassNames={{}}
+                        classNames={{
+                          months: "flex flex-col flex-1 min-h-0",
+                          month: "w-full flex flex-col flex-1 min-h-0",
+                          month_grid: "w-full flex-1 table-fixed border border-slate-300 rounded-xl overflow-hidden",
+                          weekdays: "bg-slate-100",
+                          weekday: "py-3 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-b border-slate-200 last:border-r-0",
+                          week: "h-0",
+                          day: "text-center border-r border-b border-slate-200 last:border-r-0 p-0 h-0",
+                          day_button: "relative w-full h-full flex items-center justify-center text-sm font-bold text-slate-700 cursor-pointer transition-colors",
+                          today: "font-black",
+                          outside: "text-slate-300",
+                          disabled: "cursor-default opacity-40",
+                        }}
+                        components={{
+                          DayButton: ({ day, modifiers, children, ...props }) => {
+                            const date = day.date;
+                            const isToday = modifiers?.today;
+                            const dayStr = format(date, "yyyy-MM-dd");
+                            const selectedStr = selectedCalendarDay ? format(selectedCalendarDay, "yyyy-MM-dd") : null;
+
+                            let bgClass = "";
+                            if (modifiers?.conflict) bgClass = "bg-red-50";
+                            else if (modifiers?.others) bgClass = "bg-amber-50";
+                            else if (modifiers?.mine) bgClass = "bg-emerald-50";
+
+                            return (
+                              <button {...props} className={`relative w-full h-full flex items-center justify-center text-sm font-bold cursor-pointer transition-colors ${isToday ? "" : "hover:bg-slate-100"} ${bgClass}`}>
+                                {modifiers?.mine && showAllAppointments && (
+                                  <div className="absolute bottom-1 left-1.5 right-1.5 h-[3px] rounded-full bg-emerald-500" />
+                                )}
+                                <span className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-black ${
+                                  isToday ? "bg-slate-800 text-white" : dayStr === selectedStr ? "ring-2 ring-slate-400" : "text-slate-700"
+                                }`}>
+                                  {date.getDate()}
+                                </span>
+                              </button>
+                            );
+                          },
+                          MonthCaption: ({ calendarMonth }) => (
+                            <div className="shrink-0 mb-3">
+                              <p className="text-sm font-bold text-slate-600 capitalize">
+                                {format(calendarMonth.date, "MMMM 'de' yyyy", { locale: ptBR })}
+                              </p>
+                            </div>
+                          ),
+                          Nav: () => null,
+                          Root: ({ children, ...props }) => (
+                            <div {...props} className="flex-1 flex flex-col min-h-0" onClick={() => showMonthPicker && setShowMonthPicker(false)}>
+                              {children}
+                            </div>
+                          ),
+                        }}
+                      />
+
+                      {/* Legend */}
+                      <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-slate-100 shrink-0">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-3 h-3 rounded bg-emerald-50 border border-emerald-300" />
+                          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{patient?.name?.split(" ")[0] || "Paciente"}</span>
+                        </div>
+                        {showAllAppointments && (
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3 h-3 rounded bg-amber-50 border border-amber-300" />
+                            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Outros</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-3 h-3 rounded bg-red-50 border border-red-300" />
+                          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Conflito</span>
+                        </div>
+                        </div>
+                      </div>
+                      </div>
+
+                    {/* Right: Agenda */}
+                    <div className="w-[40%] flex flex-col pr-2 gap-3">
+                      <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight shrink-0">Agendamentos</h3>
+                      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
+                      {showEditChoice && editingAppointment && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm" onClick={() => { setShowEditChoice(false); setEditingAppointment(null); }}>
+                          <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
+                            <div className="text-center mb-6">
+                              <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                                <Pencil size={22} className="text-slate-700" />
+                              </div>
+                              <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Editar horário</h3>
+                              <p className="text-sm text-slate-500 font-bold mt-1">
+                                {format(editChoiceDate, "EEEE, d 'de' MMMM", { locale: ptBR })} às {editingAppointment.time}
+                              </p>
+                              <p className="text-xs text-slate-400 mt-2">
+                                Este horário se repete semanalmente. Como deseja editar?
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              <button
+                                onClick={handleEditSingle}
+                                className="w-full py-3 px-4 bg-slate-100 text-slate-700 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                              >
+                                Apenas esta data
+                              </button>
+                              <button
+                                onClick={handleEditFuture}
+                                className="w-full py-3 px-4 bg-slate-900 text-white rounded-xl text-sm font-black uppercase tracking-widest hover:bg-slate-800 transition-all"
+                              >
+                                Esta e todas futuras
+                              </button>
+                            </div>
+                            <button
+                              onClick={() => { setShowEditChoice(false); setEditingAppointment(null); }}
+                              className="w-full mt-3 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedCalendarDay ? (
+                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
+                          <div className="flex items-start justify-between mb-3 shrink-0">
+                            <div>
+                              <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">
+                                {format(selectedCalendarDay, "EEEE", { locale: ptBR })}
+                              </h4>
+                              <p className="text-xs font-bold text-slate-500 mt-0.5">
+                                {format(selectedCalendarDay, "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="space-y-1.5 overflow-y-auto min-h-0">
+                            {appointments
+                              .filter(a => {
+                                const dateStr = format(selectedCalendarDay, "yyyy-MM-dd");
+                                if (a.scheduledDate) {
+                                  if (dateStr !== a.scheduledDate.split("T")[0]) return false;
+                                } else {
+                                  const dayOfWeek = selectedCalendarDay.getDay();
+                                  if (a.dayOfWeek !== dayOfWeek) return false;
+                                }
+                                if (a.endDate && dateStr > a.endDate.split("T")[0]) return false;
+                                if (a.skipDates && Array.isArray(a.skipDates) && a.skipDates.includes(dateStr)) return false;
+                                if (a.startDate && dateStr < a.startDate.split("T")[0]) return false;
+                                if (a.maxSessions && a.maxSessions > 0 && a.startDate) {
+                                  const start = parseLocalDateStr(a.startDate);
+                                  let count = 0;
+                                  const cursor = new Date(start);
+                                  while (cursor <= selectedCalendarDay) {
+                                    if (cursor.getDay() === a.dayOfWeek) count++;
+                                    cursor.setDate(cursor.getDate() + 7);
+                                  }
+                                  if (count > a.maxSessions) return false;
+                                }
+                                return true;
+                              })
+                              .sort((a, b) => (a.time || "").localeCompare(b.time || ""))
+                              .map(app => {
+                                const conflict = conflicts[app.id];
+                                const appPatientId = app.patient?.id ?? app.patientId;
+                                const isOtherPatient = appPatientId && appPatientId !== id;
+                                return (
+                                  <div key={app.id} className={`flex items-center gap-2 p-2.5 rounded-xl border ${
+                                    conflict ? "border-red-200 bg-red-50/30" : isOtherPatient ? "border-amber-200 bg-amber-50/30" : "border-slate-200 bg-white"
+                                  }`}>
+                                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] shrink-0 ${
+                                        conflict ? "bg-red-100 text-red-600" : isOtherPatient ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
+                                      }`}>
+                                        <Clock size={14} />
+                                      </div>
+                                      <div className="min-w-0">
+                                        <p className={`text-xs font-bold truncate ${isOtherPatient ? "text-amber-600" : "text-emerald-700"}`}>
+                                          {(isOtherPatient ? app.patient?.name : patient?.name)?.split(" ")[0] || "Paciente"}
+                                        </p>
+                                        <p className="text-[9px] font-bold text-slate-500">{app.maxSessions ? `${app.maxSessions} sessões` : app.startDate ? "Semanal" : app.scheduledDate ? format(new Date(app.scheduledDate), "dd/MM/yy") : "Avulso"}</p>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0 ml-2">
+                                      <span className="text-xs font-black text-slate-700 whitespace-nowrap">{app.time} • {app.duration}min</span>
+                                      {conflict && (
+                                        <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-200">
+                                          Conflito
+                                        </span>
+                                      )}
+                                      {!isOtherPatient && (
+                                        <button
+                                          type="button"
+                                          onClick={() => handleEditClick(app, selectedCalendarDay)}
+                                          className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all border border-slate-200 hover:border-emerald-200"
+                                          title="Editar"
+                                        >
+                                          <Pencil size={13} />
+                                        </button>
+                                      )}
+                                      {!isOtherPatient && (
+                                        <button
+                                          type="button"
+                                          onClick={() => handleRemoveSlot(app.id, selectedCalendarDay)}
+                                          className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all border border-slate-200 hover:border-red-200"
+                                          title="Remover"
+                                        >
+                                          <Trash2 size={13} />
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            {appointments.filter(a => {
+                              if (!myAppointmentIds.has(a.id)) return false;
+                              const dateStr = format(selectedCalendarDay, "yyyy-MM-dd");
+                              if (a.scheduledDate) {
+                                if (dateStr !== a.scheduledDate.split("T")[0]) return false;
+                              } else {
+                                const dayOfWeek = selectedCalendarDay.getDay();
+                                if (a.dayOfWeek !== dayOfWeek) return false;
+                              }
+                              if (a.endDate && dateStr > a.endDate.split("T")[0]) return false;
+                              if (a.skipDates && Array.isArray(a.skipDates) && a.skipDates.includes(dateStr)) return false;
+                              if (a.startDate && dateStr < a.startDate.split("T")[0]) return false;
+                              if (a.maxSessions && a.maxSessions > 0 && a.startDate) {
+                                const start = parseLocalDateStr(a.startDate);
+                                let count = 0;
+                                const cursor = new Date(start);
+                                while (cursor <= selectedCalendarDay) {
+                                  if (cursor.getDay() === a.dayOfWeek) count++;
+                                  cursor.setDate(cursor.getDate() + 7);
+                                }
+                                if (count > a.maxSessions) return false;
+                              }
+                              return true;
+                            }).length === 0 && (
+                              <div className="text-center py-4">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nenhum horário neste dia</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
+                            <div className="flex items-start justify-between mb-3 shrink-0">
+                            <div>
+                              <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Agenda Completa</h4>
+                              <p className="text-xs font-bold text-slate-500 mt-0.5">Todos os horários do mês</p>
+                            </div>
+                          </div>
+                          <div className="space-y-1.5 overflow-y-auto min-h-0">
+                            {[...new Set(appointments.filter(a => myAppointmentIds.has(a.id)).map(a => a.time))].sort().map(time => {
+                              const slotsAtTime = appointments.filter(a => myAppointmentIds.has(a.id) && a.time === time);
+                              return (
+                                <div key={time} className="p-2.5 rounded-xl border border-slate-200 bg-white">
+                                  <p className="text-xs font-bold text-slate-800">{time} • {slotsAtTime[0]?.duration}min</p>
+                                  <p className="text-[9px] font-bold text-slate-500">{slotsAtTime.length} horário{slotsAtTime.length > 1 ? 's' : ''}</p>
+                                </div>
+                              );
+                            })}
+                            {appointments.filter(a => myAppointmentIds.has(a.id)).length === 0 && (
+                              <div className="text-center py-4">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nenhum horário cadastrado</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      </div>
+
+                      <div className="flex items-center gap-3 shrink-0 justify-end">
+                        {appointments.length > 0 && (
+                          <button onClick={() => handleClearAgenda()} className="btn btn-danger text-xs">
+                            <Trash2 size={14} /> Limpar Agenda
+                          </button>
+                        )}
+                        <button onClick={() => handleOpenNewSlotModal()} className="btn btn-primary text-xs">
+                          <Plus size={14} /> Lançar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
             </div>
           )}
 
@@ -2171,6 +2342,248 @@ export default function PatientRecord() {
             </div>
           )}
 
+          {/* Share Tab */}
+          {activeTab === "share" && (
+            <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
+              {/* Stats Summary */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-500">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                    <Send size={18} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">{patientShareLinks.filter(l => l.status === "PENDENTE").length}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pendentes</p>
+                  </div>
+                </div>
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-500">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <Check size={18} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">{patientShareLinks.filter(l => l.status === "RESPONDIDO").length}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Respondidos</p>
+                  </div>
+                </div>
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-500">
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
+                    <AlertCircle size={18} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">{patientShareLinks.filter(l => l.status === "EXPIRADO").length}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expirados</p>
+                  </div>
+                </div>
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-violet-500">
+                  <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600">
+                    <TrendingUp size={18} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">
+                      {patientShareLinks.length > 0
+                        ? Math.round((patientShareLinks.filter(l => l.status === "RESPONDIDO").length / patientShareLinks.length) * 100)
+                        : 0}%
+                    </p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Adesão</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Filtro de Período */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Período</span>
+                {[
+                  { key: "thisMonth", label: "Este Mês" },
+                  { key: "lastMonth", label: "Mês Anterior" },
+                  { key: "last3Months", label: "Últimos 3 Meses" },
+                  { key: "all", label: "Todo Histórico" },
+                  { key: "custom", label: "Personalizado" },
+                ].map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => {
+                      setPeriodFilter(opt.key);
+                      const now = new Date();
+                      if (opt.key === "thisMonth") {
+                        setCustomMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
+                      } else if (opt.key === "lastMonth") {
+                        const d = subMonths(now, 1);
+                        setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+                      }
+                    }}
+                    className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
+                      periodFilter === opt.key
+                        ? "bg-emerald-600 text-white shadow-md"
+                        : "bg-white text-slate-500 border border-slate-200 hover:border-emerald-200 hover:text-emerald-600"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+                {periodFilter === "custom" && (
+                  <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronLeft size={16} /></button>
+                    <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
+                      {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
+                        const monthVal = i + 1;
+                        const currentYear = customMonth.split("-")[0];
+                        return <option key={`${currentYear}-${String(monthVal).padStart(2, "0")}`} value={`${currentYear}-${String(monthVal).padStart(2, "0")}`}>{name}</option>;
+                      })}
+                    </select>
+                    <select value={customMonth.split("-")[0]} onChange={e => { const month = customMonth.split("-")[1]; setCustomMonth(`${e.target.value}-${month}`); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
+                      {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year}>{year}</option>; })}
+                    </select>
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronRight size={16} /></button>
+                  </div>
+                )}
+              </div>
+
+              {/* Instrumentos List */}
+              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-3">
+                <div className="flex items-center justify-between shrink-0">
+                  <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Compartilhar Instrumentos</h3>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
+                {loadingLinks ? (
+                  <div className="text-center py-20 opacity-50 flex-1 flex items-center justify-center">
+                    <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-sm font-bold uppercase tracking-widest">Carregando instrumentos...</p>
+                  </div>
+                ) : filteredLinks.length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
+                    <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-5">
+                      <Share2 size={32} className="text-slate-300" />
+                    </div>
+                    <h4 className="text-lg font-black text-slate-800 mb-1">Nenhum registro no período</h4>
+                    <p className="text-xs font-bold text-slate-500 max-w-[240px] leading-relaxed">
+                      Registros de instrumentos aparecerão aqui conforme você enviar instrumentos para este paciente.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4 overflow-y-auto min-h-0">
+                    {filteredLinks.map(link => (
+                      <ShareLinkCard
+                        key={link.id}
+                        link={link}
+                        onExtend={handleExtendLink}
+                        onRevoke={handleRevokeLink}
+                        onCopy={handleCopyLink}
+                      />
+                    ))}
+                  </div>
+                )}
+                </div>
+                {/* Action Buttons */}
+                <div className="flex items-center gap-3 shrink-0 justify-end">
+                  <button onClick={() => setShowShareModal(true)} className="btn btn-primary text-xs">
+                    <Plus size={14} /> Enviar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Prontuário Tab */}
+          {activeTab === "notes" && (
+            <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
+              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-3">
+                <div className="flex items-center justify-between shrink-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                      <FileText size={20} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Prontuário</h3>
+                      <p className="text-xs text-slate-500">Anotações e documentos</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
+                  <div className="flex-1 flex flex-col min-h-0">
+                    <div className="shrink-0">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Paperclip size={14} className="text-slate-400" />
+                          <h4 className="text-xs font-bold text-slate-600 uppercase tracking-widest">Laudos e Anexos</h4>
+                          {attachments.length > 0 && (
+                            <span className="px-2 py-0.5 bg-white text-slate-500 text-[10px] font-bold rounded-full">
+                              {attachments.length}
+                            </span>
+                          )}
+                        </div>
+                        <label className="text-[11px] font-bold uppercase text-emerald-600 hover:text-emerald-700 cursor-pointer transition-colors flex items-center gap-1">
+                          <Plus size={14} />
+                          {uploading ? 'Enviando...' : 'Anexar'}
+                          <input type="file" multiple className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" disabled={uploading} onChange={handleUploadAttachment} />
+                        </label>
+                      </div>
+
+                      {loadingAttachments ? (
+                        <div className="text-center py-6 text-slate-400">
+                          <div className="w-5 h-5 border-2 border-slate-300 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                          <p className="text-[10px] font-bold uppercase tracking-widest">Carregando anexos...</p>
+                        </div>
+                      ) : attachments.length === 0 ? (
+                        <div className="text-center py-6 text-slate-400 bg-white/60 rounded-xl border-2 border-dashed border-slate-200">
+                          <File size={24} className="mx-auto mb-2 opacity-50" />
+                          <p className="text-xs font-medium">Nenhum anexo</p>
+                          <p className="text-[10px] mt-0.5">PDF, JPG, PNG, DOC (máx. 10MB)</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                          {attachments.map((att) => (
+                            <div key={att.id} className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200">
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <File size={16} className="text-slate-400 shrink-0" />
+                                <div className="min-w-0">
+                                  <p className="text-xs font-medium text-slate-700 truncate">{att.filename}</p>
+                                  <p className="text-[10px] text-slate-400">{(att.size / 1024).toFixed(1)} KB</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-0.5">
+                                <button type="button" onClick={() => handleDownloadAttachment(att)} className="p-1.5 hover:bg-emerald-50 rounded text-slate-400 hover:text-emerald-600 transition-colors" title="Baixar">
+                                  <Download size={14} />
+                                </button>
+                                <button type="button" onClick={() => handleDeleteAttachment(att.id)} className="p-1.5 hover:bg-red-50 rounded text-slate-400 hover:text-red-500 transition-colors" title="Excluir">
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                          <label className="flex items-center justify-center gap-1.5 py-2.5 text-xs text-slate-500 hover:text-emerald-600 cursor-pointer transition-colors rounded-lg border border-dashed border-slate-200 bg-white/60">
+                            <Plus size={14} />
+                            <span className="font-medium">Adicionar mais</span>
+                            <input type="file" multiple className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" disabled={uploading} onChange={handleUploadAttachment} />
+                          </label>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-4 pt-4 border-t border-slate-200/60 flex-1 flex flex-col min-h-0">
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Anotações</label>
+                      <textarea 
+                        className="input text-sm flex-1 resize-none" 
+                        value={formData?.notes || ''} 
+                        onChange={e => setFormData(prev => prev ? { ...prev, notes: e.target.value } : null)} 
+                        placeholder="Anotações relevantes sobre o paciente..."
+                      />
+                    </div>
+                  </div>
+                </div>
+                {/* Action Buttons */}
+                <div className="flex items-center gap-3 shrink-0 justify-end">
+                  <button className="btn btn-primary text-xs">
+                    <Save size={14} /> Salvar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+
+
+
+
           {/* Timeline Tab (Original) */}
           {activeTab === "timeline" && (
             loadingLinks ? (
@@ -2406,419 +2819,7 @@ export default function PatientRecord() {
             )
           )}
 
-          {/* Agenda Tab */}
-          {activeTab === "settings" && (
-            <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
-              {/* Stats Summary */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-500">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                    <Calendar size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-black text-slate-800">{agendaStats.totalActive}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Horários Ativos</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-sky-500">
-                  <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-600">
-                    <Activity size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-black text-slate-800">{agendaStats.thisMonthCount}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sessões no Mês</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-violet-500">
-                  <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600">
-                    <Clock size={18} />
-                  </div>
-                  <div>
-                    <p className="text-lg font-black text-slate-800 truncate">
-                      {agendaStats.nextSession
-                        ? format(agendaStats.nextSession.date, "dd/MM", { locale: ptBR }) + " • " + agendaStats.nextSession.time
-                        : "—"}
-                    </p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Próxima Sessão</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-500">
-                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
-                    <RefreshCcw size={18} />
-                  </div>
-                  <div>
-                    <p className="text-lg font-black text-slate-800 truncate">
-                      {agendaStats.recurringSummary || "—"}
-                    </p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Frequência Semanal</p>
-                  </div>
-                </div>
-              </div>
 
-              {/* Filtro de Período */}
-              <div className="flex items-center gap-2 flex-wrap shrink-0">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Período</span>
-                {[
-                  { key: "thisMonth", label: "Este Mês" },
-                  { key: "lastMonth", label: "Mês Anterior" },
-                  { key: "custom", label: "Personalizado" },
-                ].map(opt => (
-                  <button
-                    key={opt.key}
-                    onClick={() => {
-                      setCalendarPeriodFilter(opt.key);
-                      const now = new Date();
-                      if (opt.key === "thisMonth") {
-                        setCalendarDate(now);
-                        setCalendarCustomMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
-                      } else if (opt.key === "lastMonth") {
-                        const d = subMonths(now, 1);
-                        setCalendarDate(d);
-                        setCalendarCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-                      } else if (opt.key === "custom") {
-                        const [y, m] = calendarCustomMonth.split("-").map(Number);
-                        setCalendarDate(new Date(y, m - 1, 1));
-                      }
-                    }}
-                    className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
-                      calendarPeriodFilter === opt.key
-                        ? "bg-emerald-600 text-white shadow-md"
-                        : "bg-white text-slate-500 border border-slate-200 hover:border-emerald-200 hover:text-emerald-600"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-                {calendarPeriodFilter === "custom" && (
-                  <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                    <button onClick={() => { const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronLeft size={16} /></button>
-                    <select value={calendarCustomMonth} onChange={e => { setCalendarCustomMonth(e.target.value); const [y, m] = e.target.value.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
-                      {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
-                        const monthVal = i + 1;
-                        const currentYear = calendarCustomMonth.split("-")[0];
-                        return <option key={`${currentYear}-${String(monthVal).padStart(2, "0")}`} value={`${currentYear}-${String(monthVal).padStart(2, "0")}`}>{name}</option>;
-                      })}
-                    </select>
-                    <select value={calendarCustomMonth.split("-")[0]} onChange={e => { const month = calendarCustomMonth.split("-")[1]; const val = `${e.target.value}-${month}`; setCalendarCustomMonth(val); const [y, m] = val.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
-                      {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year}>{year}</option>; })}
-                    </select>
-                    <button onClick={() => { const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronRight size={16} /></button>
-                  </div>
-                )}
-              </div>
-
-              {/* Calendar Card */}
-              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden">
-                {loadingAppointments ? (
-                  <div className="flex-1 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                      <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Carregando agenda...</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex-1 flex gap-6 min-h-0 overflow-hidden">
-                    {/* Left: Calendar */}
-                      <div className="w-[60%] flex flex-col min-h-0">
-                        <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight mb-3 shrink-0">Calendário de Sessões</h3>
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col flex-1 min-h-0 overflow-hidden">
-
-                        <DayPicker
-                          month={calendarDate}
-                        onMonthChange={setCalendarDate}
-                        onDayClick={(day) => handleDayClick(day)}
-                        locale={ptBR}
-                        modifiers={{
-                          mine: sessionModifiers.mine,
-                          others: sessionModifiers.others,
-                          conflict: sessionModifiers.conflictDates,
-                        }}
-                        modifiersClassNames={{}}
-                        classNames={{
-                          months: "flex flex-col flex-1 min-h-0",
-                          month: "w-full flex flex-col flex-1 min-h-0",
-                          month_grid: "w-full flex-1 table-fixed border border-slate-300 rounded-xl overflow-hidden",
-                          weekdays: "bg-slate-100",
-                          weekday: "py-3 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-b border-slate-200 last:border-r-0",
-                          week: "h-0",
-                          day: "text-center border-r border-b border-slate-200 last:border-r-0 p-0 h-0",
-                          day_button: "relative w-full h-full flex items-center justify-center text-sm font-bold text-slate-700 cursor-pointer transition-colors",
-                          today: "font-black",
-                          outside: "text-slate-300",
-                          disabled: "cursor-default opacity-40",
-                        }}
-                        components={{
-                          DayButton: ({ day, modifiers, children, ...props }) => {
-                            const date = day.date;
-                            const isToday = modifiers?.today;
-                            const dayStr = format(date, "yyyy-MM-dd");
-                            const selectedStr = selectedCalendarDay ? format(selectedCalendarDay, "yyyy-MM-dd") : null;
-
-                            let bgClass = "";
-                            if (modifiers?.conflict) bgClass = "bg-red-50";
-                            else if (modifiers?.others) bgClass = "bg-amber-50";
-                            else if (modifiers?.mine) bgClass = "bg-emerald-50";
-
-                            return (
-                              <button {...props} className={`relative w-full h-full flex items-center justify-center text-sm font-bold cursor-pointer transition-colors ${isToday ? "" : "hover:bg-slate-100"} ${bgClass}`}>
-                                {modifiers?.mine && showAllAppointments && (
-                                  <div className="absolute bottom-1 left-1.5 right-1.5 h-[3px] rounded-full bg-emerald-500" />
-                                )}
-                                <span className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-black ${
-                                  isToday ? "bg-slate-800 text-white" : dayStr === selectedStr ? "ring-2 ring-slate-400" : "text-slate-700"
-                                }`}>
-                                  {date.getDate()}
-                                </span>
-                              </button>
-                            );
-                          },
-                          MonthCaption: ({ calendarMonth }) => (
-                            <div className="shrink-0 mb-3">
-                              <p className="text-sm font-bold text-slate-600 capitalize">
-                                {format(calendarMonth.date, "MMMM 'de' yyyy", { locale: ptBR })}
-                              </p>
-                            </div>
-                          ),
-                          Nav: () => null,
-                          Root: ({ children, ...props }) => (
-                            <div {...props} className="flex-1 flex flex-col min-h-0" onClick={() => showMonthPicker && setShowMonthPicker(false)}>
-                              {children}
-                            </div>
-                          ),
-                        }}
-                      />
-
-                      {/* Legend */}
-                      <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-slate-100 shrink-0">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-3 h-3 rounded bg-emerald-50 border border-emerald-300" />
-                          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{patient?.name?.split(" ")[0] || "Paciente"}</span>
-                        </div>
-                        {showAllAppointments && (
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-3 rounded bg-amber-50 border border-amber-300" />
-                            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Outros</span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-3 h-3 rounded bg-red-50 border border-red-300" />
-                          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Conflito</span>
-                        </div>
-                        </div>
-                      </div>
-                      </div>
-
-                    {/* Right: Agenda */}
-                    <div className="w-[40%] flex flex-col pr-2 gap-3">
-                      <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight shrink-0">Agendamentos</h3>
-                      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
-                      {/* Edit choice modal */}
-                      {showEditChoice && editingAppointment && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm" onClick={() => { setShowEditChoice(false); setEditingAppointment(null); }}>
-                          <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
-                            <div className="text-center mb-6">
-                              <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                                <Pencil size={22} className="text-slate-700" />
-                              </div>
-                              <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Editar horário</h3>
-                              <p className="text-sm text-slate-500 font-bold mt-1">
-                                {format(editChoiceDate, "EEEE, d 'de' MMMM", { locale: ptBR })} às {editingAppointment.time}
-                              </p>
-                              <p className="text-xs text-slate-400 mt-2">
-                                Este horário se repete semanalmente. Como deseja editar?
-                              </p>
-                            </div>
-                            <div className="space-y-2">
-                              <button
-                                onClick={handleEditSingle}
-                                className="w-full py-3 px-4 bg-slate-100 text-slate-700 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
-                              >
-                                Apenas esta data
-                              </button>
-                              <button
-                                onClick={handleEditFuture}
-                                className="w-full py-3 px-4 bg-slate-900 text-white rounded-xl text-sm font-black uppercase tracking-widest hover:bg-slate-800 transition-all"
-                              >
-                                Esta e todas futuras
-                              </button>
-                            </div>
-                            <button
-                              onClick={() => { setShowEditChoice(false); setEditingAppointment(null); }}
-                              className="w-full mt-3 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest"
-                            >
-                              Cancelar
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Day details panel or full agenda */}
-                      {selectedCalendarDay ? (
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
-                          <div className="flex items-start justify-between mb-3 shrink-0">
-                            <div>
-                              <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">
-                                {format(selectedCalendarDay, "EEEE", { locale: ptBR })}
-                              </h4>
-                              <p className="text-xs font-bold text-slate-500 mt-0.5">
-                                {format(selectedCalendarDay, "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="space-y-1.5 overflow-y-auto min-h-0">
-                            {appointments
-                              .filter(a => {
-                                const dateStr = format(selectedCalendarDay, "yyyy-MM-dd");
-                                if (a.scheduledDate) {
-                                  if (dateStr !== a.scheduledDate.split("T")[0]) return false;
-                                } else {
-                                  const dayOfWeek = selectedCalendarDay.getDay();
-                                  if (a.dayOfWeek !== dayOfWeek) return false;
-                                }
-                                if (a.endDate && dateStr > a.endDate.split("T")[0]) return false;
-                                if (a.skipDates && Array.isArray(a.skipDates) && a.skipDates.includes(dateStr)) return false;
-                                if (a.startDate && dateStr < a.startDate.split("T")[0]) return false;
-                                if (a.maxSessions && a.maxSessions > 0 && a.startDate) {
-                                  const start = parseLocalDateStr(a.startDate);
-                                  let count = 0;
-                                  const cursor = new Date(start);
-                                  while (cursor <= selectedCalendarDay) {
-                                    if (cursor.getDay() === a.dayOfWeek) count++;
-                                    cursor.setDate(cursor.getDate() + 7);
-                                  }
-                                  if (count > a.maxSessions) return false;
-                                }
-                                return true;
-                              })
-                              .sort((a, b) => (a.time || "").localeCompare(b.time || ""))
-                              .map(app => {
-                                const conflict = conflicts[app.id];
-                                const appPatientId = app.patient?.id ?? app.patientId;
-                                const isOtherPatient = appPatientId && appPatientId !== id;
-                                return (
-                                  <div key={app.id} className={`flex items-center gap-2 p-2.5 rounded-xl border ${
-                                    conflict ? "border-red-200 bg-red-50/30" : isOtherPatient ? "border-amber-200 bg-amber-50/30" : "border-slate-200 bg-white"
-                                  }`}>
-                                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] shrink-0 ${
-                                        conflict ? "bg-red-100 text-red-600" : isOtherPatient ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
-                                      }`}>
-                                        <Clock size={14} />
-                                      </div>
-                                      <div className="min-w-0">
-                                        <p className={`text-xs font-bold truncate ${isOtherPatient ? "text-amber-600" : "text-emerald-700"}`}>
-                                          {(isOtherPatient ? app.patient?.name : patient?.name)?.split(" ")[0] || "Paciente"}
-                                        </p>
-                                        <p className="text-[9px] font-bold text-slate-500">{app.maxSessions ? `${app.maxSessions} sessões` : app.startDate ? "Semanal" : app.scheduledDate ? format(new Date(app.scheduledDate), "dd/MM/yy") : "Avulso"}</p>
-                                      </div>
-                                    </div>
-                                    <div className="flex items-center gap-2 shrink-0 ml-2">
-                                      <span className="text-xs font-black text-slate-700 whitespace-nowrap">{app.time} • {app.duration}min</span>
-                                      {conflict && (
-                                        <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-200">
-                                          Conflito
-                                        </span>
-                                      )}
-                                      {!isOtherPatient && (
-                                        <button
-                                          type="button"
-                                          onClick={() => handleEditClick(app, selectedCalendarDay)}
-                                          className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all border border-slate-200 hover:border-emerald-200"
-                                          title="Editar"
-                                        >
-                                          <Pencil size={13} />
-                                        </button>
-                                      )}
-                                      {!isOtherPatient && (
-                                        <button
-                                          type="button"
-                                          onClick={() => handleRemoveSlot(app.id, selectedCalendarDay)}
-                                          className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all border border-slate-200 hover:border-red-200"
-                                          title="Remover"
-                                        >
-                                          <Trash2 size={13} />
-                                        </button>
-                                      )}
-                                    </div> {/* closes right side buttons */}
-                                  </div>
-                                );
-                              })}
-                            {appointments.filter(a => {
-                              if (!myAppointmentIds.has(a.id)) return false;
-                              const dateStr = format(selectedCalendarDay, "yyyy-MM-dd");
-                              if (a.scheduledDate) {
-                                if (dateStr !== a.scheduledDate.split("T")[0]) return false;
-                              } else {
-                                const dayOfWeek = selectedCalendarDay.getDay();
-                                if (a.dayOfWeek !== dayOfWeek) return false;
-                              }
-                              if (a.endDate && dateStr > a.endDate.split("T")[0]) return false;
-                              if (a.skipDates && Array.isArray(a.skipDates) && a.skipDates.includes(dateStr)) return false;
-                              if (a.startDate && dateStr < a.startDate.split("T")[0]) return false;
-                              if (a.maxSessions && a.maxSessions > 0 && a.startDate) {
-                                const start = parseLocalDateStr(a.startDate);
-                                let count = 0;
-                                const cursor = new Date(start);
-                                while (cursor <= selectedCalendarDay) {
-                                  if (cursor.getDay() === a.dayOfWeek) count++;
-                                  cursor.setDate(cursor.getDate() + 7);
-                                }
-                                if (count > a.maxSessions) return false;
-                              }
-                              return true;
-                            }).length === 0 && (
-                              <div className="text-center py-4">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nenhum horário neste dia</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
-                          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
-                            <div className="flex items-start justify-between mb-3 shrink-0">
-                            <div>
-                              <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Agenda Completa</h4>
-                              <p className="text-xs font-bold text-slate-500 mt-0.5">Todos os horários do mês</p>
-                            </div>
-                          </div>
-                          <div className="space-y-1.5 overflow-y-auto min-h-0">
-                            {[...new Set(appointments.filter(a => myAppointmentIds.has(a.id)).map(a => a.time))].sort().map(time => {
-                              const slotsAtTime = appointments.filter(a => myAppointmentIds.has(a.id) && a.time === time);
-                              return (
-                                <div key={time} className="p-2.5 rounded-xl border border-slate-200 bg-white">
-                                  <p className="text-xs font-bold text-slate-800">{time} • {slotsAtTime[0]?.duration}min</p>
-                                  <p className="text-[9px] font-bold text-slate-500">{slotsAtTime.length} horário{slotsAtTime.length > 1 ? 's' : ''}</p>
-                                </div>
-                              );
-                            })}
-                            {appointments.filter(a => myAppointmentIds.has(a.id)).length === 0 && (
-                              <div className="text-center py-4">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nenhum horário cadastrado</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex items-center gap-3 shrink-0 justify-end">
-                        {appointments.length > 0 && (
-                          <button onClick={() => handleClearAgenda()} className="btn btn-danger text-xs">
-                            <Trash2 size={14} /> Limpar Agenda
-                          </button>
-                        )}
-                        <button onClick={() => handleOpenNewSlotModal()} className="btn btn-primary text-xs">
-                          <Plus size={14} /> Lançar
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-            </div>
-          )}
           </div>
         </div>
       </div>

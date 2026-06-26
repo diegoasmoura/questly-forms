@@ -127,7 +127,7 @@ navigate(-1); // suporta navegação relativa
 - **Gestão UTC:** Datas em UTC, extraídas conforme fuso local.
 - **Toasts Flutuantes:** Confirmações em Emerald-600.
 - **Clinical Dashboard:** Métricas de engajamento na capa do card.
-- **Patient Record:** Padronização de abas com header e botão Save (Prontuário incluso).
+- **Patient Record:** Padronização de abas com header e botão Save (Prontuário incluso). Ordem das abas: Frequência → Agenda → Financeiro → Instrumentos → Prontuário.
 
 ### 11. Layout do PatientRecord (Regras para evitar scrollbar externa)
 
