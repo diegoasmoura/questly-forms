@@ -2507,14 +2507,9 @@ export default function PatientRecord() {
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-3">
                 <div className="flex items-center justify-between shrink-0">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                      <FileText size={20} />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Prontuário</h3>
-                      <p className="text-xs text-slate-500">Anotações e documentos</p>
-                    </div>
+                  <div>
+                    <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Prontuário</h3>
+                    <p className="text-xs text-slate-500">Anotações e documentos</p>
                   </div>
                 </div>
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
