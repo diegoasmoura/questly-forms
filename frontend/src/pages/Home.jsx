@@ -1,7 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
-import { ActivityHeatmap } from "../components/ActivityHeatmap";
 import {
   Users,
   FileText,
@@ -11,7 +10,10 @@ import {
   DollarSign,
   CakeSlice,
   PartyPopper,
-  ChevronRight
+  ChevronRight,
+  Check,
+  X,
+  AlertCircle
 } from "lucide-react";
 
 function calculateBirthdayInfo(birthDate) {
@@ -25,6 +27,19 @@ function calculateBirthdayInfo(birthDate) {
   return { diffDays, isWeek, isToday: diffDays === 0, daysUntil: diffDays };
 }
 
+function relativeTime(date) {
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "agora";
+  if (mins < 60) return `há ${mins}min`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `há ${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "ontem";
+  if (days < 30) return `há ${days}d`;
+  return date.toLocaleDateString("pt-BR", { day: "numeric", month: "short" });
+}
+
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const [patients, setPatients] = useState([]);
@@ -32,7 +47,6 @@ export default function Home() {
   const [appointments, setAppointments] = useState([]);
   const [payments, setPayments] = useState([]);
   const [formStats, setFormStats] = useState({});
-  const [aggregateData, setAggregateData] = useState({});
 
   const loadHomeData = useCallback(async () => {
     setLoading(true);
@@ -50,24 +64,13 @@ export default function Home() {
       setAppointments(appointmentsData);
       setPayments(paymentsData);
 
-      const [statsResults, aggregateResults] = await Promise.all([
-        Promise.all(formsData.map(f => api.getFormStats(f.id).catch(() => ({ responseCount: 0, shareLinkCount: 0 })))),
-        Promise.all(formsData.map(f => api.getAggregate(f.id).catch(() => null)))
-      ]);
+      const statsResults = await Promise.all(
+        formsData.map(f => api.getFormStats(f.id).catch(() => ({ responseCount: 0, shareLinkCount: 0 })))
+      );
 
       const statsMap = {};
       formsData.forEach((f, i) => { statsMap[f.id] = statsResults[i]; });
       setFormStats(statsMap);
-
-      const mergedAgg = {};
-      aggregateResults.forEach(agg => {
-        if (agg?.dailyCounts) {
-          Object.entries(agg.dailyCounts).forEach(([date, count]) => {
-            mergedAgg[date] = (mergedAgg[date] || 0) + count;
-          });
-        }
-      });
-      setAggregateData(mergedAgg);
     } catch (error) {
       console.error("Failed to load home data:", error);
     } finally {
@@ -119,6 +122,31 @@ export default function Home() {
 
   const patientMap = {};
   patients.forEach(p => { patientMap[p.id] = p; });
+
+  const timelineItems = [];
+  attendances.forEach(att => {
+    const patient = patientMap[att.patientId];
+    if (!patient) return;
+    timelineItems.push({
+      id: `att-${att.id}`,
+      date: new Date(att.date),
+      type: att.status,
+      patient,
+      description: att.status === "presente" ? "Compareceu à sessão" : att.status === "falta" ? "Faltou à sessão" : "Justificou falta"
+    });
+  });
+  payments.forEach(p => {
+    const patient = patientMap[p.patientId];
+    if (!patient) return;
+    timelineItems.push({
+      id: `pay-${p.id}`,
+      date: new Date(p.createdAt),
+      type: "payment",
+      patient,
+      description: `Pagamento de ${p.amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`
+    });
+  });
+  timelineItems.sort((a, b) => b.date - a.date);
 
   return (
     <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in">
@@ -214,7 +242,48 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
             <div className="lg:col-span-2 flex flex-col min-h-0">
               <div className="card p-5 flex-1 min-h-0 overflow-y-auto">
-                <ActivityHeatmap data={aggregateData} title="Atividade Clínica" />
+                <div className="flex items-center gap-2 mb-4 shrink-0">
+                  <Clock size={16} className="text-emerald-600" />
+                  <p className="text-xs font-black text-slate-600 uppercase tracking-widest">Timeline de Atividade</p>
+                </div>
+                {timelineItems.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center py-10">
+                    <Calendar size={32} className="text-slate-300 mb-3" />
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Nenhuma atividade registrada</p>
+                    <p className="text-[10px] text-slate-400 mt-1">Sessões, pagamentos e formulários aparecerão aqui</p>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {timelineItems.slice(0, 30).map((item, idx) => {
+                      const isLast = idx === Math.min(timelineItems.length - 1, 29);
+                      const colors = {
+                        presente: { dot: "bg-emerald-500", line: "bg-emerald-200", icon: Check },
+                        falta: { dot: "bg-red-500", line: "bg-red-200", icon: X },
+                        justificada: { dot: "bg-amber-500", line: "bg-amber-200", icon: AlertCircle },
+                        payment: { dot: "bg-blue-500", line: "bg-blue-200", icon: DollarSign }
+                      };
+                      const c = colors[item.type] || colors.presente;
+                      const Icon = c.icon;
+                      return (
+                        <Link key={item.id} to={`/patients/${item.patient.id}`} className="flex items-start gap-3 group">
+                          <div className="flex flex-col items-center shrink-0 pt-1.5">
+                            <div className={`w-7 h-7 rounded-full ${c.dot} flex items-center justify-center text-white shadow-sm`}>
+                              <Icon size={12} />
+                            </div>
+                            {!isLast && <div className={`w-0.5 h-full min-h-[24px] ${c.line}`} />}
+                          </div>
+                          <div className="min-w-0 flex-1 pb-4">
+                            <p className="text-sm font-bold text-slate-700 group-hover:text-emerald-700 transition-colors leading-tight">
+                              {item.patient.name}
+                            </p>
+                            <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>
+                            <p className="text-[10px] text-slate-400 mt-0.5 font-medium">{relativeTime(item.date)}</p>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
 
