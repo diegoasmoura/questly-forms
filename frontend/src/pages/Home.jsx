@@ -1,96 +1,63 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
 import { ActivityHeatmap } from "../components/ActivityHeatmap";
-import { 
-  Users, 
-  FileText, 
-  BarChart3, 
-  ArrowRight, 
+import {
+  Users,
+  FileText,
   Calendar,
   Clock,
-  TrendingUp,
-  Activity
+  Plus,
+  DollarSign,
+  CakeSlice,
+  PartyPopper,
+  ChevronRight
 } from "lucide-react";
 
+function calculateBirthdayInfo(birthDate) {
+  if (!birthDate) return null;
+  const today = new Date();
+  const birth = new Date(birthDate);
+  const thisYearBirthday = new Date(today.getFullYear(), birth.getMonth(), birth.getDate());
+  const diffTime = thisYearBirthday - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const isWeek = diffDays >= -3 && diffDays <= 4;
+  return { diffDays, isWeek, isToday: diffDays === 0, daysUntil: diffDays };
+}
+
 export default function Home() {
-  const { user } = useAuth();
-  const [stats, setStats] = useState({
-    patientCount: 0,
-    formCount: 0,
-    totalResponses: 0,
-    activeLinks: 0
-  });
-  const [recentResponses, setRecentResponses] = useState([]);
-  const [groupedPatients, setGroupedPatients] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [patients, setPatients] = useState([]);
+  const [attendances, setAttendances] = useState([]);
+  const [appointments, setAppointments] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [formStats, setFormStats] = useState({});
   const [aggregateData, setAggregateData] = useState({});
 
   const loadHomeData = useCallback(async () => {
     setLoading(true);
     try {
-      const [patients, forms] = await Promise.all([
+      const [patientsData, formsData, attendancesData, appointmentsData, paymentsData] = await Promise.all([
         api.getPatients(),
-        api.getForms()
+        api.getForms(),
+        api.getAttendances(),
+        api.getAppointments(),
+        api.getPayments()
       ]);
 
-      const responsePromises = forms.map(async (form) => {
-        try {
-          const responses = await api.getResponses(form.id);
-          return responses.map(r => ({ ...r, formTitle: form.title }));
-        } catch {
-          return [];
-        }
-      });
+      setPatients(patientsData);
+      setAttendances(attendancesData);
+      setAppointments(appointmentsData);
+      setPayments(paymentsData);
 
-      const responseResults = await Promise.all(responsePromises);
-      const allResponses = responseResults.flat();
-
-      const responsesWithPatients = allResponses
-        .filter(r => r.patient)
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-      // Group by patient
-      const grouped = [];
-      const seenPatients = new Set();
-      
-      responsesWithPatients.forEach(response => {
-        const patientId = response.patient.id;
-        if (!seenPatients.has(patientId)) {
-          seenPatients.add(patientId);
-          const patientResponses = responsesWithPatients.filter(r => r.patient.id === patientId);
-          grouped.push({
-            patient: response.patient,
-            responses: patientResponses,
-            count: patientResponses.length,
-            latestResponse: patientResponses[0],
-            latestDate: new Date(patientResponses[0].createdAt)
-          });
-        }
-      });
-
-      const topPatients = grouped
-        .sort((a, b) => b.latestDate - a.latestDate)
-        .slice(0, 8);
-
-      setRecentResponses(responsesWithPatients.slice(0, 8));
-      setGroupedPatients(topPatients);
-
-      const [formStats, aggregateResults] = await Promise.all([
-        Promise.all(forms.map(f => api.getFormStats(f.id).catch(() => ({ responseCount: 0, shareLinkCount: 0 })))),
-        Promise.all(forms.map(f => api.getAggregate(f.id).catch(() => null)))
+      const [statsResults, aggregateResults] = await Promise.all([
+        Promise.all(formsData.map(f => api.getFormStats(f.id).catch(() => ({ responseCount: 0, shareLinkCount: 0 })))),
+        Promise.all(formsData.map(f => api.getAggregate(f.id).catch(() => null)))
       ]);
-      
-      const totalResponses = formStats.reduce((sum, s) => sum + (s.responseCount || 0), 0);
-      const activeLinks = formStats.reduce((sum, s) => sum + (s.shareLinkCount || 0), 0);
 
-      setStats({
-        patientCount: patients.length,
-        formCount: forms.length,
-        totalResponses,
-        activeLinks
-      });
+      const statsMap = {};
+      formsData.forEach((f, i) => { statsMap[f.id] = statsResults[i]; });
+      setFormStats(statsMap);
 
       const mergedAgg = {};
       aggregateResults.forEach(agg => {
@@ -101,7 +68,6 @@ export default function Home() {
         }
       });
       setAggregateData(mergedAgg);
-
     } catch (error) {
       console.error("Failed to load home data:", error);
     } finally {
@@ -109,165 +75,216 @@ export default function Home() {
     }
   }, []);
 
-  useEffect(() => {
-    loadHomeData();
-  }, [loadHomeData]);
+  useEffect(() => { loadHomeData(); }, [loadHomeData]);
+
+  const today = new Date();
+  const thisMonth = today.getMonth();
+  const thisYear = today.getFullYear();
+
+  const monthAttendances = attendances.filter(a => {
+    const d = new Date(a.date);
+    return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
+  });
+  const monthPayments = payments.filter(p => {
+    const d = new Date(p.createdAt);
+    return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
+  });
+
+  const sessionCount = monthAttendances.length;
+  const presentCount = monthAttendances.filter(a => a.status === "presente").length;
+  const faltaCount = monthAttendances.filter(a => a.status === "falta").length;
+  const justCount = monthAttendances.filter(a => a.status === "justificada").length;
+
+  const totalSent = Object.values(formStats).reduce((sum, s) => sum + (s.shareLinkCount || 0), 0);
+  const totalResponses = Object.values(formStats).reduce((sum, s) => sum + (s.responseCount || 0), 0);
+  const pendingInstruments = totalSent - totalResponses;
+
+  const totalPaid = monthPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+  const activePatients = patients.filter(p => p.isActive !== false).length;
+
+  const birthdayPatients = patients.filter(p => {
+    const info = calculateBirthdayInfo(p.birthDate);
+    return info?.isWeek;
+  }).slice(0, 10);
+
+  const nextAppointments = appointments
+    .filter(a => a.startDate && new Date(a.startDate) > today)
+    .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
+    .slice(0, 5);
+
+  const recentFaltas = monthAttendances
+    .filter(a => a.status === "falta")
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 5);
+
+  const patientMap = {};
+  patients.forEach(p => { patientMap[p.id] = p; });
 
   return (
     <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in">
-      {/* Header */}
-      <header className="mb-6 shrink-0">
-        <h1 className="text-2xl font-display font-bold text-slate-800">
-          Painel Clínico
-        </h1>
-        <p className="text-sm text-slate-500">Visão geral da sua clínica.</p>
+      <header className="mb-6 shrink-0 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Painel Clínico</h1>
+          <p className="text-sm text-slate-500">Visão geral da sua prática clínica</p>
+        </div>
+        <Link to="/patients" className="btn bg-emerald-600 text-white hover:bg-emerald-700 text-xs py-2.5 px-4 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-emerald-200">
+          <Plus size={14} /> Novo Paciente
+        </Link>
       </header>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 shrink-0">
-        <StatCard 
-          icon={<Users size={20} />} 
-          label="Pacientes" 
-          value={stats.patientCount} 
-          trend="Ativos"
-          color="bg-blue-50 text-blue-600"
-          link="/patients"
-        />
-        <StatCard 
-          icon={<FileText size={20} />} 
-          label="Instrumentos" 
-          value={stats.formCount} 
-          trend="Clínicos"
-          color="bg-purple-50 text-purple-600"
-          link="/my-forms"
-        />
-        <StatCard 
-          icon={<BarChart3 size={20} />} 
-          label="Resultados" 
-          value={stats.totalResponses} 
-          trend="Coletados"
-          color="bg-emerald-50 text-emerald-600"
-          link="/my-forms"
-        />
-        <StatCard 
-          icon={<TrendingUp size={20} />} 
-          label="Avaliações" 
-          value={stats.activeLinks} 
-          trend="Em andamento"
-          color="bg-orange-50 text-orange-600"
-          link="/my-forms"
-        />
-      </div>
+      {loading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin" />
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 shrink-0">
+            <Link to="/patients" className="card p-3 flex items-center gap-3 border-l-4 border-emerald-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+                <Users size={18} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-2xl font-black text-slate-800 leading-none">{activePatients}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Pacientes Ativos</p>
+                <p className="text-[9px] text-slate-400 mt-0.5">{patients.length} total</p>
+              </div>
+            </Link>
 
-      {/* Activity Heatmap - Full Width */}
-      <div className="min-h-[200px] mb-6">
-        <ActivityHeatmap 
-          data={aggregateData} 
-          title="Atividade Clínica" 
-        />
-      </div>
+            <div className="card p-3 flex items-center gap-3 border-l-4 border-blue-400">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                <Calendar size={18} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-2xl font-black text-slate-800 leading-none">{sessionCount}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Sessões no Mês</p>
+                <p className="text-[9px] text-slate-400 mt-0.5">{presentCount}P · {faltaCount}F · {justCount}J</p>
+              </div>
+            </div>
 
-      {/* Recent Activity Section */}
-      <section className="card flex-1 min-h-0 overflow-hidden">
-        <div className="p-5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Activity size={18} className="text-emerald-600" />
-            <h2 className="text-base font-bold text-slate-800">Avaliações Recentes</h2>
+            <Link to="/my-forms" className="card p-3 flex items-center gap-3 border-l-4 border-amber-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
+                <FileText size={18} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-2xl font-black text-slate-800 leading-none">{totalResponses}<span className="text-base text-slate-400 font-bold">/{totalSent}</span></p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Instrumentos</p>
+                <p className="text-[9px] text-amber-600 mt-0.5">{pendingInstruments} pendentes</p>
+              </div>
+            </Link>
+
+            <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-400">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+                <DollarSign size={18} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-2xl font-black text-slate-800 leading-none">{totalPaid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Receita do Mês</p>
+                <p className="text-[9px] text-slate-400 mt-0.5">{monthPayments.length} lançamentos</p>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
-          {loading ? (
-            <div className="p-5 space-y-4">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="flex items-center gap-3 animate-pulse">
-                  <div className="w-10 h-10 rounded-xl bg-slate-200" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-3 bg-slate-200 rounded w-1/2" />
-                    <div className="h-2 bg-slate-100 rounded w-1/3" />
-                  </div>
+
+          {birthdayPatients.length > 0 && (
+            <div className="mb-6 shrink-0">
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200 p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <PartyPopper size={16} className="text-amber-500" />
+                  <p className="text-xs font-black text-amber-700 uppercase tracking-widest">Aniversariantes da Semana</p>
                 </div>
-              ))}
-            </div>
-          ) : groupedPatients.length === 0 ? (
-            <div className="p-10 text-center">
-              <Calendar size={32} className="mx-auto text-slate-300 mb-3" />
-              <p className="text-xs text-slate-500 font-bold uppercase tracking-tight">Nenhuma avaliação registrada</p>
-              <p className="text-[10px] text-slate-400 mt-1">Pacientes que utilizaram instrumentos clínicos aparecerão aqui</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-5">
-              {groupedPatients.map((group, idx) => (
-                <Link 
-                  key={group.patient.id} 
-                  to={`/patients/${group.patient.id}`}
-                  className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all group border border-slate-200 hover:border-slate-300 hover:shadow-sm"
-                >
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 font-black shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
-                      {group.patient.name.charAt(0)}
-                    </div>
-                    {group.count > 1 && (
-                      <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white text-[9px] font-black flex items-center justify-center">
-                        {group.count}
-                      </div>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-slate-700 group-hover:text-slate-900 transition-colors leading-tight">{group.patient.name}</p>
-                    {group.count > 1 ? (
-                      <p className="text-xs text-emerald-600 font-medium mt-0.5">
-                        {group.count} resultados · <span className="text-slate-500 truncate">{group.responses[0].formTitle}</span>
-                      </p>
-                    ) : (
-                      <p className="text-xs text-slate-500 mt-0.5 truncate">{group.responses[0].formTitle}</p>
-                    )}
-                    <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-1">
-                      <Clock size={10} />
-                      <span>{group.latestDate.toLocaleDateString('pt-BR')}</span>
-                    </div>
-                  </div>
-                  <ArrowRight size={14} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all shrink-0" />
-                </Link>
-              ))}
+                <div className="flex flex-wrap gap-2">
+                  {birthdayPatients.map(p => {
+                    const info = calculateBirthdayInfo(p.birthDate);
+                    return (
+                      <Link key={p.id} to={`/patients/${p.id}`} className="inline-flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-amber-200 hover:border-amber-400 hover:shadow-sm transition-all group">
+                        <div className="w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center">
+                          <CakeSlice size={12} className="text-amber-600" />
+                        </div>
+                        <span className="text-xs font-bold text-slate-700 group-hover:text-amber-700 transition-colors">{p.name.split(" ")[0]}</span>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${info?.isToday ? "bg-amber-500 text-white" : "bg-amber-50 text-amber-600"}`}>
+                          {info?.isToday ? "Hoje!" : `+${info?.daysUntil || 0}d`}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
-        </div>
-      </section>
-    </div>
-  );
-}
 
-function StatCard({ icon, label, value, trend, color, link }) {
-  const content = (
-    <div className="flex items-center gap-4">
-      <div className={`p-3 rounded-2xl ${color} shrink-0 shadow-sm`}>
-        {icon}
-      </div>
-      <div className="min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 leading-none mb-1.5">{label}</p>
-        <div className="flex items-baseline gap-2">
-          <h3 className="text-xl font-bold text-slate-800 leading-none">{value}</h3>
-          {trend && (
-            <span className="text-[9px] font-medium text-slate-400 truncate">
-              {trend}
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
+            <div className="lg:col-span-2 flex flex-col min-h-0">
+              <div className="card p-5 flex-1 min-h-0 overflow-y-auto">
+                <ActivityHeatmap data={aggregateData} title="Atividade Clínica" />
+              </div>
+            </div>
 
-  if (link) {
-    return (
-      <Link to={link} className="card p-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-        {content}
-      </Link>
-    );
-  }
+            <div className="flex flex-col min-h-0 gap-4">
+              <div className="card p-4 flex-1 flex flex-col min-h-0">
+                <div className="flex items-center gap-2 mb-4 shrink-0">
+                  <Clock size={14} className="text-emerald-600" />
+                  <p className="text-xs font-black text-slate-600 uppercase tracking-widest">Próximas Sessões</p>
+                </div>
+                <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+                  {nextAppointments.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center py-6">
+                      <Calendar size={24} className="text-slate-300 mb-2" />
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nenhuma sessão agendada</p>
+                      <Link to="/agenda" className="text-[10px] text-emerald-600 font-bold mt-2 hover:text-emerald-700 transition-colors">
+                        Gerenciar agenda
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {nextAppointments.map(app => {
+                        const patient = patientMap[app.patientId];
+                        const startDate = new Date(app.startDate);
+                        return (
+                          <Link key={app.id} to={`/patients/${app.patientId}`} className="flex items-center gap-3 p-2.5 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 hover:border-slate-300 transition-all group">
+                            <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 font-black text-xs shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                              {patient?.name?.charAt(0) || "?"}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-bold text-slate-700 truncate group-hover:text-slate-900 transition-colors">
+                                {patient?.name || "Paciente"}
+                              </p>
+                              <p className="text-[10px] text-slate-500">
+                                {startDate.toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short" })} às {app.startTime?.slice(0, 5) || "--:--"}
+                              </p>
+                            </div>
+                            <ChevronRight size={14} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition-all shrink-0" />
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
 
-  return (
-    <div className="card p-4">
-      {content}
+              <div className="card p-4 shrink-0">
+                <p className="text-xs font-black text-slate-600 uppercase tracking-widest mb-3">Ações Rápidas</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <Link to="/agenda" className="flex items-center gap-2 p-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-all group">
+                    <Calendar size={14} className="text-blue-600" />
+                    <span className="text-[10px] font-bold text-blue-700">Agenda</span>
+                  </Link>
+                  <Link to="/patients" className="flex items-center gap-2 p-2.5 bg-emerald-50 hover:bg-emerald-100 rounded-lg border border-emerald-200 transition-all group">
+                    <Users size={14} className="text-emerald-600" />
+                    <span className="text-[10px] font-bold text-emerald-700">Pacientes</span>
+                  </Link>
+                  <Link to="/my-forms" className="flex items-center gap-2 p-2.5 bg-amber-50 hover:bg-amber-100 rounded-lg border border-amber-200 transition-all group">
+                    <FileText size={14} className="text-amber-600" />
+                    <span className="text-[10px] font-bold text-amber-700">Instrumentos</span>
+                  </Link>
+                  <Link to="/patients" className="flex items-center gap-2 p-2.5 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 transition-all group">
+                    <Users size={14} className="text-slate-600" />
+                    <span className="text-[10px] font-bold text-slate-700">Cadastrar</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
