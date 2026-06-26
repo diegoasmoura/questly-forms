@@ -131,8 +131,7 @@ router.delete("/:id", async (req, res) => {
     const recordToDelete = await prisma.attendance.findUnique({
       where: { id: req.params.id },
       include: { 
-        _count: { select: { children: true } },
-        paymentId: true 
+        _count: { select: { children: true } }
       }
     });
 
@@ -178,7 +177,7 @@ router.delete("/:id", async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error("Erro ao deletar attendance:", error);
-    res.status(500).json({ error: "Erro ao deletar registro" });
+    res.status(500).json({ error: error.message || "Erro ao deletar registro" });
   }
 });
 

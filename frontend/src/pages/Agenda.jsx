@@ -1,90 +1,68 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "react-router-dom";
 import { api } from "../lib/api";
-import { 
-  Calendar as CalendarIcon, 
-  ChevronLeft, 
-  ChevronRight, 
-  Clock, 
-  Users, 
-  MoreVertical,
-  List,
+import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Users,
   Check,
   X,
   AlertCircle,
-  TrendingUp,
   RefreshCcw,
   BookOpen,
-  Edit,
+  AlertTriangle,
+  Plus,
+  Pencil,
   Trash2,
-  Link2,
-  ArrowLeft,
-  AlertTriangle
+  Phone,
+  MessageCircle
 } from "lucide-react";
-import { format, startOfWeek, endOfWeek, addDays, startOfMonth, endOfMonth, isSameDay, eachDayOfInterval } from "date-fns";
-import { ptBR } from 'date-fns/locale';
+import { format, parse, startOfWeek, getDay } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
-const DAYS_OF_WEEK = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
-
-const formatDateKey = (date) => {
+function formatDateKey(date) {
   if (!date) return "";
-  if (typeof date === 'string') {
-    return date.split('T')[0];
-  }
+  if (typeof date === "string") return date.split("T")[0];
   const d = new Date(date);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
-const extractUTCDate = (dateStr) => {
+function extractUTCDate(dateStr) {
   if (!dateStr) return "";
-  if (typeof dateStr === 'string') {
-    return dateStr.split('T')[0];
-  }
+  if (typeof dateStr === "string") return dateStr.split("T")[0];
   const d = new Date(dateStr);
-  const year = d.getUTCFullYear();
-  const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(d.getUTCDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+}
 
-const normalizeDataToKey = (input) => {
-  if (!input) return "";
-  if (typeof input === 'string') {
-    return input.split('T')[0];
-  }
-  const d = new Date(input);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
+function parseLocalDateStr(dateStr) {
+  if (!dateStr) return null;
+  const [y, m, d] = dateStr.split("T")[0].split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
 
-// ======================
-// COMPONENTES AUXILIARES
-// ======================
+const locales = { "pt-BR": ptBR };
+const rbcLocalizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 0 }),
+  getDay,
+  locales,
+});
 
 function StatsBar({ appointments, attendances }) {
-  const todayStr = formatDateKey(new Date());
-  
-  const todaySessions = appointments.filter(a => {
-    if (!a.startDate) return false;
-    const startStr = extractUTCDate(a.startDate);
-    return startStr <= todayStr && a.dayOfWeek === new Date().getDay();
-  });
-  
   const presentCount = attendances.filter(a => a.status === "presente").length;
   const absentCount = attendances.filter(a => a.status === "falta").length;
   const justifiedCount = attendances.filter(a => a.status === "justificada").length;
-  
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
         <p className="text-xl font-bold text-slate-800">{appointments.length}</p>
-        <p className="text-[10px] font-bold text-slate-400 uppercase">Pacientes</p>
+        <p className="text-[10px] font-bold text-slate-400 uppercase">Agendamentos</p>
       </div>
       <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
         <p className="text-xl font-bold text-emerald-600">{presentCount}</p>
@@ -98,388 +76,97 @@ function StatsBar({ appointments, attendances }) {
         <p className="text-xl font-bold text-amber-600">{justifiedCount}</p>
         <p className="text-[10px] font-bold text-slate-400 uppercase">Justificadas</p>
       </div>
-      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-        <p className="text-xl font-bold text-slate-800">{todaySessions.length}</p>
-        <p className="text-[10px] font-bold text-slate-400 uppercase">Hoje</p>
-      </div>
     </div>
   );
 }
 
-function SessionCard({ appointment, onStatus, attendance, date }) {
+function SessionCard({ session, date, onClick }) {
+  const appointment = session.app;
+  const attendance = session.attendance;
   const patientName = appointment.patient?.name || "Paciente";
   const attendanceStatus = attendance?.status;
-  
+
   const statusStyles = {
     presente: "border-emerald-500 bg-emerald-50/30",
     falta: "border-red-500 bg-red-50/30",
     justificada: "border-amber-500 bg-amber-50/30",
-    default: "border-slate-200 bg-white"
+    default: "border-slate-200 bg-white hover:border-slate-300"
   };
 
-  const currentStyle = statusStyles[attendanceStatus] || statusStyles.default;
-  
+  const initials = patientName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+  const firstName = patientName.split(" ")[0] || "?";
+
   return (
-    <div className={`p-3 rounded-xl border-l-4 transition-all shadow-sm ${currentStyle} flex items-center justify-between`}>
-      <div className="flex items-center gap-3">
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs ${
-          attendanceStatus === "presente" ? "bg-emerald-100 text-emerald-600" :
-          attendanceStatus === "falta" ? "bg-red-100 text-red-600" :
-          attendanceStatus === "justificada" ? "bg-amber-100 text-amber-600" :
-          "bg-slate-100 text-slate-500"
-        }`}>
-          {patientName.split(" ").map(n => n[0]).join("").slice(0, 2)}
-        </div>
-        <div>
-          <p className="text-sm font-bold text-slate-800">{patientName}</p>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">
-            {appointment.time} • {appointment.duration}min
-          </p>
-        </div>
+    <div
+      onClick={() => onClick(session, date)}
+      className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all shadow-sm ${statusStyles[attendanceStatus] || statusStyles.default}`}
+    >
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 ${
+        attendanceStatus === "presente" ? "bg-emerald-100 text-emerald-600" :
+        attendanceStatus === "falta" ? "bg-red-100 text-red-600" :
+        attendanceStatus === "justificada" ? "bg-amber-100 text-amber-600" :
+        "bg-slate-100 text-slate-500"
+      }`}>
+        {initials}
       </div>
-      <div className="flex items-center gap-1">
-        {attendanceStatus !== 'justificada' && (
-          <>
-            <button
-              onClick={() => onStatus(appointment, "presente", date)}
-              className="p-2 rounded-lg transition-all text-emerald-600 hover:bg-emerald-50"
-              title="Presente"
-            >
-              <Check size={16} />
-            </button>
-            <button
-              onClick={() => onStatus(appointment, "falta", date)}
-              className="p-2 rounded-lg transition-all text-red-600 hover:bg-red-50"
-              title="Falta"
-            >
-              <X size={16} />
-            </button>
-          </>
-        )}
-        <button
-          onClick={() => onStatus(appointment, "justificada", date)}
-          className={`p-2 rounded-lg transition-all ${
-            attendanceStatus === "justificada" ? "bg-amber-600 text-white shadow-sm" : "text-amber-600 hover:bg-amber-50"
-          }`}
-          title="Justificar"
-        >
-          <AlertCircle size={16} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function DayView({ date, appointments, attendances, onStatus, setJustModal, setJustData }) {
-  const dayName = DAYS_OF_WEEK[date.getDay()];
-  const dateStr = formatDateKey(date);
-  
-  const dayAppointments = appointments.filter(a => {
-    if (a.dayOfWeek !== date.getDay()) return false;
-    if (a.startDate) {
-      const startStr = extractUTCDate(a.startDate);
-      return startStr <= dateStr;
-    }
-    return true;
-  });
-
-  const dayExtras = attendances.filter(att => 
-    extractUTCDate(att.date) === dateStr &&
-    !dayAppointments.some(app => app.patientId === att.patientId)
-  );
-
-  const allSessions = [
-    ...dayAppointments.map(app => ({
-      type: 'fixed',
-      app,
-      attendance: attendances.find(att => att.patientId === app.patientId && extractUTCDate(att.date) === dateStr)
-    })),
-    ...dayExtras.map(att => ({
-      type: 'extra',
-      app: { id: att.id, patientId: att.patientId, time: att.sessionTime || "00:00", duration: 50, patient: att.patient },
-      attendance: att
-    }))
-  ].sort((a,b) => a.app.time.localeCompare(b.app.time));
-  
-  return (
-    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-      <div className="p-4 bg-slate-50/50 border-b border-slate-200 flex items-center justify-between">
-        <div>
-          <p className="font-bold text-slate-700">{dayName}</p>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{format(date, "d 'de' MMMM", { locale: ptBR })}</p>
-        </div>
-        <span className="px-2 py-1 bg-white border border-slate-200 text-slate-600 text-[10px] font-black rounded-full shadow-sm">
-          {allSessions.length} SESSÕES
-        </span>
-      </div>
-      <div className="p-3 space-y-3">
-        {allSessions.length === 0 ? (
-          <div className="py-10 text-center opacity-30">
-            <Users size={24} className="mx-auto mb-2" />
-            <p className="text-[10px] font-black uppercase tracking-widest">Livre</p>
-          </div>
-        ) : (
-          allSessions.map((session, idx) => (
-            <SessionCard 
-              key={session.app.id + idx} 
-              appointment={session.app} 
-              date={date}
-              attendance={session.attendance}
-              onStatus={onStatus}
-            />
-          ))
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-bold text-slate-800 truncate">{patientName}</p>
+        <p className="text-[10px] font-bold text-slate-500">
+          {appointment.time} &bull; {appointment.duration}min
+        </p>
+        {appointment.patient?.phone && (
+          <p className="text-[9px] font-medium text-slate-400 mt-0.5">{appointment.patient.phone}</p>
         )}
       </div>
-    </div>
-  );
-}
-
-function WeekView({ weekDays, appointments, attendances, onStatus, setJustModal, setJustData }) {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
-      {weekDays.map((day, idx) => (
-        <DayView 
-          key={idx} 
-          date={day} 
-          appointments={appointments} 
-          attendances={attendances}
-          onStatus={onStatus}
-          setJustModal={setJustModal}
-          setJustData={setJustData}
-        />
-      ))}
-    </div>
-  );
-}
-
-function MonthView({ currentDate, appointments, attendances, onStatus, setJustModal, setJustData }) {
-  const monthStart = startOfMonth(currentDate);
-  const monthEnd = endOfMonth(monthStart);
-  const startDate = startOfWeek(monthStart, { weekStartsOn: 0 });
-  const endDate = endOfWeek(monthEnd, { weekStartsOn: 0 });
-  const calendarDays = eachDayOfInterval({ start: startDate, end: endDate });
-  
-  const todayStr = formatDateKey(new Date());
-  
-  return (
-    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-      <div className="grid grid-cols-7 border-b border-slate-300 bg-slate-100">
-        {DAYS_OF_WEEK.map((day, idx) => (
-          <div key={idx} className="p-3 text-center text-[11px] font-black text-slate-600 uppercase tracking-widest">
-            {day.slice(0, 3)}
-          </div>
-        ))}
-      </div>
-      <div className="grid grid-cols-7">
-        {calendarDays.map((day, idx) => {
-          const isCurrentMonth = format(day, 'M') === format(monthStart, 'M');
-          const dayStr = formatDateKey(day);
-          const isToday = dayStr === todayStr;
-          
-          const dayApps = appointments.filter(a => {
-            if (a.dayOfWeek !== day.getDay()) return false;
-            const appStart = extractUTCDate(a.startDate);
-            return dayStr >= appStart;
-          });
-
-          const dayExtras = attendances.filter(att => 
-            extractUTCDate(att.date) === dayStr &&
-            !dayApps.some(app => app.patientId === att.patientId)
-          );
-
-          const allSessions = [
-            ...dayApps.map(app => ({
-              type: 'fixed',
-              app,
-              att: attendances.find(a => a.patientId === app.patientId && extractUTCDate(a.date) === dayStr)
-            })),
-            ...dayExtras.map(att => ({
-              type: 'extra',
-              app: { id: att.id, patientId: att.patientId, time: att.sessionTime || "08:00", patient: att.patient },
-              att
-            }))
-          ].sort((a,b) => {
-            const timeA = a.att?.sessionTime || a.app.time || "00:00";
-            const timeB = b.att?.sessionTime || b.app.time || "00:00";
-            return timeA.localeCompare(timeB);
-          });
-          
-          return (
-            <div key={idx} className={`p-2 border-r border-b border-slate-300 ${!isCurrentMonth ? 'bg-slate-100/70 opacity-50' : 'bg-white'}`}>
-              <div className="flex justify-end mb-1">
-                <span className={`text-[11px] font-bold w-6 h-6 flex items-center justify-center rounded-lg ${isToday ? 'bg-slate-800 text-white shadow-md' : 'text-slate-600'}`}>
-                  {format(day, 'd')}
-                </span>
-              </div>
-              <div 
-                className="space-y-1 mt-1 overflow-y-auto"
-                style={{ maxHeight: allSessions.length > 4 ? '160px' : 'auto' }}
-              >
-                {allSessions.map((session, i) => {
-                  const att = session.att;
-                  
-                  const statusStyles = {
-                    presente: "bg-emerald-100 text-emerald-700 border-emerald-300",
-                    falta: "bg-red-100 text-red-700 border-red-300",
-                    justificada: "bg-amber-100 text-amber-700 border-amber-300",
-                    default: "bg-slate-100 text-slate-600 border-slate-200"
-                  };
-                  
-                  const style = statusStyles[att?.status] || statusStyles.default;
-                  const isReagendado = att?.status === 'justificada' && att?.notes?.includes('Reagendado');
-                  const isFilho = !!att?.parentId;
-                  const hasFilho = attendances.some(a => a.parentId === att?.id);
-                  
-                  return (
-                    <div key={session.app.id + '-' + i} className="flex items-center gap-1">
-                      <div className={`text-[10px] px-1.5 py-1 rounded truncate flex-1 font-bold border transition-all ${style} 
-                        ${session.type === 'extra' || isFilho ? 'border-dashed border-2' : ''} 
-                        ${isReagendado ? 'opacity-70 grayscale-[0.3]' : ''}
-                        ${hasFilho ? 'ring-1 ring-amber-400/30' : ''}`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="truncate flex items-center gap-1">
-                            {isFilho && !hasFilho && <Clock size={10} className="shrink-0" />}
-                            {hasFilho && <Link2 size={10} className="shrink-0" />}
-                            {session.app.patient?.name?.split(" ")[0]}
-                          </span>
-                          {isReagendado && <RefreshCcw size={10} className="ml-1 animate-spin-slow" />}
-                          <span>{session.att?.sessionTime || session.app.time}</span>
-                        </div>
-                      </div>
-                      <div className="flex gap-0.5">
-                        {att?.status !== 'justificada' && (
-                          <>
-                            <button 
-                              onClick={() => onStatus(session.app, 'presente', day)} 
-                              className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition-all bg-emerald-50 text-emerald-600 hover:bg-emerald-100" 
-                              title="Presente"
-                            >
-                              P
-                            </button>
-                            <button 
-                              onClick={() => onStatus(session.app, 'falta', day)} 
-                              className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition-all bg-red-50 text-red-600 hover:bg-red-100" 
-                              title="Falta"
-                            >
-                              F
-                            </button>
-                          </>
-                        )}
-                        <button 
-                          onClick={() => onStatus(session.app, 'justificada', day)} 
-                          className={`w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black transition-all ${
-                            att?.status === 'justificada' ? 'bg-amber-500 text-white shadow-sm' : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
-                          }`} 
-                          title="Justificada"
-                        >
-                          J
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-                {allSessions.length > 3 && (
-                  <div className="text-[8px] font-bold text-slate-400 text-center">+{allSessions.length - 3} mais</div>
-                )}
-              </div>
-            </div>
-          );
-        })}
+      <div className="shrink-0 ml-2">
+        <span className={`w-2 h-2 rounded-full block ${
+          attendanceStatus === "presente" ? "bg-emerald-500" :
+          attendanceStatus === "falta" ? "bg-red-500" :
+          attendanceStatus === "justificada" ? "bg-amber-500" :
+          "bg-slate-300"
+        }`} />
       </div>
     </div>
   );
 }
-
-function ListView({ currentDate, appointments, attendances, onStatus, setJustModal, setJustData }) {
-  const dayStr = formatDateKey(currentDate);
-  const dayOfWeek = currentDate.getDay();
-  
-  const dayApps = appointments.filter(a => {
-    if (a.dayOfWeek !== dayOfWeek) return false;
-    if (!a.startDate) return true;
-    return extractUTCDate(a.startDate) <= dayStr;
-  });
-  
-  const dayExtras = attendances.filter(att => 
-    extractUTCDate(att.date) === dayStr &&
-    !dayApps.some(app => app.patientId === att.patientId)
-  );
-  
-  const allSessions = [
-    ...dayApps.map(app => ({
-      type: 'fixed',
-      app,
-      att: attendances.find(a => a.patientId === app.patientId && extractUTCDate(a.date) === dayStr)
-    })),
-    ...dayExtras.map(att => ({
-      type: 'extra',
-      app: { id: att.id, patientId: att.patientId, time: att.sessionTime || "08:00", patient: att.patient },
-      att
-    }))
-  ].sort((a,b) => (a.att?.sessionTime || a.app.time).localeCompare(b.att?.sessionTime || b.app.time));
-  
-  if (dayApps.length === 0 && dayExtras.length === 0) {
-    return (
-      <div className="bg-white rounded-2xl border border-slate-200 p-20 text-center shadow-sm">
-        <Users size={48} className="mx-auto text-slate-200 mb-4" />
-        <h3 className="text-slate-400 font-bold uppercase tracking-widest text-sm">Nenhuma sessão nesta data</h3>
-      </div>
-    );
-  }
-  
-  return (
-    <div className="space-y-3">
-      {allSessions.map((session, i) => {
-        const att = session.att;
-        const statusStyles = {
-          presente: "bg-emerald-100 text-emerald-700 border-emerald-300",
-          falta: "bg-red-100 text-red-700 border-red-300",
-          justificada: "bg-amber-100 text-amber-700 border-amber-300",
-          default: "bg-slate-100 text-slate-600 border-slate-200"
-        };
-        const style = statusStyles[att?.status] || statusStyles.default;
-        
-        return (
-          <div key={session.app.id + i} className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-black ${style}`}>
-                  {session.att?.sessionTime || session.app.time}
-                </div>
-                <div>
-                  <p className="font-bold text-slate-800">{session.app.patient?.name}</p>
-                  <p className="text-xs text-slate-500">{session.app.duration}min</p>
-                </div>
-              </div>
-              <div className="flex gap-1">
-                {att?.status !== 'justificada' && (
-                  <button onClick={() => onStatus(session.app, 'presente', currentDate)} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${att?.status === 'presente' ? 'bg-emerald-500 text-white' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'}`}>P</button>
-                )}
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ======================
-// COMPONENTE PRINCIPAL
-// ======================
 
 export default function Agenda() {
-  const [view, setView] = useState("month");
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [calendarDate, setCalendarDate] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState(new Date());
   const [appointments, setAppointments] = useState([]);
   const [attendances, setAttendances] = useState([]);
   const [loading, setLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState("");
   const [justModal, setJustModal] = useState({ open: false, patient: null, appointment: null, date: null, isEdit: false, existingAtt: null });
   const [justData, setJustData] = useState({ date: "", time: "", notes: "" });
+  const [justType, setJustType] = useState("reagendar");
   const [descendantsInfo, setDescendantsInfo] = useState({ count: 0, list: [] });
   const [confirmModal, setConfirmModal] = useState({ open: false, title: "", message: "", onConfirm: null, loading: false });
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addForm, setAddForm] = useState({ patientId: "", time: "08:00", duration: 50, recurring: true, maxSessions: 0 });
+  const [patients, setPatients] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [editingApp, setEditingApp] = useState(null);
+  const [showEditChoice, setShowEditChoice] = useState(false);
+  const [editChoiceDate, setEditChoiceDate] = useState(null);
+  const [editMode, setEditMode] = useState(null);
+  const [agendaFormDate, setAgendaFormDate] = useState(null);
+  const [agendaFormDayOfWeek, setAgendaFormDayOfWeek] = useState(null);
+  const [agendaFormTime, setAgendaFormTime] = useState("08:00");
+  const [agendaFormDuration, setAgendaFormDuration] = useState(50);
+  const [agendaFormRecurring, setAgendaFormRecurring] = useState(true);
+  const [agendaFormMaxSessions, setAgendaFormMaxSessions] = useState(0);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [detailModal, setDetailModal] = useState({ open: false, session: null, date: null });
+
+  const dateCellWrapper = useCallback(({ value, children }) => {
+    const isSelected = selectedDay && formatDateKey(value) === formatDateKey(selectedDay);
+    const isToday = formatDateKey(value) === formatDateKey(new Date());
+    if (isSelected && !isToday) {
+      return <div className="rbc-selected-day-cell" style={{ display: "contents" }}>{children}</div>;
+    }
+    return <>{children}</>;
+  }, [selectedDay]);
 
   useEffect(() => {
     if (successMessage) {
@@ -495,12 +182,14 @@ export default function Agenda() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [apps, atts] = await Promise.all([
+      const [apps, atts, pats] = await Promise.all([
         api.getAppointments() || [],
-        api.getAttendances() || []
+        api.getAttendances() || [],
+        api.getPatients() || []
       ]);
       setAppointments(apps);
       setAttendances(atts);
+      setPatients(pats);
     } catch (error) {
       console.error("Erro ao carregar:", error);
     } finally {
@@ -523,30 +212,29 @@ export default function Agenda() {
     if (!sessionDate) {
       const date = new Date();
       date.setHours(0, 0, 0, 0);
-      const dayOfWeek = appointment.dayOfWeek;
-      const diff = (dayOfWeek - date.getDay() + 7) % 7;
-      sessionDate = addDays(date, diff);
+      const diff = (appointment.dayOfWeek - date.getDay() + 7) % 7;
+      sessionDate = new Date(date.getTime() + diff * 86400000);
     }
-    
+
     const dateStr = formatDateKey(sessionDate);
     const existingAtt = attendances.find(a => a.patientId === appointment.patientId && extractUTCDate(a.date) === dateStr);
-    
-    if (status === 'justificada') {
+
+    if (status === "justificada") {
       if (existingAtt) {
         fetchDescendants(existingAtt.id);
       } else {
         setDescendantsInfo({ count: 0, list: [] });
       }
 
-      setJustModal({ 
-        open: true, 
-        patient: appointment.patient, 
-        appointment, 
-        date: sessionDate, 
+      setJustModal({
+        open: true,
+        patient: appointment.patient,
+        appointment,
+        date: sessionDate,
         isEdit: true,
-        existingAtt 
+        existingAtt
       });
-      
+
       let reschedDate = "";
       let reschedTime = "";
       if (existingAtt?.notes?.includes("Reagendado para ")) {
@@ -557,61 +245,51 @@ export default function Agenda() {
       } else if (existingAtt?.sessionTime) {
         reschedTime = existingAtt.sessionTime;
       }
-      
+
+      setJustType(existingAtt ? (reschedDate ? "reagendar" : "cancelar") : "reagendar");
       setJustData({ date: reschedDate, time: reschedTime, notes: existingAtt?.notes || "" });
       return;
     }
-    
+
     try {
       if (existingAtt?.status === status) {
-        // ─── CORREÇÃO: registros filho (reagendamentos) nunca devem ser deletados
-        // ao desmarcar o status, pois não têm Appointment fixo por baixo.
-        // Ao deletar, somem da agenda. Em vez disso, limpamos o status.
         if (existingAtt.parentId) {
           await api.saveAttendance({
             ...existingAtt,
-            status: '',
+            status: "",
             date: existingAtt.date,
           });
         } else {
-          // Sessão normal com Appointment fixo: pode deletar normalmente
           await api.deleteAttendance(existingAtt.id);
         }
         await loadData();
+        setSuccessMessage("Status removido!");
       } else {
-        const data = {
+        await api.saveAttendance({
           patientId: appointment.patientId,
           date: sessionDate.toISOString(),
           status,
           sessionTime: appointment.time
-        };
-        await api.saveAttendance(data);
+        });
         await loadData();
+        setSuccessMessage(status === "presente" ? "Presença confirmada!" : "Falta registrada!");
       }
     } catch (error) {
       console.error("Erro ao salvar:", error);
+      setSuccessMessage("Erro ao salvar status");
     }
-  };
-
-  const goToRescheduledDate = (dateStr) => {
-    if (!dateStr) return;
-    const newDate = new Date(dateStr + 'T00:00:00');
-    setCurrentDate(newDate);
-    setView('month');
-    setJustModal({ ...justModal, open: false });
   };
 
   const deleteJustification = async () => {
     if (!justModal.existingAtt) return;
-    
-    // Buscar descendentes frescos antes de montar a mensagem (evita race condition)
+
     const data = await fetchDescendants(justModal.existingAtt.id);
     const count = data.count;
     const list = data.descendants;
 
     let title = "Remover Justificativa";
     let message = "Deseja desfazer esta falta justificada? A sessão voltará a aparecer sem marcação.";
-    
+
     if (count === 1) {
       const childDate = new Date(list[0].date);
       message = `Deseja remover esta justificativa? O reagendamento de ${format(childDate, "dd/MM")} também será cancelado e excluído permanentemente.`;
@@ -639,44 +317,42 @@ export default function Agenda() {
       }
     });
   };
-  
+
   const saveJustificada = async () => {
     if (!justModal.appointment || !justModal.date) return;
-    
+
     const originalDate = justModal.date;
     const newDateStr = justData.date;
     const newTimeStr = justData.time;
     const motivo = justData.notes || "Falta justificada";
-    
+
     try {
-      const notes = newDateStr 
+      const notes = newDateStr
         ? `Falta justificada. Reagendado para ${newDateStr} às ${newTimeStr || "08:00"}. Motivo: ${motivo}`
         : motivo;
-      
+
       const sessionTime = newDateStr ? (newTimeStr || "08:00") : (justModal.appointment?.time || null);
-      
-      // 1. Salvar ou Atualizar o registro original (Pai)
+
       const originalResult = await api.saveAttendance({
         patientId: justModal.appointment.patientId,
         date: originalDate.toISOString(),
-        status: 'justificada',
+        status: "justificada",
         notes,
         sessionTime
       });
 
-      // 2. Se houver uma nova data, criar o registro Filho vinculado ao Pai
       if (newDateStr) {
-        const dateToSave = new Date(newDateStr + 'T' + (newTimeStr || "08:00") + ':00');
+        const dateToSave = new Date(newDateStr + "T" + (newTimeStr || "08:00") + ":00");
         await api.saveAttendance({
           patientId: justModal.appointment.patientId,
           date: dateToSave.toISOString(),
-          status: '', 
-          notes: `Reagendamento da sessão de ${originalDate.toLocaleDateString('pt-BR')}. ${motivo}`,
+          status: "",
+          notes: `Reagendamento da sessão de ${originalDate.toLocaleDateString("pt-BR")}. ${motivo}`,
           sessionTime: newTimeStr || "08:00",
           parentId: originalResult.id
         });
       }
-      
+
       setSuccessMessage(newDateStr ? `Sessão reagendada para ${newDateStr}` : "Falta justificada registrada!");
       await loadData();
       setJustModal({ open: false, patient: null, appointment: null, date: null, isEdit: false, existingAtt: null });
@@ -686,166 +362,577 @@ export default function Agenda() {
     }
   };
 
+  const handleAddAppointment = async () => {
+    if (!addForm.patientId || !selectedDay) return;
+    setSaving(true);
+    try {
+      const dayOfWeek = selectedDay.getDay();
+      const payload = {
+        patientId: addForm.patientId,
+        dayOfWeek,
+        time: addForm.time,
+        duration: addForm.duration,
+      };
+      if (addForm.recurring) {
+        payload.startDate = formatDateKey(selectedDay);
+        payload.maxSessions = addForm.maxSessions || null;
+      } else {
+        payload.scheduledDate = formatDateKey(selectedDay);
+      }
+      await api.createAppointment(payload);
+      setSuccessMessage("Agendamento criado!");
+      setShowAddModal(false);
+      setAddForm({ patientId: "", time: "08:00", duration: 50, recurring: true, maxSessions: 0 });
+      await loadData();
+    } catch (error) {
+      console.error("Erro ao criar agendamento:", error);
+      setSuccessMessage("Erro ao criar agendamento");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const getDayAppointments = useCallback((date) => {
+    if (!date) return [];
+    const dayStr = formatDateKey(date);
+    const dayOfWeek = date.getDay();
+
+    const dayApps = appointments.filter(a => {
+      if (a.dayOfWeek !== dayOfWeek) return false;
+      if (a.startDate) {
+        const startStr = extractUTCDate(a.startDate);
+        if (dayStr < startStr) return false;
+      }
+      if (a.endDate && dayStr > extractUTCDate(a.endDate)) return false;
+      if (a.scheduledDate && dayStr !== extractUTCDate(a.scheduledDate)) return false;
+      if (a.skipDates?.includes(dayStr)) return false;
+      if (a.maxSessions > 0 && a.startDate) {
+        const start = parseLocalDateStr(a.startDate);
+        let count = 0;
+        const cursor = new Date(start);
+        while (cursor <= date) {
+          if (cursor.getDay() === a.dayOfWeek) count++;
+          cursor.setDate(cursor.getDate() + 7);
+        }
+        if (count > a.maxSessions) return false;
+      }
+      return true;
+    });
+
+    const dayExtras = attendances.filter(att =>
+      extractUTCDate(att.date) === dayStr &&
+      appointments.some(app => app.patientId === att.patientId) &&
+      !dayApps.some(app => app.patientId === att.patientId)
+    );
+
+    return [
+      ...dayApps.map(app => ({
+        type: "fixed",
+        app,
+        attendance: attendances.find(att => att.patientId === app.patientId && extractUTCDate(att.date) === dayStr)
+      })),
+      ...dayExtras.map(att => ({
+        type: "extra",
+        app: { id: att.id, patientId: att.patientId, time: att.sessionTime || "00:00", duration: 50, patient: att.patient },
+        attendance: att
+      }))
+    ].sort((a, b) => (a.attendance?.sessionTime || a.app.time || "00:00").localeCompare(b.attendance?.sessionTime || b.app.time || "00:00"));
+  }, [appointments, attendances]);
+
+  const getMonthEvents = useCallback((month) => {
+    if (!month || !appointments.length) return [];
+    const year = month.getFullYear();
+    const monthNum = month.getMonth();
+    const daysInMonth = new Date(year, monthNum + 1, 0).getDate();
+    const events = [];
+
+    const attMap = {};
+    attendances.forEach(att => {
+      const key = extractUTCDate(att.date);
+      if (!attMap[key]) attMap[key] = {};
+      attMap[key][att.patientId] = att;
+    });
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, monthNum, day);
+      const dateStr = formatDateKey(date);
+      const dayOfWeek = date.getDay();
+
+      appointments.forEach(app => {
+        if (app.dayOfWeek !== dayOfWeek) return;
+        if (app.startDate && dateStr < extractUTCDate(app.startDate)) return;
+        if (app.endDate && dateStr > extractUTCDate(app.endDate)) return;
+        if (app.scheduledDate && dateStr !== extractUTCDate(app.scheduledDate)) return;
+        if (app.skipDates?.includes(dateStr)) return;
+        if (app.maxSessions > 0 && app.startDate) {
+          const start = parseLocalDateStr(app.startDate);
+          let count = 0;
+          const cursor = new Date(start);
+          while (cursor <= date) {
+            if (cursor.getDay() === app.dayOfWeek) count++;
+            cursor.setDate(cursor.getDate() + 7);
+          }
+          if (count > app.maxSessions) return;
+        }
+
+        const [hours, minutes] = (app.time || "08:00").split(":").map(Number);
+        const start = new Date(year, monthNum, day, hours, minutes);
+        const end = new Date(start.getTime() + (app.duration || 50) * 60000);
+        const att = attMap[dateStr]?.[app.patientId];
+
+        events.push({
+          id: `${app.id}-${dateStr}`,
+          title: app.patient?.name || "Paciente",
+          start,
+          end,
+          session: { type: "fixed", app, attendance: att }
+        });
+      });
+
+      if (attMap[dateStr]) {
+        Object.values(attMap[dateStr]).forEach(att => {
+          const patientHasApp = appointments.some(app => app.patientId === att.patientId);
+          if (patientHasApp && !appointments.some(app => app.patientId === att.patientId && app.dayOfWeek === dayOfWeek)) {
+            const [h, m] = (att.sessionTime || "08:00").split(":").map(Number);
+            const start = new Date(year, monthNum, day, h, m);
+            const end = new Date(start.getTime() + 50 * 60000);
+            events.push({
+              id: `extra-${att.id}`,
+              title: att.patient?.name || "Paciente",
+              start,
+              end,
+              session: { type: "extra", app: { id: att.id, patientId: att.patientId, time: att.sessionTime || "00:00", duration: 50, patient: att.patient }, attendance: att }
+            });
+          }
+        });
+      }
+    }
+    return events;
+  }, [appointments, attendances]);
+
+  const handleEditClick = (app, date) => {
+    if (!app.scheduledDate) {
+      setEditingApp(app);
+      setEditChoiceDate(date);
+      setShowEditChoice(true);
+      setEditMode(null);
+    } else {
+      openEditModal(app, date);
+    }
+  };
+
+  const openEditModal = (app, date) => {
+    setAgendaFormDate(date);
+    setAgendaFormDayOfWeek(app.dayOfWeek);
+    setAgendaFormTime(app.time);
+    setAgendaFormDuration(app.duration);
+    setAgendaFormRecurring(!app.scheduledDate);
+    setAgendaFormMaxSessions(app.maxSessions || 0);
+    setEditingApp(app);
+    setShowEditChoice(false);
+    setShowEditModal(true);
+  };
+
+  const handleEditSingle = () => {
+    setEditMode("single");
+    openEditModal(editingApp, editChoiceDate);
+  };
+
+  const handleEditFuture = () => {
+    setEditMode("future");
+    openEditModal(editingApp, editChoiceDate);
+  };
+
+  const handleSaveEditedSlot = async () => {
+    if (!editingApp || !agendaFormDate) return;
+    const dayOfWeek = agendaFormDayOfWeek ?? agendaFormDate.getDay();
+    const dateStr = formatDateKey(agendaFormDate);
+    setSaving(true);
+    try {
+      if (editMode === "single") {
+        const skipDates = [...(editingApp.skipDates || []), dateStr];
+        await api.updateAppointment(editingApp.id, { skipDates });
+        const targetDate = dayOfWeek !== editingApp.dayOfWeek
+          ? (() => { const d = new Date(agendaFormDate); while (d.getDay() !== dayOfWeek) d.setDate(d.getDate() + 1); return d; })()
+          : agendaFormDate;
+        await api.createAppointment({
+          patientId: editingApp.patientId,
+          dayOfWeek,
+          time: agendaFormTime,
+          duration: agendaFormDuration,
+          scheduledDate: formatDateKey(targetDate)
+        });
+      } else if (editMode === "future") {
+        const prevDate = new Date(agendaFormDate);
+        prevDate.setDate(prevDate.getDate() - 1);
+        await api.updateAppointment(editingApp.id, { endDate: formatDateKey(prevDate) });
+        await api.createAppointment({
+          patientId: editingApp.patientId,
+          dayOfWeek,
+          time: agendaFormTime,
+          duration: agendaFormDuration,
+          startDate: dateStr,
+          maxSessions: agendaFormMaxSessions || null
+        });
+      } else if (editingApp.scheduledDate) {
+        await api.updateAppointment(editingApp.id, {
+          dayOfWeek,
+          time: agendaFormTime,
+          duration: agendaFormDuration
+        });
+      }
+      setSuccessMessage("Agendamento atualizado!");
+      setShowEditModal(false);
+      setEditingApp(null);
+      setEditMode(null);
+      await loadData();
+    } catch (error) {
+      console.error("Erro ao editar:", error);
+      setSuccessMessage("Erro ao editar agendamento");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteAppointment = (session, date) => {
+    const isExtra = session.type === "extra";
+    const patientName = session.app.patient?.name || "este paciente";
+
+    setConfirmModal({
+      open: true,
+      title: isExtra ? "Excluir sessão" : "Excluir agendamento",
+      message: isExtra
+        ? `Tem certeza que deseja excluir a sessão de ${patientName}? Esta ação não pode ser desfeita.`
+        : `Tem certeza que deseja excluir o horário de ${patientName}?`,
+      loading: false,
+      onConfirm: async () => {
+        setConfirmModal(prev => ({ ...prev, loading: true }));
+        try {
+          if (isExtra) {
+            await api.deleteAttendance(session.app.id);
+            setSuccessMessage("Sessão removida!");
+          } else {
+            const app = appointments.find(a => a.id === session.app.id);
+            if (app && !app.scheduledDate && date) {
+              const dateStr = formatDateKey(date);
+              const skipDates = [...(app.skipDates || []), dateStr];
+              await api.updateAppointment(session.app.id, { skipDates });
+            } else {
+              await api.deleteAppointment(session.app.id);
+            }
+            setSuccessMessage("Agendamento removido!");
+          }
+          await loadData();
+          setConfirmModal({ open: false, title: "", message: "", onConfirm: null, loading: false });
+        } catch (error) {
+          console.error("Erro ao remover:", error);
+          setSuccessMessage(error.message || "Erro ao remover agendamento");
+          setConfirmModal(prev => ({ ...prev, loading: false }));
+        }
+      }
+    });
+  };
+
+  const openDetailModal = (session, date) => {
+    setDetailModal({ open: true, session, date });
+  };
+
+  const handleQuickStatus = async (session, status, sessionDate) => {
+    const appointment = session.app;
+    const date = sessionDate;
+
+    setDetailModal({ open: false, session: null, date: null });
+
+    if (status === "justificada") {
+      handleAttendance(appointment, "justificada", date);
+      return;
+    }
+
+    await handleAttendance(appointment, status, date);
+  };
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const dateParam = params.get('date');
+    const dateParam = params.get("date");
     if (dateParam) {
       const newDate = new Date(dateParam);
-      setCurrentDate(newDate);
-      setView('month');
+      setCalendarDate(newDate);
+      setSelectedDay(newDate);
     }
   }, []);
 
+  const daySessions = useMemo(() => {
+    return getDayAppointments(selectedDay);
+  }, [selectedDay, getDayAppointments]);
+
+  const monthEvents = useMemo(() => {
+    return getMonthEvents(calendarDate);
+  }, [calendarDate, getMonthEvents]);
+
   return (
     <div className="p-4 sm:p-6 h-full flex flex-col space-y-4">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Agenda</h1>
           <p className="text-sm text-slate-500">Gestão de sessões e presenças</p>
-        </div>
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
-          {[
-            { id: 'month', label: 'Mês' },
-            { id: 'list', label: 'Lista' }
-          ].map(item => (
-            <button
-              key={item.id}
-              onClick={() => setView(item.id)}
-              className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
-                view === item.id ? "bg-slate-800 text-white shadow-lg" : "text-slate-500 hover:text-slate-800"
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
         </div>
       </div>
 
       <StatsBar appointments={appointments} attendances={attendances} />
 
-      {/* Navigation */}
-      <div className="flex items-center justify-between bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
-        <div className="flex items-center gap-4">
-          <h2 className="font-black text-slate-800 uppercase tracking-widest text-base">
-            {view === 'list' ? format(currentDate, 'EEEE, d MMMM', { locale: ptBR }) : format(currentDate, 'MMMM yyyy', { locale: ptBR })}
-          </h2>
-          <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200">
-            <button onClick={() => setCurrentDate(view === 'list' ? addDays(currentDate, -1) : new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))} className="p-1.5 hover:bg-white rounded-lg transition-all text-slate-500">
-              <ChevronLeft size={18} />
-            </button>
-            <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-white rounded-lg transition-all">Hoje</button>
-            <button onClick={() => setCurrentDate(view === 'list' ? addDays(currentDate, 1) : new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))} className="p-1.5 hover:bg-white rounded-lg transition-all text-slate-500">
-              <ChevronRight size={18} />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto min-h-0">
+      <div className="flex-1 min-h-0">
         {loading ? (
           <div className="h-full flex items-center justify-center">
             <div className="w-10 h-10 border-4 border-slate-800 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="animate-fade-in h-full">
-            {view === "month" && <MonthView currentDate={currentDate} appointments={appointments} attendances={attendances} onStatus={handleAttendance} setJustModal={setJustModal} setJustData={setJustData} />}
-            {view === "list" && <ListView currentDate={currentDate} appointments={appointments} attendances={attendances} onStatus={handleAttendance} setJustModal={setJustModal} setJustData={setJustData} />}
+          <div className="flex gap-6 h-full animate-fade-in">
+            {/* Left: Calendar */}
+            <div className="w-[70%] flex flex-col min-h-0">
+              <div className="p-4 pb-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col flex-1 min-h-0 overflow-hidden agenda-calendar">
+                <BigCalendar
+                  localizer={rbcLocalizer}
+                  events={monthEvents}
+                  date={calendarDate}
+                  onNavigate={setCalendarDate}
+                  onSelectSlot={({ start }) => setSelectedDay(start)}
+                  onSelectEvent={(event) => openDetailModal(event.session, event.start)}
+                  selectable
+                  views={["month"]}
+                  defaultView="month"
+                  toolbar={true}
+                  popup={false}
+                  className="flex-1 min-h-0"
+                  formats={{
+                    weekdayFormat: (date) => format(date, "EEE", { locale: ptBR })
+                  }}
+                  dayPropGetter={(date) => {
+                    const today = new Date();
+                    const isSelected = selectedDay && formatDateKey(date) === formatDateKey(selectedDay);
+                    const isToday = formatDateKey(date) === formatDateKey(today);
+                    if (isSelected && !isToday) {
+                      return { className: "rbc-selected-day" };
+                    }
+                    return {};
+                  }}
+                  components={{
+                    dateCellWrapper: dateCellWrapper,
+                    event: ({ event }) => {
+                      const firstName = (event.title || "").split(" ")[0] || "?";
+                      const time = event.session?.app?.time || "";
+                      const status = event.session?.attendance?.status;
+                      let barColor = "bg-slate-400";
+                      if (status === "presente") barColor = "bg-emerald-500";
+                      else if (status === "falta") barColor = "bg-red-500";
+                      else if (status === "justificada") barColor = "bg-amber-500";
+                      return (
+                        <div className="flex items-center gap-1 px-1 py-0.5 rounded-sm cursor-pointer hover:opacity-80 transition-opacity overflow-hidden">
+                          <div className={`w-1.5 h-full min-h-[14px] rounded-full shrink-0 ${barColor}`} />
+                          <span className="text-[11px] font-bold text-slate-800 leading-tight truncate">{firstName} {time}</span>
+                        </div>
+                      );
+                    },
+                    toolbar: (toolbarProps) => {
+                      const label = format(toolbarProps.date, "MMMM 'de' yyyy", { locale: ptBR });
+                      return (
+                        <div className="shrink-0 mb-3 flex items-center justify-between">
+                          <p className="text-sm font-bold text-slate-600 capitalize">{label}</p>
+                          <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
+                            <button onClick={() => toolbarProps.onNavigate("PREV")} className="p-1 hover:bg-slate-100 rounded transition-all text-slate-500">
+                              <ChevronLeft size={16} />
+                            </button>
+                            <button onClick={() => toolbarProps.onNavigate("TODAY")} className="px-2 py-1 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-100 rounded transition-all">Hoje</button>
+                            <button onClick={() => toolbarProps.onNavigate("NEXT")} className="p-1 hover:bg-slate-100 rounded transition-all text-slate-500">
+                              <ChevronRight size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    }
+                  }}
+                />
+
+                {/* Legend */}
+                <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-slate-100 shrink-0">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                    <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Realizado</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                    <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Falta</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                    <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Justificada</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-slate-400" />
+                    <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Agendado</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Detail Panel */}
+            <div className="w-[30%] flex flex-col gap-3">
+              <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight shrink-0">Agendamentos</h3>
+              <div className="flex-1 min-h-0">
+                {selectedDay ? (
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col h-full min-h-0">
+                    <div className="flex items-start justify-between mb-4 shrink-0">
+                      <div>
+                        <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">
+                          {format(selectedDay, "EEEE", { locale: ptBR })}
+                        </h4>
+                        <p className="text-xs font-bold text-slate-500 mt-0.5">
+                          {format(selectedDay, "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="px-2.5 py-1 bg-white border border-slate-200 text-slate-600 text-[10px] font-black rounded-full shadow-sm">
+                          {daySessions.length} {daySessions.length === 1 ? "SESSÃO" : "SESSÕES"}
+                        </span>
+                        <button
+                          onClick={() => setShowAddModal(true)}
+                          className="w-8 h-8 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center justify-center transition-all shadow-sm shadow-emerald-200"
+                          title="Adicionar agendamento"
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-2 overflow-y-auto min-h-0 flex-1">
+                      {daySessions.length === 0 ? (
+                        <div className="py-10 text-center">
+                          <Users size={24} className="mx-auto text-slate-300 mb-2" />
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nenhuma sessão neste dia</p>
+                        </div>
+                      ) : (
+                        daySessions.map((session, idx) => (
+                          <SessionCard
+                            key={session.app.id + idx}
+                            session={session}
+                            date={selectedDay}
+                            onClick={openDetailModal}
+                          />
+                        ))
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="h-full flex items-center justify-center">
+                    <div className="text-center py-10">
+                      <Calendar size={32} className="mx-auto text-slate-300 mb-3" />
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Selecione um dia</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>
-      
+
       {justModal.open && createPortal(
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[9999]" onClick={() => setJustModal({ ...justModal, open: false })}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
-            
-            {/* Cabeçalho */}
             <div className="flex items-center gap-3 mb-6">
-              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${justModal.isEdit ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-600'}`}>
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${justModal.isEdit ? "bg-amber-100 text-amber-600" : "bg-slate-100 text-slate-600"}`}>
                 {justModal.isEdit ? <AlertCircle size={24} /> : <BookOpen size={24} />}
               </div>
               <div>
                 <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">
-                  {justModal.isEdit ? 'Justificar Falta' : 'Detalhes da Sessão'}
+                  {justModal.isEdit ? "Justificar Falta" : "Detalhes da Sessão"}
                 </h2>
                 <p className="text-xs font-bold text-slate-500">{justModal.patient?.name}</p>
               </div>
             </div>
 
-            {/* Formulário de Justificativa */}
             {justModal.isEdit && (
               <div className="space-y-5">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Motivo da Falta</label>
-                  <textarea 
-                    value={justData.notes} 
-                    onChange={e => setJustData({ ...justData, notes: e.target.value })} 
-                    placeholder="Ex: Férias, doença, viagem..." 
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all h-24 resize-none text-sm font-medium" 
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Tipo de Justificativa</label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => { setJustType("reagendar"); setJustData(prev => ({ ...prev, date: "", time: "" })); }}
+                      className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all border-2 ${
+                        justType === "reagendar"
+                          ? "bg-amber-500 text-white border-amber-500 shadow-sm"
+                          : "bg-white text-slate-600 border-slate-200 hover:border-amber-300"
+                      }`}
+                    >
+                      Reagendar
+                    </button>
+                    <button
+                      onClick={() => setJustType("cancelar")}
+                      className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all border-2 ${
+                        justType === "cancelar"
+                          ? "bg-amber-500 text-white border-amber-500 shadow-sm"
+                          : "bg-white text-slate-600 border-slate-200 hover:border-amber-300"
+                      }`}
+                    >
+                      Apenas cancelar
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Motivo</label>
+                  <textarea
+                    value={justData.notes}
+                    onChange={e => setJustData({ ...justData, notes: e.target.value })}
+                    placeholder="Ex: Férias, doença, viagem..."
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all h-24 resize-none text-sm font-medium"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Data</label>
-                    <input 
-                      type="date" 
-                      min={new Date().toISOString().split('T')[0]} 
-                      value={justData.date || ''} 
-                      onChange={e => setJustData({ ...justData, date: e.target.value })} 
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all text-sm font-medium" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Horário</label>
-                    <select 
-                      value={justData.time || ''} 
-                      onChange={e => setJustData({ ...justData, time: e.target.value })} 
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all text-sm font-medium"
-                    >
-                      <option value="">--:--</option>
-                      <option value="07:00">07:00</option>
-                      <option value="07:30">07:30</option>
-                      <option value="08:00">08:00</option>
-                      <option value="08:30">08:30</option>
-                      <option value="09:00">09:00</option>
-                      <option value="09:30">09:30</option>
-                      <option value="10:00">10:00</option>
-                      <option value="10:30">10:30</option>
-                      <option value="11:00">11:00</option>
-                      <option value="11:30">11:30</option>
-                      <option value="12:00">12:00</option>
-                      <option value="13:00">13:00</option>
-                      <option value="14:00">14:00</option>
-                      <option value="15:00">15:00</option>
-                      <option value="16:00">16:00</option>
-                      <option value="17:00">17:00</option>
-                      <option value="18:00">18:00</option>
-                      <option value="19:00">19:00</option>
-                      <option value="20:00">20:00</option>
-                      <option value="21:00">21:00</option>
-                    </select>
-                  </div>
-                </div>
-                <p className="text-[9px] text-slate-400 mt-2 font-bold italic">* Deixe em branco se não houver reagendamento.</p>
+                {justType === "reagendar" && (
+                  <>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nova Data</label>
+                        <input
+                          type="date"
+                          min={new Date().toISOString().split("T")[0]}
+                          value={justData.date || ""}
+                          onChange={e => setJustData({ ...justData, date: e.target.value })}
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all text-sm font-medium"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Horário</label>
+                        <select
+                          value={justData.time || ""}
+                          onChange={e => setJustData({ ...justData, time: e.target.value })}
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all text-sm font-medium"
+                        >
+                          <option value="">--:--</option>
+                          {["07:00","07:30","08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00"].map(t => (
+                            <option key={t} value={t}>{t}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <p className="text-[9px] text-slate-400 mt-2 font-bold italic">* Deixe em branco se não houver data definida.</p>
+                  </>
+                )}
 
                 <div className="flex gap-3 mt-8">
-                  <button 
-                    onClick={() => setJustModal({ ...justModal, open: false })} 
-                    className="flex-1 py-3 text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-xl transition-all"
+                  <button
+                    onClick={() => setJustModal({ ...justModal, open: false })}
+                    className="flex-1 py-3 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors"
                   >
-                    Cancelar
+                    Fechar
                   </button>
                   {justModal.existingAtt && (
-                    <button 
-                      onClick={deleteJustification} 
+                    <button
+                      onClick={deleteJustification}
                       className="flex-1 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 shadow-lg shadow-red-200 transition-all text-xs font-black uppercase tracking-widest"
                     >
                       Excluir
                     </button>
                   )}
-                  <button 
-                    onClick={saveJustificada} 
+                  <button
+                    onClick={saveJustificada}
                     className="flex-1 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-900 shadow-lg shadow-slate-200 transition-all text-xs font-black uppercase tracking-widest"
                   >
                     Confirmar
@@ -858,7 +945,6 @@ export default function Agenda() {
         document.body
       )}
 
-      {/* Custom Confirmation Modal */}
       {confirmModal.open && createPortal(
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[9999]" onClick={() => !confirmModal.loading && setConfirmModal({ ...confirmModal, open: false })}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
@@ -867,16 +953,15 @@ export default function Agenda() {
             </div>
             <h3 className="text-xl font-black text-slate-800 text-center uppercase tracking-tight mb-3">{confirmModal.title}</h3>
             <p className="text-sm text-slate-500 text-center leading-relaxed font-medium mb-8">{confirmModal.message}</p>
-            
             <div className="flex gap-3">
-              <button 
+              <button
                 disabled={confirmModal.loading}
                 onClick={() => setConfirmModal({ ...confirmModal, open: false })}
                 className="flex-1 py-4 text-xs font-black uppercase tracking-widest text-slate-400 hover:bg-slate-50 rounded-2xl transition-all"
               >
                 Cancelar
               </button>
-              <button 
+              <button
                 disabled={confirmModal.loading}
                 onClick={confirmModal.onConfirm}
                 className="flex-1 py-4 bg-red-500 text-white rounded-2xl hover:bg-red-600 shadow-lg shadow-red-200 transition-all text-xs font-black uppercase tracking-widest flex items-center justify-center"
@@ -889,7 +974,374 @@ export default function Agenda() {
         document.body
       )}
 
-      {/* Success Toast */}
+      {showAddModal && createPortal(
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[9999]" onClick={() => setShowAddModal(false)}>
+          <div className="bg-white rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-slate-100 text-slate-600 rounded-2xl flex items-center justify-center">
+                <Plus size={24} />
+              </div>
+              <div>
+                <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Novo Agendamento</h2>
+                <p className="text-xs font-bold text-slate-500">
+                  {selectedDay ? format(selectedDay, "d 'de' MMMM", { locale: ptBR }) : ""}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-5">
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Paciente</label>
+                <select
+                  value={addForm.patientId}
+                  onChange={e => setAddForm({ ...addForm, patientId: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-slate-800 focus:bg-white transition-all text-sm font-medium"
+                >
+                  <option value="">Selecione um paciente</option>
+                  {patients.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Horário</label>
+                  <select
+                    value={addForm.time}
+                    onChange={e => setAddForm({ ...addForm, time: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-slate-800 focus:bg-white transition-all text-sm font-medium"
+                  >
+                    {["07:00","07:30","08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00"].map(t => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Duração</label>
+                  <select
+                    value={addForm.duration}
+                    onChange={e => setAddForm({ ...addForm, duration: Number(e.target.value) })}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-slate-800 focus:bg-white transition-all text-sm font-medium"
+                  >
+                    <option value={30}>30 min</option>
+                    <option value={50}>50 min</option>
+                    <option value={60}>60 min</option>
+                    <option value={90}>90 min</option>
+                    <option value={120}>120 min</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <label className="flex items-center gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={addForm.recurring}
+                    onChange={e => setAddForm({ ...addForm, recurring: e.target.checked })}
+                    className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                  />
+                  <div>
+                    <span className="text-sm font-bold text-slate-700">
+                      Repetir semanalmente
+                    </span>
+                    <p className="text-[10px] text-slate-500 font-medium">
+                      Toda {["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"][selectedDay ? selectedDay.getDay() : 0]}
+                    </p>
+                  </div>
+                </label>
+                {addForm.recurring && (
+                  <div className="w-28">
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nº Sessões</label>
+                    <input
+                      type="number"
+                      min={0}
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-black text-center focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                      value={addForm.maxSessions || ""}
+                      onChange={e => setAddForm({ ...addForm, maxSessions: Math.max(0, parseInt(e.target.value) || 0) })}
+                      placeholder="0 = ilimitado"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-3 mt-8">
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 py-3 text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-xl transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleAddAppointment}
+                  disabled={!addForm.patientId || saving}
+                  className="flex-1 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-900 shadow-lg shadow-slate-200 transition-all text-xs font-black uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  {saving ? <RefreshCcw size={16} className="animate-spin" /> : "Salvar"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {showEditChoice && editingApp && createPortal(
+        <div className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm flex items-center justify-center z-[9999]" onClick={() => { setShowEditChoice(false); setEditingApp(null); }}>
+          <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                <Pencil size={22} className="text-slate-700" />
+              </div>
+              <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Editar horário</h3>
+              <p className="text-sm font-bold text-slate-500 mt-1">
+                {format(editChoiceDate, "EEEE, d 'de' MMMM", { locale: ptBR })} às {editingApp.time}
+              </p>
+              <p className="text-xs text-slate-400 mt-2 font-medium">
+                Este horário se repete semanalmente. Como deseja editar?
+              </p>
+            </div>
+            <div className="space-y-2">
+              <button onClick={handleEditSingle} className="w-full py-3 px-4 bg-slate-100 text-slate-700 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-slate-200 transition-all">
+                Apenas esta data
+              </button>
+              <button onClick={handleEditFuture} className="w-full py-3 px-4 bg-slate-800 text-white rounded-xl text-sm font-black uppercase tracking-widest hover:bg-slate-900 transition-all">
+                Esta e todas futuras
+              </button>
+            </div>
+            <button onClick={() => { setShowEditChoice(false); setEditingApp(null); }} className="w-full mt-3 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest">
+              Cancelar
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {showEditModal && agendaFormDate && createPortal(
+        <div className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm flex items-center justify-center z-[9999]" onClick={() => { setShowEditModal(false); setEditingApp(null); setEditMode(null); }}>
+          <div className="bg-white rounded-3xl p-8 w-full max-w-lg mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Editar Agendamento</h3>
+                <p className="text-sm font-bold text-slate-500 mt-1">
+                  {format(agendaFormDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                </p>
+              </div>
+              <button onClick={() => { setShowEditModal(false); setEditingApp(null); setEditMode(null); }} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Dia</label>
+                  <select className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-slate-800 focus:bg-white transition-all"
+                    value={agendaFormDayOfWeek ?? (agendaFormDate?.getDay() ?? 1)}
+                    onChange={e => setAgendaFormDayOfWeek(parseInt(e.target.value))}>
+                    {["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"].map((d, i) => (
+                      <option key={i} value={i}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Horário</label>
+                  <select className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-slate-800 focus:bg-white transition-all"
+                    value={agendaFormTime}
+                    onChange={e => setAgendaFormTime(e.target.value)}>
+                    {["07:00","07:30","08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30","20:00","20:30","21:00"].map(t => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Duração</label>
+                  <select className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-slate-800 focus:bg-white transition-all"
+                    value={agendaFormDuration}
+                    onChange={e => setAgendaFormDuration(parseInt(e.target.value))}>
+                    <option value={30}>30 minutos</option>
+                    <option value={45}>45 minutos</option>
+                    <option value={50}>50 minutos</option>
+                    <option value={60}>60 minutos</option>
+                    <option value={90}>90 minutos</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200">
+                <label className="flex items-center gap-3 cursor-pointer select-none">
+                  <input type="checkbox" checked={agendaFormRecurring} onChange={e => setAgendaFormRecurring(e.target.checked)}
+                    className="w-5 h-5 rounded border-slate-300 text-slate-800 focus:ring-slate-500" />
+                  <div>
+                    <span className="text-sm font-bold text-slate-700">Repetir semanalmente</span>
+                    <p className="text-[10px] font-medium text-slate-500">
+                      Toda {["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"][agendaFormDate.getDay()]}
+                    </p>
+                  </div>
+                </label>
+                {agendaFormRecurring && (
+                  <div className="w-28">
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nº Sessões</label>
+                    <input type="number" min={0}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-center focus:ring-2 focus:ring-slate-800 focus:bg-white transition-all"
+                      value={agendaFormMaxSessions || ""}
+                      onChange={e => setAgendaFormMaxSessions(Math.max(0, parseInt(e.target.value) || 0))}
+                      placeholder="0 = ilimitado" />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+              <button onClick={() => { setShowEditModal(false); setEditingApp(null); setEditMode(null); }}
+                className="px-5 py-2.5 text-xs font-black text-slate-500 hover:text-slate-700 uppercase tracking-widest transition-all">
+                Cancelar
+              </button>
+              <button onClick={handleSaveEditedSlot} disabled={saving}
+                className="px-6 py-2.5 bg-slate-800 text-white rounded-xl hover:bg-slate-900 transition-all text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-slate-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                {saving ? <RefreshCcw size={15} className="animate-spin" /> : <Check size={15} />}
+                Salvar alterações
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {detailModal.open && detailModal.session && createPortal(
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[9999]" onClick={() => setDetailModal({ open: false, session: null, date: null })}>
+          <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-lg shrink-0 ${
+                  detailModal.session.attendance?.status === "presente" ? "bg-emerald-100 text-emerald-600" :
+                  detailModal.session.attendance?.status === "falta" ? "bg-red-100 text-red-600" :
+                  detailModal.session.attendance?.status === "justificada" ? "bg-amber-100 text-amber-600" :
+                  "bg-slate-100 text-slate-600"
+                }`}>
+                  {(detailModal.session.app.patient?.name || "?")
+                    .split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-slate-800 uppercase tracking-tight leading-tight">
+                    {detailModal.session.app.patient?.name || "Paciente"}
+                  </h2>
+                  <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest mt-1 ${
+                    detailModal.session.attendance?.status === "presente" ? "bg-emerald-100 text-emerald-700" :
+                    detailModal.session.attendance?.status === "falta" ? "bg-red-100 text-red-700" :
+                    detailModal.session.attendance?.status === "justificada" ? "bg-amber-100 text-amber-700" :
+                    "bg-slate-100 text-slate-500"
+                  }`}>
+                    {detailModal.session.attendance?.status === "presente" ? "Realizado" :
+                     detailModal.session.attendance?.status === "falta" ? "Falta" :
+                     detailModal.session.attendance?.status === "justificada" ? "Justificada" :
+                     "Agendado"}
+                  </span>
+                </div>
+              </div>
+              <button onClick={() => setDetailModal({ open: false, session: null, date: null })} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all shrink-0">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-3 mb-6 p-4 bg-slate-50 rounded-2xl">
+              <div className="flex items-center gap-3">
+                <Clock size={15} className="text-slate-400 shrink-0" />
+                <span className="text-sm font-bold text-slate-700">
+                  {detailModal.date ? format(detailModal.date, "dd/MM/yyyy", { locale: ptBR }) : ""} às {detailModal.session.app.time} ({detailModal.session.app.duration} min)
+                </span>
+              </div>
+              {detailModal.session.app.patient?.phone && (
+                <div className="flex items-center gap-3">
+                  <Phone size={15} className="text-slate-400 shrink-0" />
+                  <span className="text-sm font-bold text-slate-700">{detailModal.session.app.patient.phone}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Status do Atendimento</p>
+              <button onClick={() => handleQuickStatus(detailModal.session, "presente", detailModal.date)}
+                className={`w-full py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${
+                  detailModal.session.attendance?.status === "presente"
+                    ? "bg-emerald-500 text-white border-emerald-500 shadow-sm"
+                    : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:text-emerald-600"
+                }`}>
+                <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                  detailModal.session.attendance?.status === "presente"
+                    ? "border-white"
+                    : "border-slate-300"
+                }`}>
+                  {detailModal.session.attendance?.status === "presente" && <Check size={12} />}
+                </span>
+                Presença
+              </button>
+              <button onClick={() => handleQuickStatus(detailModal.session, "falta", detailModal.date)}
+                className={`w-full py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${
+                  detailModal.session.attendance?.status === "falta"
+                    ? "bg-red-500 text-white border-red-500 shadow-sm"
+                    : "bg-white text-slate-600 border-slate-200 hover:border-red-300 hover:text-red-600"
+                }`}>
+                <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                  detailModal.session.attendance?.status === "falta"
+                    ? "border-white"
+                    : "border-slate-300"
+                }`}>
+                  {detailModal.session.attendance?.status === "falta" && <X size={12} />}
+                </span>
+                Falta
+              </button>
+              <button onClick={() => handleQuickStatus(detailModal.session, "justificada", detailModal.date)}
+                className={`w-full py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${
+                  detailModal.session.attendance?.status === "justificada"
+                    ? "bg-amber-500 text-white border-amber-500 shadow-sm"
+                    : "bg-white text-slate-600 border-slate-200 hover:border-amber-300 hover:text-amber-600"
+                }`}>
+                <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                  detailModal.session.attendance?.status === "justificada"
+                    ? "border-white"
+                    : "border-slate-300"
+                }`}>
+                  {detailModal.session.attendance?.status === "justificada" && <AlertCircle size={12} />}
+                </span>
+                Justificado
+              </button>
+            </div>
+
+            <div className="mt-5 pt-5 border-t border-slate-100 space-y-2">
+              <a
+                href={`https://wa.me/55${detailModal.session.app.patient?.phone?.replace(/\D/g, "") || ""}?text=${encodeURIComponent(`Olá ${detailModal.session.app.patient?.name?.split(" ")[0] || ""}, lembrete da sua consulta no dia ${detailModal.date ? format(detailModal.date, "dd/MM") : ""} às ${detailModal.session.app.time}.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition-all text-xs font-black uppercase tracking-widest border border-emerald-200"
+              >
+                <MessageCircle size={15} />
+                Lembrete WhatsApp
+              </a>
+              <button
+                onClick={() => {
+                  const session = detailModal.session;
+                  const d = detailModal.date;
+                  setDetailModal({ open: false, session: null, date: null });
+                  handleDeleteAppointment(session, d);
+                }}
+                className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all text-xs font-black uppercase tracking-widest border border-red-200"
+              >
+                <Trash2 size={15} />
+                Excluir Agendamento
+              </button>
+            </div>
+            <button
+              onClick={() => setDetailModal({ open: false, session: null, date: null })}
+              className="w-full mt-5 py-3 text-xs font-black text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
       {successMessage && (
         <div className="fixed bottom-8 right-8 z-[100] animate-slide-up">
           <div className="bg-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-500/50 backdrop-blur-sm">

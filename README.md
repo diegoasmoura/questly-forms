@@ -49,6 +49,14 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Status da Sessão:** Presença (Verde), Falta (Vermelho) e Justificada (Âmbar).
 - **Reagendamento em Cadeia:** Justificativas geram registros filhos vinculados, mantendo a linhagem clínica.
 - **Exclusão em Cascata:** Deletar uma justificativa remove automaticamente seus reagendamentos vinculados.
+- **Coloração dos Eventos no Calendário (Agenda):**
+  - Todos os agendamentos iniciam **cinza** (`bg-slate-400`) — representa "Agendado" (neutro, sem ação tomada).
+  - A cor só é alterada **após** o psicólogo registrar manualmente o status da sessão via modal de detalhes:
+    - **Presença** → `bg-emerald-500` (verde)
+    - **Falta** → `bg-red-500` (vermelho)
+    - **Justificada** → `bg-amber-500` (âmbar)
+  - Esta regra se aplica tanto à **barrinha lateral** dos eventos no calendário (`BigCalendar`) quanto ao **card da sessão** no painel direito e ao **ícone de inicial** do paciente.
+  - **Exceção:** O marcador de hoje (círculo preto) e o dia selecionado (círculo âmbar) no calendário são independentes do status da sessão.
 
 ### 3. Gestão Financeira e PDFs (v4.3)
 - **Conciliação Clínica:** Vincula pagamentos a sessões específicas para controle de pendências.
