@@ -1358,7 +1358,7 @@ export default function PatientRecord() {
 
               {/* Anotações Rápidas */}
               <div className="flex flex-col min-h-0 flex-1 pt-3">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 px-2 shrink-0">Anotações</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 px-2 shrink-0">Anotações (Prontuário)</p>
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex-1 overflow-y-auto">
                   <p className="text-xs text-slate-700 leading-relaxed">
                     {patient.notes || "Nenhuma anotação registrada."}
