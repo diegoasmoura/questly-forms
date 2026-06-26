@@ -259,28 +259,6 @@ export default function Home() {
                   )}
                 </div>
               </div>
-
-              <div className="card p-4 shrink-0">
-                <p className="text-xs font-black text-slate-600 uppercase tracking-widest mb-3">Ações Rápidas</p>
-                <div className="grid grid-cols-2 gap-2">
-                  <Link to="/agenda" className="flex items-center gap-2 p-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-all group">
-                    <Calendar size={14} className="text-blue-600" />
-                    <span className="text-[10px] font-bold text-blue-700">Agenda</span>
-                  </Link>
-                  <Link to="/patients" className="flex items-center gap-2 p-2.5 bg-emerald-50 hover:bg-emerald-100 rounded-lg border border-emerald-200 transition-all group">
-                    <Users size={14} className="text-emerald-600" />
-                    <span className="text-[10px] font-bold text-emerald-700">Pacientes</span>
-                  </Link>
-                  <Link to="/my-forms" className="flex items-center gap-2 p-2.5 bg-amber-50 hover:bg-amber-100 rounded-lg border border-amber-200 transition-all group">
-                    <FileText size={14} className="text-amber-600" />
-                    <span className="text-[10px] font-bold text-amber-700">Instrumentos</span>
-                  </Link>
-                  <Link to="/patients" className="flex items-center gap-2 p-2.5 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 transition-all group">
-                    <Users size={14} className="text-slate-600" />
-                    <span className="text-[10px] font-bold text-slate-700">Cadastrar</span>
-                  </Link>
-                </div>
-              </div>
             </div>
           </div>
         </>
