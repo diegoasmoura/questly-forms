@@ -7,7 +7,7 @@ import { generatePremiumSummary } from "../lib/pdf";
 import { scoreTest } from "../lib/scoring";
 import { ClinicalTrendChart, transformResponsesToTrendData, AttendanceHeatmap, transformResponsesToHeatmapData } from "../components/ClinicalCharts";
 import { useShareLinkStatus, getStatusBadge } from "../lib/useShareLinkStatus";
-import ShareLinkCard, { ShareLinkStats } from "../components/ShareLinkCard";
+import ShareLinkCard from "../components/ShareLinkCard";
 import FormResponsesView from "../components/FormResponsesView";
 import DataTable from "../components/DataTable";
 import { format, addMonths, subMonths } from "date-fns";
@@ -230,6 +230,33 @@ export default function PatientRecord() {
       }
     });
   }, [payments, periodFilter, customMonth]);
+
+  const filteredLinks = useMemo(() => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    return patientShareLinks.filter(l => {
+      const d = new Date(l.createdAt);
+      switch (periodFilter) {
+        case "thisMonth": return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+        case "lastMonth": {
+          const lm = currentMonth === 0 ? 11 : currentMonth - 1;
+          const ly = currentMonth === 0 ? currentYear - 1 : currentYear;
+          return d.getFullYear() === ly && d.getMonth() === lm;
+        }
+        case "last3Months": {
+          const threeMonthsAgo = new Date(now);
+          threeMonthsAgo.setMonth(now.getMonth() - 3);
+          return d >= threeMonthsAgo;
+        }
+        case "custom": {
+          const [year, month] = customMonth.split("-").map(Number);
+          return d.getFullYear() === year && d.getMonth() === month - 1;
+        }
+        default: return true;
+      }
+    });
+  }, [patientShareLinks, periodFilter, customMonth]);
 
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedCalendarDay, setSelectedCalendarDay] = useState(new Date());
@@ -1427,52 +1454,123 @@ export default function PatientRecord() {
 {/* Share Tab */}
           {activeTab === "share" && (
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
-              {/* Action Buttons */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 shrink-0">
-                <button
-                  onClick={() => setShowShareModal(true)}
-                  className="md:col-start-4 card p-3 flex items-center gap-3 border-l-4 border-slate-900 bg-slate-900 text-white hover:bg-slate-800 transition-all text-left group"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
-                    <Plus size={18} />
+              {/* Stats Summary */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-500">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                    <Send size={18} />
                   </div>
                   <div>
-                    <p className="text-lg font-black uppercase tracking-tight">Enviar</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Novo instrumento</p>
+                    <p className="text-2xl font-black text-slate-800">{patientShareLinks.filter(l => l.status === "PENDENTE").length}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pendentes</p>
                   </div>
-                </button>
+                </div>
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-500">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <Check size={18} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">{patientShareLinks.filter(l => l.status === "RESPONDIDO").length}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Respondidos</p>
+                  </div>
+                </div>
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-500">
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
+                    <AlertCircle size={18} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">{patientShareLinks.filter(l => l.status === "EXPIRADO").length}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expirados</p>
+                  </div>
+                </div>
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-violet-500">
+                  <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600">
+                    <TrendingUp size={18} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-slate-800">
+                      {patientShareLinks.length > 0
+                        ? Math.round((patientShareLinks.filter(l => l.status === "RESPONDIDO").length / patientShareLinks.length) * 100)
+                        : 0}%
+                    </p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Adesão</p>
+                  </div>
+                </div>
               </div>
 
-              <div className="card p-6 flex-1 min-h-0 overflow-y-auto">
-                <div className="mb-6">
-                  <h3 className="text-lg font-bold text-slate-900">Compartilhar Instrumentos</h3>
-                  <p className="text-sm text-slate-600 mt-1">Envie instrumentos para que {patient.name} preencha</p>
-                </div>
-
-                {loadingLinks ? (
-                  <div className="text-center py-8 text-slate-500">
-                    <div className="animate-spin w-6 h-6 border-2 border-emerald-900 border-t-transparent rounded-full mx-auto mb-2" />
-                    <p className="text-xs">Carregando links...</p>
+              {/* Filtro de Período */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Período</span>
+                {[
+                  { key: "thisMonth", label: "Este Mês" },
+                  { key: "lastMonth", label: "Mês Anterior" },
+                  { key: "last3Months", label: "Últimos 3 Meses" },
+                  { key: "all", label: "Todo Histórico" },
+                  { key: "custom", label: "Personalizado" },
+                ].map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => {
+                      setPeriodFilter(opt.key);
+                      const now = new Date();
+                      if (opt.key === "thisMonth") {
+                        setCustomMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
+                      } else if (opt.key === "lastMonth") {
+                        const d = subMonths(now, 1);
+                        setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+                      }
+                    }}
+                    className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
+                      periodFilter === opt.key
+                        ? "bg-emerald-600 text-white shadow-md"
+                        : "bg-white text-slate-500 border border-slate-200 hover:border-emerald-200 hover:text-emerald-600"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+                {periodFilter === "custom" && (
+                  <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronLeft size={16} /></button>
+                    <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
+                      {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
+                        const monthVal = i + 1;
+                        const currentYear = customMonth.split("-")[0];
+                        return <option key={`${currentYear}-${String(monthVal).padStart(2, "0")}`} value={`${currentYear}-${String(monthVal).padStart(2, "0")}`}>{name}</option>;
+                      })}
+                    </select>
+                    <select value={customMonth.split("-")[0]} onChange={e => { const month = customMonth.split("-")[1]; setCustomMonth(`${e.target.value}-${month}`); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
+                      {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year}>{year}</option>; })}
+                    </select>
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronRight size={16} /></button>
                   </div>
-                ) : patientShareLinks.length === 0 ? (
-                  <div className="text-center py-12 text-slate-400 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
-                    <Share2 size={32} className="mx-auto mb-3 opacity-50" />
-                    <p className="text-sm font-medium">Nenhum instrumento enviado</p>
-                    <p className="text-xs mt-1">Clique em "Enviar Instrumento" para começar</p>
+                )}
+              </div>
+
+              {/* Instrumentos List */}
+              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-3">
+                <div className="flex items-center justify-between shrink-0">
+                  <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Compartilhar Instrumentos</h3>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
+                {loadingLinks ? (
+                  <div className="text-center py-20 opacity-50 flex-1 flex items-center justify-center">
+                    <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-sm font-bold uppercase tracking-widest">Carregando instrumentos...</p>
+                  </div>
+                ) : filteredLinks.length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
+                    <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-5">
+                      <Share2 size={32} className="text-slate-300" />
+                    </div>
+                    <h4 className="text-lg font-black text-slate-800 mb-1">Nenhum registro no período</h4>
+                    <p className="text-xs font-bold text-slate-500 max-w-[240px] leading-relaxed">
+                      Registros de instrumentos aparecerão aqui conforme você enviar instrumentos para este paciente.
+                    </p>
                   </div>
                 ) : (
-                  <div className="space-y-4 overflow-visible">
-                    <ShareLinkStats 
-                      counts={{
-                        PENDENTE: patientShareLinks.filter(l => l.status === "PENDENTE").length,
-                        RESPONDIDO: patientShareLinks.filter(l => l.status === "RESPONDIDO").length,
-                        EXPIRADO: patientShareLinks.filter(l => l.status === "EXPIRADO").length,
-                      }}
-                      compliance={patientShareLinks.length > 0 
-                        ? Math.round((patientShareLinks.filter(l => l.status === "RESPONDIDO").length / patientShareLinks.length) * 100) 
-                        : 0}
-                    />
-                    {patientShareLinks.map(link => (
+                  <div className="space-y-4 overflow-y-auto min-h-0">
+                    {filteredLinks.map(link => (
                       <ShareLinkCard
                         key={link.id}
                         link={link}
@@ -1483,6 +1581,13 @@ export default function PatientRecord() {
                     ))}
                   </div>
                 )}
+                </div>
+                {/* Action Buttons */}
+                <div className="flex items-center gap-3 shrink-0 justify-end">
+                  <button onClick={() => setShowShareModal(true)} className="btn btn-primary text-xs">
+                    <Plus size={14} /> Enviar
+                  </button>
+                </div>
               </div>
             </div>
           )}

@@ -154,7 +154,7 @@ A página `PatientRecord.jsx` usa uma estrutura de layout específica que deve s
 - Todos os stat cards usam `p-3`, ícone `w-10 h-10 rounded-xl`, número `text-2xl font-black`, label `text-[10px] font-bold uppercase tracking-widest`
 - Dispostos em `grid grid-cols-1 md:grid-cols-4 gap-3`
 
-**Cards de conteúdo (Frequência, Financeiro, Agenda):**
+**Cards de conteúdo (Frequência, Financeiro, Agenda, Instrumentos):**
 - Padrão de duas camadas: card branco externo (`card p-6`) + quadro cinza interno (`p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0`)
 - O `flex-1` no quadro cinza faz ele preencher o espaço disponível até os botões de ação
 
