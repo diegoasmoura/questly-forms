@@ -1681,8 +1681,10 @@ export default function PatientRecord() {
               </div>
 
               {/* Timeline List */}
-              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden">
-                <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight mb-6 shrink-0">Histórico de Sessões</h3>
+              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-3">
+                <div className="flex items-center justify-between shrink-0">
+                  <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Histórico de Sessões</h3>
+                </div>
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
                 {loadingAttendances ? (
                   <div className="text-center py-20 opacity-50 flex-1 flex items-center justify-center">
