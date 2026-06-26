@@ -6,7 +6,6 @@ import { useAuth } from "../context/AuthContext";
 import { generatePremiumSummary } from "../lib/pdf";
 import { scoreTest } from "../lib/scoring";
 import { ClinicalTrendChart, transformResponsesToTrendData, AttendanceHeatmap, transformResponsesToHeatmapData } from "../components/ClinicalCharts";
-import ShareLinkCard from "../components/ShareLinkCard";
 import FormResponsesView from "../components/FormResponsesView";
 import DataTable from "../components/DataTable";
 import { format, addMonths, subMonths } from "date-fns";
@@ -730,10 +729,6 @@ export default function PatientRecord() {
     } catch (error) {
       alert("Erro ao excluir link: " + error.message);
     }
-  };
-
-  const handleCopyLink = () => {
-    // Toast feedback could be added here
   };
 
   const getTodayDate = () => {
@@ -2430,15 +2425,70 @@ export default function PatientRecord() {
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-4 overflow-y-auto min-h-0">
-                    {filteredLinks.map(link => (
-                      <ShareLinkCard
-                        key={link.id}
-                        link={link}
-                        onRevoke={handleRevokeLink}
-                        onCopy={handleCopyLink}
-                      />
-                    ))}
+                  <div className="overflow-x-auto overflow-y-auto flex-1 min-h-0">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200">
+                          <th className="text-left px-2 py-2">Instrumento</th>
+                          <th className="text-left px-2 py-2">Progresso</th>
+                          <th className="text-left px-2 py-2">Status</th>
+                          <th className="text-left px-2 py-2">Última resposta</th>
+                          <th className="text-left px-2 py-2">Criado em</th>
+                          <th className="text-center px-2 py-2">Link</th>
+                          <th className="text-center px-2 py-2">Excluir</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredLinks.map(link => (
+                          <tr key={link.id} className="border-b border-slate-100 hover:bg-white/50 transition-colors">
+                            <td className="px-2 py-3 text-slate-700 font-medium">{link.form?.title || "—"}</td>
+                            <td className="px-2 py-3 text-slate-600 whitespace-nowrap">{link.responseCount || 0}</td>
+                            <td className="px-2 py-3 whitespace-nowrap">
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                link.status === "RESPONDIDO" 
+                                  ? "bg-emerald-50 text-emerald-700" 
+                                  : "bg-amber-50 text-amber-700"
+                              }`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${
+                                  link.status === "RESPONDIDO" ? "bg-emerald-500" : "bg-amber-500"
+                                }`} />
+                                {link.status === "RESPONDIDO" ? "Respondido" : "Pendente"}
+                              </span>
+                            </td>
+                            <td className="px-2 py-3 text-slate-600 whitespace-nowrap">
+                              {link.lastResponseAt
+                                ? `${new Date(link.lastResponseAt).toLocaleDateString('pt-BR')} ${new Date(link.lastResponseAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+                                : "—"}
+                            </td>
+                            <td className="px-2 py-3 text-slate-600 whitespace-nowrap">{new Date(link.createdAt).toLocaleDateString('pt-BR')}</td>
+                            <td className="px-2 py-3 text-center">
+                              {(() => {
+                                const shareUrl = `${window.location.origin}/form/${link.token}`;
+                                return (
+                                  <button
+                                    onClick={async () => {
+                                      await navigator.clipboard.writeText(shareUrl);
+                                      alert("Link copiado!");
+                                    }}
+                                    className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded-lg transition-colors"
+                                  >
+                                    Link
+                                  </button>
+                                );
+                              })()}
+                            </td>
+                            <td className="px-2 py-3 text-center">
+                              <button
+                                onClick={() => handleRevokeLink(link.id)}
+                                className="p-1 rounded text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
                 </div>
