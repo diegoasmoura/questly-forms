@@ -20,13 +20,13 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 
 ### Sistema de Cores Funcionais
 
-| Status | Cor | Uso |
-|--------|-----|-----|
-| **Sucesso** | emerald | confirmações, positivos |
-| **Info** | blue | informativos |
-| **Alerta** | amber | avisos |
-| **Erro** | red | erros, perigo |
-| **Neutro** | slate | elementos secundários |
+| Status | Cor | Hex | Uso |
+|--------|-----|-----|-----|
+| **Sucesso** | emerald | `#059669` | confirmações, presenças, respondidos, total pago, horários ativos |
+| **Info** | blue | `#3b82f6` | informativos, adesão, sessões no mês, lançamentos realizados |
+| **Alerta** | amber | `#d97706` | avisos, justificadas, pendentes, sessões pendentes |
+| **Erro** | red | `#ef4444` | erros, faltas, perigo |
+| **Neutro** | slate | `#64748b` | elementos secundários, total sessões, próxima sessão, último recebimento |
 
 ## Funcionalidades Principais
 
@@ -158,6 +158,8 @@ A página `PatientRecord.jsx` usa uma estrutura de layout específica que deve s
 **Cards de estatísticas (overview):**
 - Todos os stat cards usam `p-3`, ícone `w-10 h-10 rounded-xl`, número `text-2xl font-black`, label `text-[10px] font-bold uppercase tracking-widest`
 - Dispostos em `grid grid-cols-1 md:grid-cols-4 gap-3`
+- Cada card tem `border-l-4` com a cor correspondente ao status (emerald=sucesso, blue=info, amber=alerta, red=erro, slate=neutro)
+- As cores seguem o sistema de design visual: apenas as 5 cores do palette (emerald, blue, amber, red, slate) — **não usar** sky, violet, indigo ou outras cores Tailwind fora da paleta definida
 
 **Cards de conteúdo (Frequência, Financeiro, Agenda, Instrumentos, Prontuário):**
 - Padrão de duas camadas: card branco externo (`card p-6`) + quadro cinza interno (`p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0`)

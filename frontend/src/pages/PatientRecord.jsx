@@ -1656,8 +1656,8 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Horários Ativos</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-sky-500">
-                  <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-blue-500">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
                     <Activity size={18} />
                   </div>
                   <div>
@@ -1665,8 +1665,8 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sessões no Mês</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-violet-500">
-                  <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-500">
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
                     <Clock size={18} />
                   </div>
                   <div>
@@ -2080,8 +2080,8 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sessões Pendentes</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-sky-500">
-                  <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-blue-500">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
                     <Receipt size={18} />
                   </div>
                   <div>
@@ -2089,8 +2089,8 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lançamentos Realizados</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-violet-500">
-                  <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-500">
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
                     <CreditCard size={18} />
                   </div>
                   <div>
@@ -2339,8 +2339,8 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Respondidos</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-violet-500">
-                  <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-blue-500">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
                     <TrendingUp size={18} />
                   </div>
                   <div>
