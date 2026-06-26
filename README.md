@@ -157,7 +157,7 @@ A página `PatientRecord.jsx` usa uma estrutura de layout específica que deve s
 **Cards de conteúdo (Frequência, Financeiro, Agenda, Instrumentos, Prontuário):**
 - Padrão de duas camadas: card branco externo (`card p-6`) + quadro cinza interno (`p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0`)
 - O `flex-1` no quadro cinza faz ele preencher o espaço disponível até os botões de ação
-- **Prontuário:** É um formulário (textarea de anotações + lista de anexos), não uma tabela, mas segue o mesmo layout de card + quadrante cinza + botões de ação
+- **Prontuário:** É um formulário (anexos em cima + textarea de anotações em baixo com `flex-1`), não uma tabela, mas segue o mesmo layout de card + quadrante cinza + botões de ação
 
 **Botões de ação:**
 - Botões simplificados: `btn btn-primary` (verde) e `btn btn-danger` (vermelho)
