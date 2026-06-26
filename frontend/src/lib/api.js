@@ -141,7 +141,7 @@ export const api = {
       throw new ApiError("Não autorizado", 401);
     }
     
-    const res = await fetch(`${API_URL}/attachments/attachments/${attachmentId}/download`, {
+    const res = await fetch(`${API_URL}/attachments/${attachmentId}/download`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     
