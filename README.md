@@ -140,8 +140,11 @@ A página `PatientRecord.jsx` usa uma estrutura de layout específica que deve s
 
 **Sidebar (coluna esquerda):**
 - Card usa `flex-1 flex flex-col min-h-0`
-- Conteúdo do paciente usa `flex-1 space-y-3 overflow-y-auto min-h-0` para scroll interno
-- Footer (CPF + botão) fica fora da área scrollável, após o `flex-1`
+- Campos do paciente (Email, Telefone, Nascimento, Paciente desde) em div `shrink-0 space-y-3`
+- Quadro cinza de Anotações entre os campos e o botão, com `flex-1 overflow-y-auto` para preencher espaço e permitir scroll interno se o texto for longo
+- Rótulo "Anotações" fica fora do quadro cinza, alinhado horizontalmente com `px-2` (igual aos demais labels)
+- Espaçamento vertical entre campos e Anotações: `pt-3` no wrapper do quadro (equivale ao `space-y-3`)
+- Botão "Ver Dados Completos" em div `shrink-0 mt-4`, sem CPF exibido
 - Email e Telefone são exibidos apenas como texto, SEM botões Enviar/Ligar
 
 **Abas (coluna direita):**

@@ -1341,7 +1341,7 @@ export default function PatientRecord() {
                 <p className="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-widest">Prontuário #{patient.id.slice(0, 8).toUpperCase()}</p>
               </div>
 
-              <div className="flex-1 space-y-3 overflow-y-auto min-h-0">
+              <div className="shrink-0 space-y-3">
                 {patient.email && (
                   <div className="flex items-center justify-between px-2 py-1.5">
                     <div className="min-w-0 flex-1">
@@ -1376,24 +1376,20 @@ export default function PatientRecord() {
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Paciente desde</p>
                   <p className="text-xs text-emerald-700 font-medium">{new Date(patient.createdAt).toLocaleDateString('pt-BR')}</p>
                 </div>
+              </div>
 
-                {/* Anotações Rápidas */}
-                <div className="px-2 py-1.5">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Anotações</p>
-                  <p className="text-xs text-slate-600 leading-relaxed line-clamp-4">
+              {/* Anotações Rápidas */}
+              <div className="flex flex-col min-h-0 flex-1 pt-3">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 px-2 shrink-0">Anotações</p>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex-1 overflow-y-auto">
+                  <p className="text-xs text-slate-700 leading-relaxed">
                     {patient.notes || "Nenhuma anotação registrada."}
                   </p>
                 </div>
               </div>
 
               {/* Footer */}
-              <div className="border-t border-emerald-50 pt-4 mt-4 space-y-2">
-                {patient.cpf && (
-                  <div className="text-[10px] text-slate-400">
-                    <span className="font-bold uppercase">CPF: </span>
-                    {patient.cpf}
-                  </div>
-                )}
+              <div className="mt-4 shrink-0">
                 <button onClick={() => { setEditTab("identity"); loadAttachments(); setShowEditModal(true); }} className="w-full btn btn-primary text-xs py-3">
                   <Edit size={14} />
                   Ver Dados Completos
@@ -2572,7 +2568,7 @@ export default function PatientRecord() {
                 </div>
                 {/* Action Buttons */}
                 <div className="flex items-center gap-3 shrink-0 justify-end">
-                  <button className="btn btn-primary text-xs">
+                  <button className="btn btn-primary text-xs" onClick={handleSave}>
                     <Save size={14} /> Salvar
                   </button>
                 </div>
