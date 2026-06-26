@@ -127,7 +127,7 @@ navigate(-1); // suporta navegação relativa
 - **Gestão UTC:** Datas em UTC, extraídas conforme fuso local.
 - **Toasts Flutuantes:** Confirmações em Emerald-600.
 - **Clinical Dashboard:** Métricas de engajamento na capa do card.
-- **Patient Record:** Padronização de abas com header e botão Save.
+- **Patient Record:** Padronização de abas com header e botão Save (Prontuário incluso).
 
 ### 11. Layout do PatientRecord (Regras para evitar scrollbar externa)
 
@@ -154,9 +154,10 @@ A página `PatientRecord.jsx` usa uma estrutura de layout específica que deve s
 - Todos os stat cards usam `p-3`, ícone `w-10 h-10 rounded-xl`, número `text-2xl font-black`, label `text-[10px] font-bold uppercase tracking-widest`
 - Dispostos em `grid grid-cols-1 md:grid-cols-4 gap-3`
 
-**Cards de conteúdo (Frequência, Financeiro, Agenda, Instrumentos):**
+**Cards de conteúdo (Frequência, Financeiro, Agenda, Instrumentos, Prontuário):**
 - Padrão de duas camadas: card branco externo (`card p-6`) + quadro cinza interno (`p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0`)
 - O `flex-1` no quadro cinza faz ele preencher o espaço disponível até os botões de ação
+- **Prontuário:** É um formulário (textarea de anotações + lista de anexos), não uma tabela, mas segue o mesmo layout de card + quadrante cinza + botões de ação
 
 **Botões de ação:**
 - Botões simplificados: `btn btn-primary` (verde) e `btn btn-danger` (vermelho)

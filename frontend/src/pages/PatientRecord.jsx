@@ -89,7 +89,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Trash2,
-  Trash,
   Edit,
   LayoutDashboard,
   Users,
@@ -1595,100 +1594,96 @@ export default function PatientRecord() {
 
           {/* Prontuário Tab */}
           {activeTab === "notes" && (
-            <div className="flex flex-col flex-1 min-h-0">
-              <div className="card flex-1 min-h-0 overflow-y-auto">
-                <div className="p-6 border-b border-slate-100 shrink-0">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                        <FileText size={20} />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-slate-900">Prontuário</h3>
-                        <p className="text-xs text-slate-500">Anotações e documentos</p>
-                      </div>
+            <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
+              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-3">
+                <div className="flex items-center justify-between shrink-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                      <FileText size={20} />
                     </div>
-                    <button className="btn btn-primary">
-                      <Save size={14} />
-                      Salvar
-                    </button>
+                    <div>
+                      <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Prontuário</h3>
+                      <p className="text-xs text-slate-500">Anotações e documentos</p>
+                    </div>
                   </div>
                 </div>
-
-                <div className="p-6">
-                  <div className="mb-6">
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">Anotações</label>
-                    <textarea 
-                      className="input text-sm min-h-[150px]" 
-                      value={formData?.notes || ''} 
-                      onChange={e => setFormData(prev => prev ? { ...prev, notes: e.target.value } : null)} 
-                      placeholder="Anotações relevantes sobre o paciente..."
-                    />
-                  </div>
-
-                  <div className="pt-4 border-t border-slate-100">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <Paperclip size={16} className="text-slate-500" />
-                        <h4 className="text-sm font-semibold text-slate-700">Laudos e Anexos</h4>
-                        {attachments.length > 0 && (
-                          <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
-                            {attachments.length}
-                          </span>
-                        )}
-                      </div>
-                      <label className="btn btn-primary cursor-pointer">
-                        {uploading ? (
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <Plus size={14} />
-                        )}
-                        {uploading ? 'Enviando...' : 'Anexar'}
-                        <input type="file" multiple className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" disabled={uploading} onChange={handleUploadAttachment} />
-                      </label>
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
+                  <div className="flex-1 flex flex-col min-h-0">
+                    <div className="shrink-0">
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Anotações</label>
+                      <textarea 
+                        className="input text-sm min-h-[120px]" 
+                        value={formData?.notes || ''} 
+                        onChange={e => setFormData(prev => prev ? { ...prev, notes: e.target.value } : null)} 
+                        placeholder="Anotações relevantes sobre o paciente..."
+                      />
                     </div>
 
-                    {loadingAttachments ? (
-                      <div className="text-center py-8 text-slate-400">
-                        <div className="w-6 h-6 border-2 border-slate-300 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                        <p className="text-xs">Carregando anexos...</p>
-                      </div>
-                    ) : attachments.length === 0 ? (
-                      <div className="text-center py-8 text-slate-400 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
-                        <File size={32} className="mx-auto mb-2 opacity-50" />
-                        <p className="text-xs">Nenhum anexo</p>
-                        <p className="text-[10px] mt-1">PDF, JPG, PNG, DOC (máx. 10MB)</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2 max-h-48 overflow-y-auto">
-                        {attachments.map((att) => (
-                          <div key={att.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
-                            <div className="flex items-center gap-3 min-w-0">
-                              <File size={18} className="text-slate-400 shrink-0" />
-                              <div className="min-w-0">
-                                <p className="text-sm font-medium text-slate-700 truncate">{att.filename}</p>
-                                <p className="text-xs text-slate-400">{(att.size / 1024).toFixed(1)} KB</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <button type="button" onClick={() => handleDownloadAttachment(att)} className="p-2 hover:bg-emerald-50 rounded text-slate-400 hover:text-emerald-600 transition-colors" title="Baixar">
-                                <Download size={16} />
-                              </button>
-                              <button type="button" onClick={() => handleDeleteAttachment(att.id)} className="p-2 hover:bg-red-50 rounded text-slate-400 hover:text-red-500 transition-colors" title="Excluir">
-                                <Trash size={16} />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                        <label className="flex items-center justify-center gap-2 py-3 text-sm text-slate-500 hover:text-emerald-600 cursor-pointer transition-colors">
-                          <Plus size={16} />
-                          <span>Adicionar mais</span>
+                    <div className="mt-4 pt-4 border-t border-slate-200/60 shrink-0">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Paperclip size={14} className="text-slate-400" />
+                          <h4 className="text-xs font-bold text-slate-600 uppercase tracking-widest">Laudos e Anexos</h4>
+                          {attachments.length > 0 && (
+                            <span className="px-2 py-0.5 bg-white text-slate-500 text-[10px] font-bold rounded-full">
+                              {attachments.length}
+                            </span>
+                          )}
+                        </div>
+                        <label className="text-[11px] font-bold uppercase text-emerald-600 hover:text-emerald-700 cursor-pointer transition-colors flex items-center gap-1">
+                          <Plus size={14} />
+                          {uploading ? 'Enviando...' : 'Anexar'}
                           <input type="file" multiple className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" disabled={uploading} onChange={handleUploadAttachment} />
                         </label>
                       </div>
-                      )}
 
+                      {loadingAttachments ? (
+                        <div className="text-center py-6 text-slate-400">
+                          <div className="w-5 h-5 border-2 border-slate-300 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                          <p className="text-[10px] font-bold uppercase tracking-widest">Carregando anexos...</p>
+                        </div>
+                      ) : attachments.length === 0 ? (
+                        <div className="text-center py-6 text-slate-400 bg-white/60 rounded-xl border-2 border-dashed border-slate-200">
+                          <File size={24} className="mx-auto mb-2 opacity-50" />
+                          <p className="text-xs font-medium">Nenhum anexo</p>
+                          <p className="text-[10px] mt-0.5">PDF, JPG, PNG, DOC (máx. 10MB)</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                          {attachments.map((att) => (
+                            <div key={att.id} className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200">
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <File size={16} className="text-slate-400 shrink-0" />
+                                <div className="min-w-0">
+                                  <p className="text-xs font-medium text-slate-700 truncate">{att.filename}</p>
+                                  <p className="text-[10px] text-slate-400">{(att.size / 1024).toFixed(1)} KB</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-0.5">
+                                <button type="button" onClick={() => handleDownloadAttachment(att)} className="p-1.5 hover:bg-emerald-50 rounded text-slate-400 hover:text-emerald-600 transition-colors" title="Baixar">
+                                  <Download size={14} />
+                                </button>
+                                <button type="button" onClick={() => handleDeleteAttachment(att.id)} className="p-1.5 hover:bg-red-50 rounded text-slate-400 hover:text-red-500 transition-colors" title="Excluir">
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                          <label className="flex items-center justify-center gap-1.5 py-2.5 text-xs text-slate-500 hover:text-emerald-600 cursor-pointer transition-colors rounded-lg border border-dashed border-slate-200 bg-white/60">
+                            <Plus size={14} />
+                            <span className="font-medium">Adicionar mais</span>
+                            <input type="file" multiple className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" disabled={uploading} onChange={handleUploadAttachment} />
+                          </label>
+                        </div>
+                      )}
                     </div>
+                  </div>
+                </div>
+                {/* Action Buttons */}
+                <div className="flex items-center gap-3 shrink-0 justify-end">
+                  <button className="btn btn-primary text-xs">
+                    <Save size={14} /> Salvar
+                  </button>
                 </div>
               </div>
             </div>
