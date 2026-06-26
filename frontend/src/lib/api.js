@@ -101,7 +101,6 @@ export const api = {
   getShareLinks: (formId) => request(`/share/form/${formId}`),
   getShareLinksForPatient: (patientId) => request(`/share/patient/${patientId}`),
   revokeShareLink: (id) => request(`/share/${id}/revoke`, { method: "PATCH" }),
-  extendShareLink: (id, days = 30, type = "renewal") => request(`/share/${id}/extend`, { method: "PATCH", body: JSON.stringify({ days, type }) }),
 
   // Public share
   getSharedForm: (token) => request(`/share/${token}`),

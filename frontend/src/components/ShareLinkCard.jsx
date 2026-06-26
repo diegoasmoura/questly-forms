@@ -1,69 +1,24 @@
-import { useState, useRef, useEffect } from "react";
-import { Copy, Trash2, RefreshCw, Check, AlertTriangle, ChevronDown, Calendar, Link2 } from "lucide-react";
-import { getStatusBadge, getDaysRemaining } from "../lib/useShareLinkStatus";
-
-const RENEWAL_OPTIONS = [
-  { days: 7, label: "+7 dias" },
-  { days: 15, label: "+15 dias" },
-  { days: 30, label: "+30 dias", recommended: true },
-  { days: 60, label: "+60 dias" },
-  { days: 90, label: "+90 dias" },
-];
+import { useState } from "react";
+import { Copy, Trash2, Check, Link2 } from "lucide-react";
+import { getStatusBadge } from "../lib/useShareLinkStatus";
 
 export default function ShareLinkCard({ 
   link, 
-  onExtend, 
   onRevoke, 
   onCopy,
   loading = false 
 }) {
   const [copied, setCopied] = useState(false);
-  const [extending, setExtending] = useState(false);
-  const [showRenewalOptions, setShowRenewalOptions] = useState(false);
-  const [showCustomModal, setShowCustomModal] = useState(false);
-  const [customDays, setCustomDays] = useState(30);
-  const dropdownRef = useRef(null);
 
   const shareUrl = `${window.location.origin}/form/${link.token}`;
-  const status = link.status || "EXPIRADO";
+  const status = link.status || "PENDENTE";
   const badge = getStatusBadge(status);
-  const daysRemaining = getDaysRemaining(link.expiresAt);
-  const isPending = status === "PENDENTE";
-  const isExpired = status === "EXPIRADO";
-  const isAnswered = status === "RESPONDIDO";
-
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowRenewalOptions(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     onCopy?.();
-  };
-
-  const handleExtend = async (days) => {
-    setExtending(true);
-    setShowRenewalOptions(false);
-    try {
-      await onExtend(link.id, days, isAnswered ? "newResponse" : "renewal");
-    } finally {
-      setExtending(false);
-    }
-  };
-
-  const handleCustomExtend = async () => {
-    if (customDays > 0 && customDays <= 365) {
-      await onExtend(link.id, customDays, isAnswered ? "newResponse" : "renewal");
-      setShowCustomModal(false);
-    }
   };
 
   const handleRevoke = async () => {
@@ -106,19 +61,6 @@ export default function ShareLinkCard({
                   <span className="font-medium">Última:</span> {new Date(link.lastResponseAt).toLocaleDateString('pt-BR')}
                 </span>
               )}
-              {link.expiresAt && (
-                <span className={`${
-                  isExpired ? "text-red-500" : 
-                  daysRemaining && daysRemaining <= 7 ? "text-amber-600" : "text-slate-600"
-                }`}>
-                  <span className="font-medium">{isExpired ? "Expirou:" : "Expira:"}</span> {new Date(link.expiresAt).toLocaleDateString('pt-BR')}
-                </span>
-              )}
-              {isExpired && !link.lastResponseAt && (
-                <span className="text-red-500 font-medium flex items-center gap-1">
-                  <AlertTriangle size={11} /> Sem resposta
-                </span>
-              )}
             </div>
           </div>
 
@@ -140,51 +82,6 @@ export default function ShareLinkCard({
                 {copied ? "Copiado!" : "Copiar"}
               </button>
 
-              {(isPending || isAnswered || (isExpired && !link.lastResponseAt)) && (
-                <div className="relative" ref={dropdownRef}>
-                  <button
-                    onClick={() => setShowRenewalOptions(!showRenewalOptions)}
-                    disabled={extending || loading}
-                    className={`p-1.5 rounded-lg transition-colors ${
-                      isAnswered 
-                        ? "bg-emerald-100 text-emerald-600 hover:bg-emerald-200" 
-                        : "bg-blue-100 text-blue-600 hover:bg-blue-200"
-                    }`}
-                    title={isAnswered ? "Solicitar novo" : "Renovar"}
-                  >
-                    <RefreshCw size={14} className={extending ? "animate-spin" : ""} />
-                  </button>
-
-                  {showRenewalOptions && (
-                    <div className="absolute right-0 bottom-full mb-1 w-40 bg-white border border-emerald-200 rounded-xl shadow-lg z-20 py-1.5 animate-scale-in">
-                      <p className="px-3 py-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-emerald-100">
-                        {isAnswered ? "Novo preenchimento" : "Renovar por"}
-                      </p>
-                      {RENEWAL_OPTIONS.map((opt) => (
-                        <button
-                          key={opt.days}
-                          onClick={() => handleExtend(opt.days)}
-                          disabled={extending}
-                          className="w-full px-3 py-1.5 text-left text-xs font-medium hover:bg-emerald-50 flex items-center justify-between text-emerald-700"
-                        >
-                          <span>{opt.label}</span>
-                          {opt.recommended && (
-                            <span className="text-[8px] bg-blue-600 text-white px-1 py-0.5 rounded">Padrão</span>
-                          )}
-                        </button>
-                      ))}
-                      <button
-                        onClick={() => { setShowRenewalOptions(false); setShowCustomModal(true); }}
-                        className="w-full px-3 py-1.5 text-left text-xs font-medium hover:bg-emerald-50 flex items-center gap-2 text-emerald-600 border-t border-emerald-100 mt-1 pt-1.5"
-                      >
-                        <Calendar size={11} />
-                        Personalizado...
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-
               <button
                 onClick={handleRevoke}
                 disabled={loading}
@@ -197,70 +94,6 @@ export default function ShareLinkCard({
           </div>
         </div>
       </div>
-
-      {/* Custom Renewal Modal */}
-      {showCustomModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-900/20 backdrop-blur-sm">
-          <div className="card w-full max-w-sm p-5 animate-scale-in">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
-                <Calendar size={18} />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-900">Renovar Link</h3>
-                <p className="text-xs text-slate-600">{link.form?.title}</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-emerald-700 mb-1.5">Quantos dias?</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="365"
-                  value={customDays}
-                  onChange={(e) => setCustomDays(parseInt(e.target.value) || 1)}
-                  className="input"
-                  autoFocus
-                />
-                <p className="text-[10px] text-slate-500 mt-1">
-                  Expira em: {new Date(Date.now() + customDays * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR')}
-                </p>
-              </div>
-
-              <div className="flex gap-1.5">
-                {[7, 15, 30, 60, 90].map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => setCustomDays(d)}
-                    className={`flex-1 py-1.5 text-[10px] font-medium rounded-lg transition-all ${
-                      customDays === d
-                        ? "bg-emerald-900 text-white"
-                        : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                    }`}
-                  >
-                    {d}d
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex gap-2 mt-5">
-              <button onClick={() => setShowCustomModal(false)} className="btn btn-secondary flex-1 text-xs py-2">
-                Cancelar
-              </button>
-              <button
-                onClick={handleCustomExtend}
-                disabled={customDays < 1 || customDays > 365}
-                className="btn btn-primary flex-1 text-xs py-2"
-              >
-                Renovar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }
@@ -277,11 +110,6 @@ export function ShareLinkStats({ counts }) {
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
         <span className="font-medium text-emerald-700">{counts.RESPONDIDO || 0}</span>
         <span className="text-slate-500">resposta{(counts.RESPONDIDO || 0) !== 1 ? 's' : ''}</span>
-      </span>
-      <span className="flex items-center gap-1.5">
-        <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-        <span className="font-medium text-emerald-700">{counts.EXPIRADO || 0}</span>
-        <span className="text-slate-500">expirado{(counts.EXPIRADO || 0) !== 1 ? 's' : ''}</span>
       </span>
     </div>
   );

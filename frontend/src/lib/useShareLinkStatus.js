@@ -20,16 +20,6 @@ export function useShareLinkStatus(patientId) {
     }
   }, [patientId]);
 
-  const extendLink = useCallback(async (linkId, days = 30) => {
-    try {
-      const result = await api.extendShareLink(linkId, days);
-      await loadLinks();
-      return result;
-    } catch (err) {
-      throw err;
-    }
-  }, [loadLinks]);
-
   const revokeLink = useCallback(async (linkId) => {
     try {
       await api.revokeShareLink(linkId);
@@ -43,7 +33,7 @@ export function useShareLinkStatus(patientId) {
     return links.reduce((acc, link) => {
       acc[link.status] = (acc[link.status] || 0) + 1;
       return acc;
-    }, { PENDENTE: 0, RESPONDIDO: 0, EXPIRADO: 0 });
+    }, { PENDENTE: 0, RESPONDIDO: 0 });
   }, [links]);
 
   const pendingLinks = useMemo(() => 
@@ -64,7 +54,6 @@ export function useShareLinkStatus(patientId) {
     loading,
     error,
     loadLinks,
-    extendLink,
     revokeLink,
     getStatusCounts,
     pendingLinks,
@@ -77,15 +66,6 @@ export function getStatusBadge(status) {
   const badges = {
     PENDENTE: { bg: "bg-amber-50", border: "border-amber-200", dot: "bg-amber-500", text: "text-amber-700", label: "Pendente" },
     RESPONDIDO: { bg: "bg-emerald-50", border: "border-emerald-200", dot: "bg-emerald-500", text: "text-emerald-700", label: "Respondido" },
-    EXPIRADO: { bg: "bg-gray-50", border: "border-gray-200", dot: "bg-gray-400", text: "text-gray-500", label: "Expirado" },
   };
-  return badges[status] || badges.EXPIRADO;
-}
-
-export function getDaysRemaining(expiresAt) {
-  if (!expiresAt) return null;
-  const now = new Date();
-  const expires = new Date(expiresAt);
-  const diff = expires - now;
-  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  return badges[status] || badges.PENDENTE;
 }

@@ -6,7 +6,6 @@ import { useAuth } from "../context/AuthContext";
 import { generatePremiumSummary } from "../lib/pdf";
 import { scoreTest } from "../lib/scoring";
 import { ClinicalTrendChart, transformResponsesToTrendData, AttendanceHeatmap, transformResponsesToHeatmapData } from "../components/ClinicalCharts";
-import { useShareLinkStatus, getStatusBadge } from "../lib/useShareLinkStatus";
 import ShareLinkCard from "../components/ShareLinkCard";
 import FormResponsesView from "../components/FormResponsesView";
 import DataTable from "../components/DataTable";
@@ -532,7 +531,7 @@ export default function PatientRecord() {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState(null);
   const [forms, setForms] = useState([]);
-  const [shareData, setShareData] = useState({ formId: "", expiresAt: "" });
+  const [shareData, setShareData] = useState({ formId: "" });
   const [patientShareLinks, setPatientShareLinks] = useState([]);
   const [showShareModal, setShowShareModal] = useState(false);
   const [loadingForms, setLoadingForms] = useState(false);
@@ -723,16 +722,6 @@ export default function PatientRecord() {
     }
   };
 
-  const handleExtendLink = async (linkId, days = 30, type = "renewal") => {
-    try {
-      const result = await api.extendShareLink(linkId, days, type);
-      alert(result.message || `Link atualizado!`);
-      await loadPatientShareLinks();
-    } catch (error) {
-      alert("Erro ao atualizar link: " + error.message);
-    }
-  };
-
   const handleRevokeLink = async (linkId) => {
     if (!confirm("Excluir este link?")) return;
     try {
@@ -745,12 +734,6 @@ export default function PatientRecord() {
 
   const handleCopyLink = () => {
     // Toast feedback could be added here
-  };
-
-  const getDefault30DaysLater = () => {
-    const today = new Date();
-    const thirtyDaysLater = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
-    return thirtyDaysLater.toISOString().split('T')[0];
   };
 
   const getTodayDate = () => {
@@ -780,7 +763,7 @@ export default function PatientRecord() {
 
   useEffect(() => {
     if (showShareModal) {
-      setShareData({ formId: "", expiresAt: getDefault30DaysLater() });
+      setShareData({ formId: "" });
       setExistingLinkForForm(null);
       setForceCreateNew(false);
     }
@@ -2342,7 +2325,7 @@ export default function PatientRecord() {
           {activeTab === "share" && (
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Stats Summary */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-500">
                   <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
                     <Send size={18} />
@@ -2359,15 +2342,6 @@ export default function PatientRecord() {
                   <div>
                     <p className="text-2xl font-black text-slate-800">{patientShareLinks.filter(l => l.status === "RESPONDIDO").length}</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Respondidos</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-500">
-                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
-                    <AlertCircle size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-black text-slate-800">{patientShareLinks.filter(l => l.status === "EXPIRADO").length}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expirados</p>
                   </div>
                 </div>
                 <div className="card p-3 flex items-center gap-3 border-l-4 border-violet-500">
@@ -2461,7 +2435,6 @@ export default function PatientRecord() {
                       <ShareLinkCard
                         key={link.id}
                         link={link}
-                        onExtend={handleExtendLink}
                         onRevoke={handleRevokeLink}
                         onCopy={handleCopyLink}
                       />
@@ -2766,7 +2739,7 @@ export default function PatientRecord() {
                 {/* Aguardando Resposta */}
                 {(() => {
                   const pending = patientShareLinks.filter(link => 
-                    link.active && (!link.expiresAt || new Date(link.expiresAt) > new Date()) && !link.response
+                    link.active && !link.response
                   );
                   if (pending.length === 0) return null;
                   
@@ -2778,8 +2751,6 @@ export default function PatientRecord() {
                       </h4>
                       <div className="space-y-4">
                         {pending.map(link => {
-                          const daysRemaining = link.expiresAt ? Math.ceil((new Date(link.expiresAt) - new Date()) / (1000 * 60 * 60 * 24)) : null;
-                          
                           return (
                             <div key={link.id} className="card p-6 bg-white border-emerald-100 hover:border-emerald-200 transition-all">
                               <div className="flex items-start justify-between gap-4">
@@ -2796,11 +2767,6 @@ export default function PatientRecord() {
                                     <span className="text-xs font-bold px-3 py-1 bg-blue-50 text-blue-700 rounded-full">
                                       Enviado
                                     </span>
-                                    {daysRemaining && (
-                                      <span className="text-xs font-bold px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full">
-                                        {daysRemaining} dias restantes
-                                      </span>
-                                    )}
                                   </div>
                                 </div>
                               </div>
@@ -3176,15 +3142,10 @@ export default function PatientRecord() {
                 alert("Selecione um instrumento");
                 return;
               }
-              if (!shareData.expiresAt) {
-                alert("Selecione a validade do link");
-                return;
-              }
               try {
                 const result = await api.createShareLink({
                   formId: shareData.formId,
                   patientId: patient.id,
-                  expiresAt: shareData.expiresAt,
                 });
                 const absoluteUrl = result.shareUrl.startsWith("http")
                   ? result.shareUrl
@@ -3193,7 +3154,7 @@ export default function PatientRecord() {
                 const action = result.reused ? "reutilizado" : "criado";
                 alert(`Link ${action} e copiado para a área de transferência!`);
                 setShowShareModal(false);
-                setShareData({ formId: "", expiresAt: "" });
+                setShareData({ formId: "" });
                 loadPatientShareLinks();
               } catch (error) {
                 alert(error.message);
@@ -3234,43 +3195,6 @@ export default function PatientRecord() {
                   </p>
                 </div>
               )}
-
-              <div>
-                <label className="block text-sm font-medium text-emerald-700 mb-2">Validade do Link *</label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { days: 7, label: "7 dias" },
-                    { days: 15, label: "15 dias" },
-                    { days: 30, label: "30 dias", recommended: true },
-                    { days: 60, label: "60 dias" },
-                    { days: 90, label: "90 dias" },
-                  ].map((opt) => (
-                    <button
-                      key={opt.days}
-                      type="button"
-                      onClick={() => {
-                        const expiresAt = new Date(Date.now() + opt.days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-                        setShareData({ ...shareData, expiresAt });
-                      }}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                        shareData.expiresAt === new Date(Date.now() + opt.days * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-                          ? "bg-emerald-900 text-white shadow-md"
-                          : opt.recommended
-                          ? "bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
-                          : "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
-                      }`}
-                    >
-                      {opt.label}
-                      {opt.recommended && <span className="ml-1 text-[10px] opacity-70">(Padrão)</span>}
-                    </button>
-                  ))}
-                </div>
-                {shareData.expiresAt && (
-                  <p className="text-xs text-slate-600 mt-2">
-                    Expira em: {new Date(shareData.expiresAt + 'T23:59:59').toLocaleDateString('pt-BR')}
-                  </p>
-                )}
-              </div>
 
               <div className="flex gap-2 pt-4">
                 {existingLinkForForm && !forceCreateNew ? (
