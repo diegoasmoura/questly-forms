@@ -2139,7 +2139,7 @@ function PatientListRow({ patient, onDelete, onEdit }) {
   const attendance = patient.attendanceStats || { presente: 0, falta: 0, justificada: 0 };
 
   return (
-    <div className={`card p-4 flex items-center gap-5 transition-all relative overflow-hidden ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'border-l-4 border-l-amber-400 bg-amber-50/20' : 'hover:border-emerald-200 hover:bg-emerald-50/10'}`}>
+    <div className={`card p-4 flex items-center gap-5 transition-all duration-300 relative overflow-hidden ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'border-l-4 border-l-amber-400 bg-amber-50/20' : 'hover:border-emerald-200 hover:shadow-lg'}`}>
       <Link to={`/patients/${patient.id}`} className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg shrink-0 transition-all ${isActive ? (isBirthdayWeek ? 'bg-amber-500 text-white' : 'bg-slate-900 text-emerald-400') : 'bg-slate-200 text-slate-500'}`}>
         {isBirthdayWeek ? <PartyPopper size={20} /> : patient.name.charAt(0).toUpperCase()}
       </Link>
