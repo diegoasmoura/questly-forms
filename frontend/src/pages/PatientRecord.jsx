@@ -2179,12 +2179,12 @@ export default function PatientRecord() {
                   <div className="overflow-x-auto overflow-y-auto flex-1 min-h-0">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                          <th className="px-4 py-3 min-w-[180px]">Período das Sessões</th>
-                          <th className="px-4 py-3 whitespace-nowrap">Valor Pago</th>
-                          <th className="px-4 py-3 whitespace-nowrap">Data do Pagamento</th>
-                          <th className="px-4 py-3">Recibo</th>
-                          <th className="px-4 py-3 text-right">Ações</th>
+                        <tr className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200">
+                          <th className="text-left px-2 py-2 min-w-[180px]">Período das Sessões</th>
+                          <th className="text-left px-2 py-2 whitespace-nowrap">Valor Pago</th>
+                          <th className="text-left px-2 py-2 whitespace-nowrap">Data do Pagamento</th>
+                          <th className="text-left px-2 py-2">Recibo</th>
+                          <th className="text-right px-2 py-2">Ações</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">

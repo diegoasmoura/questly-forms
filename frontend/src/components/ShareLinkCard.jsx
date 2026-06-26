@@ -49,48 +49,37 @@ export default function ShareLinkCard({
           </div>
         </div>
 
-        {/* Dates + Link */}
+        {/* Info + Link Row */}
         <div className="px-4 py-3 bg-white/60 border-t border-black/5">
-          <div className="flex items-center justify-between gap-4 text-xs">
-            <div className="flex items-center gap-4 flex-wrap">
-              <span className="text-slate-600">
-                <span className="font-medium text-emerald-700">Criado:</span> {new Date(link.createdAt).toLocaleDateString('pt-BR')}
+          <div className="flex items-center gap-4 flex-wrap">
+            <span className="text-slate-600 text-xs shrink-0">
+              <span className="font-medium text-emerald-700">Criado:</span> {new Date(link.createdAt).toLocaleDateString('pt-BR')}
+            </span>
+            {link.lastResponseAt && (
+              <span className="text-emerald-600 text-xs shrink-0">
+                <span className="font-medium">Última:</span> {new Date(link.lastResponseAt).toLocaleDateString('pt-BR')}
               </span>
-              {link.lastResponseAt && (
-                <span className="text-emerald-600">
-                  <span className="font-medium">Última:</span> {new Date(link.lastResponseAt).toLocaleDateString('pt-BR')}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Link Row */}
-          <div className="flex items-center justify-between gap-4 mt-2 pt-2 border-t border-black/5">
+            )}
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <Link2 size={12} className="text-slate-500 shrink-0" />
               <span className="text-[10px] font-mono text-slate-600 truncate">{shareUrl}</span>
             </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <button
-                onClick={handleCopy}
-                className="flex items-center gap-1 text-emerald-600 hover:text-slate-800 transition-colors bg-emerald-100 hover:bg-emerald-200 px-2 py-1 rounded-lg text-[10px] font-medium"
-                title="Copiar link"
-              >
-                {copied ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
-                {copied ? "Copiado!" : "Copiar"}
-              </button>
-
-              <button
-                onClick={handleRevoke}
-                disabled={loading}
-                className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
-                title="Excluir"
-              >
-                <Trash2 size={14} />
-              </button>
-            </div>
+            <button
+              onClick={handleCopy}
+              className="flex items-center gap-1 text-emerald-600 hover:text-slate-800 transition-colors bg-emerald-100 hover:bg-emerald-200 px-2 py-1 rounded-lg text-[10px] font-medium shrink-0"
+              title="Copiar link"
+            >
+              {copied ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
+              {copied ? "Copiado!" : "Copiar"}
+            </button>
+            <button
+              onClick={handleRevoke}
+              disabled={loading}
+              className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors shrink-0"
+              title="Excluir"
+            >
+              <Trash2 size={14} />
+            </button>
           </div>
         </div>
       </div>

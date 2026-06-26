@@ -128,7 +128,8 @@ navigate(-1); // suporta navegação relativa
 - **Toasts Flutuantes:** Confirmações em Emerald-600.
 - **Clinical Dashboard:** Métricas de engajamento na capa do card.
 - **Patient Record:** Padronização de abas com header e botão Save (Prontuário incluso). Ordem das abas: Frequência → Agenda → Financeiro → Instrumentos → Prontuário.
-- **Instrumentos (Share):** Não utiliza mais expiração de links. Removidos: seletor de validade no modal, contagem de expirados, renovação de links, dias restantes nos cards e filtro por expiração. Status passam a ser apenas Pendente e Respondido.
+- **Instrumentos (Share):** Não utiliza mais expiração de links. Removidos: seletor de validade no modal, contagem de expirados, renovação de links, dias restantes nos cards e filtro por expiração. Status passam a ser apenas Pendente e Respondido. Tabela com colunas: Instrumento, Progresso, Status, Última resposta, Criado em, Link, Excluir.
+- **Tabelas padronizadas:** Cabeçalhos das tabelas nas abas Financeiro e Instrumentos usam o mesmo padrão: `text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200` com padding `px-2 py-2`.
 
 ### 11. Layout do PatientRecord (Regras para evitar scrollbar externa)
 
