@@ -19,7 +19,9 @@ import {
   Pencil,
   Trash2,
   Phone,
-  MessageCircle
+  MessageCircle,
+  UserCheck,
+  UserX
 } from "lucide-react";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -60,21 +62,41 @@ function StatsBar({ appointments, attendances }) {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-        <p className="text-xl font-bold text-slate-800">{appointments.length}</p>
-        <p className="text-[10px] font-bold text-slate-400 uppercase">Agendamentos</p>
+      <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-400">
+        <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
+          <Calendar size={18} />
+        </div>
+        <div>
+          <p className="text-2xl font-black text-slate-800">{appointments.length}</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Agendamentos</p>
+        </div>
       </div>
-      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-        <p className="text-xl font-bold text-emerald-600">{presentCount}</p>
-        <p className="text-[10px] font-bold text-slate-400 uppercase">Presenças</p>
+      <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-400">
+        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+          <UserCheck size={18} />
+        </div>
+        <div>
+          <p className="text-2xl font-black text-slate-800">{presentCount}</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Presenças</p>
+        </div>
       </div>
-      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-        <p className="text-xl font-bold text-red-600">{absentCount}</p>
-        <p className="text-[10px] font-bold text-slate-400 uppercase">Faltas</p>
+      <div className="card p-3 flex items-center gap-3 border-l-4 border-red-400">
+        <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-600">
+          <UserX size={18} />
+        </div>
+        <div>
+          <p className="text-2xl font-black text-slate-800">{absentCount}</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Faltas</p>
+        </div>
       </div>
-      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-        <p className="text-xl font-bold text-amber-600">{justifiedCount}</p>
-        <p className="text-[10px] font-bold text-slate-400 uppercase">Justificadas</p>
+      <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-400">
+        <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+          <AlertCircle size={18} />
+        </div>
+        <div>
+          <p className="text-2xl font-black text-slate-800">{justifiedCount}</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Justificadas</p>
+        </div>
       </div>
     </div>
   );
