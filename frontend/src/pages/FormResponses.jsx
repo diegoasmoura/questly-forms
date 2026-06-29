@@ -88,7 +88,7 @@ export default function FormResponses() {
 
   const handleExportPdf = (response) => {
     try {
-      const fileName = `${form?.title || "Survey"}_${new Date(response.createdAt).toISOString().split('T')[0]}.pdf`;
+      const fileName = `${form?.title || "Formulario"}_${new Date(response.createdAt).toISOString().split('T')[0]}.pdf`;
       exportToPdf(form.schema, response.data, fileName);
     } catch (error) {
       alert(error.message);

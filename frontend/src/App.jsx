@@ -14,7 +14,7 @@ import Patients from "./pages/Patients";
 import PatientRecord from "./pages/PatientRecord";
 import MyForms from "./pages/MyForms";
 import Library from "./pages/Library";
-import FormBuilder from "./pages/FormBuilder";
+import CustomFormBuilder from "./pages/CustomFormBuilder";
 import FormPreview from "./pages/FormPreview";
 import FormResponses from "./pages/FormResponses";
 import ResponseDetail from "./pages/ResponseDetail";
@@ -66,8 +66,8 @@ export default function App() {
         <Route path="/my-forms" element={<ProtectedRoute><MyForms /></ProtectedRoute>} />
         <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
         
-        <Route path="/forms/new" element={<ProtectedRoute><FormBuilder /></ProtectedRoute>} />
-        <Route path="/forms/:id/edit" element={<ProtectedRoute><FormBuilder /></ProtectedRoute>} />
+        <Route path="/forms/new" element={<ProtectedRoute><CustomFormBuilder /></ProtectedRoute>} />
+        <Route path="/forms/:id/edit" element={<ProtectedRoute><CustomFormBuilder /></ProtectedRoute>} />
         <Route path="/forms/:id/preview" element={<ProtectedRoute><FormPreview /></ProtectedRoute>} />
         <Route path="/forms/:id/responses" element={<ProtectedRoute><FormResponses /></ProtectedRoute>} />
         <Route path="/responses/:id" element={<ProtectedRoute><ResponseDetail /></ProtectedRoute>} />

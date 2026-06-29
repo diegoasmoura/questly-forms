@@ -220,6 +220,44 @@ export default function ResponseDetail() {
               </div>
             </div>
 
+            {/* YSQ-L3 Schema Breakdown */}
+            {clinicalResult.schemaDetails && (
+              <div className="card p-8 bg-white shadow-sm border-emerald-100/50">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-black text-xs uppercase tracking-widest text-slate-900 flex items-center gap-3">
+                    <div className="w-1 h-4 bg-emerald-900 rounded-full" />
+                    Perfil de Esquemas
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {clinicalResult.schemaDetails.map((s) => (
+                    <div key={s.code} className={`p-4 rounded-xl border ${s.color || 'border-slate-200'} bg-white`}>
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <p className="text-xs font-bold text-slate-900 uppercase tracking-wide">{s.code}</p>
+                          <p className="text-[10px] text-slate-500 font-medium mt-0.5">{s.name}</p>
+                        </div>
+                        <span className={`text-xs font-black px-2 py-0.5 rounded ${s.color || 'text-slate-500 bg-slate-50'}`}>
+                          {s.level}
+                        </span>
+                      </div>
+                      <div className="flex items-end gap-2">
+                        <span className="text-2xl font-black text-slate-900">{s.average !== null ? s.average.toFixed(2) : "—"}</span>
+                        <span className="text-[10px] text-slate-400 font-medium mb-1">/ 6</span>
+                      </div>
+                      <div className="mt-2 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${s.level === 'Muito Alta' ? 'bg-red-500' : s.level === 'Alta' ? 'bg-orange-500' : s.level === 'Moderada' ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                          style={{ width: `${s.average !== null ? (s.average / 6) * 100 : 0}%` }}
+                        />
+                      </div>
+                      <p className="text-[9px] text-slate-400 font-medium mt-2">{s.answeredCount}/{s.itemCount} itens respondidos</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Item-by-Item Analysis */}
             <div className="card p-8 bg-white shadow-sm border-emerald-100/50">
               <div className="flex items-center justify-between mb-8">

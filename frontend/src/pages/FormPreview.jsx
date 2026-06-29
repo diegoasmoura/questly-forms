@@ -1,16 +1,15 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Model } from "survey-core";
-import { Survey } from "survey-react-ui";
-import "survey-core/survey-core.min.css";
 import { ArrowLeft, Loader2, AlertCircle } from "lucide-react";
 import { api } from "../lib/api";
+import { convertSurveyJSToCustom } from "../lib/formSchema";
+import CustomFormRenderer from "../components/CustomFormRenderer";
 
 export default function FormPreview() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const surveyRef = useRef(null);
   const [form, setForm] = useState(null);
+  const [schema, setSchema] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -18,6 +17,7 @@ export default function FormPreview() {
     api.getForm(id)
       .then((data) => {
         setForm(data);
+        setSchema(convertSurveyJSToCustom(data.schema));
       })
       .catch((err) => {
         setError(err.message || "Formulário não encontrado");
@@ -51,14 +51,10 @@ export default function FormPreview() {
     );
   }
 
-  if (!form || !form.schema) return null;
-
-  const survey = new Model(form.schema);
-  survey.mode = "edit";
+  if (!form || !schema) return null;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col overflow-hidden">
-      {/* Header */}
       <header className="bg-white border-b border-slate-200 shrink-0">
         <div className="px-4 py-4">
           <div className="flex items-center gap-3">
@@ -78,10 +74,13 @@ export default function FormPreview() {
         </div>
       </header>
 
-      {/* Survey Container */}
       <div className="flex-1 overflow-auto p-4 md:p-6">
-        <div className="bg-white rounded-xl border border-slate-200 min-h-full" style={{ maxWidth: '100%' }}>
-          <Survey model={survey} ref={surveyRef} />
+        <div className="max-w-3xl mx-auto">
+          <CustomFormRenderer
+            schema={schema}
+            preview
+            formTitle={form.title}
+          />
         </div>
       </div>
     </div>

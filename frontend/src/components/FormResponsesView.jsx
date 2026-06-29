@@ -44,34 +44,31 @@ function buildQuestionMap(schema) {
     const pages = schema.pages || [];
     
     pages.forEach(page => {
-      if (page.name === 'inicio') return;
-      
       const pageQuestions = [];
       
-      function extractQuestions(elements) {
-        if (!elements || !Array.isArray(elements)) return;
-        elements.forEach(el => {
-          if (!el) return;
-          if (el.name && el.type && el.type !== 'html' && el.type !== 'expression') {
-            const question = {
-              name: el.name,
-              title: el.title || el.name,
-              type: el.type,
-              choices: el.choices,
-              rows: el.rows,
-              columns: el.columns
-            };
-            pageQuestions.push(question);
-            map[el.name] = question;
-          }
-          if (el.elements) extractQuestions(el.elements);
-          if (el.panels) {
-            (el.panels || []).forEach(p => extractQuestions(p.elements));
-          }
-        });
-      }
+      const items = page.questions || page.elements || [];
       
-      extractQuestions(page.elements || []);
+      items.forEach(el => {
+        if (!el) return;
+        const name = el.id || el.name;
+        if (name && el.type && el.type !== 'html' && el.type !== 'expression') {
+          const normalizeLabel = (arr) =>
+            (arr || []).map((item) => ({
+              value: item.value ?? item,
+              text: item.text || item.label || String(item.value ?? item),
+            }));
+          const question = {
+            name,
+            title: el.title || name,
+            type: el.type,
+            choices: el.options ? normalizeLabel(el.options) : el.choices ? normalizeLabel(el.choices) : undefined,
+            rows: el.rows ? normalizeLabel(el.rows) : undefined,
+            columns: el.columns ? normalizeLabel(el.columns) : undefined,
+          };
+          pageQuestions.push(question);
+          map[name] = question;
+        }
+      });
       
       if (pageQuestions.length > 0) {
         sections.push({
@@ -204,7 +201,7 @@ function MatrixRows({ value, rows, columns }) {
               style={{ width: '80px' }}
             >
               <span className="text-xs font-medium text-emerald-700 leading-tight block">
-                {col.text}
+                {col.text || col.label}
               </span>
               <span className="text-xs text-slate-600 font-bold">
                 ({col.value})
@@ -218,7 +215,7 @@ function MatrixRows({ value, rows, columns }) {
       {rows.map((row, rowIdx) => {
         const rowKey = row.value || row;
         const rowValue = value[rowKey];
-        const rowLabel = row.text || getTranslatedLabel(String(rowKey));
+        const rowLabel = row.text || row.label || getTranslatedLabel(String(rowKey));
         
         let displayValue = null;
         if (!isEmptyValue(rowValue)) {
@@ -243,7 +240,7 @@ function MatrixRows({ value, rows, columns }) {
             </div>
             <div className="flex items-center">
               {cols.map((col, colIdx) => {
-                const isSelected = displayValue === col.value;
+                const isSelected = String(displayValue) === String(col.value);
                 return (
                   <div 
                     key={colIdx} 

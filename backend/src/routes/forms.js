@@ -2,11 +2,17 @@ import { Router } from "express";
 import { v4 as uuidv4 } from "uuid";
 import prisma from "../db.js";
 import { authMiddleware } from "../middleware/auth.js";
+import { convertSurveyJSToCustom } from "../lib/schemaMigration.js";
 
 const router = Router();
 
 // All routes require auth
 router.use(authMiddleware);
+
+function convertSchemaInForm(form) {
+  if (!form) return form;
+  return { ...form, schema: convertSurveyJSToCustom(form.schema) };
+}
 
 // List forms
 router.get("/", async (req, res) => {
@@ -15,7 +21,7 @@ router.get("/", async (req, res) => {
       where: { createdBy: req.user.id },
       orderBy: { updatedAt: "desc" },
     });
-    res.json(forms);
+    res.json(forms.map(convertSchemaInForm));
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
@@ -28,7 +34,7 @@ router.get("/:id", async (req, res) => {
       where: { id: req.params.id, createdBy: req.user.id },
     });
     if (!form) return res.status(404).json({ error: "Form not found" });
-    res.json(form);
+    res.json(convertSchemaInForm(form));
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }

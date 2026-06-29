@@ -2751,6 +2751,37 @@ export default function PatientRecord() {
                                         <div className="p-4 bg-emerald-50/80 rounded-xl border border-emerald-100/50">
                                           <p className="text-sm text-slate-800 leading-relaxed font-medium italic">"{result.interpretation}"</p>
                                         </div>
+
+                                        {result.schemaDetails && (
+                                          <div className="mt-6 p-6 rounded-2xl border bg-white shadow-sm">
+                                            <h5 className="font-bold text-xs uppercase tracking-widest text-slate-900 mb-4">Perfil de Esquemas</h5>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                              {result.schemaDetails.map((s) => (
+                                                <div key={s.code} className={`p-3 rounded-xl border ${s.color || 'border-slate-200'} bg-white`}>
+                                                  <div className="flex items-start justify-between mb-2">
+                                                    <div>
+                                                      <p className="text-[11px] font-bold text-slate-900 uppercase tracking-wide">{s.code}</p>
+                                                      <p className="text-[9px] text-slate-500 font-medium">{s.name}</p>
+                                                    </div>
+                                                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${s.color || 'text-slate-500 bg-slate-50'}`}>
+                                                      {s.level}
+                                                    </span>
+                                                  </div>
+                                                  <div className="flex items-end gap-1">
+                                                    <span className="text-xl font-black text-slate-900">{s.average !== null ? s.average.toFixed(2) : "—"}</span>
+                                                    <span className="text-[9px] text-slate-400 font-medium">/ 6</span>
+                                                  </div>
+                                                  <div className="mt-1.5 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                                    <div
+                                                      className={`h-full rounded-full ${s.level === 'Muito Alta' ? 'bg-red-500' : s.level === 'Alta' ? 'bg-orange-500' : s.level === 'Moderada' ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                                                      style={{ width: `${s.average !== null ? (s.average / 6) * 100 : 0}%` }}
+                                                    />
+                                                  </div>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
                                       </div>
                                     );
                                   })()}

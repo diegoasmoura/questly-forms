@@ -2,6 +2,7 @@ import { Router } from "express";
 import { v4 as uuidv4 } from "uuid";
 import prisma from "../db.js";
 import { authMiddleware } from "../middleware/auth.js";
+import { convertSurveyJSToCustom } from "../lib/schemaMigration.js";
 
 const router = Router();
 
@@ -25,7 +26,7 @@ router.get("/:token", async (req, res) => {
     res.json({
       id: link.form.id,
       title: link.form.title,
-      schema: link.form.schema,
+      schema: convertSurveyJSToCustom(link.form.schema),
     });
   } catch (error) {
     console.error("Error fetching shared form:", error);

@@ -35,8 +35,8 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Agenda Profissional:** Gestão integrada de horários recorrentes, visão mensal/lista e detecção de conflitos.
 - **Histórico de Frequência:** Registro detalhado de presenças, faltas e reagendamentos inteligentes em cadeia.
 - **Gestão Financeira:** Controle de pagamentos por blocos de sessões, conciliação clínica e geração de PDFs profissionais.
-- **Acervo Clínico:** Modelos validados como PHQ-9, GAD-7 e a **Anamnese Neuropsicológica Adulto (Completa)**.
-- **Construtor de Instrumentos:** Criação de escalas, testes e anamneses personalizadas com SurveyJS v2.
+- **Acervo Clínico:** Modelos validados como PHQ-9, GAD-7, **Anamnese Neuropsicológica Adulto (Completa)** e **YSQ-L3 (Young Schema Questionnaire)**.
+- **Construtor de Instrumentos Customizado:** Criação visual de escalas, testes e anamneses com drag-and-drop, edição inline e preview ao vivo. Substitui o SurveyJS FormBuilder por uma experiência mais intuitiva e integrada ao design do sistema.
 
 ## Regras de Negócio e Lógica do Sistema
 
@@ -139,7 +139,66 @@ navigate(-1); // suporta navegação relativa
 - **Instrumentos (Share):** Não utiliza mais expiração de links. Removidos: seletor de validade no modal, contagem de expirados, renovação de links, dias restantes nos cards e filtro por expiração. Status passam a ser apenas Pendente e Respondido. Tabela com colunas: Instrumento, Progresso, Status, Última resposta, Criado em, Link, Excluir.
 - **Tabelas padronizadas:** Cabeçalhos das tabelas nas abas Financeiro e Instrumentos usam o mesmo padrão: `text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200` com padding `px-2 py-2`.
 
-### 11. Layout do PatientRecord (Regras para evitar scrollbar externa)
+### 11. Construtor de Instrumentos Customizado
+
+Substitui o SurveyJS FormBuilder por uma solução própria com card-style:
+
+**CustomFormBuilder (`/forms/:id/edit`):**
+- **Drag-and-drop nativo:** Reordenar perguntas usando `draggable`, sem dependências externas.
+- **Edição inline:** Clique no card para editar título, tipo, opções e configurações diretamente — sem modal.
+- **Toolbox visual:** Botões com ícones para cada tipo de pergunta (Texto, Número, Sim/Não, Escolha, Likert, Matriz).
+- **Mini-preview:** Cada pergunta exibe uma prévia visual do seu formato de resposta (ex: Likert mostra 6 quadradinhos numerados).
+- **Seções (páginas):** Adicionar, renomear e remover seções com contagem de perguntas.
+- **Preview ao vivo:** Alternar entre edição e visualização do formulário completo.
+- **Exportar JSON:** Download do schema em formato JSON.
+- **Tipos de pergunta suportados:**
+  - **Texto:** Simples ou multiline, com placeholder configurável.
+  - **Número:** Com mínimo e máximo.
+  - **Sim/Não:** Rótulos personalizáveis (`trueLabel`/`falseLabel`).
+  - **Escolha:** Única ou múltipla, com opções editáveis.
+  - **Escala Likert:** Opções numeradas de 1 a 6 (padrão YSQ).
+  - **Matriz:** Linhas × colunas para grids de resposta.
+
+**CustomFormRenderer:**
+- Renderiza formulários no formato customizado (não SurveyJS).
+- **Modo Stepper:** Navegação pergunta-a-pergunta com grade numérica (1–6), atalhos de teclado e auto-avanço — ideal para escalas longas como YSQ-L3 (232 itens).
+- **Aparência card-style:** Mesma identidade visual do builder, com botões em formato de pílula para seleção, inputs com borda arredondada e foco verde.
+- **Suporte a readOnly e preview** para visualização de resultados e teste.
+
+### 12. YSQ-L3 (Young Schema Questionnaire)
+
+O instrumento **YSQ-L3** (232 itens, 18 domínios) está disponível no Acervo Clínico:
+- Schema em formato SurveyJS no template (`frontend/src/lib/templates.js`).
+- Conversão automática via `convertSurveyJSToCustom()` no backend e frontend.
+- Pontuação por domínio com 3 faixas clínicas: Baixa, Alta, Muito Alta.
+- Cards de severidade no dashboard de respostas com codificação por cores (emerald, amber, red).
+
+### 13. Esquema de Dados do Formulário Customizado
+
+```json
+{
+  "title": "Meu Instrumento",
+  "pages": [
+    {
+      "title": "Seção 1",
+      "questions": [
+        {
+          "id": "q_abc123",
+          "type": "boolean",
+          "title": "Você concorda?",
+          "required": true,
+          "trueLabel": "Sim, concordo",
+          "falseLabel": "Não concordo"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Os tipos suportados são: `text`, `number`, `boolean`, `choice`, `likert`, `matrix`.
+
+### 14. Layout do PatientRecord (Regras para evitar scrollbar externa)
 
 A página `PatientRecord.jsx` usa uma estrutura de layout específica que deve ser mantida para evitar que a barra de rolagem externa apareça ao alternar entre abas:
 

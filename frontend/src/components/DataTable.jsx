@@ -39,26 +39,31 @@ function DataTable({ data, schema, title = 'Respostas Detalhadas' }) {
     // Extract questions from each page/section
     schema.pages.forEach((page, pageIndex) => {
       const sectionName = page.title || page.name || `Seção ${pageIndex + 1}`;
+      const items = page.questions || page.elements || [];
       
-      page.elements.forEach((element) => {
+      items.forEach((element) => {
+        const qName = element.id || element.name;
+        const qTitle = element.title || qName;
+        
         if (element.type === 'matrix') {
           // Matrix questions (like PHQ-9, GAD-7)
-          element.rows?.forEach((row) => {
+          const rows = element.rows || [];
+          rows.forEach((row) => {
             questions.push({
-              id: `${element.name}_${row.value}`,
+              id: `${qName}_${row.value}`,
               header: () => (
-                <span className="text-xs font-medium text-brand-950" title={row.text}>
-                  {row.text?.substring(0, 30)}...
+                <span className="text-xs font-medium text-brand-950" title={row.label || row.text}>
+                  {(row.label || row.text)?.substring(0, 30)}...
                 </span>
               ),
-              accessorKey: `${element.name}.${row.value}`,
+              accessorKey: `${qName}.${row.value}`,
               cell: ({ getValue }) => {
                 const value = getValue();
-                const columnNames = element.columns;
-                const label = columnNames?.find(c => c.value === value)?.text || value || '-';
+                const columnNames = element.columns || [];
+                const label = columnNames?.find(c => String(c.value) === String(value))?.label || columnNames?.find(c => String(c.value) === String(value))?.text || value || '-';
                 return (
                   <span className="text-xs text-brand-700 whitespace-normal max-w-[200px]">
-                    {label}
+                    {String(label)}
                   </span>
                 );
               },
@@ -69,17 +74,17 @@ function DataTable({ data, schema, title = 'Respostas Detalhadas' }) {
         } else {
           // Regular questions
           questions.push({
-            id: element.name,
+            id: qName,
             header: () => (
-              <span className="text-xs font-medium text-brand-950" title={element.title}>
-                {element.title?.substring(0, 30)}...
+              <span className="text-xs font-medium text-brand-950" title={qTitle}>
+                {qTitle.substring(0, 30)}...
               </span>
             ),
-            accessorKey: element.name,
+            accessorKey: qName,
             cell: ({ getValue }) => {
               const value = getValue();
               if (typeof value === 'object') return <pre className="text-xs text-brand-700">{JSON.stringify(value, null, 2)}</pre>;
-              return <span className="text-xs text-brand-700 whitespace-normal max-w-[200px]">{String(value || '-')}</span>;
+              return <span className="text-xs text-brand-700 whitespace-normal max-w-[200px]">{String(value ?? '-')}</span>;
             },
             size: 180,
             section: sectionName,

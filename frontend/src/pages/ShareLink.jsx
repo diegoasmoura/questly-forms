@@ -1,23 +1,22 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Model } from "survey-core";
-import { Survey } from "survey-react-ui";
-import "survey-core/survey-core.min.css";
-import { Check, Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { api } from "../lib/api";
+import { convertSurveyJSToCustom } from "../lib/formSchema";
+import CustomFormRenderer from "../components/CustomFormRenderer";
 
 export default function ShareLink() {
   const { token } = useParams();
-  const surveyRef = useRef(null);
   const [form, setForm] = useState(null);
+  const [schema, setSchema] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     api.getSharedForm(token)
       .then((data) => {
         setForm(data);
+        setSchema(convertSurveyJSToCustom(data.schema));
       })
       .catch((err) => {
         setError(err.message);
@@ -25,12 +24,11 @@ export default function ShareLink() {
       .finally(() => setLoading(false));
   }, [token]);
 
-  const handleComplete = async (survey) => {
+  const handleComplete = async (data) => {
     try {
-      await api.submitSharedForm(token, survey.data);
-      setSubmitted(true);
+      await api.submitSharedForm(token, data);
     } catch (err) {
-      alert("Falha ao enviar. Tente novamente.");
+      throw new Error("Falha ao enviar. Tente novamente.");
     }
   };
 
@@ -60,26 +58,7 @@ export default function ShareLink() {
     );
   }
 
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-emerald-50 flex items-center justify-center px-4">
-        <div className="card max-w-md w-full p-8 text-center animate-fade-in">
-          <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6">
-            <Check size={32} className="text-emerald-600" />
-          </div>
-          <h1 className="text-2xl font-semibold text-slate-900 mb-2">Obrigado!</h1>
-          <p className="text-slate-600 mb-6">
-            Suas respostas foram enviadas com sucesso.
-          </p>
-          <div className="text-sm text-slate-500">
-            Você pode fechar esta janela.
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!form) return null;
+  if (!form || !schema) return null;
 
   return (
     <div className="min-h-screen bg-emerald-50">
@@ -95,12 +74,11 @@ export default function ShareLink() {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-semibold text-slate-900 mb-6">{form.title}</h1>
         <div className="card p-6">
-          <Survey
-            ref={surveyRef}
-            model={new Model(form.schema)}
+          <CustomFormRenderer
+            schema={schema}
             onComplete={handleComplete}
+            formTitle={form.title}
           />
         </div>
       </main>

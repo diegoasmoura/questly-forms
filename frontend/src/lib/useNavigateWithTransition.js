@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 export const TRANSITION_DELAY = 300;
@@ -5,7 +6,7 @@ export const TRANSITION_DELAY = 300;
 export function useNavigateWithTransition() {
   const navigate = useNavigate();
 
-  const navigateWithTransition = (to, options = {}) => {
+  const navigateWithTransition = useCallback((to, options = {}) => {
     const { delay = TRANSITION_DELAY, replace = false } = options;
     
     if (typeof to === "number") {
@@ -24,7 +25,7 @@ export function useNavigateWithTransition() {
         navigate(to, { replace });
       }, delay);
     }
-  };
+  }, [navigate]);
 
   return navigateWithTransition;
 }

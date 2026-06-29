@@ -29,11 +29,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.0",
     "recharts": "^3.8.1",
-    "survey-core": "^2.5.19",
-    "survey-creator-core": "^2.5.19",
-    "survey-creator-react": "^2.5.19",
-    "survey-pdf": "^2.5.19",
-    "survey-react-ui": "^2.5.19",
+
     "tailwind-merge": "^2.2.1",
     "xlsx": "^0.18.5",
     "xlsx-js-style": "^1.2.0"

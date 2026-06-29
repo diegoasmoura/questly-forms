@@ -608,7 +608,9 @@ function CreateFormModal({ onClose, onCreated }) {
     audiences: ["Adulto"]
   });
   const [saving, setSaving] = useState(false);
-  const [codeEdited, setCodeEdited] = useState(false);
+  const [nameError, setNameError] = useState("");
+
+  const typeOptions = ["Avaliação", "Anamnese", "Evolução", "Rastreamento"];
 
   const typePrefixes = {
     "Avaliação": "AVAL",
@@ -630,7 +632,6 @@ function CreateFormModal({ onClose, onCreated }) {
   };
 
   const generateCode = () => {
-    if (codeEdited) return formData.code;
     const prefix = typePrefixes[formData.type] || "FORM";
     const { audiences } = formData;
     
@@ -649,7 +650,7 @@ function CreateFormModal({ onClose, onCreated }) {
     setFormData(prev => ({
       ...prev,
       type,
-      code: codeEdited ? prev.code : `${typePrefixes[type]}-${generateAudienceSuffix(prev.audiences)}`
+      code: `${typePrefixes[type]}-${generateAudienceSuffix(prev.audiences)}`
     }));
   };
 
@@ -673,7 +674,7 @@ function CreateFormModal({ onClose, onCreated }) {
       return {
         ...prev,
         audiences: newAudiences,
-        code: codeEdited ? prev.code : `${typePrefixes[prev.type]}-${generateAudienceSuffix(newAudiences)}`
+        code: `${typePrefixes[prev.type]}-${generateAudienceSuffix(newAudiences)}`
       };
     });
   };
@@ -683,17 +684,13 @@ function CreateFormModal({ onClose, onCreated }) {
     setFormData(prev => ({ ...prev, title }));
   };
 
-  const handleCodeChange = (e) => {
-    setCodeEdited(true);
-    setFormData(prev => ({ ...prev, code: e.target.value.toUpperCase() }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.title.trim()) {
-      alert("Digite um nome para o instrumento");
+      setNameError("Digite um nome para o instrumento");
       return;
     }
+    setNameError("");
 
     setSaving(true);
     try {
@@ -709,8 +706,8 @@ function CreateFormModal({ onClose, onCreated }) {
         validated: formData.validated,
         audiences: formData.audiences,
         schema: {
-          pages: [{ name: "page1", elements: [] }],
-          showTitle: true
+          title: formData.title,
+          pages: [{ title: "Seção 1", questions: [] }]
         }
       });
       onCreated(result.id);
@@ -737,114 +734,88 @@ function CreateFormModal({ onClose, onCreated }) {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-3">
-              Classificação *
+              Identificação
             </label>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => handleTypeChange("Avaliação")}
-                className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
-                  formData.type === "Avaliação"
-                    ? "bg-blue-500 text-white shadow-lg"
-                    : "bg-blue-50 text-blue-600 hover:bg-blue-100"
-                }`}
-              >
-                Avaliação
-              </button>
-              <button
-                type="button"
-                onClick={() => handleTypeChange("Anamnese")}
-                className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
-                  formData.type === "Anamnese"
-                    ? "bg-purple-500 text-white shadow-lg"
-                    : "bg-purple-50 text-purple-600 hover:bg-purple-100"
-                }`}
-              >
-                Anamnese
-              </button>
-              <button
-                type="button"
-                onClick={() => handleTypeChange("Evolução")}
-                className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
-                  formData.type === "Evolução"
-                    ? "bg-amber-500 text-white shadow-lg"
-                    : "bg-amber-50 text-amber-600 hover:bg-amber-100"
-                }`}
-              >
-                Evolução
-              </button>
-              <button
-                type="button"
-                onClick={() => handleTypeChange("Rastreamento")}
-                className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
-                  formData.type === "Rastreamento"
-                    ? "bg-cyan-500 text-white shadow-lg"
-                    : "bg-cyan-50 text-cyan-600 hover:bg-cyan-100"
-                }`}
-              >
-                Rastreamento
-              </button>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">
+                  Nome do Instrumento *
+                </label>
+                <input
+                  type="text"
+                  className={`input ${nameError ? "border-red-400 focus:border-red-500 focus:ring-red-500" : ""}`}
+                  placeholder="Ex: Questionário de Ansiedade Generalizada"
+                  value={formData.title}
+                  onChange={(e) => {
+                    handleTitleChange(e);
+                    if (nameError) setNameError("");
+                  }}
+                />
+                {nameError && (
+                  <p className="text-xs text-red-500 mt-1">{nameError}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">
+                  Código (Sigla)
+                </label>
+                <input
+                  type="text"
+                  className="input font-mono bg-slate-50 text-slate-500 cursor-default"
+                  value={generateCode()}
+                  disabled
+                  readOnly
+                />
+                <p className="text-[10px] text-slate-400 mt-1">Gerado automaticamente</p>
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-[1fr_200px] gap-6">
-            <div>
-              <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-3">
-                Público-alvo
-              </label>
-              <div className="flex gap-2">
-                {audienceOptions.map(opt => (
-                  <label
-                    key={opt.value}
-                    className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer transition-all text-xs ${
-                      formData.audiences.includes(opt.value)
-                        ? "bg-purple-100 border-2 border-purple-400"
-                        : "bg-gray-50 border-2 border-transparent hover:bg-purple-50"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.audiences.includes(opt.value)}
-                      onChange={() => toggleAudience(opt.value)}
-                      className="sr-only"
-                    />
-                    <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-all ${
-                      formData.audiences.includes(opt.value)
-                        ? "bg-purple-500 border-purple-500"
-                        : "border-gray-300"
-                    }`}>
-                      {formData.audiences.includes(opt.value) && (
-                        <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      )}
-                    </div>
-                    <span className={`font-medium ${
-                      formData.audiences.includes(opt.value)
-                        ? "text-purple-700"
-                        : "text-gray-600"
-                    }`}>
-                      {opt.label}
-                    </span>
-                  </label>
-                ))}
-              </div>
-              <p className="text-[10px] text-slate-400 mt-1">
-                {formData.audiences.length === 3 ? "Todos selecionados" : `${formData.audiences.length} de 3 selecionados`}
-              </p>
+          <div>
+            <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-3">
+              Classificação *
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {typeOptions.map(type => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => handleTypeChange(type)}
+                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                    formData.type === type
+                      ? "bg-emerald-500 text-white shadow-lg"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
             </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">
-                Código (Sigla)
-              </label>
-              <input
-                type="text"
-                className="input font-mono bg-gray-50 text-gray-600 cursor-default"
-                value={generateCode()}
-                disabled
-                readOnly
-              />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-3">
+              Público-alvo
+            </label>
+            <div className="flex gap-2">
+              {audienceOptions.map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => toggleAudience(opt.value)}
+                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                    formData.audiences.includes(opt.value)
+                      ? "bg-emerald-500 text-white shadow-lg"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
+            <p className="text-[10px] text-slate-400 mt-1">
+              {formData.audiences.length === 3 ? "Todos selecionados" : `${formData.audiences.length} de 3 selecionados`}
+            </p>
           </div>
 
           <div>
@@ -853,27 +824,16 @@ function CreateFormModal({ onClose, onCreated }) {
                 type="checkbox"
                 checked={formData.validated}
                 onChange={(e) => setFormData(prev => ({ ...prev, validated: e.target.checked }))}
-                className="w-4 h-4 rounded border-emerald-300 text-emerald-500 focus:ring-emerald-500"
+                className="w-4 h-4 rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
               />
-              <span className="text-sm font-medium text-emerald-700">Instrumento validado cientificamente</span>
+              <span className="text-sm font-medium text-slate-700">Instrumento validado cientificamente</span>
             </label>
+            <p className="text-[10px] text-slate-400 ml-6 mt-0.5">
+              Marque se o instrumento possui validação acadêmica publicada
+            </p>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">
-              Nome do Instrumento *
-            </label>
-            <input
-              type="text"
-              required
-              className="input"
-              placeholder="Ex: Questionário de Ansiedade Generalizada"
-              value={formData.title}
-              onChange={handleTitleChange}
-            />
-          </div>
-
-          <div className="flex gap-4 pt-4 bg-white pb-4 border-t border-emerald-50">
+          <div className="flex gap-4 pt-4 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
