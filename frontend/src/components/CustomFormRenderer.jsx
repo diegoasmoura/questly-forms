@@ -20,7 +20,7 @@ export default function CustomFormRenderer({
     if (data) setValues(data);
   }, [data]);
 
-  const isStepper = schema?.stepper;
+  const displayMode = schema?.mode || (schema?.stepper ? "stepper" : "continuous");
 
   const allQuestions = useMemo(() => {
     if (!schema?.pages) return [];
@@ -28,6 +28,7 @@ export default function CustomFormRenderer({
   }, [schema]);
 
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
 
   const allQuestionsRef = useRef(allQuestions);
   allQuestionsRef.current = allQuestions;
@@ -44,14 +45,14 @@ export default function CustomFormRenderer({
       setValues(next);
       setErrors((prev) => ({ ...prev, [questionId]: null }));
       onChange?.(next);
-      if (isStepper && currentIdxRef.current < allQuestionsRef.current.length - 1) {
+      if (displayMode === "stepper" && currentIdxRef.current < allQuestionsRef.current.length - 1) {
         clearTimeout(autoAdvanceRef.current);
         autoAdvanceRef.current = setTimeout(() => {
           setCurrentIdx((prev) => Math.min(prev + 1, allQuestionsRef.current.length - 1));
         }, 500);
       }
     },
-    [readOnly, onChange, values, isStepper]
+    [readOnly, onChange, values, displayMode]
   );
 
   const validate = useCallback(() => {
@@ -77,8 +78,12 @@ export default function CustomFormRenderer({
   }, [schema, values]);
 
   const handleSubmit = useCallback(async () => {
-    if (readOnly || preview) return;
+    if (readOnly) return;
     if (!validate()) return;
+    if (preview) {
+      setSubmitted(true);
+      return;
+    }
     setSaving(true);
     try {
       await onComplete?.(values);
@@ -105,7 +110,7 @@ export default function CustomFormRenderer({
     setCurrentIdx((prev) => Math.max(prev - 1, 0));
   }, []);
   useEffect(() => {
-    if (!isStepper) return;
+    if (displayMode !== "stepper") return;
     const handleKeyDown = (e) => {
       const idx = currentIdxRef.current;
       const q = allQuestionsRef.current[idx];
@@ -145,7 +150,7 @@ export default function CustomFormRenderer({
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isStepper, handleChange, handleSubmit]);
+  }, [displayMode, handleChange, handleSubmit]);
 
   if (!schema) {
     return (
@@ -170,7 +175,7 @@ export default function CustomFormRenderer({
 
   const pages = schema.pages || [];
 
-  if (isStepper) {
+  if (displayMode === "stepper") {
     const q = allQuestions[currentIdx];
     const isLikert = q?.type === "likert";
     if (!q) {
@@ -179,9 +184,108 @@ export default function CustomFormRenderer({
           <AlertCircle size={32} className="mx-auto mb-2 opacity-50" />
           <p className="text-sm">Nenhuma pergunta encontrada</p>
         </div>
+    );
+  }
+
+  if (displayMode === "paginated") {
+    const page = pages[currentPage];
+    if (!page) {
+      return (
+        <div className="text-center py-12 text-slate-400">
+          <AlertCircle size={32} className="mx-auto mb-2 opacity-50" />
+          <p className="text-sm">Nenhuma seção encontrada</p>
+        </div>
       );
     }
+    const startQ = pages.slice(0, currentPage).reduce((sum, p) => sum + p.questions.length, 0);
+    const totalQuestions = allQuestions.length;
+
     return (
+      <div className="space-y-5">
+        {formTitle && (
+          <h1 className="text-lg font-semibold text-slate-900 text-center">{formTitle}</h1>
+        )}
+
+        {errors._form && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium flex items-center gap-2">
+            <AlertCircle size={16} />
+            {errors._form}
+          </div>
+        )}
+
+        <div className="card overflow-hidden">
+          {page.title && (
+            <div className="flex items-center justify-between px-5 py-4 bg-slate-50 border-b border-slate-200">
+              <span className="text-sm font-bold text-slate-800 uppercase tracking-wide">
+                {page.title}
+              </span>
+              <span className="text-xs text-slate-400">
+                {page.questions.length} pergunta{page.questions.length !== 1 ? "s" : ""}
+              </span>
+            </div>
+          )}
+          <div className="px-5 py-4 space-y-5">
+            {page.questions.length === 0 ? (
+              <p className="text-center text-sm text-slate-400 italic py-8">Nenhuma pergunta nesta seção</p>
+            ) : (
+              page.questions.map((q) => (
+                <QuestionField
+                  key={q.id}
+                  question={q}
+                  value={values[q.id]}
+                  error={errors[q.id]}
+                  onChange={(v) => handleChange(q.id, v)}
+                  readOnly={readOnly}
+                />
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
+            disabled={currentPage === 0}
+            className="btn btn-ghost text-sm px-4 py-2 disabled:opacity-30"
+          >
+            <ChevronLeft size={16} /> Anterior
+          </button>
+
+          <span className="text-xs text-slate-400 tabular-nums">
+            {startQ + 1}–{Math.min(startQ + page.questions.length, totalQuestions)} de {totalQuestions}
+          </span>
+
+          {readOnly ? (
+            <span className="text-xs text-slate-400 italic">Visualização</span>
+          ) : currentPage >= pages.length - 1 ? (
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={saving}
+              className="btn btn-primary px-6 py-2 text-sm"
+            >
+              {saving ? <Loader2 size={16} className="animate-spin" /> : preview ? "Finalizar Teste" : "Enviar Respostas"}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.min(pages.length - 1, p + 1))}
+              className="btn btn-primary px-5 py-2 text-sm"
+            >
+              Próxima <ChevronRight size={16} />
+            </button>
+          )}
+        </div>
+
+        <p className="text-center text-xs text-slate-400 tabular-nums">
+          {answeredCount} de {totalQuestions} respondidas
+        </p>
+      </div>
+    );
+  }
+
+  return (
       <div className="max-w-xl mx-auto space-y-5">
         {formTitle && (
           <h1 className="text-lg font-semibold text-slate-900 text-center">{formTitle}</h1>
@@ -241,7 +345,14 @@ export default function CustomFormRenderer({
                             : "text-slate-400"
                         }`}
                       >
-                        <span>{opt.label}</span>
+                        <span className={`w-6 h-6 rounded border flex items-center justify-center font-bold text-xs shrink-0 ${
+                          selected
+                            ? "bg-emerald-600 text-white border-emerald-600"
+                            : "border-slate-200 text-slate-400"
+                        }`}>
+                          {opt.value}
+                        </span>
+                        <span>{opt.value} - {opt.label}</span>
                       </div>
                     );
                   })}
@@ -275,7 +386,7 @@ export default function CustomFormRenderer({
               <ChevronLeft size={16} /> Anterior
             </button>
 
-            {readOnly || preview ? (
+            {readOnly ? (
               <span className="text-xs text-slate-400 italic">Visualização</span>
             ) : currentIdx === allQuestions.length - 1 ? (
               <button
@@ -286,9 +397,8 @@ export default function CustomFormRenderer({
               >
                 {saving ? (
                   <Loader2 size={16} className="animate-spin" />
-                ) : (
-                  "Finalizar"
-                )}
+                ) : preview ? "Finalizar Teste" : "Finalizar"
+                }
               </button>
             ) : (
               <button
@@ -335,7 +445,7 @@ export default function CustomFormRenderer({
         />
       ))}
 
-      {!readOnly && !preview && (
+      {!readOnly && (
         <div className="pt-4 border-t border-slate-200">
           <button
             onClick={handleSubmit}
@@ -344,9 +454,8 @@ export default function CustomFormRenderer({
           >
             {saving ? (
               <Loader2 size={16} className="animate-spin" />
-            ) : (
-              "Enviar Respostas"
-            )}
+            ) : preview ? "Finalizar Teste" : "Enviar Respostas"
+            }
           </button>
         </div>
       )}
@@ -563,26 +672,57 @@ function LikertField({ question, value, onChange, readOnly }) {
     return <p className="text-sm text-slate-700 bg-slate-50 px-3 py-2 rounded-lg">{label}</p>;
   }
 
+  const cols = Math.min(options.length, 6);
+
   return (
-    <div className="flex flex-wrap gap-1">
-      {options.map((opt) => {
-        const checked = String(value) === String(opt.value);
-        return (
-          <button
-            key={String(opt.value)}
-            type="button"
-            onClick={() => onChange(opt.value)}
-            className={`px-3 py-2 text-xs font-medium rounded-lg border transition-all ${
-              checked
-                ? "bg-emerald-600 text-white border-emerald-600"
-                : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300"
-            }`}
-          >
-            {opt.label}
-          </button>
-        );
-      })}
-    </div>
+    <>
+      <div
+        className="grid gap-2 mb-4"
+        style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+      >
+        {options.map((opt) => {
+          const selected = String(value) === String(opt.value);
+          return (
+            <button
+              key={String(opt.value)}
+              type="button"
+              onClick={() => onChange(opt.value)}
+              className={`aspect-square rounded-xl border-2 font-semibold transition-all duration-150 flex flex-col items-center justify-center ${
+                selected
+                  ? "bg-emerald-600 text-white border-emerald-600 scale-105 shadow-md"
+                  : "bg-white text-slate-700 border-slate-200 hover:border-emerald-300 hover:bg-emerald-50"
+              }`}
+            >
+              {opt.value}
+            </button>
+          );
+        })}
+      </div>
+      {options.some((o) => o.label !== String(o.value)) && (
+        <div className="space-y-1.5">
+          {options.map((opt) => {
+            const selected = String(value) === String(opt.value);
+            return (
+              <div
+                key={String(opt.value)}
+                className={`flex items-center gap-3 text-xs rounded-lg px-2 py-1 transition-colors ${
+                  selected ? "bg-emerald-50 text-emerald-700 font-medium" : "text-slate-500"
+                }`}
+              >
+                <span className={`w-6 h-6 rounded border flex items-center justify-center font-bold shrink-0 ${
+                  selected
+                    ? "bg-emerald-600 text-white border-emerald-600"
+                    : "border-slate-200 text-slate-400"
+                }`}>
+                  {opt.value}
+                </span>
+                <span>{opt.value} - {opt.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </>
   );
 }
 

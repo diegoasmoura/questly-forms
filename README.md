@@ -144,26 +144,36 @@ navigate(-1); // suporta navegação relativa
 Substitui o SurveyJS FormBuilder por uma solução própria com card-style:
 
 **CustomFormBuilder (`/forms/:id/edit`):**
+- **Modo de Exibição:** Seletor "Contínua" / "Paginada" no header. Contínua mostra todas as perguntas juntas; Paginada exibe uma seção por vez com navegação Anterior/Próxima.
+- **Organização por seções:** Adicionar, renomear e remover seções. Cada seção vira uma página no modo Paginada.
+- **Mover perguntas entre seções:** No painel de edição da pergunta, botões "Mover para [Seção]" para transferir perguntas entre seções.
 - **Drag-and-drop nativo:** Reordenar perguntas usando `draggable`, sem dependências externas.
 - **Edição inline:** Clique no card para editar título, tipo, opções e configurações diretamente — sem modal.
 - **Toolbox visual:** Botões com ícones para cada tipo de pergunta (Texto, Número, Sim/Não, Escolha, Likert, Matriz).
 - **Mini-preview:** Cada pergunta exibe uma prévia visual do seu formato de resposta (ex: Likert mostra 6 quadradinhos numerados).
-- **Seções (páginas):** Adicionar, renomear e remover seções com contagem de perguntas.
-- **Preview ao vivo:** Alternar entre edição e visualização do formulário completo.
+- **Preview ao vivo:** Alternar entre edição e visualização do formulário completo. A prévia respeita o modo de exibição e mostra botão "Finalizar Teste" para simular o fluxo de preenchimento.
 - **Exportar JSON:** Download do schema em formato JSON.
+- **Toast notifications:** Feedback visual de save/erro via toast flutuante (canto inferior direito).
 - **Tipos de pergunta suportados:**
   - **Texto:** Simples ou multiline, com placeholder configurável.
   - **Número:** Com mínimo e máximo.
   - **Sim/Não:** Rótulos personalizáveis (`trueLabel`/`falseLabel`).
   - **Escolha:** Única ou múltipla, com opções editáveis.
-  - **Escala Likert:** Opções numeradas de 1 a 6 (padrão YSQ).
+  - **Escala Likert:** Opções numeradas com grade visual e legenda.
   - **Matriz:** Linhas × colunas para grids de resposta.
 
 **CustomFormRenderer:**
 - Renderiza formulários no formato customizado (não SurveyJS).
-- **Modo Stepper:** Navegação pergunta-a-pergunta com grade numérica (1–6), atalhos de teclado e auto-avanço — ideal para escalas longas como YSQ-L3 (232 itens).
+- **3 modos de exibição:**
+  - **Contínua:** Todas as seções e perguntas em sequência (padrão).
+  - **Paginada:** Uma seção por vez com navegação Anterior/Próxima e progresso.
+  - **Stepper:** Uma pergunta por vez com grade numérica (1–6), atalhos de teclado e auto-avanço — ideal para escalas longas como YSQ-L3 (232 itens).
+- O modo é definido pelo campo `mode` no schema: `"continuous"`, `"paginated"` ou `"stepper"`.
 - **Aparência card-style:** Mesma identidade visual do builder, com botões em formato de pílula para seleção, inputs com borda arredondada e foco verde.
 - **Suporte a readOnly e preview** para visualização de resultados e teste.
+- **Modalidade Contínua:** Exibe todas as perguntas agrupadas por seção com cabeçalhos expansíveis. Mostra botão "Finalizar Teste" em preview.
+- **Modalidade Paginada:** Navegação entre seções com botões Anterior/Próxima e indicador de progresso (ex: "1–5 de 20"). Na última seção mostra "Enviar Respostas".
+- **Modalidade Stepper:** Card centralizado com pergunta atual, grade numerada para escalas Likert, legendas completas (ex: "1 - Inteiramente falsa"), atalhos de teclado (1–6 para responder, ← → para navegar, Enter para avançar) e auto-avanço 500ms.
 
 ### 12. YSQ-L3 (Young Schema Questionnaire)
 
@@ -178,6 +188,7 @@ O instrumento **YSQ-L3** (232 itens, 18 domínios) está disponível no Acervo C
 ```json
 {
   "title": "Meu Instrumento",
+  "mode": "continuous",
   "pages": [
     {
       "title": "Seção 1",
@@ -196,7 +207,12 @@ O instrumento **YSQ-L3** (232 itens, 18 domínios) está disponível no Acervo C
 }
 ```
 
-Os tipos suportados são: `text`, `number`, `boolean`, `choice`, `likert`, `matrix`.
+**Campos do schema:**
+- `title` (string): Nome do formulário.
+- `mode` (string): Modo de exibição — `"continuous"` (todas juntas), `"paginated"` (uma seção por vez) ou `"stepper"` (uma pergunta por vez, legado YSQ).
+- `pages` (array): Lista de seções, cada uma com `title` e `questions`.
+
+**Tipos de pergunta suportados:** `text`, `number`, `boolean`, `choice`, `likert`, `matrix`.
 
 ### 14. Layout do PatientRecord (Regras para evitar scrollbar externa)
 

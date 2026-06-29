@@ -28,6 +28,7 @@ export default function CustomFormBuilder() {
   const [title, setTitle] = useState("Novo Formulário");
   const [pages, setPages] = useState([{ title: "Seção 1", questions: [] }]);
   const [showPreview, setShowPreview] = useState(false);
+  const [displayMode, setDisplayMode] = useState("continuous");
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [editingPageIdx, setEditingPageIdx] = useState(0);
   const [dragIdx, setDragIdx] = useState(null);
@@ -43,6 +44,7 @@ export default function CustomFormBuilder() {
         const data = await api.getForm(id);
         setTitle(data.title);
         const schema = convertSurveyJSToCustom(data.schema);
+        setDisplayMode(schema?.mode || (schema?.stepper ? "stepper" : "continuous"));
         if (schema?.pages) {
           setPages(schema.pages.map((p) => ({
             title: p.title || "Seção",
@@ -59,8 +61,8 @@ export default function CustomFormBuilder() {
   }, [id]);
 
   const getSchema = useCallback(() => {
-    return { title, pages: pages.filter((p) => p.questions.length > 0 || p.title) };
-  }, [title, pages]);
+    return { title, mode: displayMode, pages: pages.filter((p) => p.questions.length > 0 || p.title) };
+  }, [title, displayMode, pages]);
 
   const handleSave = useCallback(async () => {
     if (saving) return;
@@ -172,6 +174,19 @@ export default function CustomFormBuilder() {
     dragOverIdx.current = null;
   };
 
+  const moveQuestionToPage = (fromPageIdx, qId, toPageIdx) => {
+    if (fromPageIdx === toPageIdx) return;
+    setPages((prev) => {
+      const copy = prev.map((p) => ({ ...p, questions: [...p.questions] }));
+      const qIdx = copy[fromPageIdx].questions.findIndex((q) => q.id === qId);
+      if (qIdx === -1) return prev;
+      const [moved] = copy[fromPageIdx].questions.splice(qIdx, 1);
+      copy[toPageIdx].questions.push(moved);
+      return copy;
+    });
+    if (editingQuestion === qId) setEditingQuestion(null);
+  };
+
   const addPage = () => {
     setPages((prev) => [...prev, { title: `Seção ${prev.length + 1}`, questions: [] }]);
   };
@@ -221,7 +236,32 @@ export default function CustomFormBuilder() {
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            <span className="text-xs text-slate-400 font-medium hidden sm:inline">Exibição:</span>
+            <div className="flex bg-slate-100 rounded-lg p-0.5 gap-0.5">
+              <button
+                onClick={() => setDisplayMode("continuous")}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                  displayMode === "continuous"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                Contínua
+              </button>
+              <button
+                onClick={() => setDisplayMode("paginated")}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                  displayMode === "paginated"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                Paginada
+              </button>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
           <button
             onClick={() => setShowPreview(!showPreview)}
             className={`btn text-xs py-2 ${showPreview ? "btn-primary" : "btn-secondary"}`}
@@ -248,8 +288,8 @@ export default function CustomFormBuilder() {
         {showPreview ? (
           <div className="max-w-2xl mx-auto p-6">
             <CustomFormRenderer
+              key={displayMode}
               schema={getSchema()}
-              readOnly
               preview
               formTitle={title}
             />
@@ -316,11 +356,14 @@ export default function CustomFormBuilder() {
                       onRemove={() => removeQuestion(pIdx, q.id)}
                       onMoveUp={() => moveQuestion(pIdx, qIdx, qIdx - 1)}
                       onMoveDown={() => moveQuestion(pIdx, qIdx, qIdx + 1)}
+                      onMoveToPage={(toPageIdx) => moveQuestionToPage(pIdx, q.id, toPageIdx)}
                       isFirst={qIdx === 0}
                       isLast={qIdx === page.questions.length - 1}
                       onDragStart={() => handleDragStart(pIdx, qIdx)}
                       onDragOver={(e) => handleDragOver(e, qIdx)}
                       onDrop={() => handleDrop(pIdx)}
+                      pages={pages}
+                      pageIdx={pIdx}
                     />
                   ))}
 
@@ -435,11 +478,14 @@ function QuestionEditor({
   onRemove,
   onMoveUp,
   onMoveDown,
+  onMoveToPage,
   isFirst,
   isLast,
   onDragStart,
   onDragOver,
   onDrop,
+  pages,
+  pageIdx,
 }) {
   const [localType, setLocalType] = useState(q.type);
   const [localTitle, setLocalTitle] = useState(q.title);
@@ -871,6 +917,28 @@ function QuestionEditor({
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {pages.length > 1 && (
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">
+                Mover para
+              </label>
+              <div className="flex flex-wrap gap-1">
+                {pages.map((p, i) => {
+                  if (i === pageIdx) return null;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => onMoveToPage(i)}
+                      className="px-2.5 py-1 rounded-lg border border-slate-200 text-[10px] font-medium text-slate-500 hover:border-emerald-300 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
+                    >
+                      {p.title || `Seção ${i + 1}`}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
