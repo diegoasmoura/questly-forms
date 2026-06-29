@@ -4,6 +4,7 @@ import { useNavigateWithTransition } from "../lib/useNavigateWithTransition";
 import { api } from "../lib/api";
 import { createEmptySchema, convertSurveyJSToCustom, generateId, QUESTION_TYPES, TYPE_LABELS } from "../lib/formSchema";
 import CustomFormRenderer from "../components/CustomFormRenderer";
+import { toast } from "../components/Toast";
 import {
   ArrowLeft, Save, Download, Loader2, Plus, Trash2, GripVertical,
   Eye, Check, Edit3, X, ChevronUp, ChevronDown, FileText,
@@ -24,7 +25,6 @@ export default function CustomFormBuilder() {
   const navigate = useNavigateWithTransition();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [savingSuccess, setSavingSuccess] = useState(false);
   const [title, setTitle] = useState("Novo Formulário");
   const [pages, setPages] = useState([{ title: "Seção 1", questions: [] }]);
   const [showPreview, setShowPreview] = useState(false);
@@ -65,7 +65,6 @@ export default function CustomFormBuilder() {
   const handleSave = useCallback(async () => {
     if (saving) return;
     setSaving(true);
-    setSavingSuccess(false);
     try {
       const schema = getSchema();
       if (id) {
@@ -74,10 +73,9 @@ export default function CustomFormBuilder() {
         const newForm = await api.createForm({ title, schema });
         navigate(`/forms/${newForm.id}/edit`);
       }
-      setSavingSuccess(true);
-      setTimeout(() => setSavingSuccess(false), 2000);
+      toast("Instrumento salvo com sucesso!", "success", 2500);
     } catch (error) {
-      alert("Erro ao salvar: " + error.message);
+      toast("Erro ao salvar: " + error.message, "error", 4000);
     } finally {
       setSaving(false);
     }
@@ -238,9 +236,9 @@ export default function CustomFormBuilder() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className={`btn btn-primary text-xs px-6 py-2 min-w-[120px] ${savingSuccess ? "bg-emerald-500" : ""}`}
+            className="btn btn-primary text-xs px-6 py-2 min-w-[100px]"
           >
-            {saving ? <Loader2 size={16} className="animate-spin" /> : savingSuccess ? "✓ Salvo" : "Salvar"}
+            {saving ? <Loader2 size={16} className="animate-spin" /> : "Salvar"}
           </button>
         </div>
       </header>

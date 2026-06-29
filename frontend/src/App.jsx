@@ -4,6 +4,7 @@ import { useAuth } from "./context/AuthContext";
 // Components
 import Layout from "./components/Layout";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import ToastContainer from "./components/Toast";
 
 // Pages
 import Landing from "./pages/Landing";
@@ -53,6 +54,7 @@ function PublicRoute({ children }) {
 export default function App() {
   return (
     <ErrorBoundary>
+      <ToastContainer />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />

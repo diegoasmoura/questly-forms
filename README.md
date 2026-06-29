@@ -133,7 +133,7 @@ navigate(-1); // suporta navegação relativa
 - **Tooltips Instantâneos:** Balões informativos sem delay.
 - **UX de Portals:** Modais usam fragmento na raiz do componente para evitar containing blocks com `transform`; o backdrop cobre 100% da viewport.
 - **Gestão UTC:** Datas em UTC, extraídas conforme fuso local.
-- **Toasts Flutuantes:** Confirmações em Emerald-600.
+- **Toasts Flutuantes:** Confirmações em Emerald-600, erros em Red-500. Invocar via `toast("mensagem", "success" | "error", durationMs)` — usado no CustomFormBuilder ao salvar.
 - **Clinical Dashboard:** Métricas de engajamento na capa do card.
 - **Patient Record:** Padronização de abas com header e botão Save (Prontuário incluso). Ordem das abas: Frequência → Agenda → Financeiro → Instrumentos → Prontuário.
 - **Instrumentos (Share):** Não utiliza mais expiração de links. Removidos: seletor de validade no modal, contagem de expirados, renovação de links, dias restantes nos cards e filtro por expiração. Status passam a ser apenas Pendente e Respondido. Tabela com colunas: Instrumento, Progresso, Status, Última resposta, Criado em, Link, Excluir.
