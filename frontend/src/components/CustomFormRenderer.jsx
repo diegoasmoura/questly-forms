@@ -352,7 +352,7 @@ export default function CustomFormRenderer({
                         }`}>
                           {opt.value}
                         </span>
-                        <span>{opt.value} - {opt.label}</span>
+                        <span>{opt.label}</span>
                       </div>
                     );
                   })}
@@ -716,7 +716,7 @@ function LikertField({ question, value, onChange, readOnly }) {
                 }`}>
                   {opt.value}
                 </span>
-                <span>{opt.value} - {opt.label}</span>
+                <span>{opt.label}</span>
               </div>
             );
           })}
