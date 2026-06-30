@@ -263,7 +263,7 @@ export default function MyForms() {
 
       {/* Share Modal - Reuse existing logic */}
       {showShareModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-900/20 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-900/60 backdrop-blur-md">
           <div className="card w-full max-w-2xl p-6 animate-scale-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -719,7 +719,7 @@ function CreateFormModal({ onClose, onCreated }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-900/20 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-900/60 backdrop-blur-md">
       <div className="card w-full max-w-xl p-8 animate-scale-in">
         <div className="flex items-center justify-between mb-8 bg-white pb-4 border-b border-emerald-50">
           <div>
