@@ -113,6 +113,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
   - O `return` do componente usa fragmento `<>...</>` para permitir que o modal e o grid de layout coexistam no mesmo nível
   - Slots já configurados são exibidos apenas no painel direito (a seção "Horários já configurados para X" foi removida do modal para evitar duplicação de informação)
   - Cada slot no modal exibe apenas horário e duração (sem label "Semanal" nem nome do paciente)
+- **Mês como visão padrão:** Tanto na Agenda quanto no PatientRecord, `selectedDay`/`selectedCalendarDay` inicia como `null`, exibindo a **visão do mês** (todas as sessões do mês visível agrupadas por data). Ao clicar em um dia, o painel direito mostra a **visão do dia**. O label do mês no topo do calendário é clicável (`cursor-pointer`) para retornar à visão do mês. A navegação entre meses (`onNavigate`, period filter, setas) limpa o dia selecionado automaticamente.
 
 ### 9. Navegação Suave
 - Hook `useNavigateWithTransition` adiciona delay de 300ms antes de trocas de página:
@@ -138,6 +139,14 @@ navigate(-1); // suporta navegação relativa
 - **Patient Record:** Padronização de abas com header e botão Save (Prontuário incluso). Ordem das abas: Frequência → Agenda → Financeiro → Instrumentos → Prontuário.
 - **Instrumentos (Share):** Não utiliza mais expiração de links. Removidos: seletor de validade no modal, contagem de expirados, renovação de links, dias restantes nos cards e filtro por expiração. Status passam a ser apenas Pendente e Respondido. Tabela com colunas: Instrumento, Progresso, Status, Última resposta, Criado em, Link, Excluir.
 - **Tabelas padronizadas:** Cabeçalhos das tabelas nas abas Financeiro e Instrumentos usam o mesmo padrão: `text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200` com padding `px-2 py-2`.
+- **Scroll padding:** Containers com `overflow-y-auto` e cards filhos devem usar `pr-1.5` para evitar que os cards encostem na barra de rolagem vertical.
+
+### 11. Home Dashboard — "Próximas Sessões"
+- **Expansão de 3 meses:** Para cada agendamento recorrente, `findOccurrencesInRange` gera TODAS as ocorrências nos próximos 3 meses (via `addMonths(today, 3)`), não apenas a próxima.
+- **Suporte a recorrências sem fim:** Agendas com `startDate` mas sem `endDate` e sem `maxSessions` geram ocorrências por todo o período.
+- **Agrupamento por data:** As sessões são agrupadas por `_nextDate` em `groupedNextAppointments`, ordenadas cronologicamente.
+- **Data header clicável:** Cada cabeçalho de grupo (`button`) navega para `/agenda?date=YYYY-MM-DD`.
+- **Sem limite fixo:** Todas as ocorrências do período de 3 meses são exibidas (sem `slice`). O card tem scroll próprio.
 
 ### 11. Construtor de Instrumentos Customizado
 

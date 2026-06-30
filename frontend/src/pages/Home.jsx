@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import AppointmentDetailModal from "../components/AppointmentDetailModal";
 import {
@@ -16,6 +16,8 @@ import {
   X,
   AlertCircle
 } from "lucide-react";
+import { format, addMonths } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 function calculateBirthdayInfo(birthDate) {
   if (!birthDate) return null;
@@ -109,6 +111,64 @@ function findNextOccurrence(appointment, afterDate) {
   return null;
 }
 
+function findOccurrencesInRange(appointment, rangeStart, rangeEnd) {
+  const results = [];
+  const endStr = formatDateKey(rangeEnd);
+
+  // One-off appointment
+  if (appointment.scheduledDate) {
+    const schedStr = extractUTCDate(appointment.scheduledDate);
+    const startStr = formatDateKey(rangeStart);
+    if (schedStr >= startStr && schedStr <= endStr) {
+      results.push({ ...appointment, _nextDate: schedStr });
+    }
+    return results;
+  }
+
+  // Recurring appointment
+  if (appointment.dayOfWeek == null || !appointment.startDate) return results;
+
+  const appEndStr = appointment.endDate ? extractUTCDate(appointment.endDate) : null;
+  const effectiveStart = new Date(Math.max(rangeStart.getTime(), parseLocalDateStr(appointment.startDate).getTime()));
+  const effectiveStartStr = formatDateKey(effectiveStart);
+
+  // Walk forward to the first dayOfWeek on or after effectiveStart
+  const candidate = new Date(effectiveStart);
+  while (candidate.getDay() !== appointment.dayOfWeek) {
+    candidate.setDate(candidate.getDate() + 1);
+  }
+
+  for (let i = 0; i < 200; i++) {
+    const candidateStr = formatDateKey(candidate);
+
+    if (candidateStr > endStr) break;
+    if (appEndStr && candidateStr > appEndStr) break;
+    if (candidateStr < effectiveStartStr) {
+      candidate.setDate(candidate.getDate() + 7);
+      continue;
+    }
+    if (appointment.skipDates?.includes(candidateStr)) {
+      candidate.setDate(candidate.getDate() + 7);
+      continue;
+    }
+    if (appointment.maxSessions > 0) {
+      const start = parseLocalDateStr(appointment.startDate);
+      let firstOccurrence = new Date(start);
+      while (firstOccurrence.getDay() !== appointment.dayOfWeek) {
+        firstOccurrence.setDate(firstOccurrence.getDate() + 1);
+      }
+      const diffDays = (candidate - firstOccurrence) / (1000 * 60 * 60 * 24);
+      const occurrenceNum = Math.floor(diffDays / 7) + 1;
+      if (occurrenceNum > appointment.maxSessions) break;
+    }
+
+    results.push({ ...appointment, _nextDate: candidateStr });
+    candidate.setDate(candidate.getDate() + 7);
+  }
+
+  return results;
+}
+
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const [patients, setPatients] = useState([]);
@@ -117,6 +177,8 @@ export default function Home() {
   const [payments, setPayments] = useState([]);
   const [formStats, setFormStats] = useState({});
   const [detailModal, setDetailModal] = useState({ open: false, appointment: null });
+
+  const navigate = useNavigate();
 
   const loadHomeData = useCallback(async () => {
     setLoading(true);
@@ -180,11 +242,24 @@ export default function Home() {
     return info?.isWeek;
   }).slice(0, 10);
 
-  const nextAppointments = appointments
-    .map(a => findNextOccurrence(a, today))
-    .filter(Boolean)
-    .sort((a, b) => a._nextDate.localeCompare(b._nextDate))
-    .slice(0, 5);
+  const rangeEnd = addMonths(today, 3);
+
+  const groupedNextAppointments = useMemo(() => {
+    const map = {};
+    appointments.forEach(app => {
+      const occurrences = findOccurrencesInRange(app, today, rangeEnd);
+      occurrences.forEach(occ => {
+        if (!map[occ._nextDate]) map[occ._nextDate] = [];
+        map[occ._nextDate].push(occ);
+      });
+    });
+    return Object.entries(map)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([dateStr, sessions]) => ({
+        date: new Date(dateStr + "T12:00:00"),
+        sessions,
+      }));
+  }, [appointments]);
 
   const recentFaltas = monthAttendances
     .filter(a => a.status === "falta")
@@ -364,8 +439,8 @@ export default function Home() {
                   <Clock size={14} className="text-emerald-600" />
                   <p className="text-xs font-black text-slate-600 uppercase tracking-widest">Próximas Sessões</p>
                 </div>
-                <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-                  {nextAppointments.length === 0 ? (
+                <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1.5">
+                  {groupedNextAppointments.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center py-6">
                       <Calendar size={24} className="text-slate-300 mb-2" />
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nenhuma sessão agendada</p>
@@ -374,27 +449,40 @@ export default function Home() {
                       </Link>
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      {nextAppointments.map(app => {
-                        const patient = patientMap[app.patientId];
-                        const nextDate = new Date(app._nextDate + "T12:00:00");
-                        return (
-                          <div key={app.id} onClick={() => setDetailModal({ open: true, appointment: app })} className="flex items-center gap-3 p-2.5 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 hover:border-slate-300 transition-all group cursor-pointer">
-                            <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 font-black text-xs shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                              {patient?.name?.charAt(0) || "?"}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-xs font-bold text-slate-700 truncate group-hover:text-slate-900 transition-colors">
-                                {patient?.name || "Paciente"}
-                              </p>
-                              <p className="text-[10px] text-slate-500">
-                                {nextDate.toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short" })} às {app.time?.slice(0, 5) || "--:--"}
-                              </p>
-                            </div>
-                            <ChevronRight size={14} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition-all shrink-0" />
+                    <div className="space-y-3">
+                      {groupedNextAppointments.map(({ date, sessions }) => (
+                        <div key={format(date, "yyyy-MM-dd")}>
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <button
+                              onClick={() => navigate(`/agenda?date=${format(date, "yyyy-MM-dd")}`)}
+                              className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-emerald-600 transition-colors"
+                            >
+                              {format(date, "EEE dd/MM", { locale: ptBR })}
+                            </button>
+                            <div className="flex-1 border-t border-slate-200" />
+                            <span className="text-[9px] font-bold text-slate-400">{sessions.length} sess{sessions.length === 1 ? "ão" : "ões"}</span>
                           </div>
-                        );
-                      })}
+                          {sessions.map(app => {
+                            const patient = patientMap[app.patientId];
+                            return (
+                              <div key={app.id} onClick={() => setDetailModal({ open: true, appointment: app })} className="flex items-center gap-3 p-2.5 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 hover:border-slate-300 transition-all group cursor-pointer mb-1">
+                                <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 font-black text-xs shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                                  {patient?.name?.charAt(0) || "?"}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-xs font-bold text-slate-700 truncate group-hover:text-slate-900 transition-colors">
+                                    {patient?.name || "Paciente"}
+                                  </p>
+                                  <p className="text-[10px] text-slate-500">
+                                    {format(date, "EEEE", { locale: ptBR })} às {app.time?.slice(0, 5) || "--:--"}
+                                  </p>
+                                </div>
+                                <ChevronRight size={14} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition-all shrink-0" />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>

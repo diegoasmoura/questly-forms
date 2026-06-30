@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { api } from "../lib/api";
 import { formatCPF, formatPhone, formatCEP } from "../lib/utils";
@@ -230,7 +230,7 @@ export default function PatientRecord() {
   }, [payments, periodFilter, customMonth]);
 
   const [calendarDate, setCalendarDate] = useState(new Date());
-  const [selectedCalendarDay, setSelectedCalendarDay] = useState(new Date());
+  const [selectedCalendarDay, setSelectedCalendarDay] = useState(null);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
   const [calendarPeriodFilter, setCalendarPeriodFilter] = useState("thisMonth");
   const [calendarCustomMonth, setCalendarCustomMonth] = useState(() => {
@@ -347,6 +347,24 @@ export default function PatientRecord() {
     };
   }, [appointments, myAppointmentIds, calendarDate]);
 
+  const getMonthSessions = useCallback((month) => {
+    const year = month.getFullYear();
+    const monthIndex = month.getMonth();
+    const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+    const result = [];
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateObj = new Date(year, monthIndex, d);
+      const dateStr = format(dateObj, "yyyy-MM-dd");
+      const sessions = appointments.filter(app => appointmentOccursOnDate(app, dateStr));
+      if (sessions.length > 0) {
+        result.push({ date: dateObj, sessions });
+      }
+    }
+    return result;
+  }, [appointments]);
+
+  const monthSessions = useMemo(() => getMonthSessions(calendarDate), [getMonthSessions, calendarDate]);
+
   const [savingAgenda, setSavingAgenda] = useState(false);
   const [showAgendaModal, setShowAgendaModal] = useState(false);
   const [agendaFormDate, setAgendaFormDate] = useState(null);
@@ -367,15 +385,26 @@ export default function PatientRecord() {
   const handleOpenNewSlotModal = (day) => {
     let targetDate = day;
     if (!targetDate) {
-      const displayedYear = calendarDate.getFullYear();
-      const displayedMonth = calendarDate.getMonth();
-      const selectedYear = selectedCalendarDay.getFullYear();
-      const selectedMonth = selectedCalendarDay.getMonth();
-      const isSelectedInDisplayedMonth = displayedYear === selectedYear && displayedMonth === selectedMonth;
-      if (isSelectedInDisplayedMonth) {
-        targetDate = selectedCalendarDay;
+      if (selectedCalendarDay) {
+        const displayedYear = calendarDate.getFullYear();
+        const displayedMonth = calendarDate.getMonth();
+        const selectedYear = selectedCalendarDay.getFullYear();
+        const selectedMonth = selectedCalendarDay.getMonth();
+        const isSelectedInDisplayedMonth = displayedYear === selectedYear && displayedMonth === selectedMonth;
+        if (isSelectedInDisplayedMonth) {
+          targetDate = selectedCalendarDay;
+        } else {
+          const now = new Date();
+          if (displayedYear === now.getFullYear() && displayedMonth === now.getMonth()) {
+            targetDate = now;
+          } else {
+            targetDate = getFirstBusinessDay(displayedYear, displayedMonth);
+          }
+        }
       } else {
         const now = new Date();
+        const displayedYear = calendarDate.getFullYear();
+        const displayedMonth = calendarDate.getMonth();
         if (displayedYear === now.getFullYear() && displayedMonth === now.getMonth()) {
           targetDate = now;
         } else {
@@ -1702,6 +1731,7 @@ export default function PatientRecord() {
                   <button
                     key={opt.key}
                     onClick={() => {
+                      setSelectedCalendarDay(null);
                       setCalendarPeriodFilter(opt.key);
                       const now = new Date();
                       if (opt.key === "thisMonth") {
@@ -1727,18 +1757,18 @@ export default function PatientRecord() {
                 ))}
                 {calendarPeriodFilter === "custom" && (
                   <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                    <button onClick={() => { const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronLeft size={16} /></button>
-                    <select value={calendarCustomMonth} onChange={e => { setCalendarCustomMonth(e.target.value); const [y, m] = e.target.value.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
+                    <button onClick={() => { setSelectedCalendarDay(null); const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronLeft size={16} /></button>
+                    <select value={calendarCustomMonth} onChange={e => { setSelectedCalendarDay(null); setCalendarCustomMonth(e.target.value); const [y, m] = e.target.value.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
                       {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
                         const monthVal = i + 1;
                         const currentYear = calendarCustomMonth.split("-")[0];
                         return <option key={`${currentYear}-${String(monthVal).padStart(2, "0")}`} value={`${currentYear}-${String(monthVal).padStart(2, "0")}`}>{name}</option>;
                       })}
                     </select>
-                    <select value={calendarCustomMonth.split("-")[0]} onChange={e => { const month = calendarCustomMonth.split("-")[1]; const val = `${e.target.value}-${month}`; setCalendarCustomMonth(val); const [y, m] = val.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
+                    <select value={calendarCustomMonth.split("-")[0]} onChange={e => { setSelectedCalendarDay(null); const month = calendarCustomMonth.split("-")[1]; const val = `${e.target.value}-${month}`; setCalendarCustomMonth(val); const [y, m] = val.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
                       {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year}>{year}</option>; })}
                     </select>
-                    <button onClick={() => { const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronRight size={16} /></button>
+                    <button onClick={() => { setSelectedCalendarDay(null); const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronRight size={16} /></button>
                   </div>
                 )}
               </div>
@@ -1761,7 +1791,7 @@ export default function PatientRecord() {
 
                         <DayPicker
                           month={calendarDate}
-                        onMonthChange={setCalendarDate}
+                        onMonthChange={(date) => { setSelectedCalendarDay(null); setCalendarDate(date); }}
                         onDayClick={(day) => handleDayClick(day)}
                         locale={ptBR}
                         modifiers={{
@@ -1810,7 +1840,13 @@ export default function PatientRecord() {
                           },
                           MonthCaption: ({ calendarMonth }) => (
                             <div className="shrink-0 mb-3">
-                              <p className="text-sm font-bold text-slate-600 capitalize">
+                              <p
+                                className="text-sm font-bold text-slate-600 capitalize cursor-pointer hover:text-emerald-600 transition-colors"
+                                onClick={() => {
+                                  setCalendarDate(calendarMonth.date);
+                                  setSelectedCalendarDay(null);
+                                }}
+                              >
                                 {format(calendarMonth.date, "MMMM 'de' yyyy", { locale: ptBR })}
                               </p>
                             </div>
@@ -1899,7 +1935,7 @@ export default function PatientRecord() {
                               </p>
                             </div>
                           </div>
-                          <div className="space-y-1.5 overflow-y-auto min-h-0">
+                          <div className="space-y-1.5 overflow-y-auto min-h-0 pr-1.5">
                             {appointments
                               .filter(a => {
                                 const dateStr = format(selectedCalendarDay, "yyyy-MM-dd");
@@ -2008,27 +2044,69 @@ export default function PatientRecord() {
                           </div>
                         </div>
                       ) : (
-                          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
-                            <div className="flex items-start justify-between mb-3 shrink-0">
+                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
+                          <div className="flex items-start justify-between mb-3 shrink-0">
                             <div>
-                              <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Agenda Completa</h4>
-                              <p className="text-xs font-bold text-slate-500 mt-0.5">Todos os horários do mês</p>
+                              <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Visão do Mês</h4>
+                              <p className="text-xs font-bold text-slate-500 mt-0.5">
+                                {format(calendarDate, "MMMM 'de' yyyy", { locale: ptBR })}
+                              </p>
                             </div>
+                            <span className="px-2.5 py-1 bg-white border border-slate-200 text-slate-600 text-[10px] font-black rounded-full shadow-sm">
+                              {monthSessions.reduce((acc, d) => acc + d.sessions.length, 0)} SESSÕES
+                            </span>
                           </div>
-                          <div className="space-y-1.5 overflow-y-auto min-h-0">
-                            {[...new Set(appointments.filter(a => myAppointmentIds.has(a.id)).map(a => a.time))].sort().map(time => {
-                              const slotsAtTime = appointments.filter(a => myAppointmentIds.has(a.id) && a.time === time);
-                              return (
-                                <div key={time} className="p-2.5 rounded-xl border border-slate-200 bg-white">
-                                  <p className="text-xs font-bold text-slate-800">{time} • {slotsAtTime[0]?.duration}min</p>
-                                  <p className="text-[9px] font-bold text-slate-500">{slotsAtTime.length} horário{slotsAtTime.length > 1 ? 's' : ''}</p>
-                                </div>
-                              );
-                            })}
-                            {appointments.filter(a => myAppointmentIds.has(a.id)).length === 0 && (
-                              <div className="text-center py-4">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nenhum horário cadastrado</p>
+                          <div className="space-y-3 overflow-y-auto min-h-0 flex-1 pr-1.5">
+                            {monthSessions.length === 0 ? (
+                              <div className="text-center py-10">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nenhuma sessão neste mês</p>
                               </div>
+                            ) : (
+                              monthSessions.map(({ date, sessions }) => (
+                                <div key={format(date, "yyyy-MM-dd")}>
+                                  <div className="flex items-center gap-2 mb-1.5">
+                                    <button
+                                      onClick={() => setSelectedCalendarDay(date)}
+                                      className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-emerald-600 transition-colors"
+                                    >
+                                      {format(date, "EEE dd/MM", { locale: ptBR })}
+                                    </button>
+                                    <div className="flex-1 border-t border-slate-200" />
+                                  </div>
+                                  {sessions.map(app => {
+                                    const conflict = conflicts[app.id];
+                                    const appPatientId = app.patient?.id ?? app.patientId;
+                                    const isOtherPatient = appPatientId && appPatientId !== id;
+                                    return (
+                                      <div key={app.id} className={`flex items-center gap-2 p-2.5 rounded-xl border mb-1 ${
+                                        conflict ? "border-red-200 bg-red-50/30" : isOtherPatient ? "border-amber-200 bg-amber-50/30" : "border-slate-200 bg-white"
+                                      }`}>
+                                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                                          <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] shrink-0 ${
+                                            conflict ? "bg-red-100 text-red-600" : isOtherPatient ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
+                                          }`}>
+                                            <Clock size={14} />
+                                          </div>
+                                          <div className="min-w-0">
+                                            <p className={`text-xs font-bold truncate ${isOtherPatient ? "text-amber-600" : "text-emerald-700"}`}>
+                                              {(isOtherPatient ? app.patient?.name : patient?.name)?.split(" ")[0] || "Paciente"}
+                                            </p>
+                                            <p className="text-[9px] font-bold text-slate-500">{app.maxSessions ? `${app.maxSessions} sessões` : app.startDate ? "Semanal" : app.scheduledDate ? format(new Date(app.scheduledDate), "dd/MM/yy") : "Avulso"}</p>
+                                          </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 shrink-0 ml-2">
+                                          <span className="text-xs font-black text-slate-700 whitespace-nowrap">{app.time} • {app.duration}min</span>
+                                          {conflict && (
+                                            <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-200">
+                                              Conflito
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              ))
                             )}
                           </div>
                         </div>

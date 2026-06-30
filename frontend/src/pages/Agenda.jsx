@@ -154,7 +154,7 @@ function SessionCard({ session, date, onClick }) {
 
 export default function Agenda() {
   const [calendarDate, setCalendarDate] = useState(new Date());
-  const [selectedDay, setSelectedDay] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [attendances, setAttendances] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -461,6 +461,22 @@ export default function Agenda() {
     ].sort((a, b) => (a.attendance?.sessionTime || a.app.time || "00:00").localeCompare(b.attendance?.sessionTime || b.app.time || "00:00"));
   }, [appointments, attendances]);
 
+  const getMonthSessions = useCallback((month) => {
+    if (!month) return [];
+    const year = month.getFullYear();
+    const monthNum = month.getMonth();
+    const daysInMonth = new Date(year, monthNum + 1, 0).getDate();
+    const result = [];
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, monthNum, day);
+      const sessions = getDayAppointments(date);
+      if (sessions.length > 0) {
+        result.push({ date, sessions });
+      }
+    }
+    return result;
+  }, [getDayAppointments]);
+
   const getMonthEvents = useCallback((month) => {
     if (!month || !appointments.length) return [];
     const year = month.getFullYear();
@@ -687,6 +703,10 @@ export default function Agenda() {
     return getDayAppointments(selectedDay);
   }, [selectedDay, getDayAppointments]);
 
+  const monthSessions = useMemo(() => {
+    return getMonthSessions(calendarDate);
+  }, [calendarDate, getMonthSessions]);
+
   const monthEvents = useMemo(() => {
     return getMonthEvents(calendarDate);
   }, [calendarDate, getMonthEvents]);
@@ -716,7 +736,7 @@ export default function Agenda() {
                   localizer={rbcLocalizer}
                   events={monthEvents}
                   date={calendarDate}
-                  onNavigate={setCalendarDate}
+                  onNavigate={(date) => { setCalendarDate(date); setSelectedDay(null); }}
                   onSelectSlot={({ start }) => setSelectedDay(start)}
                   onSelectEvent={(event) => openDetailModal(event.session, event.start)}
                   selectable
@@ -758,7 +778,7 @@ export default function Agenda() {
                       const label = format(toolbarProps.date, "MMMM 'de' yyyy", { locale: ptBR });
                       return (
                         <div className="shrink-0 mb-3 flex items-center justify-between">
-                          <p className="text-sm font-bold text-slate-600 capitalize">{label}</p>
+                          <p onClick={() => setSelectedDay(null)} className="text-sm font-bold text-slate-600 capitalize cursor-pointer hover:text-emerald-600 transition-colors">{label}</p>
                           <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
                             <button onClick={() => toolbarProps.onNavigate("PREV")} className="p-1 hover:bg-slate-100 rounded transition-all text-slate-500">
                               <ChevronLeft size={16} />
@@ -824,7 +844,7 @@ export default function Agenda() {
                         </button>
                       </div>
                     </div>
-                    <div className="space-y-2 overflow-y-auto min-h-0 flex-1">
+                    <div className="space-y-2 overflow-y-auto min-h-0 flex-1 pr-1.5">
                       {daySessions.length === 0 ? (
                         <div className="py-10 text-center">
                           <Users size={24} className="mx-auto text-slate-300 mb-2" />
@@ -843,10 +863,47 @@ export default function Agenda() {
                     </div>
                   </div>
                 ) : (
-                  <div className="h-full flex items-center justify-center">
-                    <div className="text-center py-10">
-                      <Calendar size={32} className="mx-auto text-slate-300 mb-3" />
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Selecione um dia</p>
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col h-full min-h-0">
+                    <div className="flex items-start justify-between mb-4 shrink-0">
+                      <div>
+                        <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Visão do Mês</h4>
+                        <p className="text-xs font-bold text-slate-500 mt-0.5">
+                          {format(calendarDate, "MMMM 'de' yyyy", { locale: ptBR })}
+                        </p>
+                      </div>
+                      <span className="px-2.5 py-1 bg-white border border-slate-200 text-slate-600 text-[10px] font-black rounded-full shadow-sm">
+                        {monthSessions.reduce((acc, d) => acc + d.sessions.length, 0)} SESSÕES
+                      </span>
+                    </div>
+                    <div className="space-y-3 overflow-y-auto min-h-0 flex-1 pr-1.5">
+                      {monthSessions.length === 0 ? (
+                        <div className="py-10 text-center">
+                          <Calendar size={24} className="mx-auto text-slate-300 mb-2" />
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nenhuma sessão neste mês</p>
+                        </div>
+                      ) : (
+                        monthSessions.map(({ date, sessions }) => (
+                          <div key={formatDateKey(date)}>
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <button
+                                onClick={() => setSelectedDay(date)}
+                                className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-emerald-600 transition-colors"
+                              >
+                                {format(date, "EEE dd/MM", { locale: ptBR })}
+                              </button>
+                              <div className="flex-1 border-t border-slate-200" />
+                            </div>
+                            {sessions.map((session, idx) => (
+                              <SessionCard
+                                key={session.app.id + idx}
+                                session={session}
+                                date={date}
+                                onClick={openDetailModal}
+                              />
+                            ))}
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 )}
