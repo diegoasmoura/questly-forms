@@ -7,7 +7,6 @@ import {
   FileText,
   Calendar,
   Clock,
-  Plus,
   DollarSign,
   CakeSlice,
   PartyPopper,
@@ -310,9 +309,6 @@ export default function Home() {
           <h1 className="text-2xl font-bold text-slate-800">Painel Clínico</h1>
           <p className="text-sm text-slate-500">Visão geral da sua prática clínica</p>
         </div>
-        <Link to="/patients" className="btn bg-emerald-600 text-white hover:bg-emerald-700 text-xs py-2.5 px-4 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-emerald-200">
-          <Plus size={14} /> Novo Paciente
-        </Link>
       </header>
 
       {loading ? (

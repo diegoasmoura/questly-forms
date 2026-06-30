@@ -187,26 +187,6 @@ export default function Sidebar() {
         </button>
       </div>
 
-      {/* User Profile */}
-      <div className="px-3 py-4 shrink-0">
-        {collapsed ? (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className={`rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold shadow-md w-[32px] h-[32px] mx-auto`}
-            whileHover={{ scale: 1.05 }}
-          >
-            {initials}
-          </motion.div>
-        ) : (
-          <div className="flex items-center rounded-xl bg-slate-800/50 p-1.5">
-            <span className="text-sm font-semibold text-white truncate">
-              {user?.name}
-            </span>
-          </div>
-        )}
-      </div>
-
       {/* Menu Items */}
       <nav className={`flex-1 space-y-0.5 overflow-hidden ${collapsed ? "px-2" : "px-3"}`}>
         {menuItems.map((item) => {
@@ -240,27 +220,40 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Footer / Logout */}
-      <div className="px-3 py-4 border-t border-slate-800 shrink-0">
-        <button
-          onClick={handleLogout}
-          className={`flex items-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 ${
-            collapsed ? "justify-center py-2.5 w-full" : "py-2.5 px-3"
-          }`}
-          title={collapsed ? "Logout" : ""}
-        >
-          <LogOut size={18} className="shrink-0" />
-          <span 
-            className="text-sm font-medium transition-all duration-300 overflow-hidden whitespace-nowrap"
-            style={{ 
-              opacity: collapsed ? 0 : 1,
-              width: collapsed ? 0 : "auto",
-              marginLeft: collapsed ? 0 : 12
-            }}
-          >
-            Logout
-          </span>
-        </button>
+      {/* Footer / User & Sair */}
+      <div className="shrink-0">
+        {collapsed ? (
+          <div className="py-3 flex flex-col items-center gap-1 border-t border-slate-800">
+            <div className={`rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold shadow-md w-[32px] h-[32px]`}>
+              {initials}
+            </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 p-2 w-full"
+              title="Sair"
+            >
+              <LogOut size={18} className="shrink-0" />
+            </button>
+          </div>
+        ) : (
+          <div className="px-3 py-3 border-t border-slate-800">
+            <div className="flex items-center gap-2 px-2 py-2 rounded-lg bg-slate-800/30 mb-1.5">
+              <div className={`w-7 h-7 rounded-md bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-[10px] shrink-0`}>
+                {initials}
+              </div>
+              <span className="text-sm font-semibold text-white truncate">
+                {user?.name}
+              </span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 py-2 px-2 w-full"
+            >
+              <LogOut size={16} className="shrink-0" />
+              <span className="text-sm font-medium ml-2">Sair</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
