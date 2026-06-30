@@ -223,17 +223,22 @@ export default function Sidebar() {
       {/* Footer / User & Sair */}
       <div className="shrink-0">
         {collapsed ? (
-          <div className="py-3 flex flex-col items-center gap-1 border-t border-slate-800">
-            <div className={`rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold shadow-md w-[32px] h-[32px]`}>
-              {initials}
+          <div className="pb-3 flex flex-col items-center">
+            <div className="py-3">
+              <div className={`rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold shadow-md w-[32px] h-[32px]`}>
+                {initials}
+              </div>
             </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 p-2 w-full"
-              title="Sair"
-            >
-              <LogOut size={18} className="shrink-0" />
-            </button>
+            <div className="w-8 border-t border-slate-800" />
+            <div className="pt-2">
+              <button
+                onClick={handleLogout}
+                className="flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 p-2 w-full"
+                title="Sair"
+              >
+                <LogOut size={18} className="shrink-0" />
+              </button>
+            </div>
           </div>
         ) : (
           <div className="px-3 pb-3">

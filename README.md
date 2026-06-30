@@ -45,7 +45,7 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Topo:** Logo "Questly Forms" + botão recolher (`ChevronLeft`/`ChevronRight`)
 - **Meio:** Itens de navegação (Home, Pacientes, Agenda, Instrumentos, Acervo Clínico) com destaque no item ativo. Scroll vertical próprio via `sidebar-scrollbar` para telas pequenas.
 - **Rodapé:** Nome do profissional (avatar com gradiente + nome) acima de um separador, abaixo o botão "Sair" com ícone de logout.
-- **Estado recolhido:** Largura 72px — avatar com iniciais e ícone de logout
+- **Estado recolhido:** Largura 72px — avatar com iniciais acima de um separador, abaixo o ícone de logout
 - **Estado expandido:** Largura 256px — nome completo e botão "Sair" com texto
 - **Z-index:** `z-[10000]` — sempre acima de modais e backdrops
 
