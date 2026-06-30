@@ -1849,7 +1849,7 @@ export default function PatientRecord() {
                       <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight shrink-0">Agendamentos</h3>
                       <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
                       {showEditChoice && editingAppointment && (
-                        <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm" onClick={() => { setShowEditChoice(false); setEditingAppointment(null); }}>
+                        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => { setShowEditChoice(false); setEditingAppointment(null); }}>
                           <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
                             <div className="text-center mb-6">
                               <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
@@ -2866,7 +2866,7 @@ export default function PatientRecord() {
 
       {/* Agenda Modal */}
       {showAgendaModal && agendaFormDate && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm" onClick={() => { setShowAgendaModal(false); setEditingAppointment(null); setEditMode(null); }}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => { setShowAgendaModal(false); setEditingAppointment(null); setEditMode(null); }}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-lg mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -2986,7 +2986,7 @@ export default function PatientRecord() {
 
       {/* Edit Patient Modal */}
       {showEditModal && formData && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="card w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-slate-200 shrink-0">
               <div className="flex items-center justify-between mb-4">
@@ -3200,7 +3200,7 @@ export default function PatientRecord() {
 
       {/* Share Modal */}
       {showShareModal && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-emerald-900/60 backdrop-blur-md">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="card w-full max-w-2xl p-6 animate-scale-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -3324,7 +3324,7 @@ export default function PatientRecord() {
 
       {/* Payment Modal */}
       {showPaymentModal && (
-        <div className="absolute inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="card w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-slate-200">
               <div className="flex items-center justify-between mb-2">

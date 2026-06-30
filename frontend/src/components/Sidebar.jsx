@@ -59,7 +59,7 @@ export default function Sidebar() {
 
   return (
     <div
-      className="bg-slate-900 flex flex-col h-screen sticky top-0 overflow-hidden transition-[width] duration-300 ease-out"
+      className="bg-slate-900 flex flex-col h-screen sticky top-0 overflow-hidden transition-[width] duration-300 ease-out z-[10000]"
       style={{ width: collapsed ? 72 : 256 }}
     >
       {/* Header */}

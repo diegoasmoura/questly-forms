@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
+import AppointmentDetailModal from "../components/AppointmentDetailModal";
 import {
   Users,
   FileText,
@@ -40,6 +41,74 @@ function relativeTime(date) {
   return date.toLocaleDateString("pt-BR", { day: "numeric", month: "short" });
 }
 
+function extractUTCDate(dateStr) {
+  if (!dateStr) return "";
+  return dateStr.split("T")[0];
+}
+
+function parseLocalDateStr(dateStr) {
+  if (!dateStr) return null;
+  const [y, m, d] = dateStr.split("T")[0].split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function formatDateKey(date) {
+  if (!date) return "";
+  if (typeof date === "string") return date.split("T")[0];
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function findNextOccurrence(appointment, afterDate) {
+  const afterStr = formatDateKey(afterDate);
+
+  if (appointment.scheduledDate) {
+    const schedStr = extractUTCDate(appointment.scheduledDate);
+    if (schedStr >= afterStr) return { ...appointment, _nextDate: schedStr };
+    return null;
+  }
+
+  if (appointment.dayOfWeek == null || !appointment.startDate) return null;
+
+  const startStr = extractUTCDate(appointment.startDate);
+  const endStr = appointment.endDate ? extractUTCDate(appointment.endDate) : null;
+
+  const candidate = new Date(afterDate);
+  candidate.setDate(candidate.getDate() + 1);
+
+  while (candidate.getDay() !== appointment.dayOfWeek) {
+    candidate.setDate(candidate.getDate() + 1);
+  }
+
+  for (let i = 0; i < 52; i++) {
+    const candidateStr = formatDateKey(candidate);
+
+    if (endStr && candidateStr > endStr) break;
+    if (candidateStr < startStr) {
+      candidate.setDate(candidate.getDate() + 7);
+      continue;
+    }
+    if (appointment.skipDates?.includes(candidateStr)) {
+      candidate.setDate(candidate.getDate() + 7);
+      continue;
+    }
+    if (appointment.maxSessions > 0) {
+      const start = parseLocalDateStr(appointment.startDate);
+      let firstOccurrence = new Date(start);
+      while (firstOccurrence.getDay() !== appointment.dayOfWeek) {
+        firstOccurrence.setDate(firstOccurrence.getDate() + 1);
+      }
+      const diffDays = (candidate - firstOccurrence) / (1000 * 60 * 60 * 24);
+      const occurrenceNum = Math.floor(diffDays / 7) + 1;
+      if (occurrenceNum > appointment.maxSessions) break;
+    }
+
+    return { ...appointment, _nextDate: candidateStr };
+  }
+
+  return null;
+}
+
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const [patients, setPatients] = useState([]);
@@ -47,6 +116,7 @@ export default function Home() {
   const [appointments, setAppointments] = useState([]);
   const [payments, setPayments] = useState([]);
   const [formStats, setFormStats] = useState({});
+  const [detailModal, setDetailModal] = useState({ open: false, appointment: null });
 
   const loadHomeData = useCallback(async () => {
     setLoading(true);
@@ -111,8 +181,9 @@ export default function Home() {
   }).slice(0, 10);
 
   const nextAppointments = appointments
-    .filter(a => a.startDate && new Date(a.startDate) > today)
-    .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
+    .map(a => findNextOccurrence(a, today))
+    .filter(Boolean)
+    .sort((a, b) => a._nextDate.localeCompare(b._nextDate))
     .slice(0, 5);
 
   const recentFaltas = monthAttendances
@@ -149,7 +220,7 @@ export default function Home() {
   timelineItems.sort((a, b) => b.date - a.date);
 
   return (
-    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in">
+    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in relative">
       <header className="mb-6 shrink-0 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Painel Clínico</h1>
@@ -306,9 +377,9 @@ export default function Home() {
                     <div className="space-y-2">
                       {nextAppointments.map(app => {
                         const patient = patientMap[app.patientId];
-                        const startDate = new Date(app.startDate);
+                        const nextDate = new Date(app._nextDate + "T12:00:00");
                         return (
-                          <Link key={app.id} to={`/patients/${app.patientId}`} className="flex items-center gap-3 p-2.5 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 hover:border-slate-300 transition-all group">
+                          <div key={app.id} onClick={() => setDetailModal({ open: true, appointment: app })} className="flex items-center gap-3 p-2.5 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 hover:border-slate-300 transition-all group cursor-pointer">
                             <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 font-black text-xs shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
                               {patient?.name?.charAt(0) || "?"}
                             </div>
@@ -317,11 +388,11 @@ export default function Home() {
                                 {patient?.name || "Paciente"}
                               </p>
                               <p className="text-[10px] text-slate-500">
-                                {startDate.toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short" })} às {app.startTime?.slice(0, 5) || "--:--"}
+                                {nextDate.toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short" })} às {app.time?.slice(0, 5) || "--:--"}
                               </p>
                             </div>
                             <ChevronRight size={14} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition-all shrink-0" />
-                          </Link>
+                          </div>
                         );
                       })}
                     </div>
@@ -331,6 +402,16 @@ export default function Home() {
             </div>
           </div>
         </>
+      )}
+
+      {detailModal.open && (
+        <AppointmentDetailModal
+          appointment={detailModal.appointment}
+          patient={patientMap[detailModal.appointment.patientId]}
+          nextDate={detailModal.appointment._nextDate}
+          onClose={() => setDetailModal({ open: false, appointment: null })}
+          onUpdate={loadHomeData}
+        />
       )}
     </div>
   );

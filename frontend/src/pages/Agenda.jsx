@@ -857,7 +857,7 @@ export default function Agenda() {
       </div>
 
       {justModal.open && createPortal(
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[9999]" onClick={() => setJustModal({ ...justModal, open: false })}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={() => setJustModal({ ...justModal, open: false })}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-6">
               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${justModal.isEdit ? "bg-amber-100 text-amber-600" : "bg-slate-100 text-slate-600"}`}>
@@ -968,7 +968,7 @@ export default function Agenda() {
       )}
 
       {confirmModal.open && createPortal(
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[9999]" onClick={() => !confirmModal.loading && setConfirmModal({ ...confirmModal, open: false })}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={() => !confirmModal.loading && setConfirmModal({ ...confirmModal, open: false })}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
             <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-6 mx-auto">
               <AlertTriangle size={32} />
@@ -997,7 +997,7 @@ export default function Agenda() {
       )}
 
       {showAddModal && createPortal(
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[9999]" onClick={() => setShowAddModal(false)}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={() => setShowAddModal(false)}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-slate-100 text-slate-600 rounded-2xl flex items-center justify-center">
@@ -1109,7 +1109,7 @@ export default function Agenda() {
       )}
 
       {showEditChoice && editingApp && createPortal(
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[9999]" onClick={() => { setShowEditChoice(false); setEditingApp(null); }}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={() => { setShowEditChoice(false); setEditingApp(null); }}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
             <div className="text-center mb-6">
               <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
@@ -1140,7 +1140,7 @@ export default function Agenda() {
       )}
 
       {showEditModal && agendaFormDate && createPortal(
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[9999]" onClick={() => { setShowEditModal(false); setEditingApp(null); setEditMode(null); }}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={() => { setShowEditModal(false); setEditingApp(null); setEditMode(null); }}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-lg mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -1231,7 +1231,7 @@ export default function Agenda() {
       )}
 
       {detailModal.open && detailModal.session && createPortal(
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[9999]" onClick={() => setDetailModal({ open: false, session: null, date: null })}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={() => setDetailModal({ open: false, session: null, date: null })}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-4">

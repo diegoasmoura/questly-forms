@@ -257,6 +257,29 @@ A página `PatientRecord.jsx` usa uma estrutura de layout específica que deve s
 - Headers usam `mb-8 shrink-0` em vez de `border-b` e ficam dentro do `p-8` do card
 - **UX de Registro:** Área clicável para upload de anexos.
 
+### 15. Padrão de Modais (Backdrop, Posicionamento e Z-Index)
+
+Todo modal que exibe um overlay (backdrop) deve seguir este padrão único:
+
+```jsx
+<div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]">
+  {/* conteúdo do modal */}
+</div>
+```
+
+**Regras:**
+- **`fixed inset-0`** — cobre a viewport inteira de forma uniforme (não usar `absolute`)
+- **`bg-black/50`** — preto com 50% de opacidade, suave mas cobre o conteúdo atrás
+- **`backdrop-blur-sm`** — desfoque sutil para suavizar o que está atrás
+- **`z-[60]`** — sempre este valor (sidebar usa `z-[10000]` e fica acima de todos os modais)
+- **Renderização inline** (dentro do JSX do componente, sem `createPortal`) — a sidebar com `z-[10000]` garante que ela não seja coberta
+- **Exceptions:** Se um modal precisar ficar dentro de uma árvore com `transform` (que cria containing block), use `createPortal(..., document.body)` para manter `fixed` funcionando — mas o backdrop e z-index devem ser os mesmos
+
+**Histórico da decisão:**
+- `absolute inset-0` foi tentado mas causava artefatos de "camadas" entre textos e não cobria uniformemente
+- `bg-slate-900/40`, `bg-slate-900/80` e `bg-emerald-900/60` foram substituídos por `bg-black/50` para consistência visual
+- `z-50` e `z-[9999]` foram unificados em `z-[60]`; a sidebar em `z-[10000]` fica acima para não ser coberta pelo backdrop
+
 ## Tecnologias
 
 - **Frontend:** React, Tailwind CSS, Lucide React, date-fns, jsPDF, jsPDF-AutoTable.
