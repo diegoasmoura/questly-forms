@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
-import { Clock, Phone, MessageCircle, Check, X, AlertCircle, Trash2, AlertTriangle, BookOpen, RefreshCcw } from "lucide-react";
+import { formatPhone } from "../lib/utils";
+import { Clock, Phone, MessageCircle, Check, X, AlertCircle, Trash2, AlertTriangle, BookOpen, RefreshCcw, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -17,7 +19,8 @@ function extractUTCDate(dateStr) {
   return dateStr.split("T")[0];
 }
 
-export default function AppointmentDetailModal({ appointment, patient, nextDate, onClose, onUpdate }) {
+export default function AppointmentDetailModal({ appointment, patient, nextDate, onClose, onUpdate, sessionType = "fixed" }) {
+  const navigate = useNavigate();
   const [attendances, setAttendances] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
   const [justModal, setJustModal] = useState({ open: false, patient: null, appointment: null, date: null, isEdit: false, existingAtt: null });
@@ -26,7 +29,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
   const [descendantsInfo, setDescendantsInfo] = useState({ count: 0, list: [] });
   const [confirmModal, setConfirmModal] = useState({ open: false, title: "", message: "", onConfirm: null, loading: false });
 
-  const sessionDate = nextDate ? new Date(nextDate + "T12:00:00") : null;
+  const sessionDate = nextDate ? new Date(formatDateKey(nextDate) + "T12:00:00") : null;
 
   useEffect(() => {
     api.getAttendances().then(setAttendances).catch(() => {});
@@ -220,22 +223,29 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
 
   const handleDeleteAppointment = () => {
     const patientName = patient?.name || "este paciente";
+    const isExtra = sessionType === "extra";
     setConfirmModal({
       open: true,
-      title: "Excluir agendamento",
-      message: `Tem certeza que deseja excluir o horário de ${patientName}?`,
+      title: isExtra ? "Excluir sessão" : "Excluir agendamento",
+      message: isExtra
+        ? `Tem certeza que deseja excluir a sessão de ${patientName}? Esta ação não pode ser desfeita.`
+        : `Tem certeza que deseja excluir o horário de ${patientName}?`,
       loading: false,
       onConfirm: async () => {
         setConfirmModal(prev => ({ ...prev, loading: true }));
         try {
-          if (!appointment.scheduledDate && sessionDate) {
+          if (isExtra) {
+            await api.deleteAttendance(appointment.id);
+            setSuccessMessage("Sessão removida!");
+          } else if (!appointment.scheduledDate && sessionDate) {
             const dateStr = formatDateKey(sessionDate);
             const skipDates = [...(appointment.skipDates || []), dateStr];
             await api.updateAppointment(appointment.id, { skipDates });
+            setSuccessMessage("Agendamento removido!");
           } else {
             await api.deleteAppointment(appointment.id);
+            setSuccessMessage("Agendamento removido!");
           }
-          setSuccessMessage("Agendamento removido!");
           setConfirmModal({ open: false, title: "", message: "", onConfirm: null, loading: false });
           onClose();
           onUpdate?.();
@@ -304,7 +314,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
             {patient?.phone && (
               <div className="flex items-center gap-3">
                 <Phone size={15} className="text-slate-400 shrink-0" />
-                <span className="text-sm font-bold text-slate-700">{patient.phone}</span>
+                <span className="text-sm font-bold text-slate-700">{formatPhone(patient.phone)}</span>
               </div>
             )}
           </div>
@@ -362,6 +372,13 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
               <MessageCircle size={15} />
               Lembrete WhatsApp
             </a>
+            <button
+              onClick={() => { onClose(); navigate(`/patients/${patient?.id}`); }}
+              className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-all text-xs font-black uppercase tracking-widest border border-slate-200"
+            >
+              <ExternalLink size={15} />
+              Ir para Prontuário
+            </button>
             <button
               onClick={handleDeleteAppointment}
               className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all text-xs font-black uppercase tracking-widest border border-red-200"

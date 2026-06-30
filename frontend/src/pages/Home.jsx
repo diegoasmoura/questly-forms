@@ -464,20 +464,18 @@ export default function Home() {
                           </div>
                           {sessions.map(app => {
                             const patient = patientMap[app.patientId];
+                            const name = patient?.name || "Paciente";
+                            const initial = name.charAt(0) || "?";
                             return (
-                              <div key={app.id} onClick={() => setDetailModal({ open: true, appointment: app })} className="flex items-center gap-3 p-2.5 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 hover:border-slate-300 transition-all group cursor-pointer mb-1">
-                                <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 font-black text-xs shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                                  {patient?.name?.charAt(0) || "?"}
+                              <div key={app.id} onClick={() => setDetailModal({ open: true, appointment: app })} className="flex items-center gap-2 p-3 rounded-lg border border-slate-200 bg-white hover:border-slate-300 transition-all group cursor-pointer mb-1">
+                                <div className="w-7 h-7 rounded-md bg-emerald-100 flex items-center justify-center text-emerald-700 font-black text-[10px] shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                                  {initial}
                                 </div>
-                                <div className="min-w-0 flex-1">
-                                  <p className="text-xs font-bold text-slate-700 truncate group-hover:text-slate-900 transition-colors">
-                                    {patient?.name || "Paciente"}
-                                  </p>
-                                  <p className="text-[10px] text-slate-500">
-                                    {format(date, "EEEE", { locale: ptBR })} às {app.time?.slice(0, 5) || "--:--"}
-                                  </p>
-                                </div>
-                                <ChevronRight size={14} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition-all shrink-0" />
+                                <p className="text-xs font-bold text-slate-800 truncate flex-1 min-w-0 group-hover:text-slate-900 transition-colors">
+                                  {name}
+                                </p>
+                                <span className="text-[10px] font-bold text-slate-500 shrink-0">{app.time?.slice(0, 5) || "--:--"}{app.duration ? ` • ${app.duration}min` : ""}</span>
+                                <ChevronRight size={13} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition-all shrink-0" />
                               </div>
                             );
                           })}

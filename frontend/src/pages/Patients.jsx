@@ -304,9 +304,15 @@ const resetImportModal = () => {
       return;
     }
     
-    if (!newPatient.email || !newPatient.phone || !newPatient.emergencyPhone || !newPatient.emergencyName) {
+    if (!newPatient.email || !newPatient.phone) {
       setAddFormTab("contact");
       setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Contato.");
+      return;
+    }
+
+    if (!newPatient.emergencyPhone || !newPatient.emergencyName) {
+      setAddFormTab("emergency");
+      setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Emergência.");
       return;
     }
 
@@ -615,7 +621,7 @@ const resetImportModal = () => {
                   </div>
                   <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-start gap-2">
                     <AlertTriangle size={14} className="text-blue-500 shrink-0 mt-0.5" />
-                    <p className="text-xs text-blue-700">Campos obrigatorios: Nome, CPF, Data, E-mail, Telefone, Nome e Telefone Emergencia.</p>
+                    <p className="text-xs text-blue-700">Campos obrigatorios: Nome, CPF, Data (Identificação), E-mail, Telefone (Contato), Telefone e Nome Emergência (Emergência).</p>
                   </div>
                 </>
               )}
@@ -725,6 +731,7 @@ const resetImportModal = () => {
                 {[
                   { id: "identity", label: "Identificação", icon: UserCheck },
                   { id: "contact", label: "Contato", icon: Contact },
+                  { id: "emergency", label: "Emergência", icon: Phone },
                   { id: "address", label: "Endereço", icon: MapPin },
                 ].map(tab => (
                   <button
@@ -846,18 +853,7 @@ const resetImportModal = () => {
                       </div>
                     </div>
 
-                    {/* Linha 3: RG | Estado Civil | Profissão */}
-                    <div className="grid grid-cols-3 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">RG</label>
-                        <input
-                          type="text"
-                          className="input text-sm"
-                          value={newPatient.rg}
-                          onChange={e => setNewPatient({ ...newPatient, rg: e.target.value })}
-                          placeholder="Documento"
-                        />
-                      </div>
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-semibold text-slate-600 mb-2">Estado Civil</label>
                         <select
@@ -902,33 +898,36 @@ const resetImportModal = () => {
                       />
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone *</label>
-                        <input
-                          type="tel"
-                          required
-                          className="input text-sm"
-                          value={newPatient.phone}
-                          onChange={e => setNewPatient({ ...newPatient, phone: formatPhone(e.target.value) })}
-                          placeholder="(00) 00000-0000"
-                          maxLength={15}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência *</label>
-                        <input
-                          type="tel"
-                          required
-                          className="input text-sm"
-                          value={newPatient.emergencyPhone}
-                          onChange={e => setNewPatient({ ...newPatient, emergencyPhone: formatPhone(e.target.value) })}
-                          placeholder="(00) 00000-0000"
-                          maxLength={15}
-                        />
-                      </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone *</label>
+                      <input
+                        type="tel"
+                        required
+                        className="input text-sm"
+                        value={newPatient.phone}
+                        onChange={e => setNewPatient({ ...newPatient, phone: formatPhone(e.target.value) })}
+                        placeholder="(00) 00000-0000"
+                        maxLength={15}
+                      />
                     </div>
+                  </div>
+                )}
 
+                {/* TAB: Emergência */}
+                {addFormTab === "emergency" && (
+                  <div className="space-y-5">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência *</label>
+                      <input
+                        type="tel"
+                        required
+                        className="input text-sm"
+                        value={newPatient.emergencyPhone}
+                        onChange={e => setNewPatient({ ...newPatient, emergencyPhone: formatPhone(e.target.value) })}
+                        placeholder="(00) 00000-0000"
+                        maxLength={15}
+                      />
+                    </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-600 mb-2">Nome Emergência *</label>
                       <input
@@ -1256,9 +1255,15 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
       return;
     }
     
-    if (!formData.email || !formData.phone || !formData.emergencyPhone || !formData.emergencyName) {
+    if (!formData.email || !formData.phone) {
       setEditTab("contact");
       setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Contato.");
+      return;
+    }
+
+    if (!formData.emergencyPhone || !formData.emergencyName) {
+      setEditTab("emergency");
+      setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Emergência.");
       return;
     }
 
@@ -1344,6 +1349,7 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
             {[
               { id: "identity", label: "Identificação", icon: UserCheck },
               { id: "contact", label: "Contato", icon: Contact },
+              { id: "emergency", label: "Emergência", icon: Phone },
               { id: "address", label: "Endereço", icon: MapPin },
             ].map(tab => (
               <button
@@ -1467,18 +1473,7 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                   </div>
                 </div>
 
-                {/* Linha 3: RG | Estado Civil | Profissão */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">RG</label>
-                    <input
-                      type="text"
-                      className="input text-sm"
-                      value={formData.rg}
-                      onChange={e => setFormData({ ...formData, rg: e.target.value })}
-                      placeholder="Documento"
-                    />
-                  </div>
+                <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-2">Estado Civil</label>
                     <select
@@ -1522,33 +1517,35 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                   />
                 </div>
                 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone *</label>
-                    <input
-                      type="tel"
-                      required
-                      className="input text-sm"
-                      value={formData.phone}
-                      onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
-                      placeholder="(00) 00000-0000"
-                      maxLength={15}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência *</label>
-                    <input
-                      type="tel"
-                      required
-                      className="input text-sm"
-                      value={formData.emergencyPhone}
-                      onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })}
-                      placeholder="(00) 00000-0000"
-                      maxLength={15}
-                    />
-                  </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone *</label>
+                  <input
+                    type="tel"
+                    required
+                    className="input text-sm"
+                    value={formData.phone}
+                    onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
+                    placeholder="(00) 00000-0000"
+                    maxLength={15}
+                  />
                 </div>
+              </div>
+            )}
 
+            {editTab === "emergency" && (
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência *</label>
+                  <input
+                    type="tel"
+                    required
+                    className="input text-sm"
+                    value={formData.emergencyPhone}
+                    onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })}
+                    placeholder="(00) 00000-0000"
+                    maxLength={15}
+                  />
+                </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-2">Nome Emergência *</label>
                   <input

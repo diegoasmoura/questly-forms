@@ -76,10 +76,12 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **maxSessions e Timezone:** A função `appointmentOccursOnDate` (e duplicatas) usava `new Date(app.startDate.split("T")[0])`, que interpreta "YYYY-MM-DD" como UTC. No Brasil (UTC-3), `getDay()` retornava o dia errado, impedindo o contador de sessões de incrementar. Corrigido com `parseLocalDateStr` que usa o construtor `Date(year, monthIndex, day)` no timezone local.
 
 ### 5. Cadastro de Pacientes e Integridade (v4.4)
-- **Campos Obrigatórios (Ética e Segurança):** Nome, CPF, Data de Nascimento, E-mail, Telefone e Contato de Emergência (Nome e Telefone) são mandatórios para garantir a segurança clínica e conformidade com emissão de documentos.
+- **Campos Obrigatórios (Ética e Segurança):** Nome, CPF, Data de Nascimento (Identificação), E-mail, Telefone (Contato), Telefone e Nome de Emergência (Emergência) são mandatórios para garantir a segurança clínica e conformidade com emissão de documentos.
+- **Abas do Formulário:** Cadastro e edição organizados em 4 abas: Identificação, Contato, Emergência, Endereço. A aba Emergência contém telefone e nome do contato de emergência, separada do contato principal do paciente.
 - **Validação de Duplicidade:** O sistema impede o cadastro de CPFs duplicados para o mesmo psicólogo, fornecendo feedback visual imediato.
 - **UX de Validação Inteligente:** Em formulários com abas, o sistema detecta campos obrigatórios faltantes e redireciona automaticamente o usuário para a aba correta, exibindo uma mensagem de alerta detalhada.
 - **Feedback Visual de Erros:** Substituição de alertas genéricos por mensagens integradas ao design do modal, com animações de atenção (shake) em caso de falha.
+- **RG removido** do formulário de cadastro e edição (não é mais solicitado).
 
 ### 6. Cadastro de Pacientes e Importação Excel (v4.5)
 - **Importação via Excel:** Modelo geração via **ExcelJS** com suporte a 3 formatos de data:
@@ -128,6 +130,7 @@ navigate(-1); // suporta navegação relativa
 ```
 
 ### 10. outras UX
+- **Modal de Detalhes do Agendamento (AppointmentDetailModal):** Componente único usado em Home e Agenda. Exibe dados do paciente, status (Presença/Falta/Justificado), telefone formatado (`formatPhone`), link WhatsApp, "Ir para Prontuário" e Excluir Agendamento. Suporta sessões do tipo `fixed` (skipDates para recorrências) e `extra` (atendimentos avulsos via `api.deleteAttendance`).
 - **Navegação Consistente:** Elementos como Avatares, Nomes e Ícones são links diretos para prontuários.
 - **Semana de Aniversário:** Visual festivo automático (dourado/confetes) em janela de 7 dias.
 - **Métricas de Engajamento:** Comparação entre assiduidade física (Sessões) e digital (Instrumentos).
@@ -136,7 +139,7 @@ navigate(-1); // suporta navegação relativa
 - **Gestão UTC:** Datas em UTC, extraídas conforme fuso local.
 - **Toasts Flutuantes:** Confirmações em Emerald-600, erros em Red-500. Invocar via `toast("mensagem", "success" | "error", durationMs)` — usado no CustomFormBuilder ao salvar.
 - **Clinical Dashboard:** Métricas de engajamento na capa do card.
-- **Patient Record:** Padronização de abas com header e botão Save (Prontuário incluso). Ordem das abas: Frequência → Agenda → Financeiro → Instrumentos → Prontuário.
+- **Patient Record:** Padronização de abas com header e botão Save (Prontuário incluso). Ordem das abas: Histórico → Agenda → Financeiro → Instrumentos → Prontuário. Aba "Emergência" adicionada ao formulário de edição (Identificação → Contato → Emergência → Endereço).
 - **Instrumentos (Share):** Não utiliza mais expiração de links. Removidos: seletor de validade no modal, contagem de expirados, renovação de links, dias restantes nos cards e filtro por expiração. Status passam a ser apenas Pendente e Respondido. Tabela com colunas: Instrumento, Progresso, Status, Última resposta, Criado em, Link, Excluir.
 - **Tabelas padronizadas:** Cabeçalhos das tabelas nas abas Financeiro e Instrumentos usam o mesmo padrão: `text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200` com padding `px-2 py-2`.
 - **Scroll padding:** Containers com `overflow-y-auto` e cards filhos devem usar `pr-1.5` para evitar que os cards encostem na barra de rolagem vertical.

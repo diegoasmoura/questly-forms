@@ -891,6 +891,21 @@ export default function PatientRecord() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!formData.name || !formData.cpf || !formData.birthDate) {
+      setEditTab("identity");
+      setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Identificação.");
+      return;
+    }
+    if (!formData.email || !formData.phone) {
+      setEditTab("contact");
+      setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Contato.");
+      return;
+    }
+    if (!formData.emergencyPhone || !formData.emergencyName) {
+      setEditTab("emergency");
+      setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Emergência.");
+      return;
+    }
     console.log("handleSave - Enviando dados:", JSON.stringify(formData, null, 2));
     setSaving(true);
     setErrorMessage("");
@@ -1422,7 +1437,7 @@ export default function PatientRecord() {
                   active={activeTab === "sessions"}
                   onClick={() => handleTabChange("sessions")}
                   icon={<Clock size={14} />}
-                  label="Frequência"
+                  label="Histórico"
                 />
                 <TabButton
                   active={activeTab === "settings"}
@@ -2077,31 +2092,20 @@ export default function PatientRecord() {
                                     const conflict = conflicts[app.id];
                                     const appPatientId = app.patient?.id ?? app.patientId;
                                     const isOtherPatient = appPatientId && appPatientId !== id;
+                                    const displayName = (isOtherPatient ? app.patient?.name : patient?.name) || "Paciente";
+                                    const initials = displayName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
                                     return (
-                                      <div key={app.id} className={`flex items-center gap-2 p-2.5 rounded-xl border mb-1 ${
-                                        conflict ? "border-red-200 bg-red-50/30" : isOtherPatient ? "border-amber-200 bg-amber-50/30" : "border-slate-200 bg-white"
-                                      }`}>
-                                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                                          <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] shrink-0 ${
-                                            conflict ? "bg-red-100 text-red-600" : isOtherPatient ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
-                                          }`}>
-                                            <Clock size={14} />
-                                          </div>
-                                          <div className="min-w-0">
-                                            <p className={`text-xs font-bold truncate ${isOtherPatient ? "text-amber-600" : "text-emerald-700"}`}>
-                                              {(isOtherPatient ? app.patient?.name : patient?.name)?.split(" ")[0] || "Paciente"}
-                                            </p>
-                                            <p className="text-[9px] font-bold text-slate-500">{app.maxSessions ? `${app.maxSessions} sessões` : app.startDate ? "Semanal" : app.scheduledDate ? format(new Date(app.scheduledDate), "dd/MM/yy") : "Avulso"}</p>
-                                          </div>
+                                      <div key={app.id} className={`flex items-center gap-2 p-3 rounded-lg border mb-1 ${conflict ? "border-red-200 bg-red-50/30" : isOtherPatient ? "border-amber-200 bg-amber-50/30" : "border-slate-200 bg-white hover:border-slate-300"} transition-all`}>
+                                        <div className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-500 font-black text-[9px] shrink-0">
+                                          {initials}
                                         </div>
-                                        <div className="flex items-center gap-2 shrink-0 ml-2">
-                                          <span className="text-xs font-black text-slate-700 whitespace-nowrap">{app.time} • {app.duration}min</span>
-                                          {conflict && (
-                                            <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-200">
-                                              Conflito
-                                            </span>
-                                          )}
-                                        </div>
+                                        <p className={`text-xs font-bold truncate flex-1 min-w-0 ${isOtherPatient ? "text-amber-600" : "text-slate-800"}`}>{displayName}</p>
+                                        <span className="text-[10px] font-bold text-slate-500 shrink-0">{app.time} &bull; {app.duration}min</span>
+                                        {conflict && (
+                                          <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-200 shrink-0">
+                                            Conflito
+                                          </span>
+                                        )}
                                       </div>
                                     );
                                   })}
@@ -3081,6 +3085,7 @@ export default function PatientRecord() {
                 {[
                   { id: "identity", label: "Identificação", icon: UserCheck },
                   { id: "contact", label: "Contato", icon: Contact },
+                  { id: "emergency", label: "Emergência", icon: Phone },
                   { id: "address", label: "Endereço", icon: MapPin },
                 ].map(tab => (
                   <button
@@ -3161,11 +3166,7 @@ export default function PatientRecord() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">RG</label>
-                        <input type="text" className="input text-sm" value={formData.rg} onChange={e => setFormData({ ...formData, rg: e.target.value })} placeholder="Documento" />
-                      </div>
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-semibold text-slate-600 mb-2">Estado Civil</label>
                         <select className="input text-sm" value={formData.maritalStatus} onChange={e => setFormData({ ...formData, maritalStatus: e.target.value })}>
@@ -3191,15 +3192,18 @@ export default function PatientRecord() {
                       <label className="block text-xs font-semibold text-slate-600 mb-2">E-mail *</label>
                       <input type="email" required className="input text-sm" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="email@exemplo.com" />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone *</label>
-                        <input type="tel" required className="input text-sm" value={formData.phone} onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência *</label>
-                        <input type="tel" required className="input text-sm" value={formData.emergencyPhone} onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
-                      </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone *</label>
+                      <input type="tel" required className="input text-sm" value={formData.phone} onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
+                    </div>
+                  </div>
+                )}
+
+                {editTab === "emergency" && (
+                  <div className="space-y-5">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência *</label>
+                      <input type="tel" required className="input text-sm" value={formData.emergencyPhone} onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-600 mb-2">Nome Emergência *</label>

@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { api } from "../lib/api";
+import AppointmentDetailModal from "../components/AppointmentDetailModal";
 import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import {
   Calendar,
   ChevronLeft,
   ChevronRight,
-  Clock,
   Users,
   Check,
   X,
@@ -17,9 +17,6 @@ import {
   AlertTriangle,
   Plus,
   Pencil,
-  Trash2,
-  Phone,
-  MessageCircle,
   UserCheck,
   UserX
 } from "lucide-react";
@@ -893,14 +890,27 @@ export default function Agenda() {
                               </button>
                               <div className="flex-1 border-t border-slate-200" />
                             </div>
-                            {sessions.map((session, idx) => (
-                              <SessionCard
-                                key={session.app.id + idx}
-                                session={session}
-                                date={date}
-                                onClick={openDetailModal}
-                              />
-                            ))}
+                            {sessions.map((session, idx) => {
+                              const app = session.app;
+                              const name = app.patient?.name || "Paciente";
+                              const initials = name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+                              return (
+                                <div
+                                  key={app.id + idx}
+                                  onClick={() => openDetailModal(session, date)}
+                                  className="flex items-center gap-2 p-3 rounded-lg border border-slate-200 bg-white hover:border-slate-300 transition-all group cursor-pointer mb-1"
+                                >
+                                  <div className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-500 font-black text-[9px] shrink-0">
+                                    {initials}
+                                  </div>
+                                  <p className="text-xs font-bold text-slate-800 truncate flex-1 min-w-0 group-hover:text-slate-900 transition-colors">
+                                    {name}
+                                  </p>
+                                  <span className="text-[10px] font-bold text-slate-500 shrink-0">{app.time} &bull; {app.duration}min</span>
+                                  <ChevronRight size={13} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition-all shrink-0" />
+                                </div>
+                              );
+                            })}
                           </div>
                         ))
                       )}
@@ -1287,138 +1297,15 @@ export default function Agenda() {
         document.body
       )}
 
-      {detailModal.open && detailModal.session && createPortal(
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={() => setDetailModal({ open: false, session: null, date: null })}>
-          <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
-            <div className="flex items-start justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-lg shrink-0 ${
-                  detailModal.session.attendance?.status === "presente" ? "bg-emerald-100 text-emerald-600" :
-                  detailModal.session.attendance?.status === "falta" ? "bg-red-100 text-red-600" :
-                  detailModal.session.attendance?.status === "justificada" ? "bg-amber-100 text-amber-600" :
-                  "bg-slate-100 text-slate-600"
-                }`}>
-                  {(detailModal.session.app.patient?.name || "?")
-                    .split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-                </div>
-                <div>
-                  <h2 className="text-lg font-black text-slate-800 uppercase tracking-tight leading-tight">
-                    {detailModal.session.app.patient?.name || "Paciente"}
-                  </h2>
-                  <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest mt-1 ${
-                    detailModal.session.attendance?.status === "presente" ? "bg-emerald-100 text-emerald-700" :
-                    detailModal.session.attendance?.status === "falta" ? "bg-red-100 text-red-700" :
-                    detailModal.session.attendance?.status === "justificada" ? "bg-amber-100 text-amber-700" :
-                    "bg-slate-100 text-slate-500"
-                  }`}>
-                    {detailModal.session.attendance?.status === "presente" ? "Realizado" :
-                     detailModal.session.attendance?.status === "falta" ? "Falta" :
-                     detailModal.session.attendance?.status === "justificada" ? "Justificada" :
-                     "Agendado"}
-                  </span>
-                </div>
-              </div>
-              <button onClick={() => setDetailModal({ open: false, session: null, date: null })} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all shrink-0">
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="space-y-3 mb-6 p-4 bg-slate-50 rounded-2xl">
-              <div className="flex items-center gap-3">
-                <Clock size={15} className="text-slate-400 shrink-0" />
-                <span className="text-sm font-bold text-slate-700">
-                  {detailModal.date ? format(detailModal.date, "dd/MM/yyyy", { locale: ptBR }) : ""} às {detailModal.session.app.time} ({detailModal.session.app.duration} min)
-                </span>
-              </div>
-              {detailModal.session.app.patient?.phone && (
-                <div className="flex items-center gap-3">
-                  <Phone size={15} className="text-slate-400 shrink-0" />
-                  <span className="text-sm font-bold text-slate-700">{detailModal.session.app.patient.phone}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Status do Atendimento</p>
-              <button onClick={() => handleQuickStatus(detailModal.session, "presente", detailModal.date)}
-                className={`w-full py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${
-                  detailModal.session.attendance?.status === "presente"
-                    ? "bg-emerald-500 text-white border-emerald-500 shadow-sm"
-                    : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:text-emerald-600"
-                }`}>
-                <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                  detailModal.session.attendance?.status === "presente"
-                    ? "border-white"
-                    : "border-slate-300"
-                }`}>
-                  {detailModal.session.attendance?.status === "presente" && <Check size={12} />}
-                </span>
-                Presença
-              </button>
-              <button onClick={() => handleQuickStatus(detailModal.session, "falta", detailModal.date)}
-                className={`w-full py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${
-                  detailModal.session.attendance?.status === "falta"
-                    ? "bg-red-500 text-white border-red-500 shadow-sm"
-                    : "bg-white text-slate-600 border-slate-200 hover:border-red-300 hover:text-red-600"
-                }`}>
-                <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                  detailModal.session.attendance?.status === "falta"
-                    ? "border-white"
-                    : "border-slate-300"
-                }`}>
-                  {detailModal.session.attendance?.status === "falta" && <X size={12} />}
-                </span>
-                Falta
-              </button>
-              <button onClick={() => handleQuickStatus(detailModal.session, "justificada", detailModal.date)}
-                className={`w-full py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${
-                  detailModal.session.attendance?.status === "justificada"
-                    ? "bg-amber-500 text-white border-amber-500 shadow-sm"
-                    : "bg-white text-slate-600 border-slate-200 hover:border-amber-300 hover:text-amber-600"
-                }`}>
-                <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                  detailModal.session.attendance?.status === "justificada"
-                    ? "border-white"
-                    : "border-slate-300"
-                }`}>
-                  {detailModal.session.attendance?.status === "justificada" && <AlertCircle size={12} />}
-                </span>
-                Justificado
-              </button>
-            </div>
-
-            <div className="mt-5 pt-5 border-t border-slate-100 space-y-2">
-              <a
-                href={`https://wa.me/55${detailModal.session.app.patient?.phone?.replace(/\D/g, "") || ""}?text=${encodeURIComponent(`Olá ${detailModal.session.app.patient?.name?.split(" ")[0] || ""}, lembrete da sua consulta no dia ${detailModal.date ? format(detailModal.date, "dd/MM") : ""} às ${detailModal.session.app.time}.`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition-all text-xs font-black uppercase tracking-widest border border-emerald-200"
-              >
-                <MessageCircle size={15} />
-                Lembrete WhatsApp
-              </a>
-              <button
-                onClick={() => {
-                  const session = detailModal.session;
-                  const d = detailModal.date;
-                  setDetailModal({ open: false, session: null, date: null });
-                  handleDeleteAppointment(session, d);
-                }}
-                className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all text-xs font-black uppercase tracking-widest border border-red-200"
-              >
-                <Trash2 size={15} />
-                Excluir Agendamento
-              </button>
-            </div>
-            <button
-              onClick={() => setDetailModal({ open: false, session: null, date: null })}
-              className="w-full mt-5 py-3 text-xs font-black text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest"
-            >
-              Fechar
-            </button>
-          </div>
-        </div>,
-        document.body
+      {detailModal.open && detailModal.session && (
+        <AppointmentDetailModal
+          appointment={detailModal.session.app}
+          patient={detailModal.session.app.patient}
+          nextDate={detailModal.date}
+          sessionType={detailModal.session.type}
+          onClose={() => setDetailModal({ open: false, session: null, date: null })}
+          onUpdate={loadData}
+        />
       )}
 
       {successMessage && (
