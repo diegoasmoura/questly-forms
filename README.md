@@ -28,7 +28,26 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 | **Erro** | red | `#ef4444` | erros, faltas, perigo |
 | **Neutro** | slate | `#64748b` | elementos secundários, total sessões, próxima sessão, último recebimento |
 
-## Funcionalidades Principais
+### Sidebar (Navegação)
+
+| Elemento | Cor | Hex |
+|----------|-----|-----|
+| **Fundo** | slate-900 | `#0f172a` |
+| **Texto Menu (inativo)** | slate-400 | `#94a3b8` |
+| **Texto Menu (ativo)** | white | `#ffffff` |
+| **Fundo Menu (ativo)** | emerald-600 | `#059669` |
+| **Hover Menu** | slate-800/50 | `rgba(30,41,59,0.5)` |
+| **Nome Profissional** | white | `#ffffff` |
+| **Botão Sair** | slate-400 | `#94a3b8` |
+| **Separador** | slate-800 | `#1e293b` |
+
+**Layout:**
+- **Topo:** Logo "Questly Forms" + botão recolher (`ChevronLeft`/`ChevronRight`)
+- **Meio:** Itens de navegação (Home, Pacientes, Agenda, Instrumentos, Acervo Clínico) com destaque no item ativo. Scroll vertical próprio via `sidebar-scrollbar` para telas pequenas.
+- **Rodapé:** Nome do profissional (avatar com gradiente + nome) acima de um separador, abaixo o botão "Sair" com ícone de logout.
+- **Estado recolhido:** Largura 72px — avatar com iniciais e ícone de logout
+- **Estado expandido:** Largura 256px — nome completo e botão "Sair" com texto
+- **Z-index:** `z-[10000]` — sempre acima de modais e backdrops
 
 - **Home (Visão Geral):** Resumo dinâmico de atividades, estatísticas de pacientes e gráficos de tendências clínicas.
 - **Gestão de Pacientes (Clinical Dashboard):** Painel de controle individual com métricas unificadas de engajamento (Sessões vs Instrumentos), alertas de aniversário com visual festivo e tooltip instantâneo.

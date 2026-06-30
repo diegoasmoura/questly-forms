@@ -188,7 +188,7 @@ export default function Sidebar() {
       </div>
 
       {/* Menu Items */}
-      <nav className={`flex-1 space-y-0.5 overflow-hidden ${collapsed ? "px-2" : "px-3"}`}>
+      <nav className={`flex-1 space-y-0.5 overflow-y-auto sidebar-scrollbar ${collapsed ? "px-2 pb-2" : "px-3 pb-2"}`}>
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path 
             || (item.path !== "/home" && location.pathname.startsWith(item.path))
@@ -236,8 +236,8 @@ export default function Sidebar() {
             </button>
           </div>
         ) : (
-          <div className="px-3 py-3 border-t border-slate-800">
-            <div className="flex items-center gap-2 px-2 py-2 rounded-lg bg-slate-800/30 mb-1.5">
+          <div className="px-3 pb-3">
+            <div className="flex items-center gap-2 px-2 py-2 mb-2">
               <div className={`w-7 h-7 rounded-md bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-[10px] shrink-0`}>
                 {initials}
               </div>
@@ -245,13 +245,15 @@ export default function Sidebar() {
                 {user?.name}
               </span>
             </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 py-2 px-2 w-full"
-            >
-              <LogOut size={16} className="shrink-0" />
-              <span className="text-sm font-medium ml-2">Sair</span>
-            </button>
+            <div className="border-t border-slate-800 pt-2">
+              <button
+                onClick={handleLogout}
+                className="flex items-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 py-2 px-2 w-full"
+              >
+                <LogOut size={16} className="shrink-0" />
+                <span className="text-sm font-medium ml-2">Sair</span>
+              </button>
+            </div>
           </div>
         )}
       </div>
