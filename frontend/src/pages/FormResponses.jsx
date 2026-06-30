@@ -195,7 +195,7 @@ export default function FormResponses() {
                       }`}
                     >
                       <div className="w-5 h-5 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 text-[8px] font-black">
-                        {patient.name.charAt(0).toUpperCase()}
+                        {patient.name.split(" ")[0].slice(0, 2).toUpperCase()}
                       </div>
                       <span className="truncate max-w-[120px]">{patient.name}</span>
                       <span className="text-[9px] opacity-60">({count})</span>
@@ -254,7 +254,7 @@ export default function FormResponses() {
                         className="flex items-center gap-3 px-4 py-2 bg-emerald-50/50 rounded-xl border border-emerald-100 hover:border-emerald-300 transition-all group/patient"
                       >
                         <div className="w-10 h-10 rounded-lg bg-emerald-900 text-white flex items-center justify-center text-xs font-bold group-hover/patient:bg-emerald-700 transition-colors">
-                          {response.patient.name.charAt(0).toUpperCase()}
+                          {response.patient.name.split(" ")[0].slice(0, 2).toUpperCase()}
                         </div>
                         <div>
                           <p className="text-sm font-bold text-slate-900 group-hover/patient:text-emerald-700 transition-colors">{response.patient.name}</p>

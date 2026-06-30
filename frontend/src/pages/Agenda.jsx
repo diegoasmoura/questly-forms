@@ -112,7 +112,7 @@ function SessionCard({ session, date, onClick }) {
     default: "border-slate-200 bg-white hover:border-slate-300"
   };
 
-  const initials = patientName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+  const initials = patientName.split(" ")[0].slice(0, 2).toUpperCase();
   const firstName = patientName.split(" ")[0] || "?";
 
   return (
@@ -727,7 +727,7 @@ export default function Agenda() {
         ) : (
           <div className="flex gap-6 h-full animate-fade-in">
             {/* Left: Calendar */}
-            <div className="w-[70%] flex flex-col min-h-0">
+            <div className="w-[75%] flex flex-col min-h-0">
               <div className="p-4 pb-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col flex-1 min-h-0 overflow-hidden agenda-calendar">
                 <BigCalendar
                   localizer={rbcLocalizer}
@@ -814,7 +814,7 @@ export default function Agenda() {
             </div>
 
             {/* Right: Detail Panel */}
-            <div className="w-[30%] flex flex-col gap-3">
+            <div className="w-[25%] flex flex-col gap-3">
               <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight shrink-0">Agendamentos</h3>
               <div className="flex-1 min-h-0">
                 {selectedDay ? (
@@ -893,7 +893,7 @@ export default function Agenda() {
                             {sessions.map((session, idx) => {
                               const app = session.app;
                               const name = app.patient?.name || "Paciente";
-                              const initials = name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+                              const initials = name.split(" ")[0].slice(0, 2).toUpperCase();
                               return (
                                 <div
                                   key={app.id + idx}

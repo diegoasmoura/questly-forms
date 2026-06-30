@@ -151,7 +151,7 @@ export default function ResponseDetail() {
           <div className="card p-6 border-2 border-emerald-100/50 bg-emerald-50/20 shadow-sm">
             <div className="flex items-center gap-6">
               <div className="w-16 h-16 rounded-2xl bg-emerald-900 flex items-center justify-center text-white text-2xl font-black shadow-lg">
-                {response.patient.name.charAt(0).toUpperCase()}
+                {response.patient.name.split(" ")[0].slice(0, 2).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-lg font-black text-slate-900 truncate">{response.patient.name}</p>

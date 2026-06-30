@@ -99,7 +99,8 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 - **Dropdown de Cadastro:** Cada botão com estado independente; "Cadastrar" (topo) alinhado à direita, "Cadastrar Paciente" (vazio) centralizado
 
 ### 8. UX do Calendário (Agenda) e Painel Direito
-- **Layout duas colunas:** Calendário (`w-[60%]`) + Agenda (`w-[40%]`) lado a lado com `flex gap-6`
+- **Layout duas colunas:** Calendário (`w-[75%]`) + Agenda/Sidebar (`w-[25%]`) lado a lado com `flex gap-6`
+- **Avatares nos cards:** Usam as duas primeiras letras do primeiro nome (ex: "Diego Moura" → `DI`), obtidas via `name.split(" ")[0].slice(0, 2).toUpperCase()`, aplicado em todos os módulos (Agenda, Home, Patients, FormResponses, ResponseDetail, PatientRecord)
 - **react-day-picker v9** com DayButton customizado, tintas de fundo (verde/âmbar/vermelho) e barra verde inferior para sessões do paciente
 - **Células dinâmicas:** Linhas com `h-0` distribuem altura igualmente via `flex-1 table-fixed`; botões preenchem com `h-full`
 - **Filtro permanente:** Painel direito sempre exibe apenas horários do paciente atual via `myAppointmentIds`
@@ -147,11 +148,12 @@ navigate(-1); // suporta navegação relativa
 ### 11. Home Dashboard — "Próximas Sessões"
 - **Expansão de 3 meses:** Para cada agendamento recorrente, `findOccurrencesInRange` gera TODAS as ocorrências nos próximos 3 meses (via `addMonths(today, 3)`), não apenas a próxima.
 - **Suporte a recorrências sem fim:** Agendas com `startDate` mas sem `endDate` e sem `maxSessions` geram ocorrências por todo o período.
-- **Agrupamento por data:** As sessões são agrupadas por `_nextDate` em `groupedNextAppointments`, ordenadas cronologicamente.
-- **Data header clicável:** Cada cabeçalho de grupo (`button`) navega para `/agenda?date=YYYY-MM-DD`.
+- **Agrupamento por mês:** Sessões são agrupadas primeiro por mês (`nextByMonth` → `{ month, days }`), depois por data dentro de cada mês, com cabeçalho do mês em destaque (ex: "Junho de 2026").
+- **Data header clicável:** Cada cabeçalho de data (`button`) navega para `/agenda?date=YYYY-MM-DD`.
 - **Sem limite fixo:** Todas as ocorrências do período de 3 meses são exibidas (sem `slice`). O card tem scroll próprio.
+- **Layout compacto:** Coluna ocupa `1fr` em grid `lg:grid-cols-4` (25% da largura), com espaçamento reduzido entre grupos.
 
-### 11. Construtor de Instrumentos Customizado
+### 12. Construtor de Instrumentos Customizado
 
 Substitui o SurveyJS FormBuilder por uma solução própria com card-style:
 
@@ -187,7 +189,7 @@ Substitui o SurveyJS FormBuilder por uma solução própria com card-style:
 - **Modalidade Paginada:** Navegação entre seções com botões Anterior/Próxima e indicador de progresso (ex: "1–5 de 20"). Na última seção mostra "Enviar Respostas".
 - **Modalidade Stepper:** Card centralizado com pergunta atual, grade numerada para escalas Likert, legendas completas (ex: "1 - Inteiramente falsa"), atalhos de teclado (1–6 para responder, ← → para navegar, Enter para avançar) e auto-avanço 500ms.
 
-### 12. YSQ-L3 (Young Schema Questionnaire)
+### 13. YSQ-L3 (Young Schema Questionnaire)
 
 O instrumento **YSQ-L3** (232 itens, 18 domínios) está disponível no Acervo Clínico:
 - Schema em formato SurveyJS no template (`frontend/src/lib/templates.js`).
@@ -195,7 +197,7 @@ O instrumento **YSQ-L3** (232 itens, 18 domínios) está disponível no Acervo C
 - Pontuação por domínio com 3 faixas clínicas: Baixa, Alta, Muito Alta.
 - Cards de severidade no dashboard de respostas com codificação por cores (emerald, amber, red).
 
-### 13. Esquema de Dados do Formulário Customizado
+### 14. Esquema de Dados do Formulário Customizado
 
 ```json
 {
@@ -226,7 +228,7 @@ O instrumento **YSQ-L3** (232 itens, 18 domínios) está disponível no Acervo C
 
 **Tipos de pergunta suportados:** `text`, `number`, `boolean`, `choice`, `likert`, `matrix`.
 
-### 14. Layout do PatientRecord (Regras para evitar scrollbar externa)
+### 15. Layout do PatientRecord (Regras para evitar scrollbar externa)
 
 A página `PatientRecord.jsx` usa uma estrutura de layout específica que deve ser mantida para evitar que a barra de rolagem externa apareça ao alternar entre abas:
 
@@ -269,7 +271,7 @@ A página `PatientRecord.jsx` usa uma estrutura de layout específica que deve s
 - Headers usam `mb-8 shrink-0` em vez de `border-b` e ficam dentro do `p-8` do card
 - **UX de Registro:** Área clicável para upload de anexos.
 
-### 15. Padrão de Modais (Backdrop, Posicionamento e Z-Index)
+### 16. Padrão de Modais (Backdrop, Posicionamento e Z-Index)
 
 Todo modal que exibe um overlay (backdrop) deve seguir este padrão único:
 

@@ -244,21 +244,30 @@ export default function Home() {
 
   const rangeEnd = addMonths(today, 3);
 
-  const groupedNextAppointments = useMemo(() => {
-    const map = {};
+  const nextByMonth = useMemo(() => {
+    const dayMap = {};
     appointments.forEach(app => {
       const occurrences = findOccurrencesInRange(app, today, rangeEnd);
       occurrences.forEach(occ => {
-        if (!map[occ._nextDate]) map[occ._nextDate] = [];
-        map[occ._nextDate].push(occ);
+        if (!dayMap[occ._nextDate]) dayMap[occ._nextDate] = [];
+        dayMap[occ._nextDate].push(occ);
       });
     });
-    return Object.entries(map)
+    const sortedDays = Object.entries(dayMap)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([dateStr, sessions]) => ({
         date: new Date(dateStr + "T12:00:00"),
         sessions,
       }));
+    const monthMap = {};
+    sortedDays.forEach(({ date, sessions }) => {
+      const key = format(date, "yyyy-MM");
+      if (!monthMap[key]) monthMap[key] = { month: date, days: [] };
+      monthMap[key].days.push({ date, sessions });
+    });
+    return Object.entries(monthMap)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([, v]) => v);
   }, [appointments]);
 
   const recentFaltas = monthAttendances
@@ -385,8 +394,8 @@ export default function Home() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
-            <div className="lg:col-span-2 flex flex-col min-h-0">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0">
+            <div className="lg:col-span-3 flex flex-col min-h-0">
               <div className="card p-5 flex-1 min-h-0 overflow-y-auto">
                 <div className="flex items-center gap-2 mb-4 shrink-0">
                   <Clock size={16} className="text-emerald-600" />
@@ -440,7 +449,7 @@ export default function Home() {
                   <p className="text-xs font-black text-slate-600 uppercase tracking-widest">Próximas Sessões</p>
                 </div>
                 <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1.5">
-                  {groupedNextAppointments.length === 0 ? (
+                  {nextByMonth.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center py-6">
                       <Calendar size={24} className="text-slate-300 mb-2" />
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nenhuma sessão agendada</p>
@@ -450,35 +459,47 @@ export default function Home() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {groupedNextAppointments.map(({ date, sessions }) => (
-                        <div key={format(date, "yyyy-MM-dd")}>
-                          <div className="flex items-center gap-2 mb-1.5">
-                            <button
-                              onClick={() => navigate(`/agenda?date=${format(date, "yyyy-MM-dd")}`)}
-                              className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-emerald-600 transition-colors"
-                            >
-                              {format(date, "EEE dd/MM", { locale: ptBR })}
-                            </button>
+                      {nextByMonth.map(({ month, days }) => (
+                        <div key={format(month, "yyyy-MM")}>
+                          <div className="flex items-center gap-2 mb-2">
+                            <p className="text-[11px] font-black text-slate-700 uppercase tracking-widest">
+                              {format(month, "MMMM 'de' yyyy", { locale: ptBR })}
+                            </p>
                             <div className="flex-1 border-t border-slate-200" />
-                            <span className="text-[9px] font-bold text-slate-400">{sessions.length} sess{sessions.length === 1 ? "ão" : "ões"}</span>
                           </div>
-                          {sessions.map(app => {
-                            const patient = patientMap[app.patientId];
-                            const name = patient?.name || "Paciente";
-                            const initial = name.charAt(0) || "?";
-                            return (
-                              <div key={app.id} onClick={() => setDetailModal({ open: true, appointment: app })} className="flex items-center gap-2 p-3 rounded-lg border border-slate-200 bg-white hover:border-slate-300 transition-all group cursor-pointer mb-1">
-                                <div className="w-7 h-7 rounded-md bg-emerald-100 flex items-center justify-center text-emerald-700 font-black text-[10px] shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                                  {initial}
+                          <div className="space-y-2">
+                            {days.map(({ date, sessions }) => (
+                              <div key={format(date, "yyyy-MM-dd")}>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <button
+                                    onClick={() => navigate(`/agenda?date=${format(date, "yyyy-MM-dd")}`)}
+                                    className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-emerald-600 transition-colors"
+                                  >
+                                    {format(date, "EEE dd/MM", { locale: ptBR })}
+                                  </button>
+                                  <div className="flex-1 border-t border-slate-200" />
+                                  <span className="text-[9px] font-bold text-slate-400">{sessions.length} sess{sessions.length === 1 ? "ão" : "ões"}</span>
                                 </div>
-                                <p className="text-xs font-bold text-slate-800 truncate flex-1 min-w-0 group-hover:text-slate-900 transition-colors">
-                                  {name}
-                                </p>
-                                <span className="text-[10px] font-bold text-slate-500 shrink-0">{app.time?.slice(0, 5) || "--:--"}{app.duration ? ` • ${app.duration}min` : ""}</span>
-                                <ChevronRight size={13} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition-all shrink-0" />
+                                {sessions.map(app => {
+                                  const patient = patientMap[app.patientId];
+                                  const name = patient?.name || "Paciente";
+                                  const initial = name.split(" ")[0].slice(0, 2).toUpperCase() || "?";
+                                  return (
+                                    <div key={app.id} onClick={() => setDetailModal({ open: true, appointment: app })} className="flex items-center gap-2 p-3 rounded-lg border border-slate-200 bg-white hover:border-slate-300 transition-all group cursor-pointer mb-1">
+                                      <div className="w-7 h-7 rounded-md bg-emerald-100 flex items-center justify-center text-emerald-700 font-black text-[10px] shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                                        {initial}
+                                      </div>
+                                      <p className="text-xs font-bold text-slate-800 truncate flex-1 min-w-0 group-hover:text-slate-900 transition-colors">
+                                        {name}
+                                      </p>
+                                      <span className="text-[10px] font-bold text-slate-500 shrink-0">{app.time?.slice(0, 5) || "--:--"}{app.duration ? ` • ${app.duration}min` : ""}</span>
+                                      <ChevronRight size={13} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition-all shrink-0" />
+                                    </div>
+                                  );
+                                })}
                               </div>
-                            );
-                          })}
+                            ))}
+                          </div>
                         </div>
                       ))}
                     </div>

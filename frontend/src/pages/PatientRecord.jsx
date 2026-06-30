@@ -1356,8 +1356,8 @@ export default function PatientRecord() {
           <div className="lg:col-span-1 flex flex-col min-h-0">
             <div className="card p-6 flex-1 flex flex-col min-h-0">
               <div className="flex flex-col items-center text-center mb-6 shrink-0">
-                <div className="w-20 h-20 rounded-2xl bg-emerald-900 flex items-center justify-center text-white font-bold text-3xl mb-3 shadow-xl shadow-emerald-900/20">
-                  {patient.name.charAt(0).toUpperCase()}
+                <div className="w-20 h-20 rounded-2xl bg-emerald-900 flex items-center justify-center text-white font-black text-2xl mb-3 shadow-xl shadow-emerald-900/20">
+                  {patient.name.split(" ")[0].slice(0, 2).toUpperCase()}
                 </div>
                 <h1 className="text-xl font-bold text-slate-900">{patient.name}</h1>
                 <p className="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-widest">Prontuário #{patient.id.slice(0, 8).toUpperCase()}</p>
@@ -2093,7 +2093,7 @@ export default function PatientRecord() {
                                     const appPatientId = app.patient?.id ?? app.patientId;
                                     const isOtherPatient = appPatientId && appPatientId !== id;
                                     const displayName = (isOtherPatient ? app.patient?.name : patient?.name) || "Paciente";
-                                    const initials = displayName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+                                    const initials = displayName.split(" ")[0].slice(0, 2).toUpperCase();
                                     return (
                                       <div key={app.id} className={`flex items-center gap-2 p-3 rounded-lg border mb-1 ${conflict ? "border-red-200 bg-red-50/30" : isOtherPatient ? "border-amber-200 bg-amber-50/30" : "border-slate-200 bg-white hover:border-slate-300"} transition-all`}>
                                         <div className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-500 font-black text-[9px] shrink-0">

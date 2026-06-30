@@ -2022,7 +2022,7 @@ function PatientCard({ patient, onDelete, onEdit }) {
         <div className="flex items-center gap-3">
           <div className="relative">
             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-xl transition-all duration-300 ${isActive ? (isBirthdayWeek ? 'bg-amber-500 text-white shadow-lg shadow-amber-200' : 'bg-slate-900 text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white') : 'bg-slate-200 text-slate-500'}`}>
-              {patient.name.charAt(0).toUpperCase()}
+              {patient.name.split(" ")[0].slice(0, 2).toUpperCase()}
             </div>
           </div>
           <div className="flex flex-col gap-1">
@@ -2138,7 +2138,7 @@ function PatientListRow({ patient, onDelete, onEdit }) {
   return (
     <div className={`card p-4 flex items-center gap-5 transition-all duration-300 relative overflow-hidden ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'border-l-4 border-l-amber-400 bg-amber-50/20' : 'hover:border-emerald-200 hover:shadow-lg'}`}>
       <Link to={`/patients/${patient.id}`} className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg shrink-0 transition-all ${isActive ? (isBirthdayWeek ? 'bg-amber-500 text-white' : 'bg-slate-900 text-emerald-400') : 'bg-slate-200 text-slate-500'}`}>
-        {isBirthdayWeek ? <PartyPopper size={20} /> : patient.name.charAt(0).toUpperCase()}
+        {isBirthdayWeek ? <PartyPopper size={20} /> : patient.name.split(" ")[0].slice(0, 2).toUpperCase()}
       </Link>
       
       <div className="flex-1 min-w-0">
