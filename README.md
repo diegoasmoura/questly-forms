@@ -145,10 +145,19 @@ navigate(-1); // suporta navegação relativa
 - **Tabelas padronizadas:** Cabeçalhos das tabelas nas abas Financeiro e Instrumentos usam o mesmo padrão: `text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200` com padding `px-2 py-2`.
 - **Scroll padding:** Containers com `overflow-y-auto` e cards filhos devem usar `pr-1.5` para evitar que os cards encostem na barra de rolagem vertical.
 
-### 11. Home Dashboard — "Próximas Sessões"
+### 11. Home Dashboard — Stat Cards e "Próximas Sessões"
+
+**Stat Cards (topo):**
+- **Estilo limpo e uniforme:** Cards sem `border-l-4`, todos com fundo de ícone `bg-brand-50 text-brand-600` (sage green), label em `text-xs font-semibold text-slate-400`.
+- **Sem linhas secundárias:** Removidos subtítulos `text-[9px]` (ex: "2 total", "1P·0F·0J") — foco no número principal.
+- **Todos `<Link>`:** Os 4 cards (Pacientes → `/patients`, Sessões → `/agenda`, Instrumentos → `/my-forms`, Receita → `/agenda`) são clicáveis com `hover:shadow-md hover:-translate-y-0.5`.
+- **Alinhamento de colunas:** Grid `gap-6` (mesmo do layout inferior) para alinhar a 4ª coluna com "Próximas Sessões".
+
+**Próximas Sessões:**
 - **Expansão de 3 meses:** Para cada agendamento recorrente, `findOccurrencesInRange` gera TODAS as ocorrências nos próximos 3 meses (via `addMonths(today, 3)`), não apenas a próxima.
 - **Suporte a recorrências sem fim:** Agendas com `startDate` mas sem `endDate` e sem `maxSessions` geram ocorrências por todo o período.
-- **Agrupamento por mês:** Sessões são agrupadas primeiro por mês (`nextByMonth` → `{ month, days }`), depois por data dentro de cada mês, com cabeçalho do mês em destaque (ex: "Junho de 2026").
+- **Agrupamento por mês:** Sessões são agrupadas primeiro por mês (`nextByMonth` → `{ month, days }`), depois por data dentro de cada mês.
+- **Cabeçalhos alinhados:** Títulos de mês e data usam `border-b` em vez de `flex` com divisor inline — eliminam desalinhamento horizontal causado por larguras variáveis de texto.
 - **Data header clicável:** Cada cabeçalho de data (`button`) navega para `/agenda?date=YYYY-MM-DD`.
 - **Sem limite fixo:** Todas as ocorrências do período de 3 meses são exibidas (sem `slice`). O card tem scroll próprio.
 - **Layout compacto:** Coluna ocupa `1fr` em grid `lg:grid-cols-4` (25% da largura), com espaçamento reduzido entre grupos.

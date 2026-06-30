@@ -321,50 +321,46 @@ export default function Home() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 shrink-0">
-            <Link to="/patients" className="card p-3 flex items-center gap-3 border-l-4 border-emerald-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6 shrink-0">
+            <Link to="/patients" className="card p-4 w-full flex items-center gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+              <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 shrink-0">
                 <Users size={18} />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-2xl font-black text-slate-800 leading-none">{activePatients}</p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Pacientes Ativos</p>
-                <p className="text-[9px] text-slate-400 mt-0.5">{patients.length} total</p>
+                <p className="text-xs font-semibold text-slate-400 mt-1">Pacientes Ativos</p>
               </div>
             </Link>
 
-            <div className="card p-3 flex items-center gap-3 border-l-4 border-blue-400">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+            <Link to="/agenda" className="card p-4 w-full flex items-center gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+              <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 shrink-0">
                 <Calendar size={18} />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-2xl font-black text-slate-800 leading-none">{sessionCount}</p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Sessões no Mês</p>
-                <p className="text-[9px] text-slate-400 mt-0.5">{presentCount}P · {faltaCount}F · {justCount}J</p>
-              </div>
-            </div>
-
-            <Link to="/my-forms" className="card p-3 flex items-center gap-3 border-l-4 border-amber-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
-                <FileText size={18} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-2xl font-black text-slate-800 leading-none">{totalResponses}<span className="text-base text-slate-400 font-bold">/{totalSent}</span></p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Instrumentos</p>
-                <p className="text-[9px] text-amber-600 mt-0.5">{pendingInstruments} pendentes</p>
+                <p className="text-xs font-semibold text-slate-400 mt-1">Sessões no Mês</p>
               </div>
             </Link>
 
-            <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-400">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+            <Link to="/my-forms" className="card p-4 w-full flex items-center gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+              <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 shrink-0">
+                <FileText size={18} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-2xl font-black text-slate-800 leading-none">{totalResponses}<span className="text-base text-slate-400 font-bold">/{totalSent}</span></p>
+                <p className="text-xs font-semibold text-slate-400 mt-1">Instrumentos</p>
+              </div>
+            </Link>
+
+            <Link to="/agenda" className="card p-4 w-full flex items-center gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+              <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 shrink-0">
                 <DollarSign size={18} />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-2xl font-black text-slate-800 leading-none">{totalPaid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Receita do Mês</p>
-                <p className="text-[9px] text-slate-400 mt-0.5">{monthPayments.length} lançamentos</p>
+                <p className="text-xs font-semibold text-slate-400 mt-1">Receita do Mês</p>
               </div>
-            </div>
+            </Link>
           </div>
 
           {birthdayPatients.length > 0 && (
@@ -461,23 +457,21 @@ export default function Home() {
                     <div className="space-y-3">
                       {nextByMonth.map(({ month, days }) => (
                         <div key={format(month, "yyyy-MM")}>
-                          <div className="flex items-center gap-2 mb-2">
+                          <div className="mb-3 pb-1.5 border-b border-slate-200">
                             <p className="text-[11px] font-black text-slate-700 uppercase tracking-widest">
                               {format(month, "MMMM 'de' yyyy", { locale: ptBR })}
                             </p>
-                            <div className="flex-1 border-t border-slate-200" />
                           </div>
                           <div className="space-y-2">
                             {days.map(({ date, sessions }) => (
                               <div key={format(date, "yyyy-MM-dd")}>
-                                <div className="flex items-center gap-2 mb-1">
+                                <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-100">
                                   <button
                                     onClick={() => navigate(`/agenda?date=${format(date, "yyyy-MM-dd")}`)}
                                     className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-emerald-600 transition-colors"
                                   >
                                     {format(date, "EEE dd/MM", { locale: ptBR })}
                                   </button>
-                                  <div className="flex-1 border-t border-slate-200" />
                                   <span className="text-[9px] font-bold text-slate-400">{sessions.length} sess{sessions.length === 1 ? "ão" : "ões"}</span>
                                 </div>
                                 {sessions.map(app => {
