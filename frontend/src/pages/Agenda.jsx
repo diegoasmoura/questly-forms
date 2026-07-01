@@ -712,7 +712,7 @@ export default function Agenda() {
     <div className="p-4 sm:p-6 h-full flex flex-col space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Agenda</h1>
+          <h1 className="text-2xl font-bold text-slate-800 tracking-tight font-serif">Agenda</h1>
           <p className="text-sm text-slate-500">Gestão de sessões e presenças</p>
         </div>
       </div>

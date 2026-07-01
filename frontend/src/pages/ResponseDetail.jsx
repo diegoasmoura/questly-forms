@@ -138,7 +138,7 @@ export default function ResponseDetail() {
 
       {/* Title */}
       <div className="mb-8">
-        <h1 className="text-3xl font-display font-bold text-slate-900">{response.form?.title || "Análise Clínica"}</h1>
+        <h1 className="text-3xl font-bold text-slate-900 font-serif">{response.form?.title || "Análise Clínica"}</h1>
         <p className="text-slate-600 mt-1 flex items-center gap-2">
           <Calendar size={14} />
           Coletado em {new Date(response.createdAt).toLocaleString("pt-BR")}

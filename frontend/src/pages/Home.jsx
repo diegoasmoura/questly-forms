@@ -306,7 +306,7 @@ export default function Home() {
     <div className="p-6 h-full flex flex-col overflow-hidden animate-fade-in relative">
       <header className="mb-6 shrink-0 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Painel Clínico</h1>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-serif">Painel Clínico</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">Visão geral da sua prática clínica</p>
         </div>
       </header>
@@ -400,7 +400,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0">
             <div className="lg:col-span-3 flex flex-col min-h-0">
-              <div className="card p-5 flex-1 min-h-0 overflow-y-auto dark:bg-slate-800">
+              <div className="card p-6 flex-1 min-h-0 overflow-y-auto dark:bg-slate-800">
                 <div className="flex items-center gap-2 mb-4 shrink-0">
                   <Clock size={16} className="text-brand-600 dark:text-brand-400" />
                   <p className="text-xs font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">Timeline de Atividade</p>
