@@ -80,6 +80,27 @@ export const api = {
   login: (credentials) => request("/auth/login", { method: "POST", body: JSON.stringify(credentials) }),
   register: (data) => request("/auth/register", { method: "POST", body: JSON.stringify(data) }),
   me: () => request("/auth/me"),
+  updateProfile: (data) => request("/auth/profile", { method: "PUT", body: JSON.stringify(data) }),
+  uploadAvatar: async (file) => {
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    const res = await fetch(`${API_URL}/auth/avatar`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = {}; }
+      throw new ApiError(data.error || `Erro ao fazer upload (${res.status})`, res.status);
+    }
+
+    return res.json();
+  },
 
   // Forms
   getForms: () => request("/forms"),

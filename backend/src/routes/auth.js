@@ -1,7 +1,12 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import multer from "multer";
+import path from "path";
+import crypto from "crypto";
+import { fileURLToPath } from "url";
 import prisma from "../db.js";
+import { authMiddleware } from "../middleware/auth.js";
 
 const router = Router();
 
@@ -101,12 +106,75 @@ router.get("/me", async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
-      select: { id: true, email: true, name: true, createdAt: true },
+      select: { id: true, email: true, name: true, avatarUrl: true, createdAt: true },
     });
     if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
     res.json({ user });
   } catch {
     res.status(401).json({ error: "Token inválido ou expirado" });
+  }
+});
+
+router.put("/profile", authMiddleware, async (req, res) => {
+  try {
+    const { name, avatarUrl } = req.body;
+    const data = {};
+    if (name !== undefined) data.name = name;
+    if (avatarUrl !== undefined) data.avatarUrl = avatarUrl;
+
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data,
+      select: { id: true, email: true, name: true, avatarUrl: true, createdAt: true },
+    });
+    res.json({ user });
+  } catch (error) {
+    console.error("Profile update error:", error.message);
+    console.error("Profile update stack:", error.stack);
+    res.status(500).json({ error: "Erro ao atualizar perfil" });
+  }
+});
+
+// Avatar upload
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const avatarStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(process.cwd(), "uploads", "avatars"));
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `${crypto.randomUUID()}${ext}`);
+  }
+});
+
+const avatarUpload = multer({
+  storage: avatarStorage,
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Formato não permitido. Use JPG, PNG ou WebP."), false);
+    }
+  }
+});
+
+router.post("/avatar", authMiddleware, avatarUpload.single("avatar"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "Nenhum arquivo enviado" });
+    }
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { avatarUrl },
+      select: { id: true, email: true, name: true, avatarUrl: true },
+    });
+    res.json({ user });
+  } catch (error) {
+    console.error("Avatar upload error:", error.message);
+    res.status(500).json({ error: "Erro ao fazer upload do avatar" });
   }
 });
 
