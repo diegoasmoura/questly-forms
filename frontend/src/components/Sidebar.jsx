@@ -39,7 +39,7 @@ export default function Sidebar() {
   return (
     <div
       className="bg-slate-900 flex flex-col h-screen sticky top-0 overflow-hidden transition-[width] duration-300 ease-out z-[10000]"
-      style={{ width: collapsed ? 72 : 256 }}
+      style={{ width: collapsed ? 72 : 280 }}
     >
       {/* Header */}
       <div className="h-14 flex items-center justify-between px-3 border-b border-slate-800 shrink-0">
