@@ -1343,7 +1343,7 @@ export default function PatientRecord() {
 
   return (
     <>
-    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in">
+    <div className="p-6 h-full flex flex-col overflow-hidden animate-fade-in">
       <Link to="/patients" className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-4 group transition-colors shrink-0">
         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
         Voltar para Lista de Pacientes

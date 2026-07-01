@@ -107,7 +107,7 @@ export default function FormResponses() {
   }
 
   return (
-    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in bg-emerald-50/30">
+    <div className="p-6 h-full flex flex-col overflow-hidden animate-fade-in bg-emerald-50/30">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div className="flex items-center gap-4">

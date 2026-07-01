@@ -303,7 +303,7 @@ export default function Home() {
   timelineItems.sort((a, b) => b.date - a.date);
 
   return (
-    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in relative">
+    <div className="p-6 h-full flex flex-col overflow-hidden animate-fade-in relative">
       <header className="mb-6 shrink-0 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Painel Clínico</h1>

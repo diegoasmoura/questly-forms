@@ -2,6 +2,10 @@
 
 Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criarem formulários clínicos baseados em evidências e acompanharem a evolução terapêutica através de dados.
 
+### Altura das Páginas
+
+O **Layout.jsx** usa `h-screen` no container de conteúdo, com top bar fixa (`h-14 shrink-0`) e `<main className="flex-1 overflow-y-auto">`. Páginas renderizadas dentro do `<main>` usam **`h-full`** (e não `h-screen`) para ocupar apenas o espaço disponível sem exceder a viewport.
+
 ## Sistema de Design Visual
 
 ### Paleta de Cores
