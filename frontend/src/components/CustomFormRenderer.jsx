@@ -164,8 +164,8 @@ export default function CustomFormRenderer({
   if (submitted) {
     return (
       <div className="text-center py-12 animate-fade-in">
-        <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
-          <Check size={32} className="text-emerald-600" />
+        <div className="w-16 h-16 rounded-full bg-secondary-100 flex items-center justify-center mx-auto mb-4">
+          <Check size={32} className="text-secondary-600" />
         </div>
         <h2 className="text-xl font-semibold text-slate-900 mb-2">Muito Obrigado!</h2>
         <p className="text-slate-600">Suas respostas foram enviadas com sucesso.</p>
@@ -300,7 +300,7 @@ export default function CustomFormRenderer({
 
         <div className="card overflow-hidden">
           <div className="px-7 py-7">
-            <div className="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-3">
+            <div className="text-xs font-semibold text-brand-600 uppercase tracking-wider mb-3">
               Pergunta {q.id} de {allQuestions.length}
             </div>
 
@@ -323,8 +323,8 @@ export default function CustomFormRenderer({
                         onClick={() => handleChange(q.id, opt.value)}
                         className={`aspect-square rounded-xl border-2 font-semibold transition-all duration-150 flex flex-col items-center justify-center ${
                           selected
-                            ? "bg-emerald-600 text-white border-emerald-600 scale-105 shadow-md"
-                            : "bg-white text-slate-700 border-slate-200 hover:border-emerald-300 hover:bg-emerald-50"
+                            ? "bg-brand-600 text-white border-brand-600 scale-105 shadow-md"
+                            : "bg-white text-slate-700 border-slate-200 hover:border-brand-300 hover:bg-brand-50"
                         }`}
                       >
                         <span className="text-lg leading-none">{opt.value}</span>
@@ -341,13 +341,13 @@ export default function CustomFormRenderer({
                         key={String(opt.value)}
                         className={`flex items-center gap-3 px-2.5 py-1.5 rounded-lg text-sm transition-colors ${
                           selected
-                            ? "bg-emerald-50 text-emerald-700 font-semibold"
+                            ? "bg-brand-50 text-brand-700 font-semibold"
                             : "text-slate-400"
                         }`}
                       >
                         <span className={`w-6 h-6 rounded border flex items-center justify-center font-bold text-xs shrink-0 ${
                           selected
-                            ? "bg-emerald-600 text-white border-emerald-600"
+                            ? "bg-brand-600 text-white border-brand-600"
                             : "border-slate-200 text-slate-400"
                         }`}>
                           {opt.value}
@@ -547,7 +547,7 @@ function TextField({ question, value, onChange, readOnly }) {
   if (question.multiline) {
     return (
       <textarea
-        className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-sm text-slate-700 placeholder-slate-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100 outline-none transition-all resize-y min-h-[80px]"
+        className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-sm text-slate-700 placeholder-slate-400 focus:border-brand-300 focus:ring-2 focus:ring-brand-100 outline-none transition-all resize-y min-h-[80px]"
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         placeholder={question.placeholder || ""}
@@ -558,7 +558,7 @@ function TextField({ question, value, onChange, readOnly }) {
   return (
     <input
       type={question.inputType || "text"}
-      className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-sm text-slate-700 placeholder-slate-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100 outline-none transition-all"
+      className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-sm text-slate-700 placeholder-slate-400 focus:border-brand-300 focus:ring-2 focus:ring-brand-100 outline-none transition-all"
       value={value || ""}
       onChange={(e) => onChange(e.target.value)}
       placeholder={question.placeholder || ""}
@@ -573,7 +573,7 @@ function NumberField({ question, value, onChange, readOnly }) {
   return (
     <input
       type="number"
-      className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-sm text-slate-700 placeholder-slate-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100 outline-none transition-all"
+      className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-sm text-slate-700 placeholder-slate-400 focus:border-brand-300 focus:ring-2 focus:ring-brand-100 outline-none transition-all"
       value={value ?? ""}
       onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
       min={question.min}
@@ -600,8 +600,8 @@ function BooleanField({ question, value, onChange, readOnly }) {
         onClick={() => onChange(true)}
         className={`flex-1 px-5 py-3 rounded-xl text-sm font-bold transition-all ${
           isChecked
-            ? "bg-emerald-600 text-white shadow-lg shadow-emerald-200"
-            : "bg-white text-slate-600 border-2 border-slate-200 hover:border-emerald-300 hover:text-emerald-600"
+            ? "bg-brand-600 text-white shadow-lg shadow-brand-200"
+            : "bg-white text-slate-600 border-2 border-slate-200 hover:border-brand-300 hover:text-brand-600"
         }`}
       >
         {trueLabel}
@@ -652,8 +652,8 @@ function ChoiceField({ question, value, onChange, readOnly }) {
             }}
             className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
               checked
-                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-200"
-                : "bg-white text-slate-600 border-2 border-slate-200 hover:border-emerald-300 hover:text-emerald-600"
+                ? "bg-brand-600 text-white shadow-lg shadow-brand-200"
+                : "bg-white text-slate-600 border-2 border-slate-200 hover:border-brand-300 hover:text-brand-600"
             }`}
           >
             {opt.label}
@@ -689,8 +689,8 @@ function LikertField({ question, value, onChange, readOnly }) {
               onClick={() => onChange(opt.value)}
               className={`aspect-square rounded-xl border-2 font-semibold transition-all duration-150 flex flex-col items-center justify-center ${
                 selected
-                  ? "bg-emerald-600 text-white border-emerald-600 scale-105 shadow-md"
-                  : "bg-white text-slate-700 border-slate-200 hover:border-emerald-300 hover:bg-emerald-50"
+                  ? "bg-brand-600 text-white border-brand-600 scale-105 shadow-md"
+                  : "bg-white text-slate-700 border-slate-200 hover:border-brand-300 hover:bg-brand-50"
               }`}
             >
               {opt.value}
@@ -706,12 +706,12 @@ function LikertField({ question, value, onChange, readOnly }) {
               <div
                 key={String(opt.value)}
                 className={`flex items-center gap-3 text-xs rounded-lg px-2 py-1 transition-colors ${
-                  selected ? "bg-emerald-50 text-emerald-700 font-medium" : "text-slate-500"
+                  selected ? "bg-brand-50 text-brand-700 font-medium" : "text-slate-500"
                 }`}
               >
                 <span className={`w-6 h-6 rounded border flex items-center justify-center font-bold shrink-0 ${
                   selected
-                    ? "bg-emerald-600 text-white border-emerald-600"
+                    ? "bg-brand-600 text-white border-brand-600"
                     : "border-slate-200 text-slate-400"
                 }`}>
                   {opt.value}
@@ -777,7 +777,7 @@ function MatrixField({ question, value, onChange, readOnly }) {
                       name={`${question.id}_${row.value}`}
                       checked={checked}
                       onChange={() => onChange({ ...matrixValue, [row.value]: col.value })}
-                      className="w-4 h-4 border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                      className="w-4 h-4 border-slate-300 text-brand-600 focus:ring-brand-500"
                     />
                   </td>
                 );

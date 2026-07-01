@@ -94,14 +94,14 @@ export default function Library() {
         <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
           <button
             onClick={() => handleViewMode("grid")}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode === "grid" ? "bg-emerald-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode === "grid" ? "bg-brand-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
           >
             <LayoutGrid size={18} />
             <span className="text-xs font-bold">Cards</span>
           </button>
           <button
             onClick={() => handleViewMode("list")}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode === "list" ? "bg-emerald-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode === "list" ? "bg-brand-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
           >
             <List size={18} />
             <span className="text-xs font-bold">Lista</span>
@@ -120,15 +120,15 @@ export default function Library() {
               >
                 <div className="p-6 flex-1">
                   <div className="flex items-start justify-between mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-200">
+                    <div className="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 group-hover:bg-brand-600 group-hover:text-white transition-colors duration-200">
                       <BookTemplate size={24} />
                     </div>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-600 bg-brand-50 px-2 py-1 rounded-md">
                       Premium
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-semibold text-slate-700 mb-2 group-hover:text-emerald-600 transition-colors">
+                  <h3 className="text-lg font-semibold text-slate-700 mb-2 group-hover:text-brand-600 transition-colors">
                     {template.title}
                   </h3>
                   <p className="text-sm text-slate-500 leading-relaxed line-clamp-3">
@@ -137,7 +137,7 @@ export default function Library() {
 
                   <div className="mt-4 flex flex-wrap gap-2">
                     <span className="text-[10px] font-medium px-2 py-1 bg-blue-50 text-blue-600 rounded-full">Avaliação</span>
-                    <span className="text-[10px] font-medium px-2 py-1 bg-emerald-50 text-emerald-600 rounded-full">Validado</span>
+                    <span className="text-[10px] font-medium px-2 py-1 bg-brand-50 text-brand-600 rounded-full">Validado</span>
                     <span className="text-[10px] font-medium px-2 py-1 bg-purple-50 text-purple-600 rounded-full">Adulto</span>
                   </div>
                 </div>
@@ -214,7 +214,7 @@ function LibraryListRow({ template, importing, previewing, onImport, onPreview }
       <button 
         onClick={onPreview}
         disabled={previewing}
-        className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
+        className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-brand-50 text-brand-700 hover:bg-brand-100 transition-colors"
       >
         <BookTemplate size={20} />
       </button>
@@ -226,7 +226,7 @@ function LibraryListRow({ template, importing, previewing, onImport, onPreview }
             disabled={previewing}
             className="group/name block min-w-0 text-left"
           >
-            <h4 className="font-semibold text-slate-900 truncate group-hover:text-emerald-600 transition-colors">
+            <h4 className="font-semibold text-slate-900 truncate group-hover:text-brand-600 transition-colors">
               {template.title}
             </h4>
           </button>

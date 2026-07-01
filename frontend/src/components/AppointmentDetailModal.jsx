@@ -262,13 +262,13 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
   const initials = (patient?.name || "?").split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
 
   const statusColors = {
-    presente: "bg-emerald-100 text-emerald-600",
+    presente: "bg-secondary-100 text-secondary-600",
     falta: "bg-red-100 text-red-600",
     justificada: "bg-amber-100 text-amber-600",
   };
 
   const statusBadgeColors = {
-    presente: "bg-emerald-100 text-emerald-700",
+    presente: "bg-secondary-100 text-secondary-700",
     falta: "bg-red-100 text-red-700",
     justificada: "bg-amber-100 text-amber-700",
   };
@@ -325,8 +325,8 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
               onClick={() => handleQuickStatus(appointment, "presente", sessionDate)}
               className={`w-full py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${
                 currentStatus === "presente"
-                  ? "bg-emerald-500 text-white border-emerald-500 shadow-sm"
-                  : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:text-emerald-600"
+                  ? "bg-secondary-500 text-white border-secondary-500 shadow-sm"
+                  : "bg-white text-slate-600 border-slate-200 hover:border-secondary-300 hover:text-secondary-600"
               }`}
             >
               <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${currentStatus === "presente" ? "border-white" : "border-slate-300"}`}>
@@ -367,7 +367,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
               href={`https://wa.me/55${phone}?text=${encodeURIComponent(whatsappText)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition-all text-xs font-black uppercase tracking-widest border border-emerald-200"
+              className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-brand-50 text-brand-700 rounded-xl hover:bg-brand-100 transition-all text-xs font-black uppercase tracking-widest border border-brand-200"
             >
               <MessageCircle size={15} />
               Lembrete WhatsApp
@@ -521,7 +521,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
 
       {successMessage && (
         <div className="fixed bottom-8 right-8 z-[100] animate-slide-up">
-          <div className="bg-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-500/50 backdrop-blur-sm">
+          <div className="bg-secondary-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-secondary-500/50 backdrop-blur-sm">
             <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
               <Check size={18} className="text-white" />
             </div>

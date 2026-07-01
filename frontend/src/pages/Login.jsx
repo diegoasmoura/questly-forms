@@ -73,7 +73,7 @@ export default function Login() {
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                className="w-12 h-12 rounded-full border-4 border-emerald-600 border-t-transparent"
+                className="w-12 h-12 rounded-full border-4 border-brand-600 border-t-transparent"
               />
               <motion.p
                 initial={{ opacity: 0, y: 10 }}
@@ -102,7 +102,7 @@ export default function Login() {
               <span className="text-sm">Voltar ao início</span>
             </Link>
             <div className="flex items-center gap-4 mb-12">
-              <div className="w-12 h-12 rounded-sm rotate-45 bg-emerald-700 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-sm rotate-45 bg-brand-700 flex items-center justify-center">
                 <span className="text-xl font-bold -rotate-45">Q</span>
               </div>
               <span className="text-2xl font-semibold">Questly Forms</span>
@@ -172,7 +172,7 @@ export default function Login() {
 
             <p className="mt-8 text-center text-sm text-slate-600">
               Não tem uma conta?{" "}
-              <Link to="/register" className="font-medium text-emerald-700 hover:underline">
+              <Link to="/register" className="font-medium text-brand-700 hover:underline">
                 Cadastre-se
               </Link>
             </p>

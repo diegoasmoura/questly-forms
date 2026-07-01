@@ -44,7 +44,7 @@ export default function Layout({ children }) {
   const gradient = "from-purple-500 to-pink-500";
   const initials = user?.name?.split(" ")[0]?.slice(0, 2)?.toUpperCase() || "U";
 
-  const gridColor = theme === "dark" ? "#0d9488" : "#5eead4";
+  const gridColor = theme === "dark" ? "#60a5fa" : "#93c5fd";
 
   return (
     <div className="flex min-h-screen bg-[#f5f0eb] dark:bg-slate-900 font-sans relative transition-colors duration-200">

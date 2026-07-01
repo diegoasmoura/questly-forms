@@ -210,7 +210,7 @@ export default function CustomFormBuilder() {
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center">
-        <Loader2 size={32} className="animate-spin text-emerald-600" />
+        <Loader2 size={32} className="animate-spin text-brand-600" />
       </div>
     );
   }
@@ -231,7 +231,7 @@ export default function CustomFormBuilder() {
               className="text-lg font-bold text-slate-900 bg-transparent border-none focus:outline-none w-64 md:w-96"
               placeholder="Título do formulário..."
             />
-            <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">
+            <span className="text-[10px] text-brand-600 font-bold uppercase tracking-wider">
               Editor de Instrumentos • {questionCount} perguntas
             </span>
           </div>
@@ -299,7 +299,7 @@ export default function CustomFormBuilder() {
             {pages.map((page, pIdx) => (
               <div key={pIdx} className="card overflow-hidden">
                 <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-100">
-                  <FileText size={14} className="text-emerald-500 shrink-0" />
+                  <FileText size={14} className="text-brand-500 shrink-0" />
                   <input
                     type="text"
                     value={page.title}
@@ -332,7 +332,7 @@ export default function CustomFormBuilder() {
                             <button
                               key={t.value}
                               onClick={() => addQuestion(pIdx, t.value)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 hover:border-emerald-300 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 hover:border-brand-300 hover:text-brand-600 hover:bg-brand-50 transition-all"
                             >
                               <Icon size={12} />
                               {t.label}
@@ -370,7 +370,7 @@ export default function CustomFormBuilder() {
                   {page.questions.length > 0 && (
                     <button
                       onClick={() => addQuestion(pIdx)}
-                      className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-400 hover:text-emerald-600 hover:border-emerald-300 transition-all font-medium flex items-center justify-center gap-2"
+                      className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-400 hover:text-brand-600 hover:border-brand-300 transition-all font-medium flex items-center justify-center gap-2"
                     >
                       <Plus size={16} />
                       Adicionar Pergunta
@@ -382,7 +382,7 @@ export default function CustomFormBuilder() {
 
             <button
               onClick={addPage}
-              className="w-full py-3 border-2 border-dashed border-slate-300 rounded-xl text-sm text-slate-500 hover:text-emerald-600 hover:border-emerald-300 transition-all font-medium flex items-center justify-center gap-2"
+              className="w-full py-3 border-2 border-dashed border-slate-300 rounded-xl text-sm text-slate-500 hover:text-brand-600 hover:border-brand-300 transition-all font-medium flex items-center justify-center gap-2"
             >
               <Plus size={16} />
               Adicionar Seção
@@ -613,7 +613,7 @@ function QuestionEditor({
       onDrop={onDrop}
       className={`rounded-xl border transition-all ${
         isEditing
-          ? "border-emerald-300 bg-emerald-50/30 shadow-sm"
+          ? "border-brand-300 bg-brand-50/30 shadow-sm"
           : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm"
       }`}
     >
@@ -646,7 +646,7 @@ function QuestionEditor({
             <button
               onClick={onMoveUp}
               disabled={isFirst}
-              className="disabled:opacity-20 hover:text-emerald-600 text-slate-400 p-0.5"
+              className="disabled:opacity-20 hover:text-brand-600 text-slate-400 p-0.5"
               title="Mover para cima"
             >
               <ChevronUp size={11} />
@@ -654,7 +654,7 @@ function QuestionEditor({
             <button
               onClick={onMoveDown}
               disabled={isLast}
-              className="disabled:opacity-20 hover:text-emerald-600 text-slate-400 p-0.5"
+              className="disabled:opacity-20 hover:text-brand-600 text-slate-400 p-0.5"
               title="Mover para baixo"
             >
               <ChevronDown size={11} />
@@ -664,7 +664,7 @@ function QuestionEditor({
             onClick={isEditing ? saveEdits : onToggleEdit}
             className={`p-1.5 rounded-lg transition-colors ${
               isEditing
-                ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                ? "bg-brand-600 text-white hover:bg-brand-700"
                 : "hover:bg-slate-100 text-slate-400"
             }`}
             title={isEditing ? "Concluir" : "Editar"}
@@ -683,7 +683,7 @@ function QuestionEditor({
 
       {/* Edit panel */}
       {isEditing && (
-        <div className="px-4 pb-5 space-y-4 border-t border-emerald-200 pt-4">
+        <div className="px-4 pb-5 space-y-4 border-t border-brand-200 pt-4">
           <div className="grid grid-cols-3 gap-3">
             {QUESTION_TYPES.map((t) => {
               const TIcon = TYPE_ICONS[t.value];
@@ -694,8 +694,8 @@ function QuestionEditor({
                   onClick={() => setLocalType(t.value)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-all ${
                     active
-                      ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
-                      : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:text-emerald-600"
+                      ? "bg-brand-600 text-white border-brand-600 shadow-sm"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-brand-300 hover:text-brand-600"
                   }`}
                 >
                   <TIcon size={14} />
@@ -724,7 +724,7 @@ function QuestionEditor({
               type="checkbox"
               checked={localRequired}
               onChange={(e) => setLocalRequired(e.target.checked)}
-              className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+              className="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
             />
             <span className="text-xs text-slate-600">Obrigatória</span>
           </label>
@@ -765,7 +765,7 @@ function QuestionEditor({
                   type="checkbox"
                   checked={localMultiline}
                   onChange={(e) => setLocalMultiline(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                  className="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                 />
                 <span className="text-xs text-slate-600">Texto longo (textarea)</span>
               </label>
@@ -819,7 +819,7 @@ function QuestionEditor({
                 </label>
                 <button
                   onClick={addOption}
-                  className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+                  className="text-[10px] font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1"
                 >
                   <Plus size={10} />
                   Adicionar
@@ -856,7 +856,7 @@ function QuestionEditor({
                     type="checkbox"
                     checked={q.multiple}
                     onChange={(e) => onUpdate({ multiple: e.target.checked })}
-                    className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    className="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                   />
                   <span className="text-xs text-slate-600">Múltipla escolha (checkboxes)</span>
                 </label>
@@ -869,7 +869,7 @@ function QuestionEditor({
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Linhas</label>
-                  <button onClick={addRow} className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
+                  <button onClick={addRow} className="text-[10px] font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1">
                     <Plus size={10} />
                     Adicionar
                   </button>
@@ -895,7 +895,7 @@ function QuestionEditor({
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Colunas</label>
-                  <button onClick={addColumn} className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
+                  <button onClick={addColumn} className="text-[10px] font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1">
                     <Plus size={10} />
                     Adicionar
                   </button>
@@ -933,7 +933,7 @@ function QuestionEditor({
                     <button
                       key={i}
                       onClick={() => onMoveToPage(i)}
-                      className="px-2.5 py-1 rounded-lg border border-slate-200 text-[10px] font-medium text-slate-500 hover:border-emerald-300 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
+                      className="px-2.5 py-1 rounded-lg border border-slate-200 text-[10px] font-medium text-slate-500 hover:border-brand-300 hover:text-brand-600 hover:bg-brand-50 transition-all"
                     >
                       {p.title || `Seção ${i + 1}`}
                     </button>

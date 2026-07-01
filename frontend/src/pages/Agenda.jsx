@@ -68,8 +68,8 @@ function StatsBar({ appointments, attendances }) {
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Agendamentos</p>
         </div>
       </div>
-      <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-400">
-        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+      <div className="card p-3 flex items-center gap-3 border-l-4 border-brand-400">
+        <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600">
           <UserCheck size={18} />
         </div>
         <div>
@@ -106,7 +106,7 @@ function SessionCard({ session, date, onClick }) {
   const attendanceStatus = attendance?.status;
 
   const statusStyles = {
-    presente: "border-emerald-500 bg-emerald-50/30",
+    presente: "border-brand-500 bg-brand-50/30",
     falta: "border-red-500 bg-red-50/30",
     justificada: "border-amber-500 bg-amber-50/30",
     default: "border-slate-200 bg-white hover:border-slate-300"
@@ -121,7 +121,7 @@ function SessionCard({ session, date, onClick }) {
       className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all shadow-sm ${statusStyles[attendanceStatus] || statusStyles.default}`}
     >
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 ${
-        attendanceStatus === "presente" ? "bg-emerald-100 text-emerald-600" :
+        attendanceStatus === "presente" ? "bg-brand-100 text-brand-600" :
         attendanceStatus === "falta" ? "bg-red-100 text-red-600" :
         attendanceStatus === "justificada" ? "bg-amber-100 text-amber-600" :
         "bg-slate-100 text-slate-500"
@@ -139,7 +139,7 @@ function SessionCard({ session, date, onClick }) {
       </div>
       <div className="shrink-0 ml-2">
         <span className={`w-2 h-2 rounded-full block ${
-          attendanceStatus === "presente" ? "bg-emerald-500" :
+          attendanceStatus === "presente" ? "bg-brand-500" :
           attendanceStatus === "falta" ? "bg-red-500" :
           attendanceStatus === "justificada" ? "bg-amber-500" :
           "bg-slate-300"
@@ -761,7 +761,7 @@ export default function Agenda() {
                       const time = event.session?.app?.time || "";
                       const status = event.session?.attendance?.status;
                       let barColor = "bg-slate-400";
-                      if (status === "presente") barColor = "bg-emerald-500";
+                      if (status === "presente") barColor = "bg-brand-500";
                       else if (status === "falta") barColor = "bg-red-500";
                       else if (status === "justificada") barColor = "bg-amber-500";
                       return (
@@ -775,7 +775,7 @@ export default function Agenda() {
                       const label = format(toolbarProps.date, "MMMM 'de' yyyy", { locale: ptBR });
                       return (
                         <div className="shrink-0 mb-3 flex items-center justify-between">
-                          <p onClick={() => setSelectedDay(null)} className="text-sm font-bold text-slate-600 capitalize cursor-pointer hover:text-emerald-600 transition-colors">{label}</p>
+                          <p onClick={() => setSelectedDay(null)} className="text-sm font-bold text-slate-600 capitalize cursor-pointer hover:text-brand-600 transition-colors">{label}</p>
                           <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
                             <button onClick={() => toolbarProps.onNavigate("PREV")} className="p-1 hover:bg-slate-100 rounded transition-all text-slate-500">
                               <ChevronLeft size={16} />
@@ -794,7 +794,7 @@ export default function Agenda() {
                 {/* Legend */}
                 <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-slate-100 shrink-0">
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-brand-500" />
                     <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Realizado</span>
                   </div>
                   <div className="flex items-center gap-1.5">
@@ -834,7 +834,7 @@ export default function Agenda() {
                         </span>
                         <button
                           onClick={() => setShowAddModal(true)}
-                          className="w-8 h-8 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center justify-center transition-all shadow-sm shadow-emerald-200"
+                          className="w-8 h-8 bg-brand-600 hover:bg-brand-700 text-white rounded-lg flex items-center justify-center transition-all shadow-sm shadow-brand-200"
                           title="Adicionar agendamento"
                         >
                           <Plus size={16} />
@@ -884,7 +884,7 @@ export default function Agenda() {
                             <div className="flex items-center gap-2 mb-1.5">
                               <button
                                 onClick={() => setSelectedDay(date)}
-                                className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-emerald-600 transition-colors"
+                                className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-brand-600 transition-colors"
                               >
                                 {format(date, "EEE dd/MM", { locale: ptBR })}
                               </button>
@@ -907,7 +907,7 @@ export default function Agenda() {
                                     {name}
                                   </p>
                                   <span className="text-[10px] font-bold text-slate-500 shrink-0">{app.time} &bull; {app.duration}min</span>
-                                  <ChevronRight size={13} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition-all shrink-0" />
+                                  <ChevronRight size={13} className="text-slate-300 group-hover:text-brand-500 group-hover:translate-x-0.5 transition-all shrink-0" />
                                 </div>
                               );
                             })}
@@ -1128,7 +1128,7 @@ export default function Agenda() {
                     type="checkbox"
                     checked={addForm.recurring}
                     onChange={e => setAddForm({ ...addForm, recurring: e.target.checked })}
-                    className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    className="w-5 h-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                   />
                   <div>
                     <span className="text-sm font-bold text-slate-700">
@@ -1145,7 +1145,7 @@ export default function Agenda() {
                     <input
                       type="number"
                       min={0}
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-black text-center focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-black text-center focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all"
                       value={addForm.maxSessions || ""}
                       onChange={e => setAddForm({ ...addForm, maxSessions: Math.max(0, parseInt(e.target.value) || 0) })}
                       placeholder="0 = ilimitado"
@@ -1310,7 +1310,7 @@ export default function Agenda() {
 
       {successMessage && (
         <div className="fixed bottom-8 right-8 z-[100] animate-slide-up">
-          <div className="bg-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-500/50 backdrop-blur-sm">
+          <div className="bg-brand-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-brand-500/50 backdrop-blur-sm">
             <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
               <Check size={18} className="text-white" />
             </div>

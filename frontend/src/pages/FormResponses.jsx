@@ -99,7 +99,7 @@ export default function FormResponses() {
     return (
       <div className="h-full flex items-center justify-center p-20">
         <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-10 h-10 rounded-full border-2 border-emerald-900 border-t-transparent animate-spin" />
+          <div className="w-10 h-10 rounded-full border-2 border-brand-900 border-t-transparent animate-spin" />
           <p className="text-sm text-slate-600 font-medium">Carregando respostas...</p>
         </div>
       </div>
@@ -107,11 +107,11 @@ export default function FormResponses() {
   }
 
   return (
-    <div className="p-6 h-full flex flex-col overflow-hidden animate-fade-in bg-emerald-50/30">
+    <div className="p-6 h-full flex flex-col overflow-hidden animate-fade-in bg-brand-50/30">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div className="flex items-center gap-4">
-          <Link to="/my-forms" className="p-2 rounded-xl hover:bg-emerald-50 text-slate-500 hover:text-emerald-900 transition-all">
+          <Link to="/my-forms" className="p-2 rounded-xl hover:bg-brand-50 text-slate-500 hover:text-brand-900 transition-all">
             <ArrowLeft size={20} />
           </Link>
           <div>
@@ -134,7 +134,7 @@ export default function FormResponses() {
       {aggregate && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 shrink-0">
           <StatBox label="Total" value={aggregate.total} color="bg-blue-50 text-blue-600" />
-          <StatBox label="Hoje" value={aggregate.todayCount} color="bg-emerald-50 text-emerald-600" />
+          <StatBox label="Hoje" value={aggregate.todayCount} color="bg-brand-50 text-brand-600" />
           <StatBox label="Esta Semana" value={aggregate.weekCount} color="bg-purple-50 text-purple-600" />
           <StatBox label="Dias Ativos" value={Object.keys(aggregate.dailyCounts || {}).length} color="bg-orange-50 text-orange-600" />
         </div>
@@ -142,7 +142,7 @@ export default function FormResponses() {
 
       {/* Tabs */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-emerald-100 shadow-sm">
+        <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-brand-100 shadow-sm">
           <TabButton 
             active={activeTab === "list"} 
             onClick={() => setActiveTab("list")} 
@@ -168,7 +168,7 @@ export default function FormResponses() {
       <div className="flex-1 overflow-y-auto">
         {/* Patient Filter */}
         {uniquePatients.length > 0 && (
-          <div className="card p-4 mb-4 bg-emerald-50/50 border-emerald-100">
+          <div className="card p-4 mb-4 bg-brand-50/50 border-brand-100">
             <div className="flex flex-col md:flex-row md:items-center gap-4">
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Filtrar por Paciente:</span>
               <div className="flex flex-wrap gap-2">
@@ -176,8 +176,8 @@ export default function FormResponses() {
                   onClick={() => setSelectedPatient("all")}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                     selectedPatient === "all"
-                      ? "bg-emerald-900 text-white shadow-md shadow-emerald-900/10"
-                      : "bg-white text-emerald-600 hover:text-emerald-900 border border-emerald-100"
+                      ? "bg-brand-900 text-white shadow-md shadow-brand-900/10"
+                      : "bg-white text-brand-600 hover:text-brand-900 border border-brand-100"
                   }`}
                 >
                   Todos ({responses.length})
@@ -190,11 +190,11 @@ export default function FormResponses() {
                       onClick={() => setSelectedPatient(patient.id)}
                       className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                         selectedPatient === patient.id
-                          ? "bg-emerald-900 text-white shadow-md shadow-emerald-900/10"
-                          : "bg-white text-emerald-600 hover:text-emerald-900 border border-emerald-100"
+                          ? "bg-brand-900 text-white shadow-md shadow-brand-900/10"
+                          : "bg-white text-brand-600 hover:text-brand-900 border border-brand-100"
                       }`}
                     >
-                      <div className="w-5 h-5 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 text-[8px] font-black">
+                      <div className="w-5 h-5 rounded-lg bg-brand-100 flex items-center justify-center text-brand-700 text-[8px] font-black">
                         {patient.name.split(" ")[0].slice(0, 2).toUpperCase()}
                       </div>
                       <span className="truncate max-w-[120px]">{patient.name}</span>
@@ -231,7 +231,7 @@ export default function FormResponses() {
         {activeTab === "list" && (
           filteredResponses.length === 0 ? (
           <div className="card p-20 text-center border-dashed border-2">
-            <Filter size={48} className="mx-auto text-emerald-200 mb-6" />
+            <Filter size={48} className="mx-auto text-brand-200 mb-6" />
             <h3 className="text-xl font-bold text-slate-900 mb-2">
               {selectedPatient !== "all" ? "Nenhuma resposta deste paciente" : "Nenhuma resposta coletada"}
             </h3>
@@ -244,36 +244,36 @@ export default function FormResponses() {
         ) : (
           <div className="grid grid-cols-1 gap-4">
             {filteredResponses.map((response) => (
-              <div key={response.id} className="card group hover:border-emerald-300 transition-all duration-300 overflow-hidden">
+              <div key={response.id} className="card group hover:border-brand-300 transition-all duration-300 overflow-hidden">
                 <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-6">
                   <div className="flex items-center gap-4 flex-1">
                     {/* Patient Info */}
                     {response.patient ? (
                       <Link 
                         to={`/patients/${response.patient.id}`}
-                        className="flex items-center gap-3 px-4 py-2 bg-emerald-50/50 rounded-xl border border-emerald-100 hover:border-emerald-300 transition-all group/patient"
+                        className="flex items-center gap-3 px-4 py-2 bg-brand-50/50 rounded-xl border border-brand-100 hover:border-brand-300 transition-all group/patient"
                       >
-                        <div className="w-10 h-10 rounded-lg bg-emerald-900 text-white flex items-center justify-center text-xs font-bold group-hover/patient:bg-emerald-700 transition-colors">
+                        <div className="w-10 h-10 rounded-lg bg-brand-900 text-white flex items-center justify-center text-xs font-bold group-hover/patient:bg-brand-700 transition-colors">
                           {response.patient.name.split(" ")[0].slice(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-slate-900 group-hover/patient:text-emerald-700 transition-colors">{response.patient.name}</p>
-                          <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-tighter">Paciente Vinculado</p>
+                          <p className="text-sm font-bold text-slate-900 group-hover/patient:text-brand-700 transition-colors">{response.patient.name}</p>
+                          <p className="text-[10px] text-brand-600 font-bold uppercase tracking-tighter">Paciente Vinculado</p>
                         </div>
                       </Link>
                     ) : (
-                      <div className="flex items-center gap-3 px-4 py-2 bg-emerald-50 rounded-xl border border-emerald-100">
-                        <div className="w-10 h-10 rounded-lg bg-emerald-200 flex items-center justify-center text-slate-600 text-xs">
+                      <div className="flex items-center gap-3 px-4 py-2 bg-brand-50 rounded-xl border border-brand-100">
+                        <div className="w-10 h-10 rounded-lg bg-brand-200 flex items-center justify-center text-slate-600 text-xs">
                           ?
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-emerald-600">Resposta Anônima</p>
+                          <p className="text-sm font-bold text-brand-600">Resposta Anônima</p>
                           <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">Link Público</p>
                         </div>
                       </div>
                     )}
                     
-                    <div className="hidden lg:block h-10 w-px bg-emerald-50 mx-2" />
+                    <div className="hidden lg:block h-10 w-px bg-brand-50 mx-2" />
                     
                     <div className="flex flex-col">
                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Coletado em</p>
@@ -296,19 +296,19 @@ export default function FormResponses() {
                       </Link>
                     )}
                     
-                    <div className="h-8 w-px bg-emerald-50 mx-1" />
+                    <div className="h-8 w-px bg-brand-50 mx-1" />
                     
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => setSelectedResponse(selectedResponse?.id === response.id ? null : response)}
-                        className={`p-2 rounded-lg transition-all ${selectedResponse?.id === response.id ? 'bg-emerald-900 text-white' : 'hover:bg-emerald-50 text-slate-500'}`}
+                        className={`p-2 rounded-lg transition-all ${selectedResponse?.id === response.id ? 'bg-brand-900 text-white' : 'hover:bg-brand-50 text-slate-500'}`}
                         title="Ver dados brutos"
                       >
                         <Eye size={18} />
                       </button>
                       <button
                         onClick={() => handleExportPdf(response)}
-                        className="p-2 rounded-lg hover:bg-emerald-50 text-slate-500 hover:text-emerald-900 transition-all"
+                        className="p-2 rounded-lg hover:bg-brand-50 text-slate-500 hover:text-brand-900 transition-all"
                         title="Exportar PDF"
                       >
                         <FileDown size={18} />
@@ -326,7 +326,7 @@ export default function FormResponses() {
                 {/* Expanded view (Raw Data) */}
                 {selectedResponse?.id === response.id && (
                   <div className="px-5 pb-5 animate-fade-in">
-                    <div className="p-4 bg-emerald-900 text-emerald-400 rounded-xl overflow-auto max-h-96 font-mono text-[11px] leading-relaxed shadow-inner">
+                    <div className="p-4 bg-brand-900 text-brand-400 rounded-xl overflow-auto max-h-96 font-mono text-[11px] leading-relaxed shadow-inner">
                       {JSON.stringify(response.data, null, 2)}
                     </div>
                   </div>
@@ -344,7 +344,7 @@ export default function FormResponses() {
 
 function StatBox({ label, value, color }) {
   return (
-    <div className="card p-6 flex items-center justify-between group hover:border-emerald-300 transition-all duration-300">
+    <div className="card p-6 flex items-center justify-between group hover:border-brand-300 transition-all duration-300">
       <div>
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{label}</p>
         <p className="text-3xl font-black text-slate-900">{value}</p>
@@ -362,8 +362,8 @@ function TabButton({ active, onClick, icon, label }) {
       onClick={onClick}
       className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
         active 
-          ? "bg-emerald-900 text-white shadow-md" 
-          : "text-slate-600 hover:text-emerald-900 hover:bg-emerald-50"
+          ? "bg-brand-900 text-white shadow-md" 
+          : "text-slate-600 hover:text-brand-900 hover:bg-brand-50"
       }`}
     >
       {icon}

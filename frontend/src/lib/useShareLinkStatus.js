@@ -65,7 +65,7 @@ export function useShareLinkStatus(patientId) {
 export function getStatusBadge(status) {
   const badges = {
     PENDENTE: { bg: "bg-amber-50", border: "border-amber-200", dot: "bg-amber-500", text: "text-amber-700", label: "Pendente" },
-    RESPONDIDO: { bg: "bg-emerald-50", border: "border-emerald-200", dot: "bg-emerald-500", text: "text-emerald-700", label: "Respondido" },
+    RESPONDIDO: { bg: "bg-secondary-50", border: "border-secondary-200", dot: "bg-secondary-500", text: "text-secondary-700", label: "Respondido" },
   };
   return badges[status] || badges.PENDENTE;
 }

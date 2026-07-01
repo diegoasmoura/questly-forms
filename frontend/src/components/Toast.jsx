@@ -41,7 +41,7 @@ function ToastItem({ toast: t, onRemove }) {
     return () => clearTimeout(timer);
   }, [t.id, t.duration, onRemove]);
 
-  const bg = t.type === "success" ? "bg-emerald-600" : "bg-red-500";
+  const bg = t.type === "success" ? "bg-secondary-600" : "bg-red-500";
   const Icon = t.type === "success" ? Check : AlertCircle;
 
   return (

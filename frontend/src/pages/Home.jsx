@@ -332,9 +332,9 @@ export default function Home() {
             </Link>
 
             <Link to="/agenda" className="w-full hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700">
-              <div className="h-1 bg-brand-500" />
+              <div className="h-1 bg-secondary-500" />
               <div className="p-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center text-brand-600 dark:text-brand-400 shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-secondary-50 dark:bg-secondary-900/30 flex items-center justify-center text-secondary-600 dark:text-secondary-400 shrink-0">
                   <Calendar size={18} />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -415,7 +415,7 @@ export default function Home() {
                   <div className="space-y-2">
                     {timelineItems.slice(0, 30).map((item, idx) => {
                       const colors = {
-                        presente: { dot: "bg-emerald-500 dark:bg-emerald-400", icon: Check },
+                        presente: { dot: "bg-secondary-500 dark:bg-secondary-400", icon: Check },
                         falta: { dot: "bg-red-500 dark:bg-red-400", icon: X },
                         justificada: { dot: "bg-amber-500 dark:bg-amber-400", icon: AlertCircle },
                         payment: { dot: "bg-blue-500 dark:bg-blue-400", icon: DollarSign }

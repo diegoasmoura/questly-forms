@@ -1,20 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --color-bone: #F9F6F0;
-  }
-
   html {
     transition: color 0.2s ease, background-color 0.2s ease;
   }
 
   html.dark {
     color-scheme: dark;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
   }
 }
 
@@ -85,10 +84,10 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-sans antialiased;
+    @apply bg-[#FAF8F4] dark:bg-[#101722] text-slate-800 dark:text-slate-100 font-sans antialiased;
   }
   ::selection {
-    @apply bg-emerald-200 text-emerald-900;
+    @apply bg-brand-200 text-brand-900;
   }
   ::-webkit-scrollbar {
     width: 8px;
@@ -108,34 +107,34 @@
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-button px-4 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
   }
   .btn-primary {
-    @apply bg-brand-600 text-white hover:bg-brand-700 focus:ring-brand-500 shadow-sm;
+    @apply bg-gradient-to-r from-brand-600 to-brand-500 text-white hover:from-brand-700 hover:to-brand-600 focus:ring-brand-500 shadow-sm;
     transition: background-color 0.3s ease, transform 0.15s ease, box-shadow 0.3s ease;
   }
   .btn-primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
   }
   .btn-primary:active {
     transform: translateY(0);
-    box-shadow: 0 1px 2px rgba(13, 148, 136, 0.2);
+    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
   }
   .btn-secondary {
-    @apply bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 focus:ring-slate-300;
+    @apply bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50 focus:ring-2 focus:ring-brand-500;
   }
   .btn-ghost {
-    @apply text-slate-600 hover:text-slate-800 hover:bg-slate-200;
+    @apply text-slate-600 hover:text-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800;
   }
   .btn-danger {
     @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-600;
   }
   .input {
-    @apply w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm text-slate-700 dark:text-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-200;
+    @apply w-full rounded-button border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm text-slate-700 dark:text-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-200 h-11;
   }
   .card {
-    @apply bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-slate-900/50;
+    @apply bg-white dark:bg-slate-800 rounded-card border border-slate-200 dark:border-slate-700 shadow-card dark:shadow-slate-900/50;
     transition: box-shadow 0.2s ease, border-color 0.2s ease, max-height 0.3s ease, background-color 0.2s ease;
   }
   
@@ -150,9 +149,9 @@
 
 /* SurveyJS theme customizations */
 .sd-root {
-  --sjs-primary-backcolor: #166534;
-  --sjs-primary-backcolor-light: #dcfce7;
-  --sjs-primary-backcolor-dark: #14532d;
+  --sjs-primary-backcolor: #2563EB;
+  --sjs-primary-backcolor-light: #dbeafe;
+  --sjs-primary-backcolor-dark: #1d4ed8;
   --sjs-base-unit: 8px;
   --sjs-corner-radius: 8px;
   --sjs-shadow-small: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
@@ -169,7 +168,7 @@
 
 /* Survey Creator theme */
 .sc-root {
-  --sjs-primary-backcolor: #166534;
+  --sjs-primary-backcolor: #2563EB;
   --sjs-general-backcolor-dim: #f8fafc;
 }
 

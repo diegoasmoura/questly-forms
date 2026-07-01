@@ -110,7 +110,7 @@ export default function Landing() {
       >
         <div className="max-w-5xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <div className="w-8 h-8 rounded-sm rotate-45 bg-emerald-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-sm rotate-45 bg-brand-600 flex items-center justify-center">
               <span className="text-white font-bold text-sm -rotate-45">Q</span>
             </div>
             <span className="text-lg font-semibold text-slate-900">Questly Forms</span>
@@ -125,7 +125,7 @@ export default function Landing() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
                 to="/register"
-                className="inline-block px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
+                className="inline-block px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition-colors"
               >
                 Cadastrar
               </Link>
@@ -151,7 +151,7 @@ export default function Landing() {
             >
               Instrumentos clínicos,
               <br />
-              <span className="text-emerald-600">sem fricção</span>
+              <span className="text-brand-600">sem fricção</span>
             </motion.h1>
 
             <motion.p
@@ -186,19 +186,19 @@ export default function Landing() {
         className="flex flex-col sm:flex-row gap-3 sm:gap-8 justify-center py-12 px-6 relative z-10"
       >
         <span className="text-sm text-slate-600 flex items-center justify-center gap-2">
-          <svg className="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-5 h-5 text-brand-600" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
           Mais agilidade no atendimento
         </span>
         <span className="text-sm text-slate-600 flex items-center justify-center gap-2">
-          <svg className="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-5 h-5 text-brand-600" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
           Mais clareza nas respostas
         </span>
         <span className="text-sm text-slate-600 flex items-center justify-center gap-2">
-          <svg className="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-5 h-5 text-brand-600" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
           Mais tempo para seus pacientes
