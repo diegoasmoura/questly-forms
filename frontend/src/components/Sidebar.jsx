@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import { 
   Home, 
   Users, 
@@ -8,7 +9,9 @@ import {
   LogOut, 
   ChevronLeft, 
   ChevronRight,
-  Calendar
+  Calendar,
+  Sun,
+  Moon
 } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -21,30 +24,9 @@ const menuItems = [
   { icon: Library, label: "Acervo Clínico", path: "/library" },
 ];
 
-const getInitials = (name) => {
-  if (!name) return "U";
-  const parts = name.trim().split(" ");
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  }
-  return name.slice(0, 2).toUpperCase();
-};
-
-const getAvatarGradient = (name) => {
-  if (!name) return "from-blue-500 to-indigo-600";
-  const gradients = [
-    "from-blue-400 to-blue-600",
-    "from-indigo-400 to-indigo-600",
-    "from-cyan-400 to-blue-500",
-    "from-sky-400 to-indigo-500",
-    "from-blue-500 to-violet-600",
-  ];
-  const hash = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return gradients[hash % gradients.length];
-};
-
 export default function Sidebar() {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
@@ -54,16 +36,13 @@ export default function Sidebar() {
     navigate("/login");
   };
 
-  const initials = getInitials(user?.name);
-  const gradient = getAvatarGradient(user?.name);
-
   return (
     <div
       className="bg-slate-900 flex flex-col h-screen sticky top-0 overflow-hidden transition-[width] duration-300 ease-out z-[10000]"
       style={{ width: collapsed ? 72 : 256 }}
     >
       {/* Header */}
-      <div className="h-16 flex items-center justify-between px-3 border-b border-slate-800 shrink-0">
+      <div className="h-14 flex items-center justify-between px-3 border-b border-slate-800 shrink-0">
         <div className="flex items-center justify-start min-w-0">
           {!collapsed && (
             <div className="overflow-hidden" key={`brand-${collapsed}`}>
@@ -188,7 +167,7 @@ export default function Sidebar() {
       </div>
 
       {/* Menu Items */}
-      <nav className={`flex-1 space-y-0.5 overflow-y-auto sidebar-scrollbar ${collapsed ? "px-2 pb-2" : "px-3 pb-2"}`}>
+      <nav className={`flex-1 space-y-0.5 overflow-y-auto sidebar-scrollbar ${collapsed ? "px-2 pb-2 pt-4" : "px-3 pb-2 pt-4"}`}>
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path 
             || (item.path !== "/home" && location.pathname.startsWith(item.path))
@@ -198,9 +177,9 @@ export default function Sidebar() {
               key={item.path}
               to={item.path}
               className={`flex items-center rounded-lg transition-colors duration-200 ${
-                isActive 
-                  ? "bg-emerald-600 text-white" 
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+                  isActive 
+                    ? "bg-brand-600 text-white" 
+                    : "text-slate-400 hover:text-white hover:bg-slate-800/50"
               } ${collapsed ? "justify-center py-2.5" : "py-2.5 px-3"}`}
               title={collapsed ? item.label : ""}
             >
@@ -220,37 +199,39 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Footer / User & Sair */}
+      {/* Footer / Theme + Sair */}
       <div className="shrink-0">
         {collapsed ? (
-          <div className="pb-3 flex flex-col items-center">
-            <div className="py-3">
-              <div className={`rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold shadow-md w-[32px] h-[32px]`}>
-                {initials}
-              </div>
-            </div>
-            <div className="w-8 border-t border-slate-800" />
-            <div className="pt-2">
-              <button
-                onClick={handleLogout}
-                className="flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 p-2 w-full"
-                title="Sair"
-              >
-                <LogOut size={18} className="shrink-0" />
-              </button>
-            </div>
+          <div className="pb-3 flex flex-col items-center gap-1">
+            <button
+              onClick={toggleTheme}
+              className="flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 p-2 w-full"
+              title={theme === "light" ? "Modo escuro" : "Modo claro"}
+            >
+              {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 p-2 w-full"
+              title="Sair"
+            >
+              <LogOut size={18} className="shrink-0" />
+            </button>
           </div>
         ) : (
-          <div className="px-3 pb-3">
-            <div className="flex items-center gap-2 px-2 py-2 mb-2">
-              <div className={`w-7 h-7 rounded-md bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-[10px] shrink-0`}>
-                {initials}
-              </div>
-              <span className="text-sm font-semibold text-white truncate">
-                {user?.name}
-              </span>
-            </div>
+          <div className="px-3 pb-3 space-y-1">
             <div className="border-t border-slate-800 pt-2">
+              <button
+                onClick={toggleTheme}
+                className="flex items-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 py-2 px-2 w-full"
+              >
+                {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
+                <span className="text-sm font-medium ml-2">
+                  {theme === "light" ? "Modo Escuro" : "Modo Claro"}
+                </span>
+              </button>
+            </div>
+            <div>
               <button
                 onClick={handleLogout}
                 className="flex items-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 py-2 px-2 w-full"

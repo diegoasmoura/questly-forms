@@ -6,46 +6,60 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 
 ### Paleta de Cores
 
-| Elemento | Cor | Hex |
-|----------|-----|-----|
-| **Background** | slate-100 | `#f1f5f9` |
-| **Cards** | white | `#ffffff` |
-| **Bordas Cards** | slate-200 | `#e2e8f0` |
-| **Sidebar** | slate-900 | `#0f172a` |
-| **Accent Primário** | emerald-600 | `#059669` |
-| **Accent Hover** | emerald-700 | `#047857` |
-| **Texto Principal** | slate-800 | `#1e293b` |
-| **Texto Secundário** | slate-500 | `#64748b` |
-| **Texto Labels** | slate-400 | `#94a3b8` |
+| Elemento | Light | Hex | Dark | Hex |
+|----------|-------|-----|------|-----|
+| **Background** | Cream | `#f5f0eb` | slate-900 | `#0f172a` |
+| **Conteúdo** | — | — | slate-800 | `#1e293b` |
+| **Cards** | white | `#ffffff` | slate-700 | `#334155` |
+| **Bordas Cards** | slate-200 | `#e2e8f0` | slate-600 | `#475569` |
+| **Sidebar** | slate-900 | `#0f172a` | slate-900 | `#0f172a` |
+| **Accent Primário** | brand-600 (teal) | `#0d9488` | brand-400 | `#2dd4bf` |
+| **Accent Hover** | brand-700 | `#0f766e` | brand-300 | `#5eead4` |
+| **Texto Principal** | slate-800 | `#1e293b` | slate-100 | `#f1f5f9` |
+| **Texto Secundário** | slate-500 | `#64748b` | slate-400 | `#94a3b8` |
+| **Texto Labels** | slate-400 | `#94a3b8` | slate-400 | `#94a3b8` |
+
+### Dark Mode
+
+Toggle de tema no rodapé da sidebar (🌙/☀️). A preferência persiste em `localStorage`. O tema é gerenciado pelo `ThemeContext` que aplica a classe `dark` no `<html>`.
+
+**Hierarquia de superfícies no dark mode:**
+
+```
+slate-900 (#0f172a)  →  Canvas / Sidebar
+slate-800 (#1e293b)  →  Cards / conteúdo
+slate-700 (#334155)  →  Itens internos (appointments, timeline)
+```
 
 ### Sistema de Cores Funcionais
 
-| Status | Cor | Hex | Uso |
-|--------|-----|-----|-----|
-| **Sucesso** | emerald | `#059669` | confirmações, presenças, respondidos, total pago, horários ativos |
-| **Info** | blue | `#3b82f6` | informativos, adesão, sessões no mês, lançamentos realizados |
-| **Alerta** | amber | `#d97706` | avisos, justificadas, pendentes, sessões pendentes |
-| **Erro** | red | `#ef4444` | erros, faltas, perigo |
-| **Neutro** | slate | `#64748b` | elementos secundários, total sessões, próxima sessão, último recebimento |
+| Status | Cor | Hex (light) | Hex (dark) | Uso |
+|--------|-----|-------------|------------|-----|
+| **Sucesso** | teal (brand) | `#0d9488` | `#2dd4bf` | confirmações, presenças, respondidos, total pago, horários ativos |
+| **Info** | blue | `#3b82f6` | `#60a5fa` | informativos, adesão, sessões no mês, lançamentos realizados |
+| **Alerta** | amber | `#d97706` | `#fbbf24` | avisos, justificadas, pendentes, sessões pendentes |
+| **Erro** | red | `#ef4444` | `#f87171` | erros, faltas, perigo |
+| **Neutro** | slate | `#64748b` | `#94a3b8` | elementos secundários, total sessões, próxima sessão, último recebimento |
 
 ### Sidebar (Navegação)
 
-| Elemento | Cor | Hex |
-|----------|-----|-----|
-| **Fundo** | slate-900 | `#0f172a` |
-| **Texto Menu (inativo)** | slate-400 | `#94a3b8` |
-| **Texto Menu (ativo)** | white | `#ffffff` |
-| **Fundo Menu (ativo)** | emerald-600 | `#059669` |
-| **Hover Menu** | slate-800/50 | `rgba(30,41,59,0.5)` |
-| **Nome Profissional** | white | `#ffffff` |
-| **Botão Sair** | slate-400 | `#94a3b8` |
-| **Separador** | slate-800 | `#1e293b` |
+| Elemento | Light | Hex | Dark | Hex |
+|----------|-------|-----|------|-----|
+| **Fundo** | slate-900 | `#0f172a` | slate-900 | `#0f172a` |
+| **Texto Menu (inativo)** | slate-400 | `#94a3b8` | slate-400 | `#94a3b8` |
+| **Texto Menu (ativo)** | white | `#ffffff` | white | `#ffffff` |
+| **Fundo Menu (ativo)** | brand-600 | `#0d9488` | brand-600 | `#0d9488` |
+| **Hover Menu** | slate-800/50 | — | slate-800/50 | — |
+| **Botão Tema** | slate-400 | `#94a3b8` | slate-400 | `#94a3b8` |
+| **Botão Sair** | slate-400 | `#94a3b8` | slate-400 | `#94a3b8` |
+| **Separador** | slate-800 | `#1e293b` | slate-800 | `#1e293b` |
 
 **Layout:**
 - **Topo:** Logo "Questly Forms" + botão recolher (`ChevronLeft`/`ChevronRight`)
-- **Meio:** Itens de navegação (Home, Pacientes, Agenda, Instrumentos, Acervo Clínico) com destaque no item ativo. Scroll vertical próprio via `sidebar-scrollbar` para telas pequenas.
-- **Rodapé:** Nome do profissional (avatar com gradiente + nome) acima de um separador, abaixo o botão "Sair" com ícone de logout.
-- **Estado recolhido:** Largura 72px — avatar com iniciais acima de um separador, abaixo o ícone de logout
+- **Meio:** Itens de navegação (Home, Pacientes, Agenda, Instrumentos, Acervo Clínico) com destaque no item ativo (`bg-brand-600`). Scroll vertical próprio via `sidebar-scrollbar` para telas pequenas.
+- **Rodapé:** Botão de alternar tema (🌙 Modo Escuro / ☀️ Modo Claro) acima de um separador, abaixo o botão "Sair" com ícone de logout.
+- **Estado recolhido:** Largura 72px — botão de tema + ícone de logout empilhados.
+- **Avatar:** Clicável — abre modal de seleção com 7 estilos DiceBear (Iniciais, Identicon, Neutro, Avataaars, Lorelei, Robô, Reações), gerados deterministicamente pelo nome do profissional. Permite "sortear" combinações alternativas mantendo o estilo. Oferece também upload manual de imagem (JPEG, PNG, WebP, máx 2MB) com preview e salvamento via `POST /api/auth/avatar`. Avatar é armazenado como `avatarUrl` no modelo `User` e atualizado via `PUT /api/auth/profile`. Fallback para iniciais em gradiente quando não configurado.
 - **Estado expandido:** Largura 256px — nome completo e botão "Sair" com texto
 - **Z-index:** `z-[10000]` — sempre acima de modais e backdrops
 
@@ -164,19 +178,25 @@ navigate(-1); // suporta navegação relativa
 - **Tabelas padronizadas:** Cabeçalhos das tabelas nas abas Financeiro e Instrumentos usam o mesmo padrão: `text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200` com padding `px-2 py-2`.
 - **Scroll padding:** Containers com `overflow-y-auto` e cards filhos devem usar `pr-1.5` para evitar que os cards encostem na barra de rolagem vertical.
 
-### 11. Home Dashboard — Stat Cards e "Próximas Sessões"
+### 11. Home Dashboard — Stat Cards, Timeline e "Próximas Sessões"
 
 **Stat Cards (topo):**
-- **Estilo limpo e uniforme:** Cards sem `border-l-4`, todos com fundo de ícone `bg-brand-50 text-brand-600` (sage green), label em `text-xs font-semibold text-slate-400`.
-- **Sem linhas secundárias:** Removidos subtítulos `text-[9px]` (ex: "2 total", "1P·0F·0J") — foco no número principal.
+- **Cards compostos:** Cada card tem uma faixa colorida superior (`h-1`) com cor única por métrica (azul para pacientes, teal para sessões, violeta para instrumentos, verde para receita) e fundo de ícone na mesma cor.
+- **Elevação visual:** Cards com `dark:bg-slate-700` (acima do conteúdo `dark:bg-slate-800`) e `dark:border-slate-600`, mesma linguagem visual dos appointments.
 - **Todos `<Link>`:** Os 4 cards (Pacientes → `/patients`, Sessões → `/agenda`, Instrumentos → `/my-forms`, Receita → `/agenda`) são clicáveis com `hover:shadow-md hover:-translate-y-0.5`.
 - **Alinhamento de colunas:** Grid `gap-6` (mesmo do layout inferior) para alinhar a 4ª coluna com "Próximas Sessões".
 
+**Timeline de Atividade:**
+- **Cards compostos:** Cada evento da timeline é um card `rounded-lg border bg-white dark:bg-slate-700` com ícone de status à esquerda (verde presença, vermelho falta, âmbar justificada, azul pagamento), nome do paciente e descrição ao centro, e timestamp à direita.
+- **Sem linha vertical:** Substituída por espaçamento `space-y-2` entre cards, alinhando visualmente com o estilo dos appointments.
+
 **Próximas Sessões:**
 - **Expansão de 3 meses:** Para cada agendamento recorrente, `findOccurrencesInRange` gera TODAS as ocorrências nos próximos 3 meses (via `addMonths(today, 3)`), não apenas a próxima.
+- **Cards de mês:** Cada mês é agrupado em um `rounded-lg border bg-white dark:bg-slate-700/50` com header e padding interno.
 - **Suporte a recorrências sem fim:** Agendas com `startDate` mas sem `endDate` e sem `maxSessions` geram ocorrências por todo o período.
 - **Agrupamento por mês:** Sessões são agrupadas primeiro por mês (`nextByMonth` → `{ month, days }`), depois por data dentro de cada mês.
-- **Cabeçalhos alinhados:** Títulos de mês e data usam `border-b` em vez de `flex` com divisor inline — eliminam desalinhamento horizontal causado por larguras variáveis de texto.
+- **Mês em chip:** Nome do mês em `px-2 py-1.5 rounded-md bg-slate-100 dark:bg-slate-700/50`.
+
 - **Data header clicável:** Cada cabeçalho de data (`button`) navega para `/agenda?date=YYYY-MM-DD`.
 - **Sem limite fixo:** Todas as ocorrências do período de 3 meses são exibidas (sem `slice`). O card tem scroll próprio.
 - **Layout compacto:** Coluna ocupa `1fr` em grid `lg:grid-cols-4` (25% da largura), com espaçamento reduzido entre grupos.
