@@ -128,7 +128,7 @@ export default function MyForms() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-800 font-serif">Meus Instrumentos</h1>
+          <h1 className="text-2xl font-semibold text-slate-800 font-heading">Meus Instrumentos</h1>
           <p className="text-sm text-slate-500">Gerencie seus modelos personalizados.</p>
         </div>
         <div className="flex items-center gap-2">
@@ -723,7 +723,7 @@ function CreateFormModal({ onClose, onCreated }) {
       <div className="card w-full max-w-xl p-8 animate-scale-in">
         <div className="flex items-center justify-between mb-8 bg-white pb-4 border-b border-brand-50">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 font-serif">Novo Instrumento</h2>
+            <h2 className="text-2xl font-bold text-slate-900 font-heading">Novo Instrumento</h2>
             <p className="text-sm text-brand-600 mt-1">Defina as informações básicas do seu instrumento.</p>
           </div>
           <button onClick={onClose} className="p-2 rounded-xl hover:bg-brand-50 text-slate-400 hover:text-slate-900 transition-all">

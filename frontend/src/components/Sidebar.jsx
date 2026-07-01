@@ -1,20 +1,16 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useTheme } from "../context/ThemeContext";
-import { 
-  Home, 
-  Users, 
-  Library, 
-  FileText, 
-  LogOut, 
-  ChevronLeft, 
-  ChevronRight,
+import {
+  Home,
+  Users,
+  FileText,
   Calendar,
-  Sun,
-  Moon
+  Library,
+  Settings,
+  ChevronRight,
+  LogOut,
 } from "lucide-react";
 import { useState } from "react";
-import { motion } from "framer-motion";
 
 const menuItems = [
   { icon: Home, label: "Home", path: "/home" },
@@ -26,222 +22,99 @@ const menuItems = [
 
 export default function Sidebar() {
   const { logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
+  const linkClass = (isActive, collapsed) =>
+    `flex items-center rounded-[14px] transition-all duration-250 ease-in-out cursor-pointer ${
+      collapsed
+        ? "justify-center w-[46px] h-[46px]"
+        : "w-[calc(100%-24px)] justify-start px-[14px] gap-3 h-[46px]"
+    } ${
+      isActive
+        ? "bg-[var(--sage-light)] text-[var(--dark-green)] dark:text-[#5CBF9D]"
+        : "text-[var(--text-muted)] hover:bg-[var(--surface-alt)] hover:text-[var(--text-primary)]"
+    }`;
+
+  const labelClass = (collapsed) =>
+    `text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis transition-all duration-250 ease-in-out ${
+      collapsed ? "max-w-0 opacity-0" : "max-w-[140px] opacity-1"
+    }`;
+
   return (
     <div
-      className="bg-slate-900 flex flex-col h-screen sticky top-0 overflow-hidden transition-[width] duration-300 ease-out z-[10000]"
-      style={{ width: collapsed ? 72 : 280 }}
+      className={`bg-[var(--surface)] border-r border-[var(--border)] flex flex-col items-center py-6 gap-1.5 relative transition-all duration-250 ease-in-out h-screen sticky top-0 z-[10000] ${
+        collapsed ? "w-[84px]" : "w-[220px]"
+      }`}
     >
-      {/* Header */}
-      <div className="h-14 flex items-center justify-between px-3 border-b border-slate-800 shrink-0">
-        <div className="flex items-center justify-start min-w-0">
-          {!collapsed && (
-            <div className="overflow-hidden" key={`brand-${collapsed}`}>
-              <motion.span
-                className="text-xl font-bold text-white tracking-tight whitespace-nowrap inline-block"
-                initial={{ width: 0 }}
-                animate={{ width: "auto" }}
-                transition={{ 
-                  width: { duration: 0.4, ease: "easeOut" }
-                }}
-              >
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    opacity: { duration: 0.1 },
-                    y: { duration: 0.2 }
-                  }}
-                >
-                  Q
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.08, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  u
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.16, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  e
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.24, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  s
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.32, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  t
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.40, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  l
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.48, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  y
-                </motion.span>
-                <motion.span
-                  className="inline-block ml-1"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.56, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  F
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.64, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  o
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.72, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  r
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.80, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  m
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.88, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  s
-                </motion.span>
-              </motion.span>
-            </div>
-          )}
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className="absolute top-[30px] -right-[13px] w-[26px] h-[26px] rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[var(--text-secondary)] z-10 hover:bg-[var(--surface-alt)] transition-all cursor-pointer"
+        aria-label={collapsed ? "Expandir menu" : "Retrair menu"}
+      >
+        <ChevronRight
+          size={13}
+          className={`transition-transform duration-250 ${
+            collapsed ? "" : "rotate-180"
+          }`}
+        />
+      </button>
+
+      <div className="flex items-center gap-2.5 w-full px-[19px] mb-7">
+        <div className="w-[44px] h-[44px] rounded-xl bg-gradient-to-br from-[#5CBF9D] to-[#3D786A] flex items-center justify-center text-white font-heading text-xl flex-shrink-0">
+          Q
         </div>
-        <button 
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0"
-          aria-label={collapsed ? "Expandir sidebar" : "Recolher sidebar"}
+        <span
+          className={`font-heading text-xl text-[var(--text-primary)] whitespace-nowrap overflow-hidden transition-all duration-250 ease-in-out ${
+            collapsed ? "max-w-0 opacity-0" : "max-w-[160px] opacity-1"
+          }`}
         >
-          {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-        </button>
+          Questly Forms
+        </span>
       </div>
 
-      {/* Menu Items */}
-      <nav className={`flex-1 space-y-0.5 overflow-y-auto sidebar-scrollbar ${collapsed ? "px-2 pb-2 pt-4" : "px-3 pb-2 pt-4"}`}>
+      <nav className="flex flex-col gap-1.5 w-full items-center flex-1">
         {menuItems.map((item) => {
-          const isActive = location.pathname === item.path 
-            || (item.path !== "/home" && location.pathname.startsWith(item.path))
-            || (item.path === "/my-forms" && location.pathname.startsWith("/forms"));
+          const isActive =
+            location.pathname === item.path ||
+            (item.path !== "/home" &&
+              location.pathname.startsWith(item.path)) ||
+            (item.path === "/my-forms" &&
+              location.pathname.startsWith("/forms"));
+          const Icon = item.icon;
           return (
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center rounded-lg transition-colors duration-200 ${
-                  isActive 
-                    ? "bg-brand-600 text-white" 
-                    : "text-slate-400 hover:text-white hover:bg-slate-800/50"
-              } ${collapsed ? "justify-center py-2.5" : "py-2.5 px-3"}`}
+              className={linkClass(isActive, collapsed)}
               title={collapsed ? item.label : ""}
             >
-              <item.icon size={18} className="shrink-0" />
-              <span 
-                className="text-sm font-medium transition-all duration-300 overflow-hidden whitespace-nowrap"
-                style={{ 
-                  opacity: collapsed ? 0 : 1,
-                  width: collapsed ? 0 : "auto",
-                  marginLeft: collapsed ? 0 : 12
-                }}
-              >
-                {item.label}
-              </span>
+              <Icon size={21} className="flex-shrink-0" />
+              <span className={labelClass(collapsed)}>{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
-      {/* Footer / Theme + Sair */}
-      <div className="shrink-0">
-        {collapsed ? (
-          <div className="pb-3 flex flex-col items-center gap-1">
-            <button
-              onClick={toggleTheme}
-              className="flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 p-2 w-full"
-              title={theme === "light" ? "Modo escuro" : "Modo claro"}
-            >
-              {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 p-2 w-full"
-              title="Sair"
-            >
-              <LogOut size={18} className="shrink-0" />
-            </button>
-          </div>
-        ) : (
-          <div className="px-3 pb-3 space-y-1">
-            <div className="border-t border-slate-800 pt-2">
-              <button
-                onClick={toggleTheme}
-                className="flex items-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 py-2 px-2 w-full"
-              >
-                {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
-                <span className="text-sm font-medium ml-2">
-                  {theme === "light" ? "Modo Escuro" : "Modo Claro"}
-                </span>
-              </button>
-            </div>
-            <div>
-              <button
-                onClick={handleLogout}
-                className="flex items-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 py-2 px-2 w-full"
-              >
-                <LogOut size={16} className="shrink-0" />
-                <span className="text-sm font-medium ml-2">Sair</span>
-              </button>
-            </div>
-          </div>
-        )}
+      <div className="mt-auto pb-3 w-full flex flex-col items-center gap-1">
+        <button
+          onClick={handleLogout}
+          className={`flex items-center rounded-[14px] text-[var(--text-muted)] hover:bg-[var(--surface-alt)] hover:text-[var(--text-primary)] transition-all duration-250 ease-in-out cursor-pointer ${
+            collapsed
+              ? "justify-center w-[46px] h-[46px]"
+              : "w-[calc(100%-24px)] justify-start px-[14px] gap-3 h-[46px]"
+          }`}
+          title="Sair"
+        >
+          <LogOut size={21} className="flex-shrink-0" />
+          <span className={labelClass(collapsed)}>Sair</span>
+        </button>
       </div>
     </div>
   );

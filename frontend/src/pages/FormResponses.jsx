@@ -115,7 +115,7 @@ export default function FormResponses() {
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 font-serif">{form?.title}</h1>
+            <h1 className="text-2xl font-bold text-slate-900 font-heading">{form?.title}</h1>
             <p className="text-sm text-slate-600">
               Resultados e análise das respostas coletadas.
               {aggregate && ` • ${aggregate.total} respostas totais`}

@@ -4,76 +4,91 @@ Uma plataforma moderna e intuitiva para psicólogos gerenciarem pacientes, criar
 
 ### Altura das Páginas
 
-O **Layout.jsx** usa `h-screen` no container de conteúdo, com top bar fixa (`h-14 shrink-0`) e `<main className="flex-1 overflow-y-auto">`. Páginas renderizadas dentro do `<main>` usam **`h-full`** (e não `h-screen`) para ocupar apenas o espaço disponível sem exceder a viewport.
+O **Layout.jsx** usa `h-screen` no container de conteúdo, com `<main className="flex-1 overflow-y-auto">`. Páginas renderizadas dentro do `<main>` usam altura natural do conteúdo com scroll no container principal.
 
-## Sistema de Design Visual
+## Sistema de Design Visual (v2 — Atualizado)
 
 ### Paleta de Cores
 
 | Elemento | Light | Hex | Dark | Hex |
 |----------|-------|-----|------|-----|
-| **Background** | Cream | `#f5f0eb` | slate-900 | `#0f172a` |
-| **Conteúdo** | — | — | slate-800 | `#1e293b` |
-| **Cards** | white | `#ffffff` | slate-700 | `#334155` |
-| **Bordas Cards** | slate-200 | `#e2e8f0` | slate-600 | `#475569` |
-| **Sidebar** | slate-900 | `#0f172a` | slate-900 | `#0f172a` |
-| **Accent Primário** | brand-600 (teal) | `#0d9488` | brand-400 | `#2dd4bf` |
-| **Accent Hover** | brand-700 | `#0f766e` | brand-300 | `#5eead4` |
-| **Texto Principal** | slate-800 | `#1e293b` | slate-100 | `#f1f5f9` |
-| **Texto Secundário** | slate-500 | `#64748b` | slate-400 | `#94a3b8` |
-| **Texto Labels** | slate-400 | `#94a3b8` | slate-400 | `#94a3b8` |
+| **Background** | Cinza claro | `#F7F8FA` | Cinza escuro | `#15171A` |
+| **Superfície (Cards/Sidebar)** | White | `#FFFFFF` | Cinza médio | `#1D2023` |
+| **Superfície alt.** | Cinza | `#F1F3F5` | Cinza escuro | `#242830` |
+| **Bordas** | Cinza | `#E8ECEF` | Cinza escuro | `#2B2F35` |
+| **Primary (Sage)** | Verde sálvia | `#5CBF9D` | — | `#5CBF9D` |
+| **Sage Light (bg)** | Verde claro | `#E4F5EE` | Verde escuro | `#1E332C` |
+| **Dark Green (text)** | Verde escuro | `#3D786A` | — | `#3D786A` |
+| **Blue (accent)** | Azul | `#2E7DFF` | — | `#2E7DFF` |
+| **Blue Light (bg)** | Azul claro | `#E7F0FF` | Azul escuro | `#182636` |
+| **Peach (accent)** | Pêssego | `#F8A26B` | — | `#F8A26B` |
+| **Peach Light (bg)** | Pêssego claro | `#FEEEE1` | Pêssego escuro | `#31241C` |
+| **Purple (accent)** | Roxo | `#7C5CFF` | — | `#7C5CFF` |
+| **Purple Light (bg)** | Roxo claro | `#F0ECFF` | Roxo escuro | `#241F38` |
+| **Texto Principal** | Quase preto | `#1E1F22` | Quase branco | `#F5F6F7` |
+| **Texto Secundário** | Cinza | `#495057` | Cinza claro | `#C3C9D0` |
+| **Texto Muted** | Cinza claro | `#9BA3AB` | Cinza médio | `#7C848D` |
 
 ### Dark Mode
 
-Toggle de tema no rodapé da sidebar (🌙/☀️). A preferência persiste em `localStorage`. O tema é gerenciado pelo `ThemeContext` que aplica a classe `dark` no `<html>`.
+Toggle de tema no header da Home (🌙/☀️) em formato pill com knob gradient. A preferência persiste em `localStorage`. O tema é gerenciado pelo `ThemeContext` que aplica a classe `dark` no `<html>`, ativando as variáveis CSS do tema escuro.
 
 **Hierarquia de superfícies no dark mode:**
+- `#15171A` → Canvas / Background
+- `#1D2023` → Sidebar / Cards / Painéis
+- `#242830` → Superfície alternativa / Hover
 
-```
-slate-900 (#0f172a)  →  Canvas / Sidebar
-slate-800 (#1e293b)  →  Cards / conteúdo
-slate-700 (#334155)  →  Itens internos (appointments, timeline)
-```
+### Tipografia
+
+| Uso | Fonte | Weight |
+|-----|-------|--------|
+| **UI / Body** | Nunito Sans | 400, 600, 700, 800 |
+| **Títulos / Logo** | Caveat Brush | 400 (cursiva) |
+| **Post-it** | Caveat Brush | 400 |
+
+### Sidebar (Navegação)
+
+| Elemento | Valor |
+|----------|-------|
+| **Fundo** | `var(--surface)` (light: white, dark: `#1D2023`) |
+| **Largura (recolhida)** | 84px |
+| **Largura (expandida)** | 220px |
+| **Toggle** | Botão circular na borda (absolute, `-right-[13px]`) |
+| **Logo** | Gradient circle "Q" + "Questly Forms" (Caveat Brush) |
+| **Nav item (inativo)** | `text-[var(--text-muted)]`, hover: `var(--surface-alt)` |
+| **Nav item (ativo)** | `bg-[var(--sage-light)] text-[var(--dark-green)]` (dark: `text-[#5CBF9D]`) |
+| **Nav item tamanho** | 46×46px, `rounded-[14px]` |
+| **Bottom** | Botão "Sair" com icon apenas |
+
+### Home Dashboard — Novo Layout (v2)
+
+**Greeting Section:**
+- Saudação dinâmica ("Bom dia / Boa tarde / Boa noite") com nome do usuário
+- SVG underline personalizado do nome em `#5CBF9D`
+- Blobs decorativos (peach-light, sage-light, purple-light com blur)
+- Chips: "3 avaliações pendentes" (peach) e "N novas respostas" (sage)
+- Sticky note em Caveat Brush, rotacionado -3deg, com pin gradient
+- Search pill, Theme toggle gradient, Bell icon com dot, Avatar gradient purple→blue
+
+**Stat Cards (4 colunas):**
+- Cada card com ícone (colored bg), trend badge, valor e label
+- Cores alternadas: sage (formulários), blue (respostas), peach (conclusão), purple (pacientes)
+- Cards com `rounded-[14px]` e sombra sutil
+
+**Content Grid (1.5fr / 1fr):**
+- **Esquerda:** Painel "Meus formulários" com lista de forms e contagem de respostas
+- **Direita superior:** Gráfico SVG line chart com área gradient em sage
+- **Direita inferior:** Painel "Respostas recentes" com activity feed
 
 ### Sistema de Cores Funcionais
 
 | Status | Cor | Hex (light) | Hex (dark) | Uso |
 |--------|-----|-------------|------------|-----|
-| **Sucesso** | teal (brand) | `#0d9488` | `#2dd4bf` | confirmações, presenças, respondidos, total pago, horários ativos |
-| **Info** | blue | `#3b82f6` | `#60a5fa` | informativos, adesão, sessões no mês, lançamentos realizados |
-| **Alerta** | amber | `#d97706` | `#fbbf24` | avisos, justificadas, pendentes, sessões pendentes |
+| **Sucesso** | sage (brand) | `#5CBF9D` | `#5CBF9D` | confirmações, respondidos, botão primário |
+| **Info** | blue (secondary) | `#2E7DFF` | `#2E7DFF` | informativos, links |
+| **Alerta** | amber | `#d97706` | `#fbbf24` | avisos, justificadas, pendentes |
 | **Erro** | red | `#ef4444` | `#f87171` | erros, faltas, perigo |
-| **Neutro** | slate | `#64748b` | `#94a3b8` | elementos secundários, total sessões, próxima sessão, último recebimento |
-
-### Sidebar (Navegação)
-
-| Elemento | Light | Hex | Dark | Hex |
-|----------|-------|-----|------|-----|
-| **Fundo** | slate-900 | `#0f172a` | slate-900 | `#0f172a` |
-| **Texto Menu (inativo)** | slate-400 | `#94a3b8` | slate-400 | `#94a3b8` |
-| **Texto Menu (ativo)** | white | `#ffffff` | white | `#ffffff` |
-| **Fundo Menu (ativo)** | brand-600 | `#0d9488` | brand-600 | `#0d9488` |
-| **Hover Menu** | slate-800/50 | — | slate-800/50 | — |
-| **Botão Tema** | slate-400 | `#94a3b8` | slate-400 | `#94a3b8` |
-| **Botão Sair** | slate-400 | `#94a3b8` | slate-400 | `#94a3b8` |
-| **Separador** | slate-800 | `#1e293b` | slate-800 | `#1e293b` |
-
-**Layout:**
-- **Topo:** Logo "Questly Forms" + botão recolher (`ChevronLeft`/`ChevronRight`)
-- **Meio:** Itens de navegação (Home, Pacientes, Agenda, Instrumentos, Acervo Clínico) com destaque no item ativo (`bg-brand-600`). Scroll vertical próprio via `sidebar-scrollbar` para telas pequenas.
-- **Rodapé:** Botão de alternar tema (🌙 Modo Escuro / ☀️ Modo Claro) acima de um separador, abaixo o botão "Sair" com ícone de logout.
-- **Estado recolhido:** Largura 72px — botão de tema + ícone de logout empilhados.
-- **Avatar:** Clicável — abre modal de seleção com 7 estilos DiceBear (Iniciais, Identicon, Neutro, Avataaars, Lorelei, Robô, Reações), gerados deterministicamente pelo nome do profissional. Permite "sortear" combinações alternativas mantendo o estilo. Oferece também upload manual de imagem (JPEG, PNG, WebP, máx 2MB) com preview e salvamento via `POST /api/auth/avatar`. Avatar é armazenado como `avatarUrl` no modelo `User` e atualizado via `PUT /api/auth/profile`. Fallback para iniciais em gradiente quando não configurado.
-- **Estado expandido:** Largura 256px — nome completo e botão "Sair" com texto
-- **Z-index:** `z-[10000]` — sempre acima de modais e backdrops
-
-- **Home (Visão Geral):** Resumo dinâmico de atividades, estatísticas de pacientes e gráficos de tendências clínicas.
-- **Gestão de Pacientes (Clinical Dashboard):** Painel de controle individual com métricas unificadas de engajamento (Sessões vs Instrumentos), alertas de aniversário com visual festivo e tooltip instantâneo.
-- **Agenda Profissional:** Gestão integrada de horários recorrentes, visão mensal/lista e detecção de conflitos.
-- **Histórico de Frequência:** Registro detalhado de presenças, faltas e reagendamentos inteligentes em cadeia.
-- **Gestão Financeira:** Controle de pagamentos por blocos de sessões, conciliação clínica e geração de PDFs profissionais.
-- **Acervo Clínico:** Modelos validados como PHQ-9, GAD-7, **Anamnese Neuropsicológica Adulto (Completa)** e **YSQ-L3 (Young Schema Questionnaire)**.
-- **Construtor de Instrumentos Customizado:** Criação visual de escalas, testes e anamneses com drag-and-drop, edição inline e preview ao vivo. Substitui o SurveyJS FormBuilder por uma experiência mais intuitiva e integrada ao design do sistema.
+| **Neutro** | slate | `#64748b` | `#94a3b8` | elementos secundários |
 
 ## Regras de Negócio e Lógica do Sistema
 
@@ -182,30 +197,7 @@ navigate(-1); // suporta navegação relativa
 - **Tabelas padronizadas:** Cabeçalhos das tabelas nas abas Financeiro e Instrumentos usam o mesmo padrão: `text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200` com padding `px-2 py-2`.
 - **Scroll padding:** Containers com `overflow-y-auto` e cards filhos devem usar `pr-1.5` para evitar que os cards encostem na barra de rolagem vertical.
 
-### 11. Home Dashboard — Stat Cards, Timeline e "Próximas Sessões"
-
-**Stat Cards (topo):**
-- **Cards compostos:** Cada card tem uma faixa colorida superior (`h-1`) com cor única por métrica (azul para pacientes, teal para sessões, violeta para instrumentos, verde para receita) e fundo de ícone na mesma cor.
-- **Elevação visual:** Cards com `dark:bg-slate-700` (acima do conteúdo `dark:bg-slate-800`) e `dark:border-slate-600`, mesma linguagem visual dos appointments.
-- **Todos `<Link>`:** Os 4 cards (Pacientes → `/patients`, Sessões → `/agenda`, Instrumentos → `/my-forms`, Receita → `/agenda`) são clicáveis com `hover:shadow-md hover:-translate-y-0.5`.
-- **Alinhamento de colunas:** Grid `gap-6` (mesmo do layout inferior) para alinhar a 4ª coluna com "Próximas Sessões".
-
-**Timeline de Atividade:**
-- **Cards compostos:** Cada evento da timeline é um card `rounded-lg border bg-white dark:bg-slate-700` com ícone de status à esquerda (verde presença, vermelho falta, âmbar justificada, azul pagamento), nome do paciente e descrição ao centro, e timestamp à direita.
-- **Sem linha vertical:** Substituída por espaçamento `space-y-2` entre cards, alinhando visualmente com o estilo dos appointments.
-
-**Próximas Sessões:**
-- **Expansão de 3 meses:** Para cada agendamento recorrente, `findOccurrencesInRange` gera TODAS as ocorrências nos próximos 3 meses (via `addMonths(today, 3)`), não apenas a próxima.
-- **Cards de mês:** Cada mês é agrupado em um `rounded-lg border bg-white dark:bg-slate-700/50` com header e padding interno.
-- **Suporte a recorrências sem fim:** Agendas com `startDate` mas sem `endDate` e sem `maxSessions` geram ocorrências por todo o período.
-- **Agrupamento por mês:** Sessões são agrupadas primeiro por mês (`nextByMonth` → `{ month, days }`), depois por data dentro de cada mês.
-- **Mês em chip:** Nome do mês em `px-2 py-1.5 rounded-md bg-slate-100 dark:bg-slate-700/50`.
-
-- **Data header clicável:** Cada cabeçalho de data (`button`) navega para `/agenda?date=YYYY-MM-DD`.
-- **Sem limite fixo:** Todas as ocorrências do período de 3 meses são exibidas (sem `slice`). O card tem scroll próprio.
-- **Layout compacto:** Coluna ocupa `1fr` em grid `lg:grid-cols-4` (25% da largura), com espaçamento reduzido entre grupos.
-
-### 12. Construtor de Instrumentos Customizado
+### 11. Construtor de Instrumentos Customizado
 
 Substitui o SurveyJS FormBuilder por uma solução própria com card-style:
 
@@ -241,7 +233,7 @@ Substitui o SurveyJS FormBuilder por uma solução própria com card-style:
 - **Modalidade Paginada:** Navegação entre seções com botões Anterior/Próxima e indicador de progresso (ex: "1–5 de 20"). Na última seção mostra "Enviar Respostas".
 - **Modalidade Stepper:** Card centralizado com pergunta atual, grade numerada para escalas Likert, legendas completas (ex: "1 - Inteiramente falsa"), atalhos de teclado (1–6 para responder, ← → para navegar, Enter para avançar) e auto-avanço 500ms.
 
-### 13. YSQ-L3 (Young Schema Questionnaire)
+### 12. YSQ-L3 (Young Schema Questionnaire)
 
 O instrumento **YSQ-L3** (232 itens, 18 domínios) está disponível no Acervo Clínico:
 - Schema em formato SurveyJS no template (`frontend/src/lib/templates.js`).
@@ -249,7 +241,7 @@ O instrumento **YSQ-L3** (232 itens, 18 domínios) está disponível no Acervo C
 - Pontuação por domínio com 3 faixas clínicas: Baixa, Alta, Muito Alta.
 - Cards de severidade no dashboard de respostas com codificação por cores (emerald, amber, red).
 
-### 14. Esquema de Dados do Formulário Customizado
+### 13. Esquema de Dados do Formulário Customizado
 
 ```json
 {
@@ -280,7 +272,7 @@ O instrumento **YSQ-L3** (232 itens, 18 domínios) está disponível no Acervo C
 
 **Tipos de pergunta suportados:** `text`, `number`, `boolean`, `choice`, `likert`, `matrix`.
 
-### 15. Layout do PatientRecord (Regras para evitar scrollbar externa)
+### 14. Layout do PatientRecord (Regras para evitar scrollbar externa)
 
 A página `PatientRecord.jsx` usa uma estrutura de layout específica que deve ser mantida para evitar que a barra de rolagem externa apareça ao alternar entre abas:
 
@@ -323,7 +315,7 @@ A página `PatientRecord.jsx` usa uma estrutura de layout específica que deve s
 - Headers usam `mb-8 shrink-0` em vez de `border-b` e ficam dentro do `p-8` do card
 - **UX de Registro:** Área clicável para upload de anexos.
 
-### 16. Padrão de Modais (Backdrop, Posicionamento e Z-Index)
+### 15. Padrão de Modais (Backdrop, Posicionamento e Z-Index)
 
 Todo modal que exibe um overlay (backdrop) deve seguir este padrão único:
 
@@ -368,4 +360,5 @@ Configuração de produção otimizada para processadores Intel (como o F2-424):
 4.  **Acesso:** Disponível em `http://IP-DO-NAS:8080`.
 
 ---
+
 *Este projeto segue rigorosos padrões de integridade de dados clínicos e UX voltada para produtividade.*

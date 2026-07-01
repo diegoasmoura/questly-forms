@@ -2,6 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg: #F7F8FA;
+  --surface: #FFFFFF;
+  --surface-alt: #F1F3F5;
+  --border: #E8ECEF;
+  --text-primary: #1E1F22;
+  --text-secondary: #495057;
+  --text-muted: #9BA3AB;
+  --sage: #5CBF9D;
+  --sage-light: #E4F5EE;
+  --dark-green: #3D786A;
+  --blue: #2E7DFF;
+  --blue-light: #E7F0FF;
+  --peach: #F8A26B;
+  --peach-light: #FEEEE1;
+  --purple: #7C5CFF;
+  --purple-light: #F0ECFF;
+  --note-bg: #FFF6DE;
+  --note-text: #7A5F1E;
+}
+
+.dark {
+  --bg: #15171A;
+  --surface: #1D2023;
+  --surface-alt: #242830;
+  --border: #2B2F35;
+  --text-primary: #F5F6F7;
+  --text-secondary: #C3C9D0;
+  --text-muted: #7C848D;
+  --sage-light: #1E332C;
+  --blue-light: #182636;
+  --peach-light: #31241C;
+  --purple-light: #241F38;
+  --note-bg: #2E2611;
+  --note-text: #E8D49C;
+}
+
 @layer base {
   html {
     transition: color 0.2s ease, background-color 0.2s ease;
@@ -12,71 +49,10 @@
   }
 
   h1, h2, h3, h4 {
-    font-family: 'Playfair Display', serif;
-    font-weight: 600;
+    font-family: 'Caveat Brush', cursive;
+    font-weight: 400;
+    letter-spacing: 0.3px;
   }
-}
-
-@layer components {
-  .card-bone {
-    background-color: #F9F6F0;
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeSlideIn 0.25s ease-out forwards;
-}
-
-@keyframes fadeSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-slide-down {
-  animation: slideDown 0.25s ease-out forwards;
-}
-
-/* Skew Scroll Animation */
-@keyframes skew-scroll {
-  0% {
-    transform:
-      rotatex(20deg) rotatez(-15deg) skewx(15deg) translatez(0) translatey(0);
-  }
-  100% {
-    transform:
-      rotatex(20deg) rotatez(-15deg) skewx(15deg) translatez(0) translatey(-50%);
-  }
-}
-
-.animate-skew-scroll {
-  animation: skew-scroll 20s linear infinite;
-  will-change: transform;
 }
 
 @layer base {
@@ -84,10 +60,10 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-[#FAF8F4] dark:bg-[#101722] text-slate-800 dark:text-slate-100 font-sans antialiased;
+    @apply bg-[#F7F8FA] dark:bg-[#15171A] text-[#1E1F22] dark:text-[#F5F6F7] font-sans antialiased;
   }
   ::selection {
-    @apply bg-brand-200 text-brand-900;
+    @apply bg-[#5CBF9D] text-white;
   }
   ::-webkit-scrollbar {
     width: 8px;
@@ -106,38 +82,43 @@
 }
 
 @layer components {
+  .card-bone {
+    background-color: var(--surface-alt);
+  }
+
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-[12px] px-4 py-2.5 text-sm font-medium transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-11;
+    @apply inline-flex items-center justify-center gap-2 rounded-[999px] px-5 py-2.5 text-sm font-bold transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-11;
   }
   .btn-primary {
-    @apply bg-gradient-to-r from-brand-600 to-brand-500 text-white hover:from-brand-700 hover:to-brand-600 focus:ring-brand-500 shadow-sm;
+    @apply bg-gradient-to-r from-[#5CBF9D] to-[#3D786A] text-white hover:from-[#4DAF8A] hover:to-[#2E5C50] focus:ring-[#5CBF9D];
+    box-shadow: 0 6px 16px rgba(92, 191, 157, 0.35);
     transition: background 0.3s ease, transform 0.15s ease-out, box-shadow 0.15s ease-out;
   }
   .btn-primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 8px 20px rgba(92, 191, 157, 0.45);
   }
   .btn-primary:active {
-    transform: translateY(0);
-    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
+    transform: scale(0.97);
+    box-shadow: 0 2px 8px rgba(92, 191, 157, 0.25);
   }
   .btn-secondary {
-    @apply bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50 focus:ring-2 focus:ring-brand-500 transition-all duration-150 ease-out;
+    @apply bg-[var(--surface)] text-[var(--text-primary)] border border-[var(--border)] hover:bg-[var(--surface-alt)] focus:ring-2 focus:ring-[#5CBF9D] transition-all duration-150 ease-out;
   }
   .btn-ghost {
-    @apply text-slate-600 hover:text-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-150 ease-out;
+    @apply text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-all duration-150 ease-out;
   }
   .btn-danger {
     @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-600 transition-all duration-150 ease-out;
   }
   .input {
-    @apply w-full rounded-[12px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm text-slate-700 dark:text-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-150 ease-out h-11;
+    @apply w-full rounded-[999px] border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#5CBF9D] focus:border-transparent transition-all duration-150 ease-out;
   }
   .card {
-    @apply bg-white dark:bg-slate-800 rounded-[16px] border border-slate-200 dark:border-slate-700 shadow-card dark:shadow-slate-900/50;
+    @apply bg-[var(--surface)] rounded-[20px] border border-[var(--border)] shadow-card;
     transition: box-shadow 0.15s ease-out, border-color 0.15s ease-out, max-height 0.3s ease-out, background-color 0.2s ease-out, transform 0.15s ease-out;
   }
-  
+
   .card-expandable {
     transition: max-height 0.3s ease-out, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
     overflow: hidden;
@@ -147,11 +128,11 @@
   }
 }
 
-/* SurveyJS theme customizations */
+/* SurveyJS theme */
 .sd-root {
-  --sjs-primary-backcolor: #2563EB;
-  --sjs-primary-backcolor-light: #dbeafe;
-  --sjs-primary-backcolor-dark: #1d4ed8;
+  --sjs-primary-backcolor: #5CBF9D;
+  --sjs-primary-backcolor-light: #E4F5EE;
+  --sjs-primary-backcolor-dark: #3D786A;
   --sjs-base-unit: 8px;
   --sjs-corner-radius: 8px;
   --sjs-shadow-small: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
@@ -166,18 +147,15 @@
   --sjs-general-forecolor-light: #64748b;
 }
 
-/* Survey Creator theme */
 .sc-root {
-  --sjs-primary-backcolor: #2563EB;
+  --sjs-primary-backcolor: #5CBF9D;
   --sjs-general-backcolor-dim: #f8fafc;
 }
 
-/* Remove SurveyJS Non-Commercial Banner */
 .svc-creator__non-commercial-text {
   display: none !important;
 }
 
-/* Ensure Survey Creator fills its container */
 .svc-creator-component {
   height: 100% !important;
   width: 100% !important;
@@ -192,7 +170,6 @@
   overflow: hidden !important;
 }
 
-/* Fix flickering add question buttons */
 .svc-tabbed-menu-item-container {
   will-change: transform;
 }
@@ -201,19 +178,16 @@
   display: none !important;
 }
 
-/* Property grid styling */
 .svc-property-grid {
   background: #ffffff !important;
 }
 
-/* Ensure icons are visible in property grid */
 .svc-string-editor,
 .svc-item-value__content,
 .svc-question__content {
   color: inherit !important;
 }
 
-/* Survey Preview - Allow dynamic width */
 .sd-table {
   width: 100% !important;
   display: table !important;
@@ -232,12 +206,11 @@
   padding: 8px 4px !important;
 }
 
-/* Survey container */
 .survey-container {
   width: 100% !important;
 }
 
-/* React Big Calendar customization */
+/* Calendar styles */
 .agenda-calendar {
   --rbc-today-bg: #f1f5f9;
 }
@@ -399,7 +372,29 @@
   }
 }
 
-/* Custom scrollbar for content areas */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeSlideIn 0.25s ease-out forwards;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.25s ease-out forwards;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
@@ -414,7 +409,6 @@
   background: #94a3b8;
 }
 
-/* Dark scrollbar for sidebar */
 .sidebar-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
