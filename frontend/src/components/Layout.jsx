@@ -1,5 +1,6 @@
 import Sidebar from "./Sidebar";
 import AvatarPickerModal from "./AvatarPickerModal";
+import DecorativeElements from "./DecorativeElements";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -56,6 +57,9 @@ export default function Layout({ children }) {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative z-10 dark:bg-slate-800 dark:border-l dark:border-slate-700/50">
+        {/* Decorative Elements */}
+        <DecorativeElements />
+
         {/* Top Bar */}
         <div className="h-14 shrink-0 flex items-center justify-end px-6 border-b border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
           <button
