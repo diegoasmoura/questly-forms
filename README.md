@@ -44,7 +44,6 @@ Toggle de tema no header da Home (🌙/☀️) em formato pill com knob gradient
 |-----|-------|--------|
 | **UI / Body** | Nunito Sans | 400, 600, 700, 800 |
 | **Títulos / Logo** | Caveat Brush | 400 (cursiva) |
-| **Post-it** | Caveat Brush | 400 |
 
 ### Sidebar (Navegação)
 
@@ -67,8 +66,7 @@ Toggle de tema no header da Home (🌙/☀️) em formato pill com knob gradient
 - SVG underline personalizado do nome em `#5CBF9D`
 - Blobs decorativos (peach-light, sage-light, purple-light com blur)
 - Chips: "3 avaliações pendentes" (peach) e "N novas respostas" (sage)
-- Sticky note em Caveat Brush, rotacionado -3deg, com pin gradient
-- Search pill, Theme toggle gradient, Bell icon com dot, Avatar gradient purple→blue
+- Theme toggle gradient, Bell icon com dot, Avatar gradient purple→blue
 
 **Stat Cards (4 colunas):**
 - Cada card com ícone (colored bg), trend badge, valor e label

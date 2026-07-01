@@ -9,7 +9,6 @@ import {
   CheckCheck,
   Users,
   Clock,
-  Search,
   Sun,
   Moon,
   Bell,
@@ -144,21 +143,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="relative z-[1] self-center bg-[var(--note-bg)] text-[var(--note-text)] font-handwritten text-lg leading-tight px-[26px] py-4 rounded-[4px_14px_14px_14px] max-w-[180px] -rotate-3 shadow-[0_8px_20px_rgba(30,31,34,0.10)] flex-shrink-0 hidden md:block">
-          <span className="absolute -top-[7px] left-[18px] w-[15px] h-[15px] rounded-full bg-gradient-to-br from-[#F8A26B] to-[#7C5CFF] shadow-[0_2px_5px_rgba(0,0,0,0.25)]" />
-          Vamos cuidar de tudo com carinho.
-        </div>
-
         <div className="relative z-[1] flex items-center gap-3.5">
-          <div className="hidden sm:flex items-center gap-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-[999px] px-[18px] py-[10px] text-[var(--text-muted)] max-w-[200px]">
-            <Search size={16} className="flex-shrink-0" />
-            <input
-              type="text"
-              placeholder="Buscar..."
-              className="bg-transparent border-none outline-none font-sans text-sm text-[var(--text-primary)] w-full"
-            />
-          </div>
-
           <button
             onClick={toggleTheme}
             className="flex items-center gap-2 bg-[var(--surface)] border border-[var(--border)] rounded-[999px] p-[6px] cursor-pointer w-[60px] h-[34px] relative"
