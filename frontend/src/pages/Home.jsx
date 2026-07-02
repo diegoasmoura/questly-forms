@@ -821,7 +821,7 @@ function TimelineRow({ app }) {
 function ComparativoRow({ label, prev, current, format, invertColor }) {
   const isUp = current > prev;
   const isDown = current < prev;
-  const good = invertColor ? isDown : isUp;
+  // bad = faltas aumentaram (invertColor+isUp) OU sessões/faturamento caíram
   const bad = invertColor ? isUp : isDown;
 
   const fmt = (v) => format === "currency" ? fmtCurrency(v) : v;
@@ -830,14 +830,18 @@ function ComparativoRow({ label, prev, current, format, invertColor }) {
     <div className="flex items-center justify-between py-2.5">
       <span className="text-[12px] text-[var(--text-secondary)]">{label}</span>
       <div className="flex items-center gap-2">
+        {/* Mês anterior — sempre neutro */}
         <span className="text-[12px] text-[var(--text-muted)]">{fmt(prev)}</span>
         <ArrowRight size={10} className="text-[var(--text-muted)]" />
-        <span className={`text-[14px] font-extrabold ${good ? "text-[#5CBF90]" : bad ? "text-[#F8A268]" : "text-[var(--text-primary)]"}`}>
+        {/* Mês atual — sempre verde (destaque positivo), laranja só quando ruim */}
+        <span className={`text-[14px] font-extrabold ${bad ? "text-[#D97706]" : "text-[#3D9E76]"}`}>
           {fmt(current)}
         </span>
-        {good && <TrendingUp size={11} className="text-[#5CBF90]" />}
-        {bad && <TrendingDown size={11} className="text-[#F8A268]" />}
+        {isUp && !bad && <TrendingUp size={11} className="text-[#3D9E76]" />}
+        {bad && isDown && <TrendingDown size={11} className="text-[#D97706]" />}
+        {bad && isUp && <TrendingUp size={11} className="text-[#D97706]" />}
       </div>
     </div>
   );
 }
+
