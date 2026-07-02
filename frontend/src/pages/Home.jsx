@@ -23,6 +23,8 @@ import {
   CakeSlice,
   AlertCircle,
   Banknote,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import AvatarPickerModal from "../components/AvatarPickerModal";
 import DecorativeElements from "../components/DecorativeElements";
@@ -169,6 +171,40 @@ export default function Home() {
   const [appointments, setAppointments] = useState([]);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [detailModal, setDetailModal] = useState({ open: false, app: null });
+
+  const [notes, setNotes] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("questly_dashboard_notes") || "[]");
+    } catch {
+      return [];
+    }
+  });
+  const [newNoteText, setNewNoteText] = useState("");
+
+  useEffect(() => {
+    localStorage.setItem("questly_dashboard_notes", JSON.stringify(notes));
+  }, [notes]);
+
+  const addNote = () => {
+    if (!newNoteText.trim()) return;
+    const newNote = {
+      id: Date.now().toString(),
+      text: newNoteText.trim(),
+      completed: false,
+    };
+    setNotes((prev) => [...prev, newNote]);
+    setNewNoteText("");
+  };
+
+  const toggleNote = (id) => {
+    setNotes((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, completed: !n.completed } : n))
+    );
+  };
+
+  const deleteNote = (id) => {
+    setNotes((prev) => prev.filter((n) => n.id !== id));
+  };
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -598,7 +634,7 @@ export default function Home() {
           )}
         </div>
 
-        {/* COLUNA 2 — Faturamento + Instrumentos (40%) */}
+        {/* COLUNA 2 — Faturamento + (Instrumentos & Aniversários Lado a Lado) (40%) */}
         <div className="w-full lg:w-[40%] flex flex-col gap-4">
           {/* Evolução do Faturamento com Área de Gradiente Peach */}
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5 flex flex-col">
@@ -650,51 +686,87 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Instrumentos Clínicos (diferencial QF) */}
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5">
-            <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--text-muted)] m-0 mb-1">Instrumentos Clínicos</p>
-            <p className="text-[11px] text-[var(--text-muted)] mb-4">Avaliações e formulários enviados</p>
-
-            {/* Taxa de conclusão — anel */}
-            <div className="flex items-center gap-4 mb-4">
-              <div className="relative w-[72px] h-[72px] flex-shrink-0">
-                <svg viewBox="0 0 72 72" className="w-full h-full -rotate-90">
-                  <circle cx="36" cy="36" r="28" fill="none" stroke="var(--surface-alt)" strokeWidth="8" />
-                  <circle
-                    cx="36" cy="36" r="28" fill="none"
-                    stroke={completionRate > 70 ? "#5CBF9D" : completionRate > 40 ? "#F8A26B" : "#7C5CFF"}
-                    strokeWidth="8"
-                    strokeLinecap="round"
-                    strokeDasharray={`${(completionRate / 100) * 2 * Math.PI * 28} ${2 * Math.PI * 28}`}
-                  />
-                </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-[14px] font-extrabold text-[var(--text-primary)]">
-                  {completionRate}%
-                </span>
-              </div>
+          {/* Grid de Instrumentos Clínicos + Aniversários Lado a Lado */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Instrumentos Clínicos */}
+            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5 flex flex-col justify-between">
               <div>
-                <p className="text-[13px] font-bold text-[var(--text-primary)]">Taxa de resposta</p>
-                <p className="text-[12px] text-[var(--text-muted)]">{totalResponses} de {totalSent} enviados</p>
-                <p className="text-[11px] text-[var(--text-muted)] mt-1">{forms.length} formulário{forms.length !== 1 ? "s" : ""} cadastrado{forms.length !== 1 ? "s" : ""}</p>
+                <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--text-muted)] m-0 mb-1">Instrumentos Clínicos</p>
+                <p className="text-[11px] text-[var(--text-muted)] mb-4">Avaliações enviadas</p>
+
+                {/* Taxa de conclusão — anel */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="relative w-[60px] h-[60px] flex-shrink-0">
+                    <svg viewBox="0 0 72 72" className="w-full h-full -rotate-90">
+                      <circle cx="36" cy="36" r="28" fill="none" stroke="var(--surface-alt)" strokeWidth="8" />
+                      <circle
+                        cx="36" cy="36" r="28" fill="none"
+                        stroke={completionRate > 70 ? "#5CBF9D" : completionRate > 40 ? "#F8A26B" : "#7C5CFF"}
+                        strokeWidth="8"
+                        strokeLinecap="round"
+                        strokeDasharray={`${(completionRate / 100) * 2 * Math.PI * 28} ${2 * Math.PI * 28}`}
+                      />
+                    </svg>
+                    <span className="absolute inset-0 flex items-center justify-center text-[12px] font-extrabold text-[var(--text-primary)]">
+                      {completionRate}%
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-[12px] font-bold text-[var(--text-primary)] leading-tight">Taxa de resposta</p>
+                    <p className="text-[11px] text-[var(--text-muted)] mt-0.5">{totalResponses} de {totalSent}</p>
+                  </div>
+                </div>
+
+                {/* Formulário mais usado */}
+                {topForm && (
+                  <div className="bg-[var(--surface-alt)] rounded-[12px] p-2.5 mb-3">
+                    <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-0.5">Mais utilizado</p>
+                    <p className="text-[12px] font-semibold text-[var(--text-primary)] truncate">{topForm.name}</p>
+                    <p className="text-[11px] text-[var(--text-muted)]">{formStats[topForm.id]?.responseCount || 0} respostas</p>
+                  </div>
+                )}
               </div>
+
+              <Link to="/my-forms" className="flex items-center justify-center gap-1.5 w-full py-2 rounded-[10px] border border-[var(--border)] text-[12px] font-bold text-[var(--dark-green)] dark:text-[#5CBF9D] hover:bg-[var(--sage-light)] transition-colors mt-auto">
+                Ver todos <ArrowRight size={12} />
+              </Link>
             </div>
 
-            {/* Formulário mais usado */}
-            {topForm && (
-              <div className="bg-[var(--surface-alt)] rounded-[12px] p-3 mb-3">
-                <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Mais utilizado</p>
-                <p className="text-[13px] font-semibold text-[var(--text-primary)] truncate">{topForm.name}</p>
-                <p className="text-[11px] text-[var(--text-muted)]">{formStats[topForm.id]?.responseCount || 0} respostas</p>
+            {/* Aniversários próximos */}
+            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5 flex flex-col justify-between">
+              <div>
+                <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--text-muted)] m-0 mb-3 flex items-center gap-1.5 flex-shrink-0">
+                  <CakeSlice size={13} className="text-[var(--peach)]" />
+                  Aniversários (7 dias)
+                </p>
+                {upcomingBirthdays.length === 0 ? (
+                  <p className="text-[12px] text-[var(--text-muted)] py-2">Nenhum próximo</p>
+                ) : (
+                  <div className="flex flex-col gap-2.5">
+                    {upcomingBirthdays.slice(0, 4).map((p) => {
+                      const ini = p.name?.split(" ")?.map((n) => n[0])?.join("")?.toUpperCase()?.slice(0, 2) || "?";
+                      return (
+                        <div key={p.id} className="flex items-center gap-2.5">
+                          <div className="w-[30px] h-[30px] rounded-full bg-gradient-to-br from-[#F8A26B] to-[#7C5CFF] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+                            {ini}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] font-semibold text-[var(--text-primary)] truncate leading-tight">{p.name.split(" ")[0]}</p>
+                            <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                              {p.daysUntil === 0 ? "🎉 Hoje!" : p.daysUntil === 1 ? "Amanhã" : `em ${p.daysUntil} dias`}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            )}
-
-            <Link to="/my-forms" className="flex items-center justify-center gap-1.5 w-full py-2 rounded-[10px] border border-[var(--border)] text-[12px] font-bold text-[var(--dark-green)] dark:text-[#5CBF9D] hover:bg-[var(--sage-light)] transition-colors">
-              Ver instrumentos <ArrowRight size={12} />
-            </Link>
+            </div>
           </div>
         </div>
 
-        {/* COLUNA 3 — Perfil da Base + Aniversários (30%) */}
+        {/* COLUNA 3 — Perfil da Base + Lembretes (30%) */}
         <div className="w-full lg:w-[30%] flex flex-col gap-4">
           {/* Perfil da base */}
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5">
@@ -767,34 +839,59 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Aniversários próximos */}
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5">
-            <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--text-muted)] m-0 mb-3 flex items-center gap-1.5 flex-shrink-0">
-              <CakeSlice size={13} className="text-[var(--peach)]" />
-              Aniversários (7 dias)
-            </p>
-            {upcomingBirthdays.length === 0 ? (
-              <p className="text-[12px] text-[var(--text-muted)] py-2">Nenhum aniversário próximo</p>
-            ) : (
-              <div className="flex flex-col gap-2.5">
-                {upcomingBirthdays.slice(0, 4).map((p) => {
-                  const ini = p.name?.split(" ")?.map((n) => n[0])?.join("")?.toUpperCase()?.slice(0, 2) || "?";
-                  return (
-                    <div key={p.id} className="flex items-center gap-2.5">
-                      <div className="w-[30px] h-[30px] rounded-full bg-gradient-to-br from-[#F8A26B] to-[#7C5CFF] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
-                        {ini}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold text-[var(--text-primary)] truncate">{p.name.split(" ")[0]}</p>
-                        <p className="text-[11px] text-[var(--text-muted)]">
-                          {p.daysUntil === 0 ? "🎉 Hoje!" : p.daysUntil === 1 ? "Amanhã" : `em ${p.daysUntil} dias`}
-                        </p>
-                      </div>
+          {/* Lembretes e Anotações */}
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5 flex flex-col justify-between min-h-[220px]">
+            <div>
+              <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--text-muted)] m-0 mb-3">
+                Lembretes Rápidos
+              </p>
+              {notes.length === 0 ? (
+                <p className="text-[12px] text-[var(--text-muted)] py-4 text-center">Nenhum lembrete cadastrado</p>
+              ) : (
+                <div className="flex flex-col gap-2 max-h-[160px] overflow-y-auto pr-1 mb-3">
+                  {notes.map((n) => (
+                    <div key={n.id} className="flex items-center justify-between gap-2 group py-1 border-b border-[var(--border)]/30 last:border-b-0">
+                      <label className="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
+                        <input
+                          type="checkbox"
+                          checked={n.completed}
+                          onChange={() => toggleNote(n.id)}
+                          className="w-[14px] h-[14px] rounded border-[var(--border)] text-[var(--sage)] focus:ring-[var(--sage)] cursor-pointer"
+                        />
+                        <span className={`text-[12px] truncate transition-all ${n.completed ? "line-through text-[var(--text-muted)] opacity-60" : "text-[var(--text-primary)]"}`}>
+                          {n.text}
+                        </span>
+                      </label>
+                      <button
+                        onClick={() => deleteNote(n.id)}
+                        className="text-[var(--text-muted)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded"
+                        title="Excluir"
+                      >
+                        <Trash2 size={12} />
+                      </button>
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Input para adicionar novo lembrete */}
+            <div className="flex gap-2 mt-auto pt-2 border-t border-[var(--border)]/50">
+              <input
+                type="text"
+                value={newNoteText}
+                onChange={(e) => setNewNoteText(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && addNote()}
+                placeholder="Adicionar lembrete..."
+                className="flex-1 bg-[var(--surface-alt)] border border-[var(--border)] rounded-[10px] px-3 py-1.5 text-[12px] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--sage)] transition-colors"
+              />
+              <button
+                onClick={addNote}
+                className="w-[30px] h-[30px] bg-[var(--sage)] rounded-[10px] flex items-center justify-center text-white hover:bg-[var(--dark-green)] transition-colors"
+              >
+                <Plus size={14} />
+              </button>
+            </div>
           </div>
         </div>
       </div>

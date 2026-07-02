@@ -77,10 +77,10 @@ Toggle de tema no header da Home (🌙/☀️) em formato pill com knob gradient
 - **Coluna 1 (30%):** Painel "Agenda de Hoje" com altura fixa de `500px`, timeline de sessões com avatares de cores suaves baseados no hash do paciente e lista de contagem de sessões dos próximos dias na parte inferior.
 - **Coluna 2 (40%):** 
   - **Gráfico de Faturamento:** Gráfico de área (Recharts) com curva monotone e gradiente de preenchimento pêssego (`var(--peach)`) exibindo a evolução financeira dos últimos 6 meses.
-  - **Instrumentos Clínicos:** Painel contendo anel de taxa de resposta, formulário mais utilizado e atalho de navegação.
+  - **Grid Lateral:** Exibe lado a lado o card de **Instrumentos Clínicos** (com taxa de resposta) e o card de **Aniversários (7 dias)**.
 - **Coluna 3 (30%):**
   - **Perfil da Base:** Consolidação de pacientes ativos no mês, gráfico circular de gênero e gráficos horizontais de faixa etária.
-  - **Aniversários (7 dias):** Lista com os próximos aniversariantes da semana.
+  - **Lembretes Rápidos:** Card de afazeres/lembretes rápidos com input para adição, exclusão e toggle de conclusão (com corte de texto dinâmico), persistido automaticamente no `localStorage`.
 
 ### Sistema de Cores Funcionais
 
