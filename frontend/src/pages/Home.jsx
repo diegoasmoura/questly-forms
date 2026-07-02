@@ -825,16 +825,17 @@ function ComparativoRow({ label, prev, current, format, invertColor }) {
     <div className="flex items-center justify-between py-2.5">
       <span className="text-[12px] text-[var(--text-secondary)]">{label}</span>
       <div className="flex items-center gap-2">
-        {/* Mês anterior — sempre neutro */}
-        <span className="text-[12px] text-[var(--text-muted)]">{fmt(prev)}</span>
-        <ArrowRight size={10} className="text-[var(--text-muted)]" />
-        {/* Mês atual — sempre verde, é o dado principal */}
+        {/* Atual — esquerda, verde, destaque */}
         <span className="text-[14px] font-extrabold text-[#3D9E76]">
           {fmt(current)}
         </span>
         {isUp && !bad && <TrendingUp size={11} className="text-[#3D9E76]" />}
         {bad && isDown && <TrendingDown size={11} className="text-[#D97706]" />}
         {bad && isUp && <TrendingUp size={11} className="text-[#D97706]" />}
+        {/* Separador */}
+        <span className="text-[10px] font-bold text-[var(--text-muted)] px-0.5">vs</span>
+        {/* Anterior — direita, muted */}
+        <span className="text-[12px] text-[var(--text-muted)]">{fmt(prev)}</span>
       </div>
     </div>
   );
