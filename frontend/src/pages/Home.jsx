@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import AvatarPickerModal from "../components/AvatarPickerModal";
 import DecorativeElements from "../components/DecorativeElements";
+import AppointmentDetailModal from "../components/AppointmentDetailModal";
 
 /* ─── Helpers ──────────────────────────────────────────────────────── */
 function getGreeting() {
@@ -166,6 +167,7 @@ export default function Home() {
   const [payments, setPayments] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [detailModal, setDetailModal] = useState({ open: false, app: null });
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -544,9 +546,9 @@ export default function Home() {
               </Link>
             </div>
           ) : (
-            <div className="flex flex-col gap-0 overflow-y-auto">
+            <div className="flex flex-col gap-1 overflow-y-auto pr-1">
               {todayEvents.map((app, i) => (
-                <TimelineRow key={app.id + "-" + i} app={app} />
+                <TimelineRow key={app.id + "-" + i} app={app} onClick={() => setDetailModal({ open: true, app })} />
               ))}
             </div>
           )}
@@ -741,6 +743,16 @@ export default function Home() {
       </div>
 
       {showAvatarPicker && <AvatarPickerModal onClose={() => setShowAvatarPicker(false)} />}
+
+      {detailModal.open && detailModal.app && (
+        <AppointmentDetailModal
+          appointment={detailModal.app}
+          patient={detailModal.app.patient}
+          nextDate={detailModal.app.date}
+          onClose={() => setDetailModal({ open: false, app: null })}
+          onUpdate={loadData}
+        />
+      )}
     </div>
   );
 }
@@ -784,14 +796,17 @@ const STATUS_CONFIG = {
   confirmado: { dot: "#2E7DFF", bg: "var(--blue-light)",   label: "Confirmado", text: "#2E7DFF" },
 };
 
-function TimelineRow({ app }) {
+function TimelineRow({ app, onClick }) {
   const status = app.attendance?.status || "confirmado";
   const sc = STATUS_CONFIG[status] || STATUS_CONFIG.confirmado;
   const patientName = app.patient?.name || "Paciente";
   const ini = patientName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 
   return (
-    <div className="flex items-center gap-3 py-2.5 border-b border-[var(--border)] last:border-b-0">
+    <div
+      onClick={onClick}
+      className="flex items-center gap-3 py-2 px-2 border-b border-[var(--border)] last:border-b-0 cursor-pointer hover:bg-[var(--surface-alt)] rounded-[12px] transition-all"
+    >
       {/* Hora */}
       <span className="text-[12px] font-bold text-[var(--text-muted)] w-[44px] flex-shrink-0 tabular-nums">
         {app.sortTime.slice(0, 5)}
