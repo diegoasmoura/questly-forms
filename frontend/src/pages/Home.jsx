@@ -77,7 +77,7 @@ function getAgeGroup(birthDate) {
 
 const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
-/* ─── Sparkline SVG ────────────────────────────────────────────────── */
+/* ─── Sparkline SVG (mantida para uso futuro) ──────────────────────── */
 function Sparkline({ data, color = "#5CBF9D", height = 36 }) {
   if (!data || data.length < 2) return null;
   const max = Math.max(...data, 1);
@@ -90,22 +90,47 @@ function Sparkline({ data, color = "#5CBF9D", height = 36 }) {
   });
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className="w-full" preserveAspectRatio="none">
-      <polyline
-        points={pts.join(" ")}
-        fill="none"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity="0.8"
-      />
-      <polyline
-        points={`0,${h} ${pts.join(" ")} ${w},${h}`}
-        fill={color}
-        opacity="0.08"
-        strokeWidth="0"
-      />
+      <polyline points={pts.join(" ")} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.8" />
+      <polyline points={`0,${h} ${pts.join(" ")} ${w},${h}`} fill={color} opacity="0.08" strokeWidth="0" />
     </svg>
+  );
+}
+
+/* ─── Mini gráfico de barras semanais ─────────────────────────────── */
+function WeekBarChart({ data, color = "#5CBF9D", colorBg = "var(--surface-alt)" }) {
+  const max = Math.max(...data.map((d) => d.value), 1);
+  const hasData = data.some((d) => d.value > 0);
+
+  if (!hasData) {
+    return (
+      <div className="flex items-end justify-between gap-1 h-[52px]">
+        {data.map((d) => (
+          <div key={d.label} className="flex flex-col items-center gap-1 flex-1">
+            <div className="w-full rounded-[4px] flex-1" style={{ background: colorBg, opacity: 0.5 }} />
+            <span className="text-[9px] text-[var(--text-muted)] font-bold">{d.label}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-end justify-between gap-1.5 h-[52px]">
+      {data.map((d) => {
+        const pct = (d.value / max) * 100;
+        const isEmpty = d.value === 0;
+        return (
+          <div key={d.label} className="flex flex-col items-center gap-1 flex-1" title={`${d.label}: ${d.value} sessão${d.value !== 1 ? "ões" : ""}`}>
+            <div className="w-full rounded-t-[4px] transition-all duration-500 relative group" style={{ height: `${Math.max(pct, isEmpty ? 4 : 8)}%`, background: isEmpty ? colorBg : color, opacity: isEmpty ? 0.35 : 0.9 }}>
+              {d.value > 0 && (
+                <span className="absolute -top-[18px] left-1/2 -translate-x-1/2 text-[9px] font-extrabold" style={{ color }}>{d.value}</span>
+              )}
+            </div>
+            <span className="text-[9px] text-[var(--text-muted)] font-bold">{d.label}</span>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -237,16 +262,18 @@ export default function Home() {
     prevAttendances.filter((a) => a.status === "presente").map((a) => a.patientId)
   );
 
-  /* ── Sparkline: presenças por semana nas últimas 6 semanas ── */
+  /* ── Mini bar chart: presenças por semana nas últimas 6 semanas ── */
+  const weekShortNames = ["S−5", "S−4", "S−3", "S−2", "S−1", "Esta"];
   const sparklineData = Array.from({ length: 6 }, (_, i) => {
     const weekStart = new Date(today);
     weekStart.setDate(today.getDate() - (5 - i) * 7 - today.getDay());
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 6);
-    return attendances.filter((a) => {
+    const value = attendances.filter((a) => {
       const d = new Date(a.date);
       return a.status === "presente" && d >= weekStart && d <= weekEnd;
     }).length;
+    return { label: weekShortNames[i], value };
   });
 
   /* ── Aniversários: próximos 7 dias ── */
@@ -594,16 +621,15 @@ export default function Home() {
       ═══════════════════════════════════════════════════════════════ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-        {/* 3A — Comparativo com sparkline */}
+        {/* 3A — Comparativo com mini bar chart */}
         <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5">
           <h2 className="text-[18px] m-0 text-[var(--text-primary)] font-heading mb-1">Comparativo do Mês</h2>
-          <p className="text-[11px] text-[var(--text-muted)] mb-3">Atual vs. mês anterior</p>
+          <p className="text-[11px] text-[var(--text-muted)] mb-4">Atual vs. mês anterior</p>
 
-          <div className="mb-3">
-            <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Presenças — últimas 6 semanas</p>
-            <div className="h-[40px]">
-              <Sparkline data={sparklineData} color="#5CBF9D" height={40} />
-            </div>
+          {/* Mini bar chart */}
+          <div className="mb-4 bg-[var(--surface-alt)] rounded-[12px] p-3">
+            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Presenças — últimas 6 semanas</p>
+            <WeekBarChart data={sparklineData} color="#5CBF9D" colorBg="var(--border)" />
           </div>
 
           <div className="space-y-0 divide-y divide-[var(--border)]">
