@@ -39,8 +39,9 @@ export default {
       },
       fontFamily: {
         sans: ["Nunito Sans", "system-ui", "sans-serif"],
-        heading: ["Caveat Brush", "cursive"],
-        handwritten: ["Caveat Brush", "cursive"],
+        heading: ["Playfair Display", "Georgia", "serif"],
+        handwritten: ["Caveat", "cursive"],
+        brand: ["Caveat Brush", "cursive"],
       },
       boxShadow: {
         card: "0 8px 24px rgba(30,31,34,0.06)",

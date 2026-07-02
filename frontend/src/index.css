@@ -3,11 +3,11 @@
 @tailwind utilities;
 
 :root {
-  --bg: #F7F8FA;
+  --bg: #FAF8F4;
   --surface: #FFFFFF;
-  --surface-alt: #F1F3F5;
+  --surface-alt: #F5F4EF;
   --border: #E8ECEF;
-  --text-primary: #1E1F22;
+  --text-primary: #1F2937;
   --text-secondary: #495057;
   --text-muted: #9BA3AB;
   --sage: #5CBF9D;
@@ -24,18 +24,18 @@
 }
 
 .dark {
-  --bg: #15171A;
-  --surface: #1D2023;
-  --surface-alt: #242830;
-  --border: #2B2F35;
-  --text-primary: #F5F6F7;
+  --bg: #101722;
+  --surface: #192231;
+  --surface-alt: #202B3C;
+  --border: #2B3650;
+  --text-primary: #F6F7FB;
   --text-secondary: #C3C9D0;
-  --text-muted: #7C848D;
-  --sage-light: #1E332C;
-  --blue-light: #182636;
-  --peach-light: #31241C;
-  --purple-light: #241F38;
-  --note-bg: #2E2611;
+  --text-muted: #A8B2C1;
+  --sage-light: #1A3028;
+  --blue-light: #152030;
+  --peach-light: #2E2018;
+  --purple-light: #1E1A30;
+  --note-bg: #2A2210;
   --note-text: #E8D49C;
 }
 
@@ -48,10 +48,22 @@
     color-scheme: dark;
   }
 
+  /* Playfair Display para títulos — elegante, editorial, nunca o Caveat Brush */
   h1, h2, h3, h4 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+  }
+
+  /* Caveat apenas em palavras de destaque pontuais */
+  .highlight {
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+  }
+
+  /* Caveat Brush restrito ao monograma/logo */
+  .font-brand {
     font-family: 'Caveat Brush', cursive;
-    font-weight: 400;
-    letter-spacing: 0.3px;
   }
 }
 
@@ -60,7 +72,7 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-[#F7F8FA] dark:bg-[#15171A] text-[#1E1F22] dark:text-[#F5F6F7] font-sans antialiased;
+    @apply bg-[#FAF8F4] dark:bg-[#101722] text-[#1F2937] dark:text-[#F6F7FB] font-sans antialiased;
   }
   ::selection {
     @apply bg-[#5CBF9D] text-white;
