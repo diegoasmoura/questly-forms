@@ -836,6 +836,7 @@ function ComparativoRow({ label, prev, current, format, invertColor }) {
         {isUp && !bad && <TrendingUp size={11} className="text-[#3D9E76]" />}
         {bad && isDown && <TrendingDown size={11} className="text-[#D97706]" />}
         {bad && isUp && <TrendingUp size={11} className="text-[#D97706]" />}
+        {!isUp && !isDown && <Minus size={11} className="text-[var(--text-muted)]" />}
       </div>
     </div>
   );
