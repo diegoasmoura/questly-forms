@@ -879,7 +879,7 @@ export default function Home() {
             </div>
 
             {/* Input para adicionar novo lembrete */}
-            <div className="flex gap-2 pt-2 border-t border-[var(--border)]/50 flex-shrink-0">
+            <div className="flex gap-2 pt-2 flex-shrink-0">
               <input
                 type="text"
                 value={newNoteText}
