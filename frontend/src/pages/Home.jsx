@@ -626,12 +626,6 @@ export default function Home() {
           <h2 className="text-[18px] m-0 text-[var(--text-primary)] font-heading mb-1">Comparativo do Mês</h2>
           <p className="text-[11px] text-[var(--text-muted)] mb-4">Atual vs. mês anterior</p>
 
-          {/* Mini bar chart */}
-          <div className="mb-4 bg-[var(--surface-alt)] rounded-[12px] p-3">
-            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Presenças — últimas 6 semanas</p>
-            <WeekBarChart data={sparklineData} color="#5CBF9D" colorBg="var(--border)" />
-          </div>
-
           <div className="space-y-0 divide-y divide-[var(--border)]">
             <ComparativoRow label="Sessões" prev={prevPresencas} current={presencas} format="number" />
             <ComparativoRow label="Pacientes atendidos" prev={prevPatientIds.size} current={monthPatientIds.size} format="number" />
@@ -639,6 +633,7 @@ export default function Home() {
             <ComparativoRow label="Faturamento" prev={prevTotalPaid} current={totalPaid} format="currency" />
           </div>
         </div>
+
 
         {/* 3B — Instrumentos Clínicos (diferencial QF) */}
         <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5">
