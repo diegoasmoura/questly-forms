@@ -481,7 +481,7 @@ export default function Home() {
         />
         <KpiCard
           icon={<CheckCheck size={16} />}
-          iconBg="var(--sage-light)" iconColor="var(--sage)"
+          iconBg="var(--sage-light)" iconColor="var(--dark-green)"
           label="Presença no mês"
           value={`${taxaPresenca}%`}
           trend={{ current: taxaPresenca, previous: prevTaxaPresenca, unit: "%" }}
@@ -489,7 +489,7 @@ export default function Home() {
         />
         <KpiCard
           icon={<DollarSign size={16} />}
-          iconBg="var(--sage-light)" iconColor="var(--dark-green)"
+          iconBg="var(--peach-light)" iconColor="#C97840"
           label="Recebido no mês"
           value={fmtCurrency(totalPaid)}
           trend={{ current: totalPaid, previous: prevTotalPaid, unit: "R$" }}
@@ -510,6 +510,7 @@ export default function Home() {
           value={`${totalResponses}/${totalSent}`}
           sub={`${completionRate}% de resposta`}
         />
+
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
