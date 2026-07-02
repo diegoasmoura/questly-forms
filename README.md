@@ -80,7 +80,7 @@ Toggle de tema no header da Home (🌙/☀️) em formato pill com knob gradient
   - **Grid Lateral:** Exibe lado a lado o card de **Instrumentos Clínicos** (com taxa de resposta) e o card de **Aniversários (7 dias)**.
 - **Coluna 3 (30%):**
   - **Perfil da Base:** Consolidação de pacientes ativos no mês, gráfico circular de gênero e gráficos horizontais de faixa etária.
-  - **Lembretes Rápidos:** Card de afazeres/lembretes rápidos com input para adição, exclusão e toggle de conclusão (com corte de texto dinâmico), persistido automaticamente no `localStorage`.
+  - **Lembretes Rápidos:** Card de afazeres/lembretes rápidos com altura fixa de `235px` e rolagem interna (`overflow-y-auto`), contendo input para adição, exclusão e toggle de conclusão (com corte de texto dinâmico), persistido automaticamente no `localStorage`.
 
 ### Sistema de Cores Funcionais
 

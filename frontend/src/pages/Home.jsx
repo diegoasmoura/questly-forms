@@ -840,31 +840,34 @@ export default function Home() {
           </div>
 
           {/* Lembretes e Anotações */}
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5 flex flex-col justify-between min-h-[220px]">
-            <div>
-              <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--text-muted)] m-0 mb-3">
-                Lembretes Rápidos
-              </p>
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5 flex flex-col h-[235px]">
+            <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--text-muted)] m-0 mb-3 flex-shrink-0">
+              Lembretes Rápidos
+            </p>
+            
+            <div className="flex-1 overflow-y-auto pr-1 mb-2">
               {notes.length === 0 ? (
-                <p className="text-[12px] text-[var(--text-muted)] py-4 text-center">Nenhum lembrete cadastrado</p>
+                <div className="h-full flex items-center justify-center">
+                  <p className="text-[12px] text-[var(--text-muted)] py-4 text-center">Nenhum lembrete cadastrado</p>
+                </div>
               ) : (
-                <div className="flex flex-col gap-2 max-h-[160px] overflow-y-auto pr-1 mb-3">
+                <div className="flex flex-col">
                   {notes.map((n) => (
-                    <div key={n.id} className="flex items-center justify-between gap-2 group py-1 border-b border-[var(--border)]/30 last:border-b-0">
-                      <label className="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
+                    <div key={n.id} className="flex items-center justify-between gap-2 group py-2 border-b border-[var(--border)] last:border-b-0">
+                      <label className="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0">
                         <input
                           type="checkbox"
                           checked={n.completed}
                           onChange={() => toggleNote(n.id)}
                           className="w-[14px] h-[14px] rounded border-[var(--border)] text-[var(--sage)] focus:ring-[var(--sage)] cursor-pointer"
                         />
-                        <span className={`text-[12px] truncate transition-all ${n.completed ? "line-through text-[var(--text-muted)] opacity-60" : "text-[var(--text-primary)]"}`}>
+                        <span className={`text-[12px] truncate transition-all duration-150 ${n.completed ? "line-through text-[var(--text-muted)] opacity-60" : "text-[var(--text-primary)] font-medium"}`}>
                           {n.text}
                         </span>
                       </label>
                       <button
                         onClick={() => deleteNote(n.id)}
-                        className="text-[var(--text-muted)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded"
+                        className="text-[var(--text-muted)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded flex-shrink-0"
                         title="Excluir"
                       >
                         <Trash2 size={12} />
@@ -876,7 +879,7 @@ export default function Home() {
             </div>
 
             {/* Input para adicionar novo lembrete */}
-            <div className="flex gap-2 mt-auto pt-2 border-t border-[var(--border)]/50">
+            <div className="flex gap-2 pt-2 border-t border-[var(--border)]/50 flex-shrink-0">
               <input
                 type="text"
                 value={newNoteText}
@@ -887,7 +890,7 @@ export default function Home() {
               />
               <button
                 onClick={addNote}
-                className="w-[30px] h-[30px] bg-[var(--sage)] rounded-[10px] flex items-center justify-center text-white hover:bg-[var(--dark-green)] transition-colors"
+                className="w-[30px] h-[30px] bg-[var(--sage)] rounded-[10px] flex items-center justify-center text-white hover:bg-[var(--dark-green)] transition-colors flex-shrink-0"
               >
                 <Plus size={14} />
               </button>
