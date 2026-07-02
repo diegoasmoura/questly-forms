@@ -27,6 +27,7 @@ import {
 import AvatarPickerModal from "../components/AvatarPickerModal";
 import DecorativeElements from "../components/DecorativeElements";
 import AppointmentDetailModal from "../components/AppointmentDetailModal";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts";
 
 /* ─── Helpers ──────────────────────────────────────────────────────── */
 function getGreeting() {
@@ -319,6 +320,29 @@ export default function Home() {
   }));
   const maxAge = Math.max(...ageData.map((d) => d.value), 1);
 
+  /* ── Dados de faturamento dos últimos 6 meses ── */
+  const revenueData = (() => {
+    const data = [];
+    const monthNamesShort = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(today.getMonth() - i);
+      const targetMonth = d.getMonth();
+      const targetYear = d.getFullYear();
+      const total = payments
+        .filter((p) => {
+          const pDate = new Date(p.paymentDate || p.createdAt);
+          return pDate.getMonth() === targetMonth && pDate.getFullYear() === targetYear;
+        })
+        .reduce((sum, p) => sum + (p.amount || 0), 0);
+      data.push({
+        name: monthNamesShort[targetMonth],
+        faturamento: total,
+      });
+    }
+    return data;
+  })();
+
   /* ── Agenda de hoje ── */
   function getAppointmentsForDate(date) {
     const dateStr = formatDateKey(date);
@@ -518,18 +542,18 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════════════
           ZONA 2 — Agenda do dia (hero) + Painel lateral
       ═══════════════════════════════════════════════════════════════ */}
-      <div className="flex flex-col lg:flex-row gap-4">
+      <div className="flex flex-col lg:flex-row gap-4 items-start">
 
-        {/* 2A — Timeline do dia */}
-        <div className="flex-[3] bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5 flex flex-col min-h-0">
+        {/* COLUNA 1 — Agenda de Hoje (30%) */}
+        <div className="w-full lg:w-[30%] bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5 flex flex-col lg:h-[500px] min-h-0">
           <div className="flex items-center justify-between mb-4 flex-shrink-0">
-            <h2 className="text-[20px] m-0 text-[var(--text-primary)] font-heading flex items-center gap-2">
+            <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--text-muted)] m-0 flex items-center gap-1.5">
               Agenda de Hoje
-              <Leaf size={15} className="text-[var(--sage)] opacity-60" />
-            </h2>
+              <Leaf size={12} className="text-[var(--sage)] opacity-60" />
+            </p>
             <div className="flex items-center gap-3">
               <span className="text-[12px] font-semibold text-[var(--text-muted)]">
-                {dayNames[today.getDay()]}, {today.getDate()} de {today.toLocaleString("pt-BR", { month: "long" })}
+                {dayNames[today.getDay()]} {today.getDate()} de {today.toLocaleString("pt-BR", { month: "long" })}
               </span>
               <Link to="/agenda" className="text-[12px] font-bold text-[var(--dark-green)] dark:text-[#5CBF9D] no-underline flex items-center gap-1 hover:underline">
                 Ver agenda <ArrowRight size={12} />
@@ -546,7 +570,7 @@ export default function Home() {
               </Link>
             </div>
           ) : (
-            <div className="flex flex-col gap-1 overflow-y-auto pr-1">
+            <div className="flex flex-col gap-2 overflow-y-auto pr-1 flex-1">
               {todayEvents.map((app, i) => (
                 <TimelineRow key={app.id + "-" + i} app={app} onClick={() => setDetailModal({ open: true, app })} />
               ))}
@@ -556,13 +580,17 @@ export default function Home() {
           {/* Próximos dias com sessões */}
           {upcomingDays.length > 0 && (
             <div className="mt-4 pt-4 border-t border-[var(--border)] flex-shrink-0">
-              <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Próximos dias</p>
-              <div className="flex gap-2 flex-wrap">
+              <p className="text-[11px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider mb-3">Próximos dias</p>
+              <div className="flex gap-4 flex-wrap">
                 {upcomingDays.map(({ date, events }) => (
-                  <div key={formatDateKey(date)} className="flex items-center gap-1.5 bg-[var(--surface-alt)] rounded-[10px] px-3 py-1.5">
-                    <span className="text-[11px] font-bold text-[var(--text-muted)]">{dayNames[date.getDay()]} {date.getDate()}</span>
-                    <span className="w-[5px] h-[5px] rounded-full bg-[var(--sage)]" />
-                    <span className="text-[11px] font-semibold text-[var(--text-primary)]">{events.length} sessão{events.length > 1 ? "ões" : ""}</span>
+                  <div key={formatDateKey(date)} className="flex items-center gap-2 text-[12px]">
+                    <span className="font-extrabold text-[var(--text-primary)]">
+                      {dayNames[date.getDay()]} {date.getDate()}
+                    </span>
+                    <span className="w-[4px] h-[4px] rounded-full bg-[var(--sage)]" />
+                    <span className="font-semibold text-[var(--text-secondary)]">
+                      {events.length} {events.length > 1 ? "sessões" : "sessão"}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -570,33 +598,185 @@ export default function Home() {
           )}
         </div>
 
-        {/* 2B — Painel de urgências/contexto */}
-        <div className="flex-[2] flex flex-col gap-3">
+        {/* COLUNA 2 — Faturamento + Instrumentos (40%) */}
+        <div className="w-full lg:w-[40%] flex flex-col gap-4">
+          {/* Evolução do Faturamento com Área de Gradiente Peach */}
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5 flex flex-col">
+            <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--text-muted)] m-0 mb-1">Evolução do Faturamento</p>
+            <p className="text-[11px] text-[var(--text-muted)] mb-4">Últimos 6 meses</p>
 
-          {/* Pacientes ativos */}
+            <div className="h-[140px] w-full mt-1">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={revenueData} margin={{ top: 5, right: 5, left: -22, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorFaturamento" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--peach)" stopOpacity={0.25}/>
+                      <stop offset="95%" stopColor="var(--peach)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis 
+                    dataKey="name" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 10, fill: "var(--text-muted)", fontWeight: 600 }}
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 10, fill: "var(--text-muted)", fontWeight: 600 }}
+                    tickFormatter={(value) => `R$ ${value}`}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: "var(--surface)", 
+                      borderColor: "var(--border)", 
+                      borderRadius: "12px",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.05)"
+                    }}
+                    labelStyle={{ fontSize: "10px", fontWeight: "bold", color: "var(--text-muted)" }}
+                    itemStyle={{ fontSize: "12px", fontWeight: "extrabold", color: "var(--peach)" }}
+                    formatter={(value) => [`R$ ${value}`, "Faturamento"]}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="faturamento" 
+                    stroke="var(--peach)" 
+                    strokeWidth={2}
+                    fillOpacity={1} 
+                    fill="url(#colorFaturamento)" 
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Instrumentos Clínicos (diferencial QF) */}
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5">
-            <div className="flex items-center justify-between">
+            <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--text-muted)] m-0 mb-1">Instrumentos Clínicos</p>
+            <p className="text-[11px] text-[var(--text-muted)] mb-4">Avaliações e formulários enviados</p>
+
+            {/* Taxa de conclusão — anel */}
+            <div className="flex items-center gap-4 mb-4">
+              <div className="relative w-[72px] h-[72px] flex-shrink-0">
+                <svg viewBox="0 0 72 72" className="w-full h-full -rotate-90">
+                  <circle cx="36" cy="36" r="28" fill="none" stroke="var(--surface-alt)" strokeWidth="8" />
+                  <circle
+                    cx="36" cy="36" r="28" fill="none"
+                    stroke={completionRate > 70 ? "#5CBF9D" : completionRate > 40 ? "#F8A26B" : "#7C5CFF"}
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray={`${(completionRate / 100) * 2 * Math.PI * 28} ${2 * Math.PI * 28}`}
+                  />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-[14px] font-extrabold text-[var(--text-primary)]">
+                  {completionRate}%
+                </span>
+              </div>
               <div>
-                <p className="text-[12px] text-[var(--text-muted)] font-semibold uppercase tracking-wider mb-1">Pacientes ativos</p>
-                <p className="text-[32px] font-extrabold text-[var(--text-primary)] leading-none">{activePatients}</p>
-                <p className="text-[12px] text-[var(--text-muted)] mt-1">{monthPatientIds.size} atendidos este mês</p>
+                <p className="text-[13px] font-bold text-[var(--text-primary)]">Taxa de resposta</p>
+                <p className="text-[12px] text-[var(--text-muted)]">{totalResponses} de {totalSent} enviados</p>
+                <p className="text-[11px] text-[var(--text-muted)] mt-1">{forms.length} formulário{forms.length !== 1 ? "s" : ""} cadastrado{forms.length !== 1 ? "s" : ""}</p>
               </div>
-              <div className="w-[50px] h-[50px] rounded-[14px] bg-[var(--purple-light)] flex items-center justify-center">
-                <Users size={22} className="text-[var(--purple)]" />
+            </div>
+
+            {/* Formulário mais usado */}
+            {topForm && (
+              <div className="bg-[var(--surface-alt)] rounded-[12px] p-3 mb-3">
+                <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Mais utilizado</p>
+                <p className="text-[13px] font-semibold text-[var(--text-primary)] truncate">{topForm.name}</p>
+                <p className="text-[11px] text-[var(--text-muted)]">{formStats[topForm.id]?.responseCount || 0} respostas</p>
               </div>
+            )}
+
+            <Link to="/my-forms" className="flex items-center justify-center gap-1.5 w-full py-2 rounded-[10px] border border-[var(--border)] text-[12px] font-bold text-[var(--dark-green)] dark:text-[#5CBF9D] hover:bg-[var(--sage-light)] transition-colors">
+              Ver instrumentos <ArrowRight size={12} />
+            </Link>
+          </div>
+        </div>
+
+        {/* COLUNA 3 — Perfil da Base + Aniversários (30%) */}
+        <div className="w-full lg:w-[30%] flex flex-col gap-4">
+          {/* Perfil da base */}
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--text-muted)] m-0 mb-1">Perfil da Base</p>
+                <div className="flex items-baseline gap-1.5 mt-2">
+                  <span className="text-[28px] font-extrabold text-[var(--text-primary)] leading-none">{activePatients}</span>
+                  <span className="text-[11px] text-[var(--text-muted)] font-semibold uppercase tracking-wider">Pacientes ativos</span>
+                </div>
+                <p className="text-[11px] text-[var(--text-muted)] mt-1">{monthPatientIds.size} atendidos este mês</p>
+              </div>
+              <div className="w-[42px] h-[42px] rounded-[12px] bg-[var(--purple-light)] flex items-center justify-center flex-shrink-0">
+                <Users size={18} className="text-[var(--purple)]" />
+              </div>
+            </div>
+
+            {/* Gênero */}
+            <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Gênero</p>
+            <div className="flex gap-3 items-center mb-4">
+              <div className="relative w-[60px] h-[60px] flex-shrink-0">
+                <svg viewBox="0 0 72 72" className="w-full h-full -rotate-90">
+                  <circle cx="36" cy="36" r="28" fill="none" stroke="var(--surface-alt)" strokeWidth="10" />
+                  {(() => {
+                    let offset = 0;
+                    return genderData.map((g, i) => {
+                      const circ = 2 * Math.PI * 28;
+                      const dash = (g.pct / 100) * circ;
+                      const el = (
+                        <circle key={i} cx="36" cy="36" r="28" fill="none"
+                          stroke={g.color} strokeWidth="10" strokeLinecap="butt"
+                          strokeDasharray={`${dash} ${circ - dash}`}
+                          strokeDashoffset={-offset}
+                        />
+                      );
+                      offset += dash;
+                      return el;
+                    });
+                  })()}
+                </svg>
+              </div>
+              <div className="flex flex-col gap-1 flex-1">
+                {genderData.map((g) => (
+                  <div key={g.label} className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-[8px] h-[8px] rounded-full flex-shrink-0" style={{ background: g.color }} />
+                      <span className="text-[11px] text-[var(--text-secondary)]">{g.label}</span>
+                    </div>
+                    <span className="text-[11px] font-bold text-[var(--text-primary)]">{g.pct}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Faixa etária */}
+            <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Faixa etária</p>
+            <div className="flex flex-col gap-1.5">
+              {ageData.map((g) => (
+                <div key={g.label} className="flex items-center gap-2">
+                  <span className="text-[11px] text-[var(--text-secondary)] w-[40px] flex-shrink-0">{g.label}</span>
+                  <div className="flex-1 h-[6px] bg-[var(--surface-alt)] rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-[var(--sage)] transition-all duration-500"
+                      style={{ width: `${Math.round((g.value / maxAge) * 100)}%` }}
+                    />
+                  </div>
+                  <span className="text-[11px] font-bold text-[var(--text-primary)] w-[16px] text-right">{g.value}</span>
+                </div>
+              ))}
             </div>
           </div>
 
           {/* Aniversários próximos */}
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5 flex-1">
-            <h2 className="text-[16px] m-0 text-[var(--text-primary)] font-heading mb-3 flex items-center gap-1.5">
-              <CakeSlice size={15} className="text-[var(--peach)]" />
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5">
+            <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--text-muted)] m-0 mb-3 flex items-center gap-1.5 flex-shrink-0">
+              <CakeSlice size={13} className="text-[var(--peach)]" />
               Aniversários (7 dias)
-            </h2>
+            </p>
             {upcomingBirthdays.length === 0 ? (
-              <p className="text-[12px] text-[var(--text-muted)] text-center py-3">Nenhum aniversário próximo</p>
+              <p className="text-[12px] text-[var(--text-muted)] py-2">Nenhum aniversário próximo</p>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2.5">
                 {upcomingBirthdays.slice(0, 4).map((p) => {
                   const ini = p.name?.split(" ")?.map((n) => n[0])?.join("")?.toUpperCase()?.slice(0, 2) || "?";
                   return (
@@ -615,129 +795,6 @@ export default function Home() {
                 })}
               </div>
             )}
-          </div>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════════
-          ZONA 3 — Comparativo + Instrumentos + Perfil da base
-      ═══════════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-        {/* 3A — Comparativo com mini bar chart */}
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5">
-          <h2 className="text-[18px] m-0 text-[var(--text-primary)] font-heading mb-1">Comparativo do Mês</h2>
-          <p className="text-[11px] text-[var(--text-muted)] mb-4">Atual vs. mês anterior</p>
-
-          <div className="space-y-0 divide-y divide-[var(--border)]">
-            <ComparativoRow label="Sessões" prev={prevPresencas} current={presencas} format="number" />
-            <ComparativoRow label="Pacientes atendidos" prev={prevPatientIds.size} current={monthPatientIds.size} format="number" />
-            <ComparativoRow label="Faltas" prev={prevFaltas} current={faltas} format="number" invertColor />
-            <ComparativoRow label="Faturamento" prev={prevTotalPaid} current={totalPaid} format="currency" />
-          </div>
-        </div>
-
-
-        {/* 3B — Instrumentos Clínicos (diferencial QF) */}
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5">
-          <h2 className="text-[18px] m-0 text-[var(--text-primary)] font-heading mb-1">Instrumentos Clínicos</h2>
-          <p className="text-[11px] text-[var(--text-muted)] mb-4">Avaliações e formulários enviados</p>
-
-          {/* Taxa de conclusão — anel */}
-          <div className="flex items-center gap-4 mb-4">
-            <div className="relative w-[72px] h-[72px] flex-shrink-0">
-              <svg viewBox="0 0 72 72" className="w-full h-full -rotate-90">
-                <circle cx="36" cy="36" r="28" fill="none" stroke="var(--surface-alt)" strokeWidth="8" />
-                <circle
-                  cx="36" cy="36" r="28" fill="none"
-                  stroke={completionRate > 70 ? "#5CBF9D" : completionRate > 40 ? "#F8A26B" : "#7C5CFF"}
-                  strokeWidth="8"
-                  strokeLinecap="round"
-                  strokeDasharray={`${(completionRate / 100) * 2 * Math.PI * 28} ${2 * Math.PI * 28}`}
-                />
-              </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-[14px] font-extrabold text-[var(--text-primary)]">
-                {completionRate}%
-              </span>
-            </div>
-            <div>
-              <p className="text-[13px] font-bold text-[var(--text-primary)]">Taxa de resposta</p>
-              <p className="text-[12px] text-[var(--text-muted)]">{totalResponses} de {totalSent} enviados</p>
-              <p className="text-[11px] text-[var(--text-muted)] mt-1">{forms.length} formulário{forms.length !== 1 ? "s" : ""} cadastrado{forms.length !== 1 ? "s" : ""}</p>
-            </div>
-          </div>
-
-          {/* Formulário mais usado */}
-          {topForm && (
-            <div className="bg-[var(--surface-alt)] rounded-[12px] p-3 mb-3">
-              <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Mais utilizado</p>
-              <p className="text-[13px] font-semibold text-[var(--text-primary)] truncate">{topForm.name}</p>
-              <p className="text-[11px] text-[var(--text-muted)]">{formStats[topForm.id]?.responseCount || 0} respostas</p>
-            </div>
-          )}
-
-          <Link to="/my-forms" className="flex items-center justify-center gap-1.5 w-full py-2 rounded-[10px] border border-[var(--border)] text-[12px] font-bold text-[var(--dark-green)] dark:text-[#5CBF9D] hover:bg-[var(--sage-light)] transition-colors">
-            Ver instrumentos <ArrowRight size={12} />
-          </Link>
-        </div>
-
-        {/* 3C — Perfil da base */}
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5">
-          <h2 className="text-[18px] m-0 text-[var(--text-primary)] font-heading mb-1">Perfil da Base</h2>
-          <p className="text-[11px] text-[var(--text-muted)] mb-4">Pacientes ativos</p>
-
-          {/* Gênero */}
-          <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Gênero</p>
-          <div className="flex gap-3 items-center mb-4">
-            <div className="relative w-[60px] h-[60px] flex-shrink-0">
-              <svg viewBox="0 0 72 72" className="w-full h-full -rotate-90">
-                <circle cx="36" cy="36" r="28" fill="none" stroke="var(--surface-alt)" strokeWidth="10" />
-                {(() => {
-                  let offset = 0;
-                  return genderData.map((g, i) => {
-                    const circ = 2 * Math.PI * 28;
-                    const dash = (g.pct / 100) * circ;
-                    const el = (
-                      <circle key={i} cx="36" cy="36" r="28" fill="none"
-                        stroke={g.color} strokeWidth="10" strokeLinecap="butt"
-                        strokeDasharray={`${dash} ${circ - dash}`}
-                        strokeDashoffset={-offset}
-                      />
-                    );
-                    offset += dash;
-                    return el;
-                  });
-                })()}
-              </svg>
-            </div>
-            <div className="flex flex-col gap-1 flex-1">
-              {genderData.map((g) => (
-                <div key={g.label} className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-[8px] h-[8px] rounded-full flex-shrink-0" style={{ background: g.color }} />
-                    <span className="text-[11px] text-[var(--text-secondary)]">{g.label}</span>
-                  </div>
-                  <span className="text-[11px] font-bold text-[var(--text-primary)]">{g.pct}%</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Faixa etária */}
-          <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Faixa etária</p>
-          <div className="flex flex-col gap-1.5">
-            {ageData.map((g) => (
-              <div key={g.label} className="flex items-center gap-2">
-                <span className="text-[11px] text-[var(--text-secondary)] w-[40px] flex-shrink-0">{g.label}</span>
-                <div className="flex-1 h-[6px] bg-[var(--surface-alt)] rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-[var(--sage)] transition-all duration-500"
-                    style={{ width: `${Math.round((g.value / maxAge) * 100)}%` }}
-                  />
-                </div>
-                <span className="text-[11px] font-bold text-[var(--text-primary)] w-[16px] text-right">{g.value}</span>
-              </div>
-            ))}
           </div>
         </div>
       </div>
@@ -800,29 +857,58 @@ function TimelineRow({ app, onClick }) {
   const status = app.attendance?.status || "confirmado";
   const sc = STATUS_CONFIG[status] || STATUS_CONFIG.confirmado;
   const patientName = app.patient?.name || "Paciente";
-  const ini = patientName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+
+  // Obter as duas primeiras letras do nome (ex: Jhersyka -> JH, Diego Moura -> DI)
+  const cleanName = patientName.trim();
+  const ini = cleanName.length >= 2 ? cleanName.substring(0, 2).toUpperCase() : cleanName.toUpperCase();
+
+  // Cores suaves (tons pastel) da paleta baseadas no hash do nome do paciente
+  const colors = [
+    { bg: "var(--sage-light)", text: "var(--dark-green)" },
+    { bg: "var(--blue-light)", text: "var(--blue)" },
+    { bg: "var(--peach-light)", text: "var(--peach)" },
+    { bg: "var(--purple-light)", text: "var(--purple)" }
+  ];
+  let hash = 0;
+  for (let i = 0; i < patientName.length; i++) {
+    hash = patientName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const colorIndex = Math.abs(hash) % colors.length;
+  const avatarColor = colors[colorIndex];
 
   return (
     <div
       onClick={onClick}
-      className="flex items-center gap-3 py-2 px-2 border-b border-[var(--border)] last:border-b-0 cursor-pointer hover:bg-[var(--surface-alt)] rounded-[12px] transition-all"
+      className="flex items-center gap-3 py-3 px-2 border-b border-[var(--border)] last:border-b-0 cursor-pointer hover:bg-[var(--surface-alt)] rounded-[12px] transition-all duration-150 ease-out"
     >
       {/* Hora */}
-      <span className="text-[12px] font-bold text-[var(--text-muted)] w-[44px] flex-shrink-0 tabular-nums">
-        {app.sortTime.slice(0, 5)}
-      </span>
-      {/* Linha de status */}
-      <div className="flex flex-col items-center self-stretch py-0.5 flex-shrink-0">
-        <div className="w-[8px] h-[8px] rounded-full flex-shrink-0" style={{ background: sc.dot }} />
-        <div className="w-[1px] flex-1 mt-0.5" style={{ background: sc.dot, opacity: 0.25 }} />
+      <div className="flex items-center gap-1 bg-[var(--surface-alt)] dark:bg-[var(--surface)] px-2 py-0.5 rounded-[8px] text-[var(--text-primary)] flex-shrink-0">
+        <Clock size={11} className="text-[var(--text-muted)]" />
+        <span className="text-[11px] font-extrabold tabular-nums">
+          {app.sortTime.slice(0, 5)}
+        </span>
       </div>
-      {/* Avatar + Nome */}
-      <div className="w-[30px] h-[30px] rounded-full bg-gradient-to-br from-[var(--sage)] to-[var(--dark-green)] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+
+      {/* Avatar */}
+      <div 
+        className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-[10px] font-extrabold flex-shrink-0"
+        style={{ backgroundColor: avatarColor.bg, color: avatarColor.text }}
+      >
         {ini}
       </div>
-      <span className="flex-1 text-[14px] font-semibold text-[var(--text-primary)] truncate">{patientName}</span>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <p className="text-[13px] font-bold text-[var(--text-primary)] truncate m-0 leading-tight">
+          {patientName}
+        </p>
+        <span className="text-[10px] text-[var(--text-muted)] mt-0.5 block leading-none">
+          {app.duration || app.patient?.sessionDuration || 50} min
+        </span>
+      </div>
+
       {/* Badge de status */}
-      <span className="text-[10px] font-bold px-[8px] py-[3px] rounded-[999px] flex-shrink-0" style={{ background: sc.bg, color: sc.text }}>
+      <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-[999px] flex-shrink-0 tracking-wide uppercase" style={{ background: sc.bg, color: sc.text }}>
         {sc.label}
       </span>
     </div>

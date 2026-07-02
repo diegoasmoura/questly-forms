@@ -59,7 +59,7 @@ Toggle de tema no header da Home (🌙/☀️) em formato pill com knob gradient
 | **Nav item tamanho** | 46×46px, `rounded-[14px]` |
 | **Bottom** | Botão "Sair" com icon apenas |
 
-### Home Dashboard — Novo Layout (v2)
+### Home Dashboard — Novo Layout (v3)
 
 **Greeting Section:**
 - Saudação dinâmica ("Bom dia / Boa tarde / Boa noite") com nome do usuário
@@ -68,15 +68,19 @@ Toggle de tema no header da Home (🌙/☀️) em formato pill com knob gradient
 - Chips: "3 avaliações pendentes" (peach) e "N novas respostas" (sage)
 - Theme toggle gradient, Bell icon com dot, Avatar gradient purple→blue
 
-**Stat Cards (4 colunas):**
+**Stat Cards (5 colunas):**
 - Cada card com ícone (colored bg), trend badge, valor e label
-- Cores alternadas: sage (formulários), blue (respostas), peach (conclusão), purple (pacientes)
+- Cores alternadas: sage (presenças), blue (aniversários), peach (recebimentos), purple (cobranças/faltas)
 - Cards com `rounded-[14px]` e sombra sutil
 
-**Content Grid (1.5fr / 1fr):**
-- **Esquerda:** Painel "Meus formulários" com lista de forms e contagem de respostas
-- **Direita superior:** Gráfico SVG line chart com área gradient em sage
-- **Direita inferior:** Painel "Respostas recentes" com activity feed
+**Content Grid (3 Colunas Assimétricas — 30% / 40% / 30%):**
+- **Coluna 1 (30%):** Painel "Agenda de Hoje" com altura fixa de `500px`, timeline de sessões com avatares de cores suaves baseados no hash do paciente e lista de contagem de sessões dos próximos dias na parte inferior.
+- **Coluna 2 (40%):** 
+  - **Gráfico de Faturamento:** Gráfico de área (Recharts) com curva monotone e gradiente de preenchimento pêssego (`var(--peach)`) exibindo a evolução financeira dos últimos 6 meses.
+  - **Instrumentos Clínicos:** Painel contendo anel de taxa de resposta, formulário mais utilizado e atalho de navegação.
+- **Coluna 3 (30%):**
+  - **Perfil da Base:** Consolidação de pacientes ativos no mês, gráfico circular de gênero e gráficos horizontais de faixa etária.
+  - **Aniversários (7 dias):** Lista com os próximos aniversariantes da semana.
 
 ### Sistema de Cores Funcionais
 
