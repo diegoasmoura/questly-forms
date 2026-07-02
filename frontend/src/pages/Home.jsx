@@ -828,8 +828,8 @@ function ComparativoRow({ label, prev, current, format, invertColor }) {
         {/* Mês anterior — sempre neutro */}
         <span className="text-[12px] text-[var(--text-muted)]">{fmt(prev)}</span>
         <ArrowRight size={10} className="text-[var(--text-muted)]" />
-        {/* Mês atual — sempre verde (destaque positivo), laranja só quando ruim */}
-        <span className={`text-[14px] font-extrabold ${bad ? "text-[#D97706]" : "text-[#3D9E76]"}`}>
+        {/* Mês atual — sempre verde, é o dado principal */}
+        <span className="text-[14px] font-extrabold text-[#3D9E76]">
           {fmt(current)}
         </span>
         {isUp && !bad && <TrendingUp size={11} className="text-[#3D9E76]" />}
