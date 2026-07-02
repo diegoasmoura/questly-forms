@@ -40,8 +40,8 @@
 }
 
 @layer base {
-  html {
-    transition: color 0.2s ease, background-color 0.2s ease;
+  *, *::before, *::after {
+    @apply transition-colors duration-300 ease-in-out;
   }
 
   html.dark {

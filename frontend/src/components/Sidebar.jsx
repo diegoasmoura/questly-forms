@@ -6,7 +6,6 @@ import {
   FileText,
   Calendar,
   Library,
-  Settings,
   ChevronRight,
   LogOut,
 } from "lucide-react";
@@ -20,6 +19,10 @@ const menuItems = [
   { icon: Library, label: "Acervo Clínico", path: "/library" },
 ];
 
+/* Largura da zona do ícone — igual à sidebar colapsada, para que
+   os ícones NUNCA se desloquem durante a animação de expandir/retrair. */
+const ICON_ZONE = "84px";
+
 export default function Sidebar() {
   const { logout } = useAuth();
   const location = useLocation();
@@ -31,33 +34,13 @@ export default function Sidebar() {
     navigate("/login");
   };
 
-  const linkClass = (isActive, collapsed) =>
-    `flex items-center rounded-[14px] transition-all duration-250 ease-in-out cursor-pointer ${
-      collapsed
-        ? "justify-center w-[46px] h-[46px]"
-        : "w-[calc(100%-24px)] justify-start px-[14px] gap-3 h-[46px]"
-    } ${
-      isActive
-        ? "bg-[var(--sage-light)] text-[var(--dark-green)] dark:text-[#5CBF9D]"
-        : "text-[var(--text-muted)] hover:bg-[var(--surface-alt)] hover:text-[var(--text-primary)]"
-    }`;
-
-  const labelClass = (collapsed) =>
-    `text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis transition-all duration-250 ease-in-out ${
-      collapsed ? "max-w-0 opacity-0" : "max-w-[140px] opacity-1"
-    }`;
-
   return (
-    // h-full (não h-screen): a altura já vem travada pelo pai (h-dvh no Layout).
-    // flex-shrink-0: garante que a sidebar nunca seja espremida pelo flex row.
-    // sticky/top-0 removidos: só fazem sentido quando o PAI rola; aqui quem
-    // rola é o wrapper de conteúdo ao lado, então a sidebar já fica fixa
-    // naturalmente por estar fora da área com overflow-y-auto.
     <div
-      className={`bg-[var(--surface)] border-r border-[var(--border)] grid grid-rows-[auto_1fr_auto] relative transition-all duration-250 ease-in-out h-full flex-shrink-0 z-[10000] ${
+      className={`bg-[var(--surface)] border-r border-[var(--border)] flex flex-col relative h-full flex-shrink-0 z-[10000] transition-[width] duration-300 ease-in-out ${
         collapsed ? "w-[84px]" : "w-[220px]"
       }`}
     >
+      {/* Toggle chevron */}
       <button
         onClick={() => setCollapsed(!collapsed)}
         className="absolute top-[30px] -right-[13px] w-[26px] h-[26px] rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[var(--text-secondary)] z-10 hover:bg-[var(--surface-alt)] transition-all cursor-pointer"
@@ -65,31 +48,35 @@ export default function Sidebar() {
       >
         <ChevronRight
           size={13}
-          className={`transition-transform duration-250 ${
+          className={`transition-transform duration-300 ease-in-out ${
             collapsed ? "" : "rotate-180"
           }`}
         />
       </button>
 
-      <div className="flex items-center gap-2.5 w-full px-[19px] mb-0 pt-6">
-        <div className="w-[44px] h-[44px] rounded-xl bg-gradient-to-br from-[#5CBF9D] to-[#3D786A] flex items-center justify-center text-white flex-shrink-0">
-          <span className="font-brand text-[17px] leading-none tracking-tight">QF</span>
+      {/* Logo — ícone centralizado na zona fixa de 84px */}
+      <div className="flex items-center h-[44px] mt-6 overflow-hidden flex-shrink-0">
+        <div
+          className="flex items-center justify-center flex-shrink-0"
+          style={{ width: ICON_ZONE }}
+        >
+          <div className="w-[44px] h-[44px] rounded-xl bg-gradient-to-br from-[#5CBF9D] to-[#3D786A] flex items-center justify-center text-white flex-shrink-0">
+            <span className="font-brand text-[17px] leading-none tracking-tight">QF</span>
+          </div>
         </div>
         <span
-          className={`font-brand text-xl text-[var(--text-primary)] whitespace-nowrap overflow-hidden transition-all duration-250 ease-in-out ${
-            collapsed ? "max-w-0 opacity-0" : "max-w-[160px] opacity-1"
+          className={`font-brand text-xl text-[var(--text-primary)] whitespace-nowrap transition-all duration-300 ease-in-out ${
+            collapsed
+              ? "opacity-0 translate-x-[-8px] pointer-events-none"
+              : "opacity-100 translate-x-0"
           }`}
         >
           Questly Forms
         </span>
       </div>
 
-      {/* min-h-0 + overflow-y-auto: se um dia o menu tiver itens demais para a
-          tela, ELE rola por dentro em vez de empurrar o "Sair" pra fora da
-          viewport — o footer nunca mais desalinha, não importa o conteúdo.
-          self-stretch garante que a row do meio (1fr) seja preenchida, mantendo
-          o "Sair" sempre ancorado ao fundo da tela. */}
-      <nav className="flex flex-col gap-1.5 w-full items-center pt-5 min-h-0 overflow-y-auto self-stretch">
+      {/* Navigation — items fixos, sem scroll */}
+      <nav className="flex flex-col gap-1.5 w-full pt-5 flex-shrink-0">
         {menuItems.map((item) => {
           const isActive =
             location.pathname === item.path ||
@@ -102,29 +89,59 @@ export default function Sidebar() {
             <Link
               key={item.path}
               to={item.path}
-              className={linkClass(isActive, collapsed)}
+              className={`flex items-center h-[46px] rounded-[14px] mx-[8px] transition-colors duration-200 ease-in-out cursor-pointer ${
+                isActive
+                  ? "bg-[var(--sage-light)] text-[var(--dark-green)] dark:text-[#5CBF9D]"
+                  : "text-[var(--text-muted)] hover:bg-[var(--surface-alt)] hover:text-[var(--text-primary)]"
+              }`}
               title={collapsed ? item.label : ""}
             >
-              <Icon size={21} className="flex-shrink-0" />
-              <span className={labelClass(collapsed)}>{item.label}</span>
+              {/* Zona fixa do ícone — sempre centrado nos mesmos 84px - 2*8px margin */}
+              <div
+                className="flex items-center justify-center flex-shrink-0"
+                style={{ width: `calc(${ICON_ZONE} - 16px)` }}
+              >
+                <Icon size={21} />
+              </div>
+              <span
+                className={`text-sm font-semibold whitespace-nowrap transition-all duration-300 ease-in-out ${
+                  collapsed
+                    ? "opacity-0 translate-x-[-8px] pointer-events-none w-0"
+                    : "opacity-100 translate-x-0 w-auto"
+                }`}
+              >
+                {item.label}
+              </span>
             </Link>
           );
         })}
       </nav>
 
-      {/* Footer sempre ancorado ao fundo — row "auto" do grid-rows-[auto_1fr_auto] */}
-      <div className="border-t border-[var(--border)] pt-3 pb-6 w-full flex flex-col items-center gap-1">
+      {/* Spacer — empurra o Sair pro fundo */}
+      <div className="flex-1" />
+
+      {/* Footer — colado ao fundo da viewport */}
+      <div className="border-t border-[var(--border)] pt-2 pb-2 w-full flex-shrink-0">
         <button
           onClick={handleLogout}
-          className={`flex items-center rounded-[14px] text-[var(--text-muted)] hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/40 dark:hover:text-red-400 transition-all duration-250 ease-in-out cursor-pointer ${
-            collapsed
-              ? "justify-center w-[46px] h-[46px]"
-              : "w-[calc(100%-24px)] justify-start px-[14px] gap-3 h-[46px]"
-          }`}
+          className="flex items-center h-[46px] rounded-[14px] mx-[8px] text-[var(--text-muted)] hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/40 dark:hover:text-red-400 transition-colors duration-200 ease-in-out cursor-pointer w-[calc(100%-16px)]"
           title="Sair"
         >
-          <LogOut size={21} className="flex-shrink-0" />
-          <span className={labelClass(collapsed)}>Sair</span>
+          <div
+            className="flex items-center justify-center flex-shrink-0"
+            style={{ width: `calc(${ICON_ZONE} - 16px)` }}
+          >
+            <LogOut size={21} />
+          </div>
+          <span
+            className={`text-sm font-semibold whitespace-nowrap transition-all duration-300 ease-in-out ${
+              collapsed
+                ? "opacity-0 translate-x-[-8px] pointer-events-none w-0"
+                : "opacity-100 translate-x-0 w-auto"
+            }`}
+          >
+            Sair
+          </span>
         </button>
       </div>
     </div>
