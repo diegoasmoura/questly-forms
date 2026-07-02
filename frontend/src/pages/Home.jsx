@@ -829,13 +829,13 @@ function ComparativoRow({ label, prev, current, format, invertColor }) {
         <span className="text-[14px] font-extrabold text-[#3D9E76]">
           {fmt(current)}
         </span>
+        {/* Separador */}
+        <span className="text-[10px] font-bold text-[var(--text-muted)] px-0.5">vs</span>
+        {/* Anterior — direita, pêssego da paleta + seta de tendência */}
+        <span className="text-[12px] font-semibold text-[var(--peach)]">{fmt(prev)}</span>
         {isUp && !bad && <TrendingUp size={11} className="text-[#3D9E76]" />}
         {bad && isDown && <TrendingDown size={11} className="text-[#D97706]" />}
         {bad && isUp && <TrendingUp size={11} className="text-[#D97706]" />}
-        {/* Separador */}
-        <span className="text-[10px] font-bold text-[var(--text-muted)] px-0.5">vs</span>
-        {/* Anterior — direita, pêssego da paleta */}
-        <span className="text-[12px] font-semibold text-[var(--peach)]">{fmt(prev)}</span>
       </div>
     </div>
   );
