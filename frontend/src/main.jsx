@@ -10,11 +10,6 @@ import { registerSW } from "virtual:pwa-register";
 // Registro automático do Service Worker do PWA
 registerSW({ immediate: true });
 
-import { registerSW } from 'virtual:pwa-register';
-
-// Registra o Service Worker (PWA)
-registerSW({ immediate: true });
-
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
