@@ -8,11 +8,13 @@ import {
   Library,
   ChevronRight,
   LogOut,
+  Kanban
 } from "lucide-react";
 import { useState } from "react";
 
 const menuItems = [
   { icon: Home, label: "Home", path: "/home" },
+  { icon: Kanban, label: "CRM (Funil)", path: "/crm" },
   { icon: Users, label: "Pacientes", path: "/patients" },
   { icon: Calendar, label: "Agenda", path: "/agenda" },
   { icon: FileText, label: "Instrumentos", path: "/my-forms" },

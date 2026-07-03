@@ -90,19 +90,27 @@ router.post("/", async (req, res) => {
   try {
     const data = req.body;
 
-    const requiredFields = {
-      name: "Nome",
-      cpf: "CPF",
-      birthDate: "Data de Nascimento",
-      email: "E-mail",
-      phone: "Telefone",
-      emergencyName: "Nome do Contato de Emergência",
-      emergencyPhone: "Telefone de Emergência"
-    };
+    const isLead = data.funnelStep && data.funnelStep !== "active";
 
-    for (const [field, label] of Object.entries(requiredFields)) {
-      if (!data[field]) {
-        return res.status(400).json({ error: `${label} é obrigatório` });
+    if (!isLead) {
+      const requiredFields = {
+        name: "Nome",
+        cpf: "CPF",
+        birthDate: "Data de Nascimento",
+        email: "E-mail",
+        phone: "Telefone",
+        emergencyName: "Nome do Contato de Emergência",
+        emergencyPhone: "Telefone de Emergência"
+      };
+
+      for (const [field, label] of Object.entries(requiredFields)) {
+        if (!data[field]) {
+          return res.status(400).json({ error: `${label} é obrigatório` });
+        }
+      }
+    } else {
+      if (!data.name) {
+        return res.status(400).json({ error: "Nome é obrigatório" });
       }
     }
 
@@ -116,7 +124,7 @@ router.post("/", async (req, res) => {
       "gender", "maritalStatus", "profession", "cep", "street", 
       "number", "complement", "neighborhood", "city", "state",
       "emergencyName", "emergencyPhone", "sessionTime", "sessionDuration", 
-      "sessionFrequency", "nextSession"
+      "sessionFrequency", "nextSession", "funnelStep", "leadSource", "crmNotes"
     ];
     
     const fieldsToNormalize = ["cpf", "phone", "emergencyPhone", "cep"];
@@ -189,9 +197,18 @@ router.put("/:id", async (req, res) => {
       emergencyPhone: "Telefone de Emergência"
     };
 
-    for (const [field, label] of Object.entries(requiredFields)) {
-      if (data.hasOwnProperty(field) && !data[field]) {
-        return res.status(400).json({ error: `${label} não pode ser vazio` });
+    const currentStep = data.funnelStep !== undefined ? data.funnelStep : patient.funnelStep;
+    const isLead = currentStep && currentStep !== "active";
+
+    if (!isLead) {
+      for (const [field, label] of Object.entries(requiredFields)) {
+        if (data.hasOwnProperty(field) && !data[field]) {
+          return res.status(400).json({ error: `${label} não pode ser vazio` });
+        }
+      }
+    } else {
+      if (data.hasOwnProperty("name") && !data.name) {
+        return res.status(400).json({ error: "Nome não pode ser vazio" });
       }
     }
 
@@ -200,7 +217,8 @@ router.put("/:id", async (req, res) => {
       "gender", "maritalStatus", "profession", "cep", "street",
       "number", "complement", "neighborhood", "city", "state",
       "emergencyName", "emergencyPhone", "isActive", "inactivatedAt",
-      "sessionTime", "sessionDuration", "sessionFrequency", "nextSession"
+      "sessionTime", "sessionDuration", "sessionFrequency", "nextSession",
+      "funnelStep", "leadSource", "crmNotes"
     ];
 
     const cleanData = {};
@@ -276,6 +294,74 @@ router.delete("/:id", async (req, res) => {
   } catch (error) {
     console.error("Error deleting patient:", error.message);
     res.status(500).json({ error: "Erro ao excluir paciente" });
+  }
+});
+
+router.patch("/:id/funnel", async (req, res) => {
+  try {
+    const { funnelStep } = req.body;
+    const allowedSteps = ["lead", "triagem", "scheduled", "active", "archived"];
+    if (!allowedSteps.includes(funnelStep)) {
+      return res.status(400).json({ error: "Estágio do funil inválido" });
+    }
+
+    const patient = await prisma.patient.findFirst({
+      where: { id: req.params.id, psychologistId: req.user.id }
+    });
+
+    if (!patient) {
+      return res.status(404).json({ error: "Paciente não encontrado" });
+    }
+
+    const updateData = { funnelStep };
+
+    if (funnelStep === "active") {
+      const required = {
+        cpf: "CPF",
+        birthDate: "Data de Nascimento",
+        email: "E-mail",
+        phone: "Telefone",
+        emergencyName: "Nome do Contato de Emergência",
+        emergencyPhone: "Telefone de Emergência"
+      };
+
+      const missingFields = [];
+      for (const [field, label] of Object.entries(required)) {
+        const val = req.body[field] !== undefined ? req.body[field] : patient[field];
+        if (!val) {
+          missingFields.push(field);
+        } else {
+          let finalVal = val;
+          if (typeof val === "string" && ["cpf", "phone", "emergencyPhone"].includes(field)) {
+            finalVal = val.replace(/\D/g, "");
+          }
+          if (field === "birthDate") {
+            const date = new Date(val);
+            if (!isNaN(date.getTime())) {
+              finalVal = date;
+            }
+          }
+          updateData[field] = finalVal;
+        }
+      }
+
+      if (missingFields.length > 0) {
+        return res.status(400).json({
+          error: "Campos obrigatórios de prontuário ausentes",
+          missingFields
+        });
+      }
+    }
+
+    const updated = await prisma.patient.update({
+      where: { id: req.params.id },
+      data: updateData
+    });
+
+    res.json(updated);
+  } catch (error) {
+    console.error("Error updating patient funnel:", error.message);
+    res.status(500).json({ error: "Erro ao atualizar estágio do funil" });
   }
 });
 

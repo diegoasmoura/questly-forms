@@ -1,0 +1,570 @@
+import { useState, useEffect } from "react";
+import { api } from "../lib/api";
+import { toast } from "../components/Toast";
+import { useNavigateWithTransition } from "../lib/useNavigateWithTransition";
+import { 
+  Plus, 
+  Trash2, 
+  Phone, 
+  UserPlus, 
+  ArrowRight,
+  UserCheck,
+  Calendar,
+  AlertCircle,
+  X,
+  TrendingUp,
+  Tag
+} from "lucide-react";
+
+const STAGES = [
+  { id: "lead", label: "Contato Inicial", color: "slate", bgHeader: "bg-slate-100 text-slate-700", borderLeft: "border-l-slate-400" },
+  { id: "triagem", label: "Triagem Clínica", color: "blue", bgHeader: "bg-blue-50 text-blue-700", borderLeft: "border-l-blue-500" },
+  { id: "scheduled", label: "Primeira Sessão", color: "amber", bgHeader: "bg-amber-50 text-amber-700", borderLeft: "border-l-amber-500" },
+  { id: "active", label: "Paciente Ativo", color: "emerald", bgHeader: "bg-emerald-50 text-emerald-700", borderLeft: "border-l-emerald-500" }
+];
+
+export default function CrmDashboard() {
+  const [patients, setPatients] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [draggedId, setDraggedId] = useState(null);
+  const [draggedOverStage, setDraggedOverStage] = useState(null);
+  
+  // Modais
+  const [showAddLeadModal, setShowAddLeadModal] = useState(false);
+  const [showActivationModal, setShowActivationModal] = useState(false);
+  const [activePatientData, setActivePatientData] = useState(null);
+
+  // Form de novo Lead
+  const [newLead, setNewLead] = useState({
+    name: "",
+    phone: "",
+    leadSource: "",
+    crmNotes: ""
+  });
+
+  // Form de Ativação (dados obrigatórios)
+  const [activationForm, setActivationForm] = useState({
+    cpf: "",
+    birthDate: "",
+    email: "",
+    phone: "",
+    emergencyName: "",
+    emergencyPhone: ""
+  });
+
+  const navigate = useNavigateWithTransition();
+
+  const fetchPatients = async () => {
+    try {
+      setLoading(true);
+      const data = await api.getPatients();
+      // Filtrar apenas pacientes no funil (não arquivados)
+      const funnelPatients = data.filter(p => p.funnelStep !== "archived" && p.isActive);
+      setPatients(funnelPatients);
+    } catch (error) {
+      toast(error.message || "Erro ao carregar dados do CRM", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  // Drag and Drop
+  const handleDragStart = (e, id) => {
+    setDraggedId(id);
+    e.dataTransfer.setData("text/plain", id);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e, stageId) => {
+    e.preventDefault();
+    setDraggedOverStage(stageId);
+  };
+
+  const handleDragLeave = () => {
+    setDraggedOverStage(null);
+  };
+
+  const handleDrop = async (e, targetStage) => {
+    e.preventDefault();
+    setDraggedOverStage(null);
+    const id = e.dataTransfer.getData("text/plain") || draggedId;
+    if (!id) return;
+
+    const patient = patients.find(p => p.id === id);
+    if (!patient || patient.funnelStep === targetStage) return;
+
+    // Se mover para active (Ativo), verificar dados obrigatórios
+    if (targetStage === "active") {
+      const requiredFields = ["cpf", "birthDate", "email", "phone", "emergencyName", "emergencyPhone"];
+      const missing = requiredFields.filter(f => !patient[f]);
+      
+      if (missing.length > 0) {
+        // Abre o modal para preenchimento obrigatório
+        setActivePatientData(patient);
+        setActivationForm({
+          cpf: patient.cpf || "",
+          birthDate: patient.birthDate ? patient.birthDate.split("T")[0] : "",
+          email: patient.email || "",
+          phone: patient.phone || "",
+          emergencyName: patient.emergencyName || "",
+          emergencyPhone: patient.emergencyPhone || ""
+        });
+        setShowActivationModal(true);
+        return;
+      }
+    }
+
+    try {
+      await api.updatePatientFunnel(id, { funnelStep: targetStage });
+      setPatients(prev => prev.map(p => p.id === id ? { ...p, funnelStep: targetStage } : p));
+      toast("Estágio atualizado com sucesso!", "success", 2000);
+    } catch (error) {
+      toast(error.message || "Erro ao atualizar estágio", "error");
+    }
+  };
+
+  // Criar Novo Lead
+  const handleCreateLead = async (e) => {
+    e.preventDefault();
+    if (!newLead.name.trim()) {
+      toast("Nome é obrigatório", "error");
+      return;
+    }
+
+    try {
+      const data = {
+        name: newLead.name,
+        phone: newLead.phone || null,
+        leadSource: newLead.leadSource || "Outro",
+        crmNotes: newLead.crmNotes || null,
+        funnelStep: "lead"
+      };
+
+      const created = await api.createPatient(data);
+      setPatients(prev => [...prev, created]);
+      setShowAddLeadModal(false);
+      setNewLead({ name: "", phone: "", leadSource: "", crmNotes: "" });
+      toast("Lead adicionado com sucesso!", "success", 2500);
+    } catch (error) {
+      toast(error.message || "Erro ao criar Lead", "error");
+    }
+  };
+
+  // Salvar Ativação de Lead
+  const handleSaveActivation = async (e) => {
+    e.preventDefault();
+    
+    // Validar CPF básico
+    if (activationForm.cpf.replace(/\D/g, "").length !== 11) {
+      toast("CPF inválido (deve conter 11 dígitos)", "error");
+      return;
+    }
+
+    if (!activationForm.birthDate || !activationForm.email || !activationForm.phone || !activationForm.emergencyName || !activationForm.emergencyPhone) {
+      toast("Todos os campos de prontuário são obrigatórios para ativação", "error");
+      return;
+    }
+
+    try {
+      const updated = await api.updatePatientFunnel(activePatientData.id, {
+        funnelStep: "active",
+        cpf: activationForm.cpf,
+        birthDate: new Date(activationForm.birthDate).toISOString(),
+        email: activationForm.email,
+        phone: activationForm.phone,
+        emergencyName: activationForm.emergencyName,
+        emergencyPhone: activationForm.emergencyPhone
+      });
+
+      setPatients(prev => prev.map(p => p.id === activePatientData.id ? updated : p));
+      setShowActivationModal(false);
+      setActivePatientData(null);
+      toast("Paciente ativado com sucesso!", "success", 2500);
+    } catch (error) {
+      toast(error.message || "Erro ao ativar paciente", "error");
+    }
+  };
+
+  // Excluir ou Arquivar Lead do CRM
+  const handleArchivePatient = async (id) => {
+    if (!confirm("Deseja arquivar este contato? Ele sairá do funil de captação.")) return;
+    try {
+      await api.updatePatientFunnel(id, { funnelStep: "archived" });
+      setPatients(prev => prev.filter(p => p.id !== id));
+      toast("Contato arquivado com sucesso", "success");
+    } catch (error) {
+      toast(error.message || "Erro ao arquivar contato", "error");
+    }
+  };
+
+  // Métricas do Funil
+  const totalLeads = patients.length;
+  const activeCount = patients.filter(p => p.funnelStep === "active").length;
+  const conversionRate = totalLeads > 0 ? ((activeCount / totalLeads) * 100).toFixed(0) : 0;
+
+  return (
+    <div className="flex flex-col h-full min-h-0 space-y-6">
+      
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0 px-2">
+        <div>
+          <h1 className="text-3xl font-black text-slate-800 tracking-tight">CRM - Funil de Captação</h1>
+          <p className="text-sm text-slate-500 font-medium">Gerencie leads, triagens e acompanhe a atração de novos pacientes.</p>
+        </div>
+        <button 
+          onClick={() => setShowAddLeadModal(true)}
+          className="btn btn-primary flex items-center gap-2"
+        >
+          <Plus size={18} />
+          Novo Lead (Contato)
+        </button>
+      </div>
+
+      {/* Overview Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0 px-2">
+        <div className="p-4 bg-white rounded-xl border border-slate-200 border-l-4 border-l-slate-400 flex items-center justify-between shadow-sm">
+          <div>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Total no Funil</span>
+            <span className="text-2xl font-black text-slate-800">{totalLeads}</span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-500">
+            <Tag size={20} />
+          </div>
+        </div>
+
+        <div className="p-4 bg-white rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 flex items-center justify-between shadow-sm">
+          <div>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Convertidos em Ativos</span>
+            <span className="text-2xl font-black text-emerald-600">{activeCount}</span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+            <UserCheck size={20} />
+          </div>
+        </div>
+
+        <div className="p-4 bg-white rounded-xl border border-slate-200 border-l-4 border-l-blue-500 flex items-center justify-between shadow-sm">
+          <div>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Taxa de Conversão</span>
+            <span className="text-2xl font-black text-blue-600">{conversionRate}%</span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+            <TrendingUp size={20} />
+          </div>
+        </div>
+      </div>
+
+      {/* Kanban Board Container */}
+      <div className="flex-1 min-h-0 overflow-x-auto pb-4 px-2">
+        <div className="flex gap-4 h-full min-h-[500px] w-full min-w-[1000px]">
+          {STAGES.map(stage => {
+            const stagePatients = patients.filter(p => p.funnelStep === stage.id);
+            const isOver = draggedOverStage === stage.id;
+            
+            return (
+              <div 
+                key={stage.id}
+                onDragOver={(e) => handleDragOver(e, stage.id)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, stage.id)}
+                className={`flex-1 flex flex-col min-h-0 rounded-2xl border border-slate-200 transition-colors duration-200 ${
+                  isOver ? "bg-slate-100 border-dashed border-slate-400" : "bg-slate-50/50"
+                }`}
+              >
+                {/* Header da Coluna */}
+                <div className={`p-4 rounded-t-2xl border-b border-slate-200 flex justify-between items-center ${stage.bgHeader}`}>
+                  <span className="text-xs font-black uppercase tracking-wider">{stage.label}</span>
+                  <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-white/80 shadow-sm border border-slate-200/50">
+                    {stagePatients.length}
+                  </span>
+                </div>
+
+                {/* Lista de Cards */}
+                <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
+                  {stagePatients.length === 0 ? (
+                    <div className="h-24 flex items-center justify-center border border-dashed border-slate-200 rounded-xl text-xs text-slate-400 font-medium">
+                      Sem contatos nesta etapa
+                    </div>
+                  ) : (
+                    stagePatients.map(patient => (
+                      <div
+                        key={patient.id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, patient.id)}
+                        className={`bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing transition-shadow duration-200 flex flex-col gap-3 border-l-4 ${stage.borderLeft}`}
+                      >
+                        {/* Info Principal */}
+                        <div className="flex justify-between items-start gap-2">
+                          <span 
+                            onClick={() => navigate(`/patients/${patient.id}`)}
+                            className="text-sm font-bold text-slate-800 hover:text-emerald-600 transition-colors cursor-pointer truncate"
+                          >
+                            {patient.name}
+                          </span>
+                          <button
+                            onClick={() => handleArchivePatient(patient.id)}
+                            className="text-slate-300 hover:text-red-500 transition-colors p-0.5 rounded"
+                            title="Arquivar lead"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+
+                        {/* Metadados */}
+                        <div className="flex flex-col gap-1.5 text-[11px] text-slate-500 font-medium">
+                          {patient.phone && (
+                            <div className="flex items-center gap-1.5">
+                              <Phone size={12} className="text-slate-400" />
+                              <span>{patient.phone}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-1.5">
+                            <Calendar size={12} className="text-slate-400" />
+                            <span>Entrou em: {new Date(patient.createdAt).toLocaleDateString("pt-BR")}</span>
+                          </div>
+                        </div>
+
+                        {/* Tags / Rodapé do Card */}
+                        <div className="flex justify-between items-center pt-2 border-t border-slate-100 mt-1">
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200/50">
+                            {patient.leadSource || "Sem Origem"}
+                          </span>
+                          
+                          {/* Botão de navegação rápida de prontuário */}
+                          <button
+                            onClick={() => navigate(`/patients/${patient.id}`)}
+                            className="text-xs text-slate-400 hover:text-slate-700 flex items-center gap-1 font-semibold"
+                          >
+                            Ver Prontuário
+                            <ArrowRight size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Modal 1: Adicionar Lead Simplificado */}
+      {showAddLeadModal && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md border border-slate-200 flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center shrink-0">
+              <h3 className="text-lg font-bold text-slate-800">Adicionar Novo Lead (Contato)</h3>
+              <button 
+                onClick={() => setShowAddLeadModal(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleCreateLead} className="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nome Completo *</label>
+                <input 
+                  type="text" 
+                  required
+                  value={newLead.name}
+                  onChange={e => setNewLead(prev => ({ ...prev, name: e.target.value }))}
+                  className="input input-bordered w-full"
+                  placeholder="Nome do contato preliminar"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">WhatsApp / Telefone</label>
+                <input 
+                  type="text" 
+                  value={newLead.phone}
+                  onChange={e => setNewLead(prev => ({ ...prev, phone: e.target.value }))}
+                  className="input input-bordered w-full"
+                  placeholder="(00) 00000-0000"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Origem da Captação</label>
+                <select 
+                  value={newLead.leadSource}
+                  onChange={e => setNewLead(prev => ({ ...prev, leadSource: e.target.value }))}
+                  className="input input-bordered w-full"
+                >
+                  <option value="">Selecione...</option>
+                  <option value="Instagram">Instagram</option>
+                  <option value="Google">Google / Maps</option>
+                  <option value="Indicação">Indicação de Colega/Paciente</option>
+                  <option value="Doctoralia">Doctoralia</option>
+                  <option value="Outro">Outro Canal</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Notas de Contato</label>
+                <textarea 
+                  value={newLead.crmNotes}
+                  onChange={e => setNewLead(prev => ({ ...prev, crmNotes: e.target.value }))}
+                  className="input input-bordered w-full h-24 py-2 resize-none"
+                  placeholder="Queixas iniciais, valores combinados, etc."
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 shrink-0">
+                <button 
+                  type="button" 
+                  onClick={() => setShowAddLeadModal(false)}
+                  className="btn btn-secondary"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                >
+                  Criar Lead
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal 2: Ativação Obrigatória de Lead para Paciente Ativo */}
+      {showActivationModal && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg border border-slate-200 flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center shrink-0">
+              <div className="flex items-center gap-2 text-emerald-600">
+                <UserCheck size={20} />
+                <h3 className="text-lg font-bold text-slate-800">Concluir Ativação do Paciente</h3>
+              </div>
+              <button 
+                onClick={() => {
+                  setShowActivationModal(false);
+                  setActivePatientData(null);
+                }}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="px-6 py-4 bg-slate-50 border-b border-slate-100 text-xs text-slate-600 flex items-start gap-2 shrink-0">
+              <AlertCircle size={16} className="text-emerald-600 shrink-0 mt-0.5" />
+              <span>
+                Para mover <strong>{activePatientData?.name}</strong> para Paciente Ativo, a ética clínica e o sistema exigem o preenchimento dos dados obrigatórios de prontuário abaixo.
+              </span>
+            </div>
+
+            <form onSubmit={handleSaveActivation} className="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">CPF *</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={activationForm.cpf}
+                    onChange={e => setActivationForm(prev => ({ ...prev, cpf: e.target.value }))}
+                    className="input input-bordered w-full"
+                    placeholder="000.000.000-00"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Data de Nascimento *</label>
+                  <input 
+                    type="date" 
+                    required
+                    value={activationForm.birthDate}
+                    onChange={e => setActivationForm(prev => ({ ...prev, birthDate: e.target.value }))}
+                    className="input input-bordered w-full"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">E-mail *</label>
+                  <input 
+                    type="email" 
+                    required
+                    value={activationForm.email}
+                    onChange={e => setActivationForm(prev => ({ ...prev, email: e.target.value }))}
+                    className="input input-bordered w-full"
+                    placeholder="paciente@provedor.com"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Telefone / WhatsApp *</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={activationForm.phone}
+                    onChange={e => setActivationForm(prev => ({ ...prev, phone: e.target.value }))}
+                    className="input input-bordered w-full"
+                    placeholder="(00) 90000-0000"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100">
+                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Contato de Emergência</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nome do Contato *</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={activationForm.emergencyName}
+                      onChange={e => setActivationForm(prev => ({ ...prev, emergencyName: e.target.value }))}
+                      className="input input-bordered w-full"
+                      placeholder="Nome do familiar ou responsável"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Telefone de Emergência *</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={activationForm.emergencyPhone}
+                      onChange={e => setActivationForm(prev => ({ ...prev, emergencyPhone: e.target.value }))}
+                      className="input input-bordered w-full"
+                      placeholder="(00) 90000-0000"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 shrink-0">
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setShowActivationModal(false);
+                    setActivePatientData(null);
+                  }}
+                  className="btn btn-secondary"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                >
+                  Concluir e Ativar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}

@@ -32,6 +32,9 @@ model Patient {
   gender         String?
   maritalStatus  String?
   profession     String?
+  funnelStep     String      @default("active")
+  leadSource     String?
+  crmNotes       String?
   
   // Endereço
   cep            String?

@@ -30,6 +30,7 @@ const ResponseDetail = lazy(() => import("./pages/ResponseDetail"));
 const ShareLink = lazy(() => import("./pages/ShareLink"));
 const PatientForm = lazy(() => import("./pages/PatientForm"));
 const Agenda = lazy(() => import("./pages/Agenda"));
+const CrmDashboard = lazy(() => import("./pages/CrmDashboard"));
 
 function LoadingScreen() {
   return (
@@ -71,6 +72,7 @@ export default function App() {
           
           <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
           <Route path="/dashboard" element={<Navigate to="/home" replace />} />
+          <Route path="/crm" element={<ProtectedRoute><CrmDashboard /></ProtectedRoute>} />
           <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
           <Route path="/patients/:id" element={<ProtectedRoute><PatientRecord /></ProtectedRoute>} />
           <Route path="/agenda" element={<ProtectedRoute><Agenda /></ProtectedRoute>} />
