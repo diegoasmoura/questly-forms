@@ -1,39 +1,34 @@
-# Questly Forms - Regras de Governança e Desenvolvimento
+# Instruções para Agentes IA (Questly Forms)
 
-Este documento estabelece as regras e padrões de arquitetura para o projeto Questly Forms. Ao atuar neste repositório, siga rigorosamente as diretrizes abaixo.
+Você é o assistente de IA responsável por manter e expandir o SaaS **Questly Forms**.
+O projeto possui uma documentação estrita de Design System, UX e regras de negócio divididas por **Abas/Menus**.
 
-## 1. Organização e Componentização
-- **Arquivos Pequenos:** Evite arquivos maiores que 250 linhas. Refatore componentes monolíticos em subcomponentes menores (ex: `PastaComponente/index.jsx`, `PastaComponente/SubComponente.jsx`).
-- **Hooks Customizados:** Toda lógica complexa, requisições de API (`fetch`/`axios`/`api.get`) e manipulação de estado complexo devem ser extraídas para `hooks` (ex: `useDashboardData.js`).
-- **Widgets:** Componentes que representam blocos independentes de tela (como cartões na Dashboard) devem ser chamados de `Widget` e colocados em pastas semânticas (ex: `components/dashboard/`).
+## Regra de Ouro: Leitura Obrigatória de Documentação
+**ANTES** de propor qualquer plano de implementação, criar novos componentes, alterar botões ou telas, você **DEVE** ler o arquivo correspondente na pasta `docs/`. 
 
-## 2. Padrões de Estilo e Identidade Visual
-- **Aderência à Marca:** Respeite as variáveis definidas no `index.css` (`--sage`, `--peach`, `--purple`, etc).
-- **Tipografia:** 
-  - Interface geral (textos, botões, labels): `Nunito Sans` (classe `font-sans`).
-  - Headings e Saudações: `Playfair Display` (classe `font-heading`).
-  - Destaques manuscritos (nomes, palavras isoladas): `Caveat` (classe `font-handwritten`).
-  - Marca (logo exclusivo): `Caveat Brush` (classe `font-brand`).
-- **Tailwind:** Utilize as classes do Tailwind para espaçamentos e cores. Evite strings de classes exageradamente longas repetidas; prefira abstrair em componentes React se a repetição for alta, ou no `@layer components` se for estritamente necessário (como botões).
-- **Transições:** A aplicação utiliza transições universais (`* { transition-colors }`) para garantir consistência entre tema claro e escuro. Respeite as propriedades base para evitar bugs visuais na troca de temas.
+Nunca adivinhe padrões visuais (como border-radius, cores ou tipografia). A arquitetura do projeto não permite botões redondos em formato de "pílula", por exemplo.
 
-## 3. Padrões de Git e Colaboração
-- Utilize **Conventional Commits** para padronizar o histórico:
-  - `feat:` Nova funcionalidade
-  - `fix:` Correção de bug
-  - `refactor:` Refatoração de código sem mudar comportamento
-  - `style:` Alterações apenas visuais/CSS
-  - `chore:` Alterações em configurações, pacotes ou builds
-- Descreva no corpo do commit a motivação da mudança, caso envolva regras de negócio complexas.
+### Mapa da Documentação (Onde encontrar as regras):
 
-## 4. Tratamento de Dados (Governança)
-- **APIs:** Nunca instancie chamadas cruas dentro da renderização do componente. Sempre passe através de `lib/api.js` para garantir centralização de tratamento de erros e autenticação (interceptors).
-- **Dados Sensíveis:** Não commite chaves de API cruas, senhas de Supabase ou strings de banco de dados diretamente no código. Utilize variáveis de ambiente (`.env`).
-- **Tratamento de Exceções:** Todos os componentes devem prever estado de `loading` (carregamento) e `error` (falha na API), além do `empty state` (nenhum dado disponível).
+1. **Alterações visuais, novos componentes, cores, botões e sombras:**
+   👉 Leia obrigatoriamente: `docs/0_design_system.md`
+2. **Alterações na Sidebar, Header ou Dropdown de Perfil:**
+   👉 Leia obrigatoriamente: `docs/1_layout_e_navegacao.md`
+3. **Alterações no Dashboard (KpiCards, Widgets da tela inicial):**
+   👉 Leia obrigatoriamente: `docs/2_home_dashboard.md`
+4. **Alterações na gestão de Pacientes ou Prontuários:**
+   👉 Leia obrigatoriamente: `docs/3_pacientes.md`
+5. **Alterações na Agenda, Calendário ou Modais de Agendamento:**
+   👉 Leia obrigatoriamente: `docs/4_agenda.md`
+6. **Alterações no Construtor de Formulários ou Acervo:**
+   👉 Leia obrigatoriamente: `docs/5_instrumentos_e_acervo.md`
 
-## 5. Modais e Fluxo de UI
-- **Pilha de Modais:** Mantenha a hierarquia de `z-index` clara quando modais se sobrepõem (ex: `z-[60]` para o principal, `z-[70]` para secundários, `z-[80]` para confirmação). Quando um modal secundário for aberto, evite ocultar completamente o anterior (não usar hidden), deixando-o atrás do backdrop para manter o contexto visual, a menos que especificado de outra forma.
-- **Fechamento em Cascata:** Ao concluir uma ação de sucesso em um modal interno (como excluir ou confirmar reagendamento), feche a pilha inteira de modais para retornar imediatamente à tela principal, evitando múltiplos cliques para sair.
-- **Botões de Ação (Listas Verticais):** Grupos de ações em modais devem manter uma consistência visual para reduzir a carga cognitiva. Alinhe conteúdo à esquerda (`justify-start`) e uniformize cores base (ex: `var(--surface-alt)` e `var(--text-secondary)`), destacando cores apenas nos ícones quando estritamente necessário (ex: ícone do WhatsApp).
+## Governança de Código
 
-Siga estas regras em toda iteração do projeto para assegurar que a base de código permaneça escalável, limpa e adequada ao trabalho em equipe.
+- **Padrões de Git:** Utilize **Conventional Commits** (`feat:`, `fix:`, `refactor:`, `style:`, `chore:`).
+- **Tratamento de Dados:** Nunca instancie requisições diretas em componentes. Sempre utilize as funções de `lib/api.js`.
+- **Organização:** Arquivos grandes (>250 linhas) devem ser componentizados logicamente. Lógicas pesadas devem virar Hooks (ex: `useDashboardData.js`).
+- **Modais:** O empilhamento de modais complexos deve usar a propriedade `createPortal(..., document.body)` para evitar conflitos de contexto de empilhamento (Stacking Context) e para o `backdrop-blur-[3px]` funcionar sobre toda a página. Quando terminar uma ação profunda, feche em cascata (feche todos os modais da pilha simultaneamente).
+
+---
+> ⚠️ Sempre verifique a pasta `docs/` usando a ferramenta de leitura de arquivos antes de começar seu trabalho. O usuário confia na sua capacidade de ler a documentação interna.

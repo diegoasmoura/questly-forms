@@ -1,7 +1,7 @@
-# QF Design System
+# 0. Global & Design System
 ### Questly Forms — Human Crafted Digital
 
-> Referência viva do sistema de design implementado no produto.  
+> Referência viva do sistema de design global implementado no produto.  
 > Última atualização: Julho 2026.
 
 ---
@@ -58,15 +58,6 @@ A interface deve parecer cuidadosamente desenhada por pessoas — não gerada au
 
 > ⚠️ **Acessibilidade:** Nunca usar `--text-muted` abaixo de `#6B7280` no modo claro. O valor mínimo WCAG AA é 4.5:1.
 
-### 2.5 Tons pastel (backgrounds de ícones e badges)
-
-| Cor base | Tom pastel Light | Tom pastel Dark |
-|---|---|---|
-| Sage `#5CBF9D` | `#E4F5EE` | `#1A3028` |
-| Azul `#2E7DFF` | `#E7F0FF` | `#152030` |
-| Pêssego `#F8A26B` | `#FEEEE1` | `#2E2018` |
-| Roxo `#7C5CFF` | `#F0ECFF` | `#1E1A30` |
-
 ---
 
 ## 3. Tipografia
@@ -92,7 +83,6 @@ Micro labels:        9–10px   font-sans  uppercase  tracking-wider
 ```
 
 ### 3.3 Regras de uso
-
 - ✅ `font-heading` — títulos de seção, saudação
 - ✅ `font-handwritten` — nome do usuário na saudação, palavra única de acolhimento
 - ✅ `font-brand` — logo "QF" na sidebar, identidade de marca
@@ -101,30 +91,45 @@ Micro labels:        9–10px   font-sans  uppercase  tracking-wider
 
 ---
 
-## 4. Espaçamento e Dimensões
+## 4. A Regra dos "Quadradinhos" (Squircles) e Botões
+
+A identidade visual do projeto **aboliu** os botões em formato de "pílula" (pill-shaped, `rounded-full` ou `rounded-[999px]`) para ações dentro de painéis e modais. 
+O padrão adotado é o uso de **retângulos com cantos arredondados**, conhecidos como *quadradinhos* ou *squircles*.
+
+Sempre que for refatorar ou criar um novo botão ou card, utilize as seguintes proporções de border-radius do Tailwind:
+
+1. **Botões de Ação (Salvar, Cancelar, Enviar):**
+   - Utilizar `rounded-[12px]` ou `rounded-[14px]`.
+   - Exemplo: `className="px-4 py-2.5 rounded-[12px] bg-[var(--sage)] text-white font-bold..."`
+
+2. **Botões de Ícone Menores (Ex: Lixeira, Fechar, Editar):**
+   - Utilizar proporção quadrada real (mesmo `width` e `height`) e cantos `rounded-[10px]` ou `rounded-[12px]`.
+   - Exemplo: `className="w-[42px] h-[42px] rounded-[12px] flex items-center justify-center..."`
+
+3. **Avatares (Fotos de Perfil):**
+   - Avatares na interface (como no Timeline ou Dropdown) e pré-visualizações de imagens devem seguir a mesma lógica. Não são mais circulares (`rounded-full`).
+   - Pequenos (Timeline): `w-[30px] h-[30px] rounded-[8px]`
+   - Médios (Menu): `w-[40px] h-[40px] rounded-[10px]`
+   - Grandes (Picker): `w-[84px] h-[84px] rounded-[18px]`
+
+4. **Botões Globais (.btn)**
+   - O uso de classes legadas como `.btn` (que forçam `rounded-[999px]`) deve ser evitado ou sobreposto manualmente com um novo `rounded-[Xpx]` quando utilizado dentro do contexto do Dashboard.
+
+---
+
+## 5. Espaçamento, Dimensões e Sombras
 
 ```
 Grid base:          8px
 Padding interno:    p-4 (16px) cards menores / p-5 (20px) cards maiores
 Gap entre cards:    gap-3 (12px) KPIs / gap-4 (16px) cards maiores
 Gap entre seções:   gap-5 (20px)
-Border radius:
-  - Cards:          rounded-[20px]  (20px)
-  - Botões pill:    rounded-[999px]
-  - Ícones:         rounded-[10px] a rounded-[12px]
-  - Badges:         rounded-[999px]
-  - Inputs:         rounded-[999px]
 ```
-
----
-
-## 5. Sombras
 
 ```css
 card:       0 8px 24px rgba(30,31,34,0.06)
 card-hover: 0 8px 30px rgba(30,31,34,0.10)
 ```
-
 Aplicar sombra apenas em cards elevados, nunca em elements inline.
 
 ---
@@ -142,88 +147,7 @@ Slide-in (sidebar): 0.3s ease-out (opacity 0→1, translateX -10px→0)
 
 ---
 
-## 7. Componentes Principais
-
-### 7.1 KPI Card
-
-```
-Estrutura:  ícone (34×34px, rounded-[10px]) + label + valor (22px extrabold) + sub-texto
-Border:     border-[var(--border)]
-Hover:      hover:shadow-card-hover + hover:-translate-y-[1px]
-```
-
-**Distribuição de cores dos ícones (sem repetição adjacente):**
-
-| Card | Cor do ícone | Hex |
-|---|---|---|
-| Sessões hoje | Azul | `#2E7DFF` |
-| Presença no mês | Sage | `#5CBF9D` |
-| Recebido no mês | Pêssego | `#F8A26B` |
-| Sessões a cobrar | Roxo | `#7C5CFF` |
-| Instrumentos | Verde escuro | `#3D786A` |
-
-### 7.2 Timeline do dia
-
-```
-Estrutura:  hora (44px fixo) + dot colorido + linha vertical + avatar + nome + badge status
-Status:
-  presente    → dot #5CBF90,  bg sage-light,   text #3D786A
-  falta       → dot #F8A268,  bg peach-light,  text #C97840
-  justificada → dot #7C5CFF,  bg purple-light, text #7C5CFF
-  confirmado  → dot #2E7DFF,  bg blue-light,   text #2E7DFF
-```
-
-### 7.3 Comparativo do Mês
-
-```
-Layout:   label (esquerda) | atual verde + "vs" + anterior pêssego + seta (direita)
-Atual:    sempre #3D9E76 (verde)
-Anterior: sempre var(--peach) = #F8A26B
-Seta ↑:   #3D9E76 quando subiu (bom)
-Seta ↓:   #D97706 quando caiu (ruim)
-Seta —:   var(--text-muted) quando igual
-```
-
-> **Lógica de "ruim":** para Faltas, `isUp` é ruim (invertColor). Para demais métricas, `isDown` is ruim.
-
-### 7.4 Toggle de Tema
-
-```
-Tamanho:   56×30px  pill
-Dia:       track sage-light + bolinha sage #5CBF9D + ícone Sun
-Noite:     track #1a2540 + bolinha #2B3D6B + ícone Moon
-Hover:     border-[var(--sage)]
-```
-
-### 7.5 Botões de header (Sino + Avatar)
-
-```
-Tamanho:       38×38px
-Border-radius: rounded-[10px]  (quadrado arredondado, não círculo)
-Hover:         bg-surface-alt + border-sage + scale-[1.04]
-Avatar:        gradiente linear sage→peach quando sem foto
-Badge sino:    -top-[3px] -right-[3px], 7px, bg peach, border bg
-```
-
-### 7.6 Botões de Ação Secundários (Listas em Modais)
-
-```
-Layout:        flex, items-center, justify-start (alinhamento à esquerda), gap-3
-Cores base:    bg-[var(--surface-alt)], text-[var(--text-secondary)], border-[var(--btn-action-neutral-border)]
-Ícones:        Manter cores neutras (text-muted) na maioria, exceto quando representando marca externa (ex: WhatsApp verde #25D366)
-```
-
-### 7.7 Sidebar
-
-```
-Logo:       "QF" em Caveat Brush, gradiente sage→dark-green
-Nav items:  ícone + label, hover bg-surface-alt
-"Sair":     ancorado ao fundo (grid rows), vermelho no hover
-```
-
----
-
-## 8. Elementos Decorativos
+## 7. Elementos Decorativos
 
 Renderizados em uma camada `z-0` fixa, **atrás de todo o conteúdo funcional**.  
 Nunca devem competir com texto ou elementos interativos.
@@ -240,7 +164,7 @@ Nunca devem competir com texto ou elementos interativos.
 
 ---
 
-## 9. Acessibilidade
+## 8. Acessibilidade
 
 | Regra | Valor |
 |---|---|
@@ -253,35 +177,7 @@ Nunca devem competir com texto ou elementos interativos.
 
 ---
 
-## 10. Tokens CSS (referência rápida)
-
-```css
-/* Superfícies */
-var(--bg)           /* fundo da página */
-var(--surface)      /* cards e painéis */
-var(--surface-alt)  /* inputs, badges, alternativo */
-var(--border)       /* bordas e divisores */
-
-/* Texto */
-var(--text-primary)    /* títulos, valores principais */
-var(--text-secondary)  /* labels, conteúdo */
-var(--text-muted)      /* sub-textos, placeholders */
-
-/* Cores principais */
-var(--sage)         /* #5CBF9D — ação primária */
-var(--sage-light)   /* fundo pastel sage */
-var(--dark-green)   /* #3D786A — verde profundo */
-var(--blue)         /* #2E7DFF */
-var(--blue-light)   /* fundo pastel azul */
-var(--peach)        /* #F8A26B */
-var(--peach-light)  /* fundo pastel pêssego */
-var(--purple)       /* #7C5CFF */
-var(--purple-light) /* fundo pastel roxo */
-```
-
----
-
-## 11. O que Nunca Fazer
+## 9. O que Nunca Fazer
 
 | ❌ Errado | ✅ Correto |
 |---|---|
@@ -290,6 +186,5 @@ var(--purple-light) /* fundo pastel roxo */
 | Dois cards adjacentes com a mesma cor de ícone | Distribuir as 5 cores da paleta |
 | `--text-muted` abaixo de `#6B7280` no light | Mínimo `#6B7280` |
 | Elementos decorativos sobre áreas funcionais | Decorativos em camada `z-0` fixa |
-| Mostrar `-100%` quando não há histórico | Ocultar trend badge sem dados suficientes |
-| Círculos (`rounded-full`) nos botões de ação do header | `rounded-[10px]` (quadrado arredondado) |
+| Círculos (`rounded-full`) nos avatares e botões | `rounded-[12px]` ou `rounded-[18px]` (squircles) |
 | Gradiente roxo→azul no avatar (frio) | Gradiente sage→pêssego (quente, botânico) |
