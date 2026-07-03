@@ -129,7 +129,7 @@ export default function Home() {
       </div>
 
       {/* WIDGETS */}
-      <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:flex-1 lg:min-h-0 min-w-0 pb-10">
+      <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:flex-1 lg:min-h-0 min-w-0">
         <AgendaWidget today={new Date()} todayEvents={todayEvents} upcomingDays={upcomingDays} TimelineRow={TimelineRow} onEventClick={(app) => setDetailModal({ open: true, app })} />
         <div className="w-full lg:w-[40%] flex flex-col gap-4 lg:min-h-0">
           <RevenueWidget revenueData={revenueData} />
