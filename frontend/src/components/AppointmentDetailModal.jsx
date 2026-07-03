@@ -321,11 +321,11 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
     <>
       {/* ── Modal Principal ── (ocultado se o modal de justificativa estiver ativo) */}
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-start pt-[8vh] md:pt-[12vh] justify-center z-[60] ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
+        className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-start pt-[8vh] md:pt-[6vh] justify-center z-[60] ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
         onClick={triggerClose}
       >
         <div
-          className={`bg-[var(--surface)] border border-[var(--border)] rounded-[24px] w-full max-w-sm mx-4 shadow-2xl flex flex-col h-[70vh] md:h-[580px] relative overflow-hidden ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
+          className={`bg-[var(--surface)] border border-[var(--border)] rounded-[24px] w-full max-w-sm mx-4 shadow-2xl flex flex-col h-[85vh] md:h-auto md:max-h-[85vh] relative overflow-hidden ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
           onClick={e => e.stopPropagation()}
         >
           {/* ── HEADER ── */}
