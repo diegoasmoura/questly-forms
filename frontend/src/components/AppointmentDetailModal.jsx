@@ -325,7 +325,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
         onClick={triggerClose}
       >
         <div
-          className={`bg-[var(--surface)] border border-[var(--border)] rounded-[24px] w-full max-w-sm mx-4 shadow-2xl flex flex-col h-[85vh] md:h-auto md:max-h-[85vh] relative overflow-hidden ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
+          className={`bg-[var(--surface)] border border-[var(--border)] rounded-[24px] w-full max-w-sm mx-4 shadow-2xl flex flex-col h-auto max-h-[72vh] md:max-h-[85vh] relative overflow-hidden ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
           onClick={e => e.stopPropagation()}
         >
           {/* ── HEADER ── */}
@@ -389,7 +389,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
             </div>
           </div>
 
-          <div className="px-6 pb-10 overflow-y-auto hide-scrollbar flex-1 min-h-0">
+          <div className={`px-6 overflow-y-auto hide-scrollbar flex-1 min-h-0 ${justModal.open ? 'pb-16' : 'pb-6'}`}>
             {/* ── SEÇÃO STATUS ── */}
             <p
               className="text-[10px] font-extrabold uppercase tracking-[0.12em] mb-3"
@@ -640,11 +640,13 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
             </button>
           </div>
 
-          {/* Fade Overlay (Fundo Falso) */}
-          <div 
-            className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none rounded-b-[24px]"
-            style={{ background: "linear-gradient(to top, var(--surface) 20%, transparent)" }}
-          />
+          {/* Fade Overlay (Fundo Falso) - Aparece apenas quando a justificativa está aberta para indicar rolagem */}
+          {justModal.open && (
+            <div 
+              className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none rounded-b-[24px]"
+              style={{ background: "linear-gradient(to top, var(--surface) 20%, transparent)" }}
+            />
+          )}
         </div>
       </div>
 

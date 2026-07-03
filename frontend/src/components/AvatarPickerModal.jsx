@@ -87,11 +87,11 @@ export default function AvatarPickerModal({ onClose }) {
   const { initials, color: avatarColor } = getAvatarProps(user?.name);
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center z-[60] p-4 animate-fade-in">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-start pt-[8vh] md:pt-[6vh] justify-center z-[60] p-4 animate-fade-in">
       {/* Invisible backdrop for closing on click outside (optional, if you want click outside) */}
       <div className="absolute inset-0" onClick={onClose} />
       
-      <div className="relative bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-card-hover w-full max-w-[420px] max-h-[90vh] overflow-y-auto p-6 flex flex-col gap-6" onClick={e => e.stopPropagation()}>
+      <div className="relative bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-card-hover w-full max-w-[420px] max-h-[90vh] overflow-y-auto p-4 md:p-6 flex flex-col gap-4 md:gap-6" onClick={e => e.stopPropagation()}>
         
         <div className="flex items-center justify-between">
           <h2 className="text-[18px] font-bold text-[var(--text-primary)]">Seu Avatar</h2>
@@ -102,7 +102,7 @@ export default function AvatarPickerModal({ onClose }) {
 
         <div className="flex flex-col items-center">
           <div 
-            className="w-[84px] h-[84px] rounded-[18px] flex items-center justify-center overflow-hidden border border-[var(--border)] shadow-sm"
+            className="w-[64px] h-[64px] md:w-[84px] md:h-[84px] rounded-[18px] flex items-center justify-center overflow-hidden border border-[var(--border)] shadow-sm"
             style={{ backgroundColor: previewUrl ? "transparent" : avatarColor.bg, color: avatarColor.text }}
           >
             {previewUrl ? (
@@ -115,7 +115,7 @@ export default function AvatarPickerModal({ onClose }) {
 
         <div>
           <p className="text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-widest mb-3">Escolha um avatar</p>
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-5 sm:grid-cols-6 lg:grid-cols-7 gap-2 md:gap-3">
             {PRESETS.map((preset) => (
               <button
                 key={`${preset.style}-${preset.seed}`}
@@ -125,7 +125,7 @@ export default function AvatarPickerModal({ onClose }) {
                 <img
                   src={getAvatarUrl(preset.style, preset.seed)}
                   alt=""
-                  className={`w-[60px] h-[60px] rounded-[12px] bg-[var(--surface-alt)] transition-all ${
+                  className={`w-[48px] h-[48px] sm:w-[56px] sm:h-[56px] rounded-[10px] sm:rounded-[12px] bg-[var(--surface-alt)] transition-all ${
                     selectedPreset?.seed === preset.seed && selectedPreset?.style === preset.style
                       ? "ring-2 ring-[var(--sage)] shadow-sm scale-[0.95]"
                       : "hover:ring-2 hover:ring-[var(--border)] hover:bg-[var(--bg)]"
@@ -147,7 +147,7 @@ export default function AvatarPickerModal({ onClose }) {
           />
           <button
             onClick={() => fileRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-3 rounded-[14px] border-2 border-dashed border-[var(--border)] hover:border-[var(--sage)] hover:bg-[var(--sage-light)] dark:hover:bg-[#1A3028] transition-all w-full justify-center text-[13px] font-bold text-[var(--text-secondary)] hover:text-[var(--dark-green)] dark:hover:text-[#5CBF9D]"
+            className="flex items-center gap-2 px-4 py-2.5 md:py-3 rounded-[14px] border-2 border-dashed border-[var(--border)] hover:border-[var(--sage)] hover:bg-[var(--sage-light)] dark:hover:bg-[#1A3028] transition-all w-full justify-center text-[13px] font-bold text-[var(--text-secondary)] hover:text-[var(--dark-green)] dark:hover:text-[#5CBF9D]"
           >
             <Upload size={16} />
             Escolher imagem
