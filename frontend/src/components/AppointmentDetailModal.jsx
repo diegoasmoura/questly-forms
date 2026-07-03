@@ -95,7 +95,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
         reschedTime = existing.sessionTime;
       }
 
-      setJustType(existing ? (reschedDate ? "reagendar" : "cancelar") : "reagendar");
+      setJustType(existing?.status === "justificada" ? (reschedDate ? "reagendar" : "cancelar") : "reagendar");
       setJustData({ date: reschedDate, time: reschedTime, notes: existing?.notes || "" });
       return;
     }
@@ -110,8 +110,10 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
         const fresh = await api.getAttendances();
         setAttendances(fresh);
         setSuccessMessage("Status removido!");
+        setJustModal(prev => ({ ...prev, open: false }));
       } else {
         await api.saveAttendance({
+          ...(existing ? { id: existing.id } : {}),
           patientId: appt.patientId,
           date: date.toISOString(),
           status,
@@ -120,6 +122,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
         const fresh = await api.getAttendances();
         setAttendances(fresh);
         setSuccessMessage(status === "presente" ? "Presença confirmada!" : "Falta registrada!");
+        setJustModal(prev => ({ ...prev, open: false }));
       }
       onUpdate?.();
     } catch (error) {
@@ -185,6 +188,16 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
     const motivo = justData.notes || "Falta justificada";
 
     try {
+      // Se estamos editando uma justificativa existente, apagamos os reagendamentos filhos antigos antes de criar os novos
+      if (justModal.existingAtt && justModal.existingAtt.status === "justificada") {
+        const data = await fetchDescendants(justModal.existingAtt.id);
+        if (data && data.descendants) {
+          for (const item of data.descendants) {
+            await api.deleteAttendance(item.id);
+          }
+        }
+      }
+
       const notes = newDateStr
         ? `Falta justificada. Reagendado para ${newDateStr} às ${newTimeStr || "08:00"}. Motivo: ${motivo}`
         : motivo;
@@ -192,6 +205,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
       const sessionTime = newDateStr ? (newTimeStr || "08:00") : (justModal.appointment?.time || null);
 
       const originalResult = await api.saveAttendance({
+        ...(justModal.existingAtt ? { id: justModal.existingAtt.id } : {}),
         patientId: justModal.appointment.patientId,
         date: originalDate.toISOString(),
         status: "justificada",
@@ -199,7 +213,9 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
         sessionTime
       });
 
-      if (newDateStr) {
+      const parentId = originalResult?.id || justModal.existingAtt?.id;
+
+      if (newDateStr && parentId) {
         const dateToSave = new Date(newDateStr + "T" + (newTimeStr || "08:00") + ":00");
         await api.saveAttendance({
           patientId: justModal.appointment.patientId,
@@ -207,7 +223,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
           status: "",
           notes: `Reagendamento da sessão de ${originalDate.toLocaleDateString("pt-BR")}. ${motivo}`,
           sessionTime: newTimeStr || "08:00",
-          parentId: originalResult.id
+          parentId: parentId
         });
       }
 
@@ -287,6 +303,9 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
   };
 
   const currentStatus = existingAtt?.status;
+  const isActivePresente = !justModal.open && currentStatus === "presente";
+  const isActiveFalta = !justModal.open && currentStatus === "falta";
+  const isActiveJustificado = justModal.open || currentStatus === "justificada";
 
   const whatsappText = `Olá ${patient?.name?.split(" ")[0] || ""}, lembrete da sua consulta no dia ${sessionDate ? format(sessionDate, "dd/MM") : ""} às ${appointment.time}.`;
 
@@ -294,7 +313,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
     <>
       {/* ── Modal Principal ── (ocultado se o modal de justificativa estiver ativo) */}
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center z-[60] ${justModal.open ? "hidden" : ""}`}
+        className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center z-[60]"
         onClick={onClose}
       >
         <div
@@ -377,16 +396,16 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
               <button
                 onClick={() => handleQuickStatus(appointment, "presente", sessionDate)}
                 className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-[14px] font-bold text-[11px] transition-all duration-200"
-                style={currentStatus === "presente"
-                  ? { background: "#5CBF9D", color: "white", border: "2px solid #5CBF9D" }
+                style={isActivePresente
+                  ? { background: "var(--chip-presente-bg)", color: "var(--chip-presente-text)", border: "2px solid #5CBF9D" }
                   : { background: "var(--chip-presente-bg)", color: "var(--chip-presente-text)", border: "2px solid transparent" }
                 }
               >
                 <span
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ background: currentStatus === "presente" ? "rgba(255,255,255,0.25)" : "var(--sage)" }}
+                  className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+                  style={{ background: isActivePresente ? "#5CBF9D" : "rgba(92,191,157,0.15)" }}
                 >
-                  <Check size={16} color="white" />
+                  <Check size={16} color={isActivePresente ? "white" : "var(--chip-presente-text)"} strokeWidth={2} />
                 </span>
                 Presença
               </button>
@@ -395,16 +414,16 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
               <button
                 onClick={() => handleQuickStatus(appointment, "falta", sessionDate)}
                 className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-[14px] font-bold text-[11px] transition-all duration-200"
-                style={currentStatus === "falta"
-                  ? { background: "#EF4444", color: "white", border: "2px solid #EF4444" }
+                style={isActiveFalta
+                  ? { background: "var(--chip-falta-bg)", color: "var(--chip-falta-text)", border: "2px solid #EF4444" }
                   : { background: "var(--chip-falta-bg)", color: "var(--chip-falta-text)", border: "2px solid transparent" }
                 }
               >
                 <span
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ background: currentStatus === "falta" ? "rgba(255,255,255,0.25)" : "rgba(239,68,68,0.25)" }}
+                  className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+                  style={{ background: isActiveFalta ? "#EF4444" : "rgba(239,68,68,0.15)" }}
                 >
-                  <X size={16} color={currentStatus === "falta" ? "white" : "var(--chip-falta-text)"} />
+                  <X size={16} color={isActiveFalta ? "white" : "var(--chip-falta-text)"} strokeWidth={2} />
                 </span>
                 Falta
               </button>
@@ -413,23 +432,146 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
               <button
                 onClick={() => handleQuickStatus(appointment, "justificada", sessionDate)}
                 className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-[14px] font-bold text-[11px] transition-all duration-200"
-                style={currentStatus === "justificada"
-                  ? { background: "#F59E0B", color: "white", border: "2px solid #F59E0B" }
+                style={isActiveJustificado
+                  ? { background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)", border: "2px solid #F59E0B" }
                   : { background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)", border: "2px solid transparent" }
                 }
               >
                 <span
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ background: currentStatus === "justificada" ? "rgba(255,255,255,0.25)" : "rgba(245,158,11,0.2)" }}
+                  className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+                  style={{ background: isActiveJustificado ? "#F59E0B" : "rgba(245,158,11,0.15)" }}
                 >
-                  <AlertCircle size={16} color={currentStatus === "justificada" ? "white" : "var(--chip-justificado-text)"} />
+                  <AlertCircle size={16} color={isActiveJustificado ? "white" : "var(--chip-justificado-text)"} strokeWidth={2} />
                 </span>
                 Justificado
               </button>
             </div>
 
-            {/* ── AÇÕES ── */}
-            <div className="pt-4 space-y-2" style={{ borderTop: "1px solid var(--border)" }}>
+            {/* ── EXPANSÃO DE JUSTIFICATIVA (PROGRESSIVE DISCLOSURE) ── */}
+            {justModal.open && (
+              <div className="animate-slide-down space-y-4 pt-5 mb-2 border-t border-[var(--border)]">
+                {/* Tipo */}
+                <div>
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] mb-2.5" style={{ color: "var(--text-muted)" }}>
+                    Tipo de Justificativa
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Remarcar Sessão — Âmbar (Justificado) */}
+                    <button
+                      onClick={() => { setJustType("reagendar"); setJustData(prev => ({ ...prev, date: "", time: "" })); }}
+                      className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-[14px] font-bold text-[11px] transition-all duration-200"
+                      style={justType === "reagendar"
+                        ? { background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)", border: "2px solid #F59E0B" }
+                        : { background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)", border: "2px solid transparent" }
+                      }
+                    >
+                      <span
+                        className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+                        style={{ background: justType === "reagendar" ? "#F59E0B" : "rgba(245,158,11,0.15)" }}
+                      >
+                        <CalendarClock size={16} color={justType === "reagendar" ? "white" : "var(--chip-justificado-text)"} strokeWidth={2} />
+                      </span>
+                      Remarcar Sessão
+                    </button>
+
+                    {/* Cancelar — Vermelho (Falta) */}
+                    <button
+                      onClick={() => setJustType("cancelar")}
+                      className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-[14px] font-bold text-[11px] transition-all duration-200"
+                      style={justType === "cancelar"
+                        ? { background: "var(--chip-falta-bg)", color: "var(--chip-falta-text)", border: "2px solid #EF4444" }
+                        : { background: "var(--chip-falta-bg)", color: "var(--chip-falta-text)", border: "2px solid transparent" }
+                      }
+                    >
+                      <span
+                        className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+                        style={{ background: justType === "cancelar" ? "#EF4444" : "rgba(239,68,68,0.15)" }}
+                      >
+                        <X size={16} color={justType === "cancelar" ? "white" : "var(--chip-falta-text)"} strokeWidth={2} />
+                      </span>
+                      Cancelar (Abonar)
+                    </button>
+                  </div>
+                </div>
+
+                {/* Motivo */}
+                <div>
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] mb-2" style={{ color: "var(--text-muted)" }}>
+                    Motivo
+                  </p>
+                  <textarea
+                    value={justData.notes}
+                    onChange={e => setJustData({ ...justData, notes: e.target.value })}
+                    placeholder="Ex: Férias, doença, viagem..."
+                    className="w-full px-4 py-3 rounded-[14px] resize-none text-[13px] font-medium h-24 focus:outline-none"
+                    style={{
+                      background: "var(--surface-alt)",
+                      border: "1px solid var(--btn-action-neutral-border)",
+                      color: "var(--text-primary)",
+                    }}
+                  />
+                </div>
+
+                {/* Nova Data/Horário — só aparece se Reagendar */}
+                {justType === "reagendar" && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] mb-2" style={{ color: "var(--text-muted)" }}>
+                        Nova Data
+                      </p>
+                      <input
+                        type="date"
+                        min={new Date().toISOString().split("T")[0]}
+                        value={justData.date || ""}
+                        onChange={e => setJustData({ ...justData, date: e.target.value })}
+                        className="w-full px-3 py-2.5 rounded-[12px] text-[13px] font-medium focus:outline-none"
+                        style={{
+                          background: "var(--surface-alt)",
+                          border: "1px solid var(--btn-action-neutral-border)",
+                          color: "var(--text-primary)",
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] mb-2" style={{ color: "var(--text-muted)" }}>
+                        Horário
+                      </p>
+                      <select
+                        value={justData.time || ""}
+                        onChange={e => setJustData({ ...justData, time: e.target.value })}
+                        className="w-full px-3 py-2.5 rounded-[12px] text-[13px] font-medium focus:outline-none"
+                        style={{
+                          background: "var(--surface-alt)",
+                          border: "1px solid var(--btn-action-neutral-border)",
+                          color: "var(--text-primary)",
+                        }}
+                      >
+                        <option value="">--:--</option>
+                        {["07:00","07:30","08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00"].map(t => (
+                          <option key={t} value={t}>{t}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {/* Confirmar */}
+                <div className="pt-2">
+                  <button
+                    onClick={saveJustificada}
+                    className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-[14px] text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
+                    style={{ background: "var(--sage)" }}
+                  >
+                    <Check size={15} strokeWidth={2} />
+                    Confirmar
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── AÇÕES (Escondidas se o Justificar estiver aberto) ── */}
+            {!justModal.open && (
+              <div className="pt-4 space-y-2" style={{ borderTop: "1px solid var(--border)" }}>
 
               {/* WhatsApp */}
               <a
@@ -476,7 +618,9 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
                 <Trash2 size={18} strokeWidth={2} style={{ color: "var(--text-muted)" }} />
                 Excluir Agendamento
               </button>
-            </div>
+              </div>
+            )}
+
 
             {/* Fechar */}
             <button
@@ -492,187 +636,6 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
 
 
 
-      {justModal.open && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center z-[70]" onClick={() => setJustModal({ ...justModal, open: false })}>
-          <div
-            className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] w-full max-w-sm mx-4 shadow-2xl animate-scale-in overflow-hidden"
-            onClick={e => e.stopPropagation()}
-          >
-            {/* ── HEADER ── */}
-            <div className="relative px-6 pt-12 pb-5 overflow-hidden">
-              {/* Blob decorativo */}
-              <div
-                className="absolute -top-8 -right-8 w-[100px] h-[100px] rounded-full opacity-20 blur-2xl pointer-events-none"
-                style={{ backgroundColor: "var(--purple)" }}
-              />
-
-              {/* Botão Voltar (Esquerda) */}
-              <button
-                onClick={() => setJustModal({ ...justModal, open: false })}
-                className="absolute top-4 left-4 p-1.5 rounded-[10px] z-10 hover:bg-[var(--surface-alt)] transition-colors text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                title="Voltar"
-              >
-                <ArrowLeft size={18} strokeWidth={2.5} />
-              </button>
-
-              {/* Botão Fechar (Direita) */}
-              <button
-                onClick={() => {
-                  setJustModal({ ...justModal, open: false });
-                  onClose();
-                }}
-                className="absolute top-4 right-4 p-1.5 rounded-[10px] z-10 bg-[var(--surface-alt)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
-                title="Fechar"
-              >
-                <X size={16} strokeWidth={2.5} />
-              </button>
-
-              {/* Avatar + Título */}
-              <div className="flex items-center gap-4">
-                <div
-                  className="w-[52px] h-[52px] rounded-[16px] flex items-center justify-center shrink-0 shadow-sm"
-                  style={{ background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)" }}
-                >
-                  <AlertCircle size={22} strokeWidth={2} />
-                </div>
-                <div className="min-w-0 pr-8">
-                  <h2 className="text-[17px] font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "'Nunito Sans', sans-serif" }}>
-                    Justificar Falta
-                  </h2>
-                  <p className="text-[12px] font-medium mt-0.5 truncate" style={{ color: "var(--text-muted)" }}>
-                    {justModal.patient?.name}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="px-6 pb-6">
-              {justModal.isEdit && (
-                <div className="space-y-4">
-                  {/* Tipo */}
-                  <div>
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] mb-2.5" style={{ color: "var(--text-muted)" }}>
-                      Tipo de Justificativa
-                    </p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {/* Remarcar Sessão — Âmbar (Justificado) */}
-                      <button
-                        onClick={() => { setJustType("reagendar"); setJustData(prev => ({ ...prev, date: "", time: "" })); }}
-                        className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-[14px] font-bold text-[11px] transition-all duration-200 border-2 ${
-                          justType === "reagendar"
-                            ? "bg-[#F59E0B] text-white border-[#F59E0B]"
-                            : "bg-[var(--chip-justificado-bg)] text-[var(--chip-justificado-text)] border-transparent hover:border-[#F59E0B]/30"
-                        }`}
-                      >
-                        <span
-                          className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
-                          style={{ background: justType === "reagendar" ? "rgba(255,255,255,0.25)" : "rgba(245,158,11,0.2)" }}
-                        >
-                          <CalendarClock size={16} strokeWidth={2} />
-                        </span>
-                        Remarcar Sessão
-                      </button>
-
-                      {/* Cancelar — Vermelho (Falta) */}
-                      <button
-                        onClick={() => setJustType("cancelar")}
-                        className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-[14px] font-bold text-[11px] transition-all duration-200 border-2 ${
-                          justType === "cancelar"
-                            ? "bg-[#EF4444] text-white border-[#EF4444]"
-                            : "bg-[var(--chip-falta-bg)] text-[var(--chip-falta-text)] border-transparent hover:border-[#EF4444]/30"
-                        }`}
-                      >
-                        <span
-                          className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
-                          style={{ background: justType === "cancelar" ? "rgba(255,255,255,0.25)" : "rgba(239,68,68,0.25)" }}
-                        >
-                          <XCircle size={16} strokeWidth={2} />
-                        </span>
-                        Cancelar (Abonar)
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Motivo */}
-                  <div>
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] mb-2" style={{ color: "var(--text-muted)" }}>
-                      Motivo
-                    </p>
-                    <textarea
-                      value={justData.notes}
-                      onChange={e => setJustData({ ...justData, notes: e.target.value })}
-                      placeholder="Ex: Férias, doença, viagem..."
-                      className="w-full px-4 py-3 rounded-[14px] resize-none text-[13px] font-medium h-24 focus:outline-none"
-                      style={{
-                        background: "var(--surface-alt)",
-                        border: "1px solid var(--btn-action-neutral-border)",
-                        color: "var(--text-primary)",
-                      }}
-                    />
-                  </div>
-
-                  {/* Nova Data/Horário — só aparece se Reagendar */}
-                  {justType === "reagendar" && (
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] mb-2" style={{ color: "var(--text-muted)" }}>
-                          Nova Data
-                        </p>
-                        <input
-                          type="date"
-                          min={new Date().toISOString().split("T")[0]}
-                          value={justData.date || ""}
-                          onChange={e => setJustData({ ...justData, date: e.target.value })}
-                          className="w-full px-3 py-2.5 rounded-[12px] text-[13px] font-medium focus:outline-none"
-                          style={{
-                            background: "var(--surface-alt)",
-                            border: "1px solid var(--btn-action-neutral-border)",
-                            color: "var(--text-primary)",
-                          }}
-                        />
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] mb-2" style={{ color: "var(--text-muted)" }}>
-                          Horário
-                        </p>
-                        <select
-                          value={justData.time || ""}
-                          onChange={e => setJustData({ ...justData, time: e.target.value })}
-                          className="w-full px-3 py-2.5 rounded-[12px] text-[13px] font-medium focus:outline-none"
-                          style={{
-                            background: "var(--surface-alt)",
-                            border: "1px solid var(--btn-action-neutral-border)",
-                            color: "var(--text-primary)",
-                          }}
-                        >
-                          <option value="">--:--</option>
-                          {["07:00","07:30","08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00"].map(t => (
-                            <option key={t} value={t}>{t}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Ações */}
-                  <div className="pt-4 space-y-2" style={{ borderTop: "1px solid var(--border)" }}>
-                    {/* Confirmar → Sage: ação primária positiva do QF Design System */}
-                    <button
-                      onClick={saveJustificada}
-                      className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-[14px] text-[13px] font-semibold text-white"
-                      style={{ background: "var(--sage)" }}
-                    >
-                      <Check size={15} strokeWidth={2} />
-                      Confirmar
-                    </button>
-
-                    {/* Excluir justificativa → vermelho outline: ação destrutiva */}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
       )}
 
 

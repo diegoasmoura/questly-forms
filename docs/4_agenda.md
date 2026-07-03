@@ -47,8 +47,14 @@ Na gestão clínica, a integridade do histórico é vital:
 - **Cancelar (Abonar):** Paciente avisou com antecedência. A sessão original vira "Justificada" (histórico mantido) e libera o slot no calendário para eventuais encaixes avulsos, mas o registro de cancelamento não deve ser deletado. A interface usa vermelho para o alerta de cancelamento, mas o status no sistema indica que não haverá cobrança de falta indevida.
 - **Remarcar Sessão (Reagendar):** O mesmo que o anterior, porém o sistema cria uma nova Sessão Avulsa para a data escolhida. O botão no sub-modal segue a cor Âmbar para acompanhar a hierarquia visual do botão primário de "Justificado".
 
+**Edição de Justificativas e Garbage Collection (Upsert):**
+Sempre que uma justificativa pré-existente for *editada* (ex: alterar a data do reagendamento ou mudar de "Remarcar" para "Cancelar"), o sistema deve obrigatoriamente realizar as seguintes ações para evitar poluição do banco (registros órfãos e duplicados):
+1. **Limpeza de Filhos:** Identificar a justificativa original (`existingAtt.id`), buscar seus descendentes (a sessão avulsa criada no futuro) e **deletá-los** antes de salvar as novas alterações.
+2. **Upsert da Mãe:** O ID original da justificativa deve ser passado na requisição (`id: existingAtt.id`) para que o backend realize um *Update* (Upsert) da justificativa raiz, em vez de criar uma nova marcação de falta para o mesmo dia.
+3. **Criação do Novo Filho:** Só após os passos acima, a nova sessão reagendada deve ser criada e vinculada (usando `parentId`).
+
 > Nunca ofereça opções na interface que permitam a deleção total de uma falta justificada sob o pretexto de "liberar a agenda". Slots justificados já são considerados implicitamente livres para encaixes. Deletar a justificativa apagaria o histórico clínico e reativaria a regra de recorrência do paciente.
 
-## 4.3 Fechamento em Cascata
+## 4.4 Fechamento em Cascata
 Sempre que uma ação é tomada no modal da agenda (ex: Justificar falta que abre um sub-modal), ao clicar em "Salvar", **toda a pilha de modais deve ser fechada simultaneamente**.
 O usuário nunca deve ter que fechar manualmente os modais anteriores depois de concluir o fluxo de sucesso. O código deve executar o `onClose` na cadeia.

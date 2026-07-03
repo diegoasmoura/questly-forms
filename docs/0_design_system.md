@@ -115,6 +115,12 @@ Sempre que for refatorar ou criar um novo botão ou card, utilize as seguintes p
 4. **Botões Globais (.btn)**
    - O uso de classes legadas como `.btn` (que forçam `rounded-[999px]`) deve ser evitado ou sobreposto manualmente com um novo `rounded-[Xpx]` quando utilizado dentro do contexto do Dashboard.
 
+5. **Botões de Múltipla Escolha (Status / Justificativas):**
+   - A identidade dita um comportamento **Tonal/Outline** adaptativo para opções expansíveis e estados de atendimento.
+   - **Estado Desmarcado (Inativo):** Fundo suave. O ícone fica flutuando num círculo com fundo pastel, puxando a variável de background correspondente (ex: `var(--chip-falta-bg)` ou sua versão `rgba(..., 0.15)` correspondente ao HEX bruto). A borda do botão é `2px solid transparent`.
+   - **Estado Selecionado (Ativo):** O botão recebe destaque (Outline) e ganha uma borda `2px solid` na **cor forte original** (ex: `#5CBF9D`, `#EF4444`, `#F59E0B`). O fundo do ícone é preenchido com a exata mesma cor forte, e o SVG fica branco (`white`).
+   - **Herança em Sub-botões (Progressive Disclosure):** Se um botão de status abre opções filhas (ex: Justificado abre "Remarcar" ou "Cancelar"), as opções filhas **devem espelhar rigorosamente** a estética, as cores fortes e os valores translúcidos do botão pai equivalente. O botão "Cancelar (Abonar)" herda toda a estilização e ícone do botão "Falta". O botão "Remarcar" herda toda a estilização do botão "Justificado".
+
 ---
 
 ## 5. Espaçamento, Dimensões e Sombras
