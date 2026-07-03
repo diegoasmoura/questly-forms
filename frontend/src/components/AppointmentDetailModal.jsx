@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+    import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
@@ -21,6 +21,7 @@ function extractUTCDate(dateStr) {
 
 export default function AppointmentDetailModal({ appointment, patient, nextDate, onClose, onUpdate, sessionType = "fixed" }) {
   const navigate = useNavigate();
+  const [isClosing, setIsClosing] = useState(false);
   const [attendances, setAttendances] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
   const [justModal, setJustModal] = useState({ open: false, patient: null, appointment: null, date: null, isEdit: false, existingAtt: null });
@@ -28,6 +29,13 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
   const [justType, setJustType] = useState("reagendar");
   const [descendantsInfo, setDescendantsInfo] = useState({ count: 0, list: [] });
   const [confirmModal, setConfirmModal] = useState({ open: false, title: "", message: "", onConfirm: null, loading: false });
+
+  const triggerClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+    }, 200);
+  };
 
   const sessionDate = nextDate ? new Date(formatDateKey(nextDate) + "T12:00:00") : null;
 
@@ -169,7 +177,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
           setAttendances(fresh);
           setJustModal({ open: false, patient: null, appointment: null, date: null, isEdit: false, existingAtt: null });
           setConfirmModal({ open: false, title: "", message: "", onConfirm: null, loading: false });
-          onClose(); // Fecha o modal principal por completo
+          triggerClose();
           onUpdate?.();
         } catch (error) {
           alert("Erro ao remover: " + error.message);
@@ -231,7 +239,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
       const fresh = await api.getAttendances();
       setAttendances(fresh);
       setJustModal({ open: false, patient: null, appointment: null, date: null, isEdit: false, existingAtt: null });
-      onClose(); // Fecha o modal principal por completo
+      triggerClose();
       onUpdate?.();
     } catch (error) {
       console.error("Erro ao salvar:", error);
@@ -265,7 +273,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
             setSuccessMessage("Agendamento removido!");
           }
           setConfirmModal({ open: false, title: "", message: "", onConfirm: null, loading: false });
-          onClose();
+          triggerClose();
           onUpdate?.();
         } catch (error) {
           console.error("Erro ao remover:", error);
@@ -313,15 +321,15 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
     <>
       {/* ── Modal Principal ── (ocultado se o modal de justificativa estiver ativo) */}
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center z-[60]"
-        onClick={onClose}
+        className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-start pt-[8vh] md:pt-[12vh] justify-center z-[60] ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
+        onClick={triggerClose}
       >
         <div
-          className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] w-full max-w-sm mx-4 shadow-2xl animate-scale-in overflow-hidden"
+          className={`bg-[var(--surface)] border border-[var(--border)] rounded-[24px] w-full max-w-sm mx-4 shadow-2xl flex flex-col h-[70vh] md:h-[580px] relative overflow-hidden ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
           onClick={e => e.stopPropagation()}
         >
           {/* ── HEADER ── */}
-          <div className="relative px-6 pt-6 pb-5 overflow-hidden">
+          <div className="relative px-6 pt-6 pb-5 overflow-hidden flex-shrink-0">
             {/* Blob decorativo no canto */}
             <div
               className="absolute -top-8 -right-8 w-[120px] h-[120px] rounded-full opacity-20 blur-2xl pointer-events-none"
@@ -330,7 +338,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
 
             {/* Fechar */}
             <button
-              onClick={onClose}
+              onClick={triggerClose}
               className="absolute top-4 right-4 p-1.5 rounded-[10px] z-10"
               style={{ color: "var(--text-muted)", background: "var(--surface-alt)" }}
             >
@@ -381,7 +389,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
             </div>
           </div>
 
-          <div className="px-6 pb-6">
+          <div className="px-6 pb-10 overflow-y-auto hide-scrollbar flex-1 min-h-0">
             {/* ── SEÇÃO STATUS ── */}
             <p
               className="text-[10px] font-extrabold uppercase tracking-[0.12em] mb-3"
@@ -391,21 +399,21 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
             </p>
 
             {/* 3 botões lado a lado com cores próprias */}
-            <div className="grid grid-cols-3 gap-2 mb-5">
+            <div className="grid grid-cols-3 gap-2 mb-4 md:mb-5">
               {/* Presença — Verde */}
               <button
                 onClick={() => handleQuickStatus(appointment, "presente", sessionDate)}
-                className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-[14px] font-bold text-[11px] transition-all duration-200"
+                className="flex flex-col items-center gap-1 md:gap-1.5 py-2 md:py-3 px-1 md:px-2 rounded-[12px] md:rounded-[14px] font-bold text-[9px] md:text-[11px] transition-all duration-200"
                 style={isActivePresente
                   ? { background: "var(--chip-presente-bg)", color: "var(--chip-presente-text)", border: "2px solid #5CBF9D" }
                   : { background: "var(--chip-presente-bg)", color: "var(--chip-presente-text)", border: "2px solid transparent" }
                 }
               >
                 <span
-                  className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+                  className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-colors"
                   style={{ background: isActivePresente ? "#5CBF9D" : "rgba(92,191,157,0.15)" }}
                 >
-                  <Check size={16} color={isActivePresente ? "white" : "var(--chip-presente-text)"} strokeWidth={2} />
+                  <Check className="w-3.5 h-3.5 md:w-4 md:h-4" color={isActivePresente ? "white" : "var(--chip-presente-text)"} strokeWidth={2} />
                 </span>
                 Presença
               </button>
@@ -413,17 +421,17 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
               {/* Falta — Vermelho */}
               <button
                 onClick={() => handleQuickStatus(appointment, "falta", sessionDate)}
-                className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-[14px] font-bold text-[11px] transition-all duration-200"
+                className="flex flex-col items-center gap-1 md:gap-1.5 py-2 md:py-3 px-1 md:px-2 rounded-[12px] md:rounded-[14px] font-bold text-[9px] md:text-[11px] transition-all duration-200"
                 style={isActiveFalta
                   ? { background: "var(--chip-falta-bg)", color: "var(--chip-falta-text)", border: "2px solid #EF4444" }
                   : { background: "var(--chip-falta-bg)", color: "var(--chip-falta-text)", border: "2px solid transparent" }
                 }
               >
                 <span
-                  className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+                  className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-colors"
                   style={{ background: isActiveFalta ? "#EF4444" : "rgba(239,68,68,0.15)" }}
                 >
-                  <X size={16} color={isActiveFalta ? "white" : "var(--chip-falta-text)"} strokeWidth={2} />
+                  <X className="w-3.5 h-3.5 md:w-4 md:h-4" color={isActiveFalta ? "white" : "var(--chip-falta-text)"} strokeWidth={2} />
                 </span>
                 Falta
               </button>
@@ -431,17 +439,17 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
               {/* Justificado — Âmbar */}
               <button
                 onClick={() => handleQuickStatus(appointment, "justificada", sessionDate)}
-                className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-[14px] font-bold text-[11px] transition-all duration-200"
+                className="flex flex-col items-center gap-1 md:gap-1.5 py-2 md:py-3 px-1 md:px-2 rounded-[12px] md:rounded-[14px] font-bold text-[9px] md:text-[11px] transition-all duration-200"
                 style={isActiveJustificado
                   ? { background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)", border: "2px solid #F59E0B" }
                   : { background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)", border: "2px solid transparent" }
                 }
               >
                 <span
-                  className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+                  className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-colors"
                   style={{ background: isActiveJustificado ? "#F59E0B" : "rgba(245,158,11,0.15)" }}
                 >
-                  <AlertCircle size={16} color={isActiveJustificado ? "white" : "var(--chip-justificado-text)"} strokeWidth={2} />
+                  <AlertCircle className="w-3.5 h-3.5 md:w-4 md:h-4" color={isActiveJustificado ? "white" : "var(--chip-justificado-text)"} strokeWidth={2} />
                 </span>
                 Justificado
               </button>
@@ -449,61 +457,61 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
 
             {/* ── EXPANSÃO DE JUSTIFICATIVA (PROGRESSIVE DISCLOSURE) ── */}
             {justModal.open && (
-              <div className="animate-slide-down space-y-4 pt-5 mb-2 border-t border-[var(--border)]">
+              <div className="animate-slide-down space-y-3 md:space-y-4 pt-4 md:pt-5 mb-2 border-t border-[var(--border)]">
                 {/* Tipo */}
                 <div>
-                  <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] mb-2.5" style={{ color: "var(--text-muted)" }}>
+                  <p className="text-[9px] md:text-[10px] font-extrabold uppercase tracking-[0.12em] mb-2" style={{ color: "var(--text-muted)" }}>
                     Tipo de Justificativa
                   </p>
                   <div className="grid grid-cols-2 gap-2">
                     {/* Remarcar Sessão — Âmbar (Justificado) */}
                     <button
                       onClick={() => { setJustType("reagendar"); setJustData(prev => ({ ...prev, date: "", time: "" })); }}
-                      className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-[14px] font-bold text-[11px] transition-all duration-200"
+                      className="flex flex-col items-center gap-1 md:gap-1.5 py-2 md:py-3 px-1 md:px-2 rounded-[12px] md:rounded-[14px] font-bold text-[9px] md:text-[11px] transition-all duration-200"
                       style={justType === "reagendar"
                         ? { background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)", border: "2px solid #F59E0B" }
                         : { background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)", border: "2px solid transparent" }
                       }
                     >
                       <span
-                        className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+                        className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-colors"
                         style={{ background: justType === "reagendar" ? "#F59E0B" : "rgba(245,158,11,0.15)" }}
                       >
-                        <CalendarClock size={16} color={justType === "reagendar" ? "white" : "var(--chip-justificado-text)"} strokeWidth={2} />
+                        <CalendarClock className="w-3.5 h-3.5 md:w-4 md:h-4" color={justType === "reagendar" ? "white" : "var(--chip-justificado-text)"} strokeWidth={2} />
                       </span>
-                      Remarcar Sessão
+                      Remarcar
                     </button>
 
                     {/* Cancelar — Vermelho (Falta) */}
                     <button
                       onClick={() => setJustType("cancelar")}
-                      className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-[14px] font-bold text-[11px] transition-all duration-200"
+                      className="flex flex-col items-center gap-1 md:gap-1.5 py-2 md:py-3 px-1 md:px-2 rounded-[12px] md:rounded-[14px] font-bold text-[9px] md:text-[11px] transition-all duration-200"
                       style={justType === "cancelar"
                         ? { background: "var(--chip-falta-bg)", color: "var(--chip-falta-text)", border: "2px solid #EF4444" }
                         : { background: "var(--chip-falta-bg)", color: "var(--chip-falta-text)", border: "2px solid transparent" }
                       }
                     >
                       <span
-                        className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+                        className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-colors"
                         style={{ background: justType === "cancelar" ? "#EF4444" : "rgba(239,68,68,0.15)" }}
                       >
-                        <X size={16} color={justType === "cancelar" ? "white" : "var(--chip-falta-text)"} strokeWidth={2} />
+                        <X className="w-3.5 h-3.5 md:w-4 md:h-4" color={justType === "cancelar" ? "white" : "var(--chip-falta-text)"} strokeWidth={2} />
                       </span>
-                      Cancelar (Abonar)
+                      Cancelar
                     </button>
                   </div>
                 </div>
 
                 {/* Motivo */}
                 <div>
-                  <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] mb-2" style={{ color: "var(--text-muted)" }}>
+                  <p className="text-[9px] md:text-[10px] font-extrabold uppercase tracking-[0.12em] mb-1.5 md:mb-2" style={{ color: "var(--text-muted)" }}>
                     Motivo
                   </p>
                   <textarea
                     value={justData.notes}
                     onChange={e => setJustData({ ...justData, notes: e.target.value })}
                     placeholder="Ex: Férias, doença, viagem..."
-                    className="w-full px-4 py-3 rounded-[14px] resize-none text-[13px] font-medium h-24 focus:outline-none"
+                    className="w-full px-3 md:px-4 py-2.5 md:py-3 rounded-[12px] md:rounded-[14px] resize-none text-[12px] md:text-[13px] font-medium h-16 md:h-24 focus:outline-none"
                     style={{
                       background: "var(--surface-alt)",
                       border: "1px solid var(--btn-action-neutral-border)",
@@ -514,9 +522,9 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
 
                 {/* Nova Data/Horário — só aparece se Reagendar */}
                 {justType === "reagendar" && (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2 md:gap-3">
                     <div>
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] mb-2" style={{ color: "var(--text-muted)" }}>
+                      <p className="text-[9px] md:text-[10px] font-extrabold uppercase tracking-[0.12em] mb-1.5 md:mb-2" style={{ color: "var(--text-muted)" }}>
                         Nova Data
                       </p>
                       <input
@@ -524,7 +532,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
                         min={new Date().toISOString().split("T")[0]}
                         value={justData.date || ""}
                         onChange={e => setJustData({ ...justData, date: e.target.value })}
-                        className="w-full px-3 py-2.5 rounded-[12px] text-[13px] font-medium focus:outline-none"
+                        className="w-full px-2 md:px-3 py-2 md:py-2.5 rounded-[10px] md:rounded-[12px] text-[12px] md:text-[13px] font-medium focus:outline-none"
                         style={{
                           background: "var(--surface-alt)",
                           border: "1px solid var(--btn-action-neutral-border)",
@@ -533,13 +541,13 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
                       />
                     </div>
                     <div>
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] mb-2" style={{ color: "var(--text-muted)" }}>
+                      <p className="text-[9px] md:text-[10px] font-extrabold uppercase tracking-[0.12em] mb-1.5 md:mb-2" style={{ color: "var(--text-muted)" }}>
                         Horário
                       </p>
                       <select
                         value={justData.time || ""}
                         onChange={e => setJustData({ ...justData, time: e.target.value })}
-                        className="w-full px-3 py-2.5 rounded-[12px] text-[13px] font-medium focus:outline-none"
+                        className="w-full px-2 md:px-3 py-2 md:py-2.5 rounded-[10px] md:rounded-[12px] text-[12px] md:text-[13px] font-medium focus:outline-none"
                         style={{
                           background: "var(--surface-alt)",
                           border: "1px solid var(--btn-action-neutral-border)",
@@ -556,13 +564,13 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
                 )}
 
                 {/* Confirmar */}
-                <div className="pt-2">
+                <div className="pt-1 md:pt-2">
                   <button
                     onClick={saveJustificada}
-                    className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-[14px] text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
+                    className="flex items-center justify-center gap-2 w-full py-2.5 md:py-3 px-4 rounded-[12px] md:rounded-[14px] text-[12px] md:text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
                     style={{ background: "var(--sage)" }}
                   >
-                    <Check size={15} strokeWidth={2} />
+                    <Check className="w-3.5 h-3.5 md:w-4 md:h-4" strokeWidth={2} />
                     Confirmar
                   </button>
                 </div>
@@ -593,7 +601,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
 
               {/* Prontuário */}
               <button
-                onClick={() => { onClose(); navigate(`/patients/${patient?.id}`); }}
+                onClick={() => { triggerClose(); setTimeout(() => navigate(`/patients/${patient?.id}`), 200); }}
                 className="flex items-center justify-start gap-3 w-full py-3 px-4 rounded-[14px] font-semibold text-[13px]"
                 style={{
                   background: "var(--surface-alt)",
@@ -624,13 +632,19 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
 
             {/* Fechar */}
             <button
-              onClick={onClose}
+              onClick={triggerClose}
               className="w-full mt-3 py-2 text-[12px] font-medium text-center"
               style={{ color: "var(--text-muted)" }}
             >
               Fechar
             </button>
           </div>
+
+          {/* Fade Overlay (Fundo Falso) */}
+          <div 
+            className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none rounded-b-[24px]"
+            style={{ background: "linear-gradient(to top, var(--surface) 20%, transparent)" }}
+          />
         </div>
       </div>
 
@@ -663,12 +677,12 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
       )}
 
       {successMessage && (
-        <div className="fixed bottom-8 right-8 z-[100] animate-slide-up">
-          <div className="bg-[var(--sage)] text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-[var(--sage)]/50 backdrop-blur-sm">
-            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-              <Check size={18} className="text-white" />
+        <div className="fixed bottom-[80px] left-8 right-8 md:left-auto md:bottom-8 md:right-8 z-[100] animate-slide-up">
+          <div className="bg-[var(--sage)] text-white px-4 py-2.5 md:px-6 md:py-4 rounded-[14px] md:rounded-2xl shadow-2xl flex items-center gap-2.5 md:gap-3 border border-[var(--sage)]/50 backdrop-blur-sm mx-auto max-w-xs md:max-w-none">
+            <div className="w-6 h-6 md:w-8 md:h-8 shrink-0 bg-white/20 rounded-full flex items-center justify-center">
+              <Check className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" />
             </div>
-            <p className="text-sm font-bold tracking-tight">{successMessage}</p>
+            <p className="text-[12px] md:text-sm font-bold tracking-tight truncate">{successMessage}</p>
           </div>
         </div>
       )}
