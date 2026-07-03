@@ -60,12 +60,13 @@ export default function Sidebar() {
           className="flex items-center justify-center flex-shrink-0"
           style={{ width: ICON_ZONE }}
         >
-          <div className="w-[44px] h-[44px] rounded-xl bg-gradient-to-br from-[#5CBF9D] to-[#3D786A] flex items-center justify-center text-white flex-shrink-0">
-            <span className="font-brand text-[17px] leading-none tracking-tight">QF</span>
+          {/* Símbolo QF usando CSS e Fonte Nativa para máxima nitidez (Padrão SaaS Moderno) */}
+          <div className="w-[46px] h-[46px] rounded-xl bg-gradient-to-br from-[#5CBF9D] to-[#3D786A] shadow-sm flex items-center justify-center text-white flex-shrink-0 border border-white/10">
+            <span className="font-brand text-[26px] leading-none tracking-tight pt-1 pr-0.5">QF</span>
           </div>
         </div>
         <span
-          className={`font-brand text-xl text-[var(--text-primary)] whitespace-nowrap transition-all duration-300 ease-in-out ${
+          className={`font-brand text-[22px] text-[var(--text-primary)] whitespace-nowrap transition-all duration-300 ease-in-out ${
             collapsed
               ? "opacity-0 translate-x-[-8px] pointer-events-none"
               : "opacity-100 translate-x-0"
