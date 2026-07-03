@@ -12,9 +12,6 @@ export function PatientProfileWidget({ activePatients, monthPatientIds, genderDa
           </div>
           <p className="text-[11px] text-[var(--text-muted)] mt-1">{monthPatientIds.size} atendidos este mês</p>
         </div>
-        <div className="w-[42px] h-[42px] rounded-[12px] bg-[var(--purple-light)] flex items-center justify-center flex-shrink-0">
-          <Users size={18} className="text-[var(--purple)]" />
-        </div>
       </div>
 
       <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Gênero</p>
