@@ -93,13 +93,13 @@
     transition: color-scheme 300ms ease-in-out;
   }
 
-  /* Elementos que usam variáveis CSS de cor diretamente e precisam de transição */
+  /* Elementos que usam variáveis CSS de cor diretamente e precisam de transição suave de tema */
   .bg-\[var\(--surface\)\],
   .bg-\[var\(--surface-alt\)\],
   .bg-\[var\(--bg\)\],
   .bg-\[var\(--border\)\],
   .border-\[var\(--border\)\] {
-    transition: background-color 300ms ease-in-out, border-color 300ms ease-in-out;
+    transition: all 300ms ease-in-out;
   }
 
   /* Textos que usam vars de cor diretamente */

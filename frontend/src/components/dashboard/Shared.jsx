@@ -49,7 +49,7 @@ export function KpiCard({ icon, iconBg, iconColor, label, value, sub, trend, urg
   }
 
   return (
-    <div className={`bg-[var(--surface)] border rounded-[16px] p-4 flex flex-col gap-2 transition-all duration-200 hover:shadow-card-hover hover:-translate-y-[1px] ${urgent ? "border-[var(--peach)] bg-[var(--peach-light)]/10" : "border-[var(--border)]"}`}>
+    <div className="relative bg-[var(--surface)] border border-[var(--border)] rounded-[16px] p-4 flex flex-col gap-2 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-[2px] will-change-transform">
       <div className="flex items-center justify-between">
         <div className="w-[34px] h-[34px] rounded-[10px] flex items-center justify-center flex-shrink-0" style={{ background: iconBg, color: iconColor }}>
           {icon}
