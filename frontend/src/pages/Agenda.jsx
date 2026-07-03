@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { api } from "../lib/api";
 import AppointmentDetailModal from "../components/AppointmentDetailModal";
+import { toast } from "../components/Toast";
 import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import {
@@ -399,13 +400,13 @@ export default function Agenda() {
         payload.scheduledDate = formatDateKey(selectedDay);
       }
       await api.createAppointment(payload);
-      setSuccessMessage("Agendamento criado!");
+      toast("Agendamento criado com sucesso!", "success");
       setShowAddModal(false);
       setAddForm({ patientId: "", time: "08:00", duration: 50, recurring: true, maxSessions: 0 });
       await loadData();
     } catch (error) {
       console.error("Erro ao criar agendamento:", error);
-      setSuccessMessage("Erro ao criar agendamento");
+      toast(error.message || "Erro ao criar agendamento", "error");
     } finally {
       setSaving(false);
     }
@@ -616,14 +617,14 @@ export default function Agenda() {
           duration: agendaFormDuration
         });
       }
-      setSuccessMessage("Agendamento atualizado!");
+      toast("Agendamento atualizado com sucesso!", "success");
       setShowEditModal(false);
       setEditingApp(null);
       setEditMode(null);
       await loadData();
     } catch (error) {
       console.error("Erro ao editar:", error);
-      setSuccessMessage("Erro ao editar agendamento");
+      toast(error.message || "Erro ao editar agendamento", "error");
     } finally {
       setSaving(false);
     }
@@ -833,9 +834,10 @@ export default function Agenda() {
                           {daySessions.length} {daySessions.length === 1 ? "SESSÃO" : "SESSÕES"}
                         </span>
                         <button
+                          disabled={selectedDay && formatDateKey(selectedDay) < formatDateKey(new Date())}
                           onClick={() => setShowAddModal(true)}
-                          className="w-8 h-8 bg-brand-600 hover:bg-brand-700 text-white rounded-lg flex items-center justify-center transition-all shadow-sm shadow-brand-200"
-                          title="Adicionar agendamento"
+                          className="w-8 h-8 bg-brand-600 hover:bg-brand-700 text-white rounded-lg flex items-center justify-center transition-all shadow-sm shadow-brand-200 disabled:opacity-35 disabled:cursor-not-allowed"
+                          title={selectedDay && formatDateKey(selectedDay) >= formatDateKey(new Date()) ? "Adicionar agendamento" : "Não é possível agendar em datas retroativas"}
                         >
                           <Plus size={16} />
                         </button>

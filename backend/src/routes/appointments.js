@@ -5,6 +5,103 @@ import { authMiddleware } from "../middleware/auth.js";
 const router = Router();
 router.use(authMiddleware);
 
+// Utilitário para data de hoje à meia-noite local (fuso Brasil UTC-3) normalizada para UTC
+const getTodayUtcMidnight = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return new Date(`${year}-${month}-${day}T00:00:00Z`);
+};
+
+// Lógica de colisão centralizada para intervalo mínimo de 50 minutos (ou duração real)
+const checkConflictInternal = async ({
+  dayOfWeek,
+  time,
+  duration,
+  startDate,
+  scheduledDate,
+  excludeId,
+  psychologistId
+}) => {
+  if (!time || !duration) return { hasConflict: false, conflicts: [] };
+
+  const toMinutes = (timeStr) => {
+    const [h, m] = timeStr.split(':').map(Number);
+    return h * 60 + m;
+  };
+
+  const startMinutes = toMinutes(time);
+  const endMinutes = startMinutes + parseInt(duration);
+
+  // Buscar todos os agendamentos do profissional, exceto o editado
+  const existing = await prisma.appointment.findMany({
+    where: {
+      psychologistId,
+      id: excludeId ? { not: excludeId } : undefined
+    },
+    include: { patient: { select: { name: true } } }
+  });
+
+  const isNewAvulso = !!scheduledDate;
+  const dNewStart = startDate ? new Date(startDate.split('T')[0] + 'T00:00:00Z') : (scheduledDate ? new Date(scheduledDate.split('T')[0] + 'T00:00:00Z') : null);
+  const newDayOfWeek = parseInt(dayOfWeek);
+
+  const conflicts = existing.filter(app => {
+    // A. Sobreposição de minutos (janela de 50 minutos ou tempo real de duração)
+    const appStart = toMinutes(app.time);
+    const appEnd = appStart + app.duration;
+    
+    const timeOverlap = startMinutes < appEnd && appStart < endMinutes;
+    if (!timeOverlap) return false;
+
+    const isExistAvulso = !!app.scheduledDate;
+    const dExistStart = app.startDate ? new Date(app.startDate) : (app.scheduledDate ? new Date(app.scheduledDate) : null);
+    const dExistEnd = app.endDate ? new Date(app.endDate) : null;
+
+    // B. Ambos são avulsos
+    if (isNewAvulso && isExistAvulso) {
+      return scheduledDate.split('T')[0] === app.scheduledDate.toISOString().split('T')[0];
+    }
+
+    // C. Ambos são recorrentes
+    if (!isNewAvulso && !isExistAvulso) {
+      if (newDayOfWeek !== app.dayOfWeek) return false;
+      
+      const startColides = dNewStart <= (dExistEnd || new Date('9999-12-31'));
+      const endColides = dExistStart <= (dNewStart || new Date('9999-12-31'));
+      return startColides && endColides;
+    }
+
+    // D. Um recorrente e um avulso
+    const rec = !isNewAvulso ? { startDate: dNewStart, endDate: null, dayOfWeek: newDayOfWeek, skipDates: null } : app;
+    const av = isNewAvulso ? { scheduledDate: scheduledDate } : app;
+
+    const avDatePart = av.scheduledDate instanceof Date ? av.scheduledDate.toISOString().split('T')[0] : av.scheduledDate.split('T')[0];
+    const [y, mo, d] = avDatePart.split('-').map(Number);
+    const localAvDate = new Date(y, mo - 1, d);
+    const avDayOfWeek = localAvDate.getDay();
+
+    if (rec.dayOfWeek !== avDayOfWeek) return false;
+
+    const rStart = rec.startDate ? new Date(rec.startDate) : null;
+    const rEnd = rec.endDate ? new Date(rec.endDate) : null;
+    const avTime = new Date(avDatePart + 'T00:00:00Z');
+
+    if (rStart && avTime < rStart) return false;
+    if (rEnd && avTime > rEnd) return false;
+
+    if (rec.skipDates) {
+      const skips = Array.isArray(rec.skipDates) ? rec.skipDates : JSON.parse(JSON.stringify(rec.skipDates)) || [];
+      if (skips.includes(avDatePart)) return false;
+    }
+
+    return true;
+  });
+
+  return { hasConflict: conflicts.length > 0, conflicts };
+};
+
 // Listar todos os agendamentos do profissional (para a página Agenda do Sidebar)
 router.get("/", async (req, res) => {
   try {
@@ -76,39 +173,82 @@ router.delete("/patient/:patientId", async (req, res) => {
   }
 });
 
-// Salvar/Atualizar horários de um paciente (Lógica para 1x, 2x por semana etc)
+// Salvar/Atualizar horários de um paciente (Lógica para 1x, 2x por semana etc) em lote
 router.post("/batch", async (req, res) => {
-  const { patientId, slots } = req.body; // slots: [{ dayOfWeek, time, duration, startDate, maxSessions, scheduledDate, endDate, skipDates }]
+  const { patientId, slots } = req.body;
   
-  console.log("batch slots received:", JSON.stringify(slots, null, 2));
-
   if (!slots || !Array.isArray(slots) || slots.length === 0) {
     return res.status(400).json({ error: "Nenhum slot fornecido" });
   }
   
-  let missingDate = null;
+  // 1. Validar retroatividade e datas obrigatórias
+  const todayMidnight = getTodayUtcMidnight();
   for (let i = 0; i < slots.length; i++) {
     const slot = slots[i];
     if (!slot.startDate && !slot.scheduledDate) {
-      missingDate = i + 1;
-      break;
+      return res.status(400).json({ error: `Slot ${i + 1}: data de início não informada` });
     }
-  }
-  
-  if (missingDate) {
-    return res.status(400).json({ error: `Slot ${missingDate}: data de início não informada` });
+
+    const datePart = slot.startDate ? slot.startDate.split('T')[0] : null;
+    const start = datePart ? new Date(datePart + 'T00:00:00Z') : null;
+    const schedPart = slot.scheduledDate ? slot.scheduledDate.split('T')[0] : null;
+    const schedDate = schedPart ? new Date(schedPart + 'T00:00:00Z') : null;
+
+    if (start && start < todayMidnight) {
+      return res.status(400).json({ error: `Slot ${i + 1}: A data de início não pode ser anterior à data atual.` });
+    }
+    if (schedDate && schedDate < todayMidnight) {
+      return res.status(400).json({ error: `Slot ${i + 1}: A data do agendamento avulso não pode ser anterior à data atual.` });
+    }
   }
 
   try {
-    console.log("Criando slots...");
+    // 2. Verificar conflitos dos slots contra o banco (ignora o próprio paciente atual que está tendo sua agenda resetada)
+    for (let i = 0; i < slots.length; i++) {
+      const slot = slots[i];
+      const conflictCheck = await checkConflictInternal({
+        dayOfWeek: slot.dayOfWeek,
+        time: slot.time,
+        duration: slot.duration || 50,
+        startDate: slot.startDate ? slot.startDate.split('T')[0] : null,
+        scheduledDate: slot.scheduledDate ? slot.scheduledDate.split('T')[0] : null,
+        excludeId: null,
+        psychologistId: req.user.id
+      });
+
+      const externalConflicts = conflictCheck.conflicts.filter(c => c.patientId !== patientId);
+      if (externalConflicts.length > 0) {
+        const names = externalConflicts.map(c => c.patient?.name).join(", ");
+        return res.status(400).json({ error: `Slot ${i + 1}: Conflito de horário com o(s) paciente(s): ${names}` });
+      }
+
+      // 3. Verificar conflitos internos entre os próprios slots do lote
+      const toMinutes = (timeStr) => {
+        const [h, m] = timeStr.split(':').map(Number);
+        return h * 60 + m;
+      };
+      
+      const startMinutes = toMinutes(slot.time);
+      const endMinutes = startMinutes + (slot.duration || 50);
+
+      for (let j = i + 1; j < slots.length; j++) {
+        const other = slots[j];
+        if (slot.dayOfWeek === other.dayOfWeek) {
+          const otherStart = toMinutes(other.time);
+          const otherEnd = otherStart + (other.duration || 50);
+          if (startMinutes < otherEnd && otherStart < endMinutes) {
+            return res.status(400).json({ error: `Conflito de horários no lote entre as ${slot.time} e ${other.time}.` });
+          }
+        }
+      }
+    }
     
-    // 1. Remover horários antigos do paciente para este profissional
-    const deleted = await prisma.appointment.deleteMany({
+    // Remover horários antigos do paciente para este profissional
+    await prisma.appointment.deleteMany({
       where: { patientId, psychologistId: req.user.id }
     });
-    console.log("Removed:", deleted.count, "old appointments");
 
-    // 2. Criar novos horários (cada um com sua própria data de início)
+    // Criar novos horários
     const newAppointments = [];
     for (const slot of slots) {
       const datePart = slot.startDate ? slot.startDate.split('T')[0] : null;
@@ -122,7 +262,7 @@ router.post("/batch", async (req, res) => {
         data: {
           dayOfWeek: slot.dayOfWeek,
           time: slot.time,
-          duration: slot.duration,
+          duration: slot.duration || 50,
           startDate: start,
           maxSessions: slot.maxSessions ?? null,
           scheduledDate: schedDate,
@@ -135,58 +275,45 @@ router.post("/batch", async (req, res) => {
       newAppointments.push(created);
     }
 
-    console.log("Created appointments:", newAppointments.length);
     res.status(201).json(newAppointments);
   } catch (error) {
-    console.error("Error saving appointments:", error);
+    console.error("Error saving appointments batch:", error);
     res.status(500).json({ error: "Erro ao salvar horários: " + error.message });
   }
 });
 
 // Verificar conflitos (para feedback em tempo real no frontend)
 router.post("/check-conflict", async (req, res) => {
-  const { dayOfWeek, time, duration, excludePatientId } = req.body;
+  const { dayOfWeek, time, duration, startDate, scheduledDate, excludePatientId } = req.body;
 
   if (!time || !duration) {
     return res.json({ hasConflict: false, conflicts: [] });
   }
 
   try {
-    // 1. Buscar todos os agendamentos do mesmo dia da semana
-    const existingAppointments = await prisma.appointment.findMany({
-      where: {
-        psychologistId: req.user.id,
-        dayOfWeek: parseInt(dayOfWeek),
-        patientId: { not: excludePatientId },
-      },
-      include: { patient: { select: { name: true } } }
+    const result = await checkConflictInternal({
+      dayOfWeek,
+      time,
+      duration,
+      startDate,
+      scheduledDate,
+      excludeId: null,
+      psychologistId: req.user.id
     });
 
-    // 2. Converter horários para minutos para facilitar a comparação
-    const toMinutes = (timeStr) => {
-      const [h, m] = timeStr.split(':').map(Number);
-      return h * 60 + m;
-    };
+    let finalConflicts = result.conflicts;
+    if (excludePatientId) {
+      finalConflicts = finalConflicts.filter(c => c.patientId !== excludePatientId);
+    }
 
-    const newStart = toMinutes(time);
-    const newEnd = newStart + parseInt(duration);
-
-    // 3. Filtrar os que sobrepõem
-    // Overlap: (start1 < end2) && (start2 < end1)
-    const conflicts = existingAppointments.filter(app => {
-      const appStart = toMinutes(app.time);
-      const appEnd = appStart + app.duration;
-      return newStart < appEnd && appStart < newEnd;
-    });
-
-    res.json({ hasConflict: conflicts.length > 0, conflicts });
+    res.json({ hasConflict: finalConflicts.length > 0, conflicts: finalConflicts });
   } catch (error) {
     console.error("Erro ao verificar conflitos:", error);
     res.status(500).json({ error: "Erro ao verificar conflito" });
   }
 });
 
-// Criar um agendamento avulso (com scheduledDate)
+// Criar um agendamento individual
 router.post("/", async (req, res) => {
   const { patientId, dayOfWeek, time, duration, startDate, maxSessions, scheduledDate, endDate, skipDates } = req.body;
 
@@ -197,6 +324,31 @@ router.post("/", async (req, res) => {
     const start = startPart ? new Date(startPart + 'T00:00:00Z') : schedDate;
     const endPart = endDate ? endDate.split('T')[0] : null;
     const end = endPart ? new Date(endPart + 'T00:00:00Z') : null;
+
+    // 1. Validar retroatividade
+    const todayMidnight = getTodayUtcMidnight();
+    if (start && start < todayMidnight) {
+      return res.status(400).json({ error: "A data de início do agendamento não pode ser anterior à data atual." });
+    }
+    if (schedDate && schedDate < todayMidnight) {
+      return res.status(400).json({ error: "A data do agendamento avulso não pode ser anterior à data atual." });
+    }
+
+    // 2. Validar conflitos de horários
+    const conflictCheck = await checkConflictInternal({
+      dayOfWeek,
+      time,
+      duration,
+      startDate: startPart,
+      scheduledDate: schedPart,
+      excludeId: null,
+      psychologistId: req.user.id
+    });
+
+    if (conflictCheck.hasConflict) {
+      const names = conflictCheck.conflicts.map(c => c.patient?.name).join(", ");
+      return res.status(400).json({ error: `Conflito de horário detectado com o(s) paciente(s): ${names}` });
+    }
 
     const created = await prisma.appointment.create({
       data: {
@@ -250,6 +402,37 @@ router.put("/:id", async (req, res) => {
     const schedDate = schedPart ? new Date(schedPart + 'T00:00:00Z') : undefined;
     const endPart = endDate ? endDate.split('T')[0] : null;
     const end = endPart ? new Date(endPart + 'T00:00:00Z') : undefined;
+
+    // 1. Validar retroatividade
+    const todayMidnight = getTodayUtcMidnight();
+    if (start && start < todayMidnight) {
+      return res.status(400).json({ error: "A data de início do agendamento não pode ser anterior à data atual." });
+    }
+    if (schedDate && schedDate < todayMidnight) {
+      return res.status(400).json({ error: "A data do agendamento avulso não pode ser anterior à data atual." });
+    }
+
+    // 2. Validar conflitos de horários
+    const finalDayOfWeek = dayOfWeek !== undefined ? dayOfWeek : existing.dayOfWeek;
+    const finalTime = time !== undefined ? time : existing.time;
+    const finalDuration = duration !== undefined ? duration : existing.duration;
+    const finalStartDate = startPart !== null ? startPart : (existing.startDate ? existing.startDate.toISOString().split('T')[0] : null);
+    const finalScheduledDate = schedPart !== null ? schedPart : (existing.scheduledDate ? existing.scheduledDate.toISOString().split('T')[0] : null);
+
+    const conflictCheck = await checkConflictInternal({
+      dayOfWeek: finalDayOfWeek,
+      time: finalTime,
+      duration: finalDuration,
+      startDate: finalStartDate,
+      scheduledDate: finalScheduledDate,
+      excludeId: id,
+      psychologistId: req.user.id
+    });
+
+    if (conflictCheck.hasConflict) {
+      const names = conflictCheck.conflicts.map(c => c.patient?.name).join(", ");
+      return res.status(400).json({ error: `Conflito de horário detectado com o(s) paciente(s): ${names}` });
+    }
 
     const updated = await prisma.appointment.update({
       where: { id },
