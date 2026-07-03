@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { api } from "../lib/api";
+import { toast } from "../components/Toast";
 import { formatCPF, formatPhone, formatCEP } from "../lib/utils";
 import { useAuth } from "../context/AuthContext";
 import { generatePremiumSummary } from "../lib/pdf";
@@ -375,6 +376,7 @@ export default function PatientRecord() {
   const [agendaFormMaxSessions, setAgendaFormMaxSessions] = useState(0);
   const [editingAppointment, setEditingAppointment] = useState(null);
   const [showEditChoice, setShowEditChoice] = useState(false);
+  const [showDeleteChoice, setShowDeleteChoice] = useState(false);
   const [editChoiceDate, setEditChoiceDate] = useState(null);
   const [editMode, setEditMode] = useState(null); // "single" | "future"
 
@@ -448,23 +450,85 @@ export default function PatientRecord() {
     }
   };
 
-  const handleRemoveSlot = async (slotId, date) => {
-    if (!window.confirm("Tem certeza que deseja excluir este horário?")) return;
+  const executeDirectDelete = async (slotId) => {
+    if (!window.confirm("Tem certeza que deseja excluir este agendamento avulso?")) return;
     setSavingAgenda(true);
     try {
-      const app = appointments.find(a => a.id === slotId);
-      if (app && !app.scheduledDate && date) {
-        const dateStr = format(date, "yyyy-MM-dd");
-        const skipDates = [...(app.skipDates || []), dateStr];
-        await api.updateAppointment(slotId, { skipDates });
-      } else {
-        await api.deleteAppointment(slotId);
-      }
+      await api.deleteAppointment(slotId);
+      toast("Agendamento avulso removido!", "success");
       await loadPatientAppointments(showAllAppointments);
     } catch (error) {
-      alert("Erro ao remover: " + error.message);
+      toast(error.message || "Erro ao remover agendamento", "error");
     } finally {
       setSavingAgenda(false);
+    }
+  };
+
+  const handleDeleteSingleDate = async () => {
+    if (!editingAppointment || !agendaFormDate) return;
+    setSavingAgenda(true);
+    try {
+      const dateStr = format(agendaFormDate, "yyyy-MM-dd");
+      const skipDates = [...(editingAppointment.skipDates || []), dateStr];
+      await api.updateAppointment(editingAppointment.id, { skipDates });
+      toast("Esta data foi desmarcada!", "success");
+      setShowDeleteChoice(false);
+      setEditingAppointment(null);
+      await loadPatientAppointments(showAllAppointments);
+    } catch (error) {
+      console.error("Erro ao desmarcar data:", error);
+      toast(error.message || "Erro ao desmarcar data", "error");
+    } finally {
+      setSavingAgenda(false);
+    }
+  };
+
+  const handleDeleteSeries = async () => {
+    if (!editingAppointment) return;
+    if (!window.confirm(`Tem certeza que deseja excluir toda a série recorrente deste dia da semana?`)) return;
+    setSavingAgenda(true);
+    try {
+      await api.deleteAppointment(editingAppointment.id);
+      toast("Série recorrente excluída!", "success");
+      setShowDeleteChoice(false);
+      setEditingAppointment(null);
+      await loadPatientAppointments(showAllAppointments);
+    } catch (error) {
+      console.error("Erro ao excluir série:", error);
+      toast(error.message || "Erro ao excluir série", "error");
+    } finally {
+      setSavingAgenda(false);
+    }
+  };
+
+  const handleDeleteAllInTime = async () => {
+    if (!editingAppointment) return;
+    if (!window.confirm(`Tem certeza que deseja excluir TODOS os agendamentos deste paciente às ${editingAppointment.time}? (Exclusão em lote por horário).`)) return;
+    setSavingAgenda(true);
+    try {
+      await api.deletePatientAppointmentsByTime(id, editingAppointment.time);
+      toast(`Agendamentos das ${editingAppointment.time} excluídos em lote!`, "success");
+      setShowDeleteChoice(false);
+      setEditingAppointment(null);
+      await loadPatientAppointments(showAllAppointments);
+    } catch (error) {
+      console.error("Erro ao excluir em lote:", error);
+      toast(error.message || "Erro ao excluir em lote", "error");
+    } finally {
+      setSavingAgenda(false);
+    }
+  };
+
+  const handleRemoveSlot = async (slotId, date) => {
+    const app = appointments.find(a => a.id === slotId);
+    if (!app) return;
+
+    if (app.scheduledDate) {
+      await executeDirectDelete(slotId);
+    } else {
+      setEditingAppointment(app);
+      setAgendaFormDate(date);
+      setShowDeleteChoice(true);
     }
   };
 
@@ -1932,6 +1996,48 @@ export default function PatientRecord() {
                               onClick={() => { setShowEditChoice(false); setEditingAppointment(null); }}
                               className="w-full mt-3 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest"
                             >
+                              Cancelar
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {showDeleteChoice && editingAppointment && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm" onClick={() => { setShowDeleteChoice(false); setEditingAppointment(null); }}>
+                          <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
+                            <div className="text-center mb-6">
+                              <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-4 text-red-500">
+                                <Trash2 size={22} />
+                              </div>
+                              <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Excluir Agendamento</h3>
+                              <p className="text-sm font-bold text-slate-500 mt-1">
+                                {editingAppointment.time} &bull; {editingAppointment.duration}min
+                              </p>
+                              <p className="text-xs text-slate-400 mt-2 font-medium">
+                                Este horário se repete semanalmente. Como deseja excluir?
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              <button 
+                                onClick={handleDeleteSingleDate} 
+                                className="w-full py-3 px-4 bg-slate-100 text-slate-700 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                              >
+                                Apenas esta data
+                              </button>
+                              <button 
+                                onClick={handleDeleteSeries} 
+                                className="w-full py-3 px-4 bg-red-50 text-red-600 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-red-100 transition-all"
+                              >
+                                Toda a série recorrente
+                              </button>
+                              <button 
+                                onClick={handleDeleteAllInTime} 
+                                className="w-full py-3 px-4 bg-red-500 text-white rounded-xl text-sm font-black uppercase tracking-widest hover:bg-red-600 shadow-lg shadow-red-200 transition-all"
+                              >
+                                Todos os dias neste horário
+                              </button>
+                            </div>
+                            <button onClick={() => { setShowDeleteChoice(false); setEditingAppointment(null); }} className="w-full mt-4 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest">
                               Cancelar
                             </button>
                           </div>
