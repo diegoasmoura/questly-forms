@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
 import { X, Upload, Trash2 } from "lucide-react";
@@ -85,15 +86,15 @@ export default function AvatarPickerModal({ onClose }) {
 
   const { initials, color: avatarColor } = getAvatarProps(user?.name);
 
-  return (
-    <div className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 animate-fade-in">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center z-[60] p-4 animate-fade-in">
       {/* Invisible backdrop for closing on click outside (optional, if you want click outside) */}
       <div className="absolute inset-0" onClick={onClose} />
       
       <div className="relative bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-card-hover w-full max-w-[420px] max-h-[90vh] overflow-y-auto p-6 flex flex-col gap-6" onClick={e => e.stopPropagation()}>
         
         <div className="flex items-center justify-between">
-          <h2 className="text-[18px] font-extrabold text-[var(--text-primary)]">Seu Avatar</h2>
+          <h2 className="text-[18px] font-bold text-[var(--text-primary)]">Seu Avatar</h2>
           <button onClick={onClose} className="p-2 rounded-[12px] hover:bg-[var(--surface-alt)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
             <X size={20} />
           </button>
@@ -186,6 +187,7 @@ export default function AvatarPickerModal({ onClose }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
