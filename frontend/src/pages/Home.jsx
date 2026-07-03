@@ -68,32 +68,20 @@ export default function Home() {
         <span className="absolute w-[70px] h-[70px] rounded-full bg-[var(--purple-light)] opacity-50 blur-[2px] top-[8px] -right-[8px] pointer-events-none" />
 
         <div className="relative z-[1] flex-1 min-w-0">
-          <h1 className="text-[30px] leading-tight m-0 text-[var(--text-primary)] font-heading font-normal tracking-tight flex items-baseline">
-            <span className="font-brand">{getGreeting()},</span>{" "}
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] mb-1.5" style={{ color: "var(--sage)" }}>
+            {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+          </p>
+          <h1 className="leading-tight m-0 text-[var(--text-primary)] tracking-tight flex items-baseline">
+            <span className="font-handwritten font-normal text-[36px]">{getGreeting()},</span>{" "}
             <span className="relative inline-block ml-2">
-              <span className="font-handwritten font-normal text-[36px] text-[var(--dark-green)] dark:text-[#5CBF9D] transition-colors duration-300">
+              <span className="font-handwritten font-normal text-[38px] text-[var(--dark-green)] dark:text-[#5CBF9D] transition-colors duration-300">
                 {user?.name?.split(" ")[0] || "Usuário"}
               </span>
-              <svg className="absolute left-[1px] -bottom-[8px] w-[calc(100%-2px)] h-[10px] overflow-visible text-[var(--dark-green)] dark:text-[#5CBF9D] transition-colors duration-300" viewBox="0 0 60 10" preserveAspectRatio="none">
-                <path d="M0,5 Q30,0 60,8" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="opacity-40 transition-colors duration-300" />
-                <path d="M2,9 Q30,4 58,10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="opacity-20 transition-colors duration-300" />
+              <svg className="absolute left-0 -bottom-[2px] w-full h-[6px] overflow-visible text-[var(--sage)] opacity-80" viewBox="0 0 100 12" preserveAspectRatio="none">
+                <path d="M0,6 C15,-4 30,16 50,6 C70,-4 85,16 100,6" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
               </svg>
             </span>
           </h1>
-          <div className="flex items-center gap-2 mt-3">
-            {totalResponses > 0 && (
-              <span className="inline-flex items-center gap-[6px] text-[12px] font-bold px-[12px] py-[5px] rounded-[999px] bg-[var(--sage-light)] text-[var(--dark-green)] dark:text-[#5CBF9D]">
-                <MessageCircle size={13} />
-                {totalResponses} novas respostas
-              </span>
-            )}
-            {aReceberCount > 0 && (
-              <span className="inline-flex items-center gap-[6px] text-[12px] font-bold px-[12px] py-[5px] rounded-[999px] bg-[var(--blue-light)] text-[var(--blue)]">
-                <AlertCircle size={13} />
-                {aReceberCount} sessões a cobrar
-              </span>
-            )}
-          </div>
         </div>
 
         <div className="relative z-[1] flex items-center gap-2.5 pt-[4px] flex-shrink-0">
