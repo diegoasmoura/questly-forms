@@ -261,16 +261,11 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
   const phone = patient?.phone?.replace(/\D/g, "") || "";
   const initials = (patient?.name || "?").split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
 
-  const statusColors = {
-    presente: "bg-[var(--sage-light)] text-[var(--dark-green)] dark:text-[#5CBF9D]",
-    falta: "bg-[var(--peach-light)] text-[var(--peach)]",
-    justificada: "bg-[var(--purple-light)] text-[var(--purple)]",
-  };
-
-  const statusBadgeColors = {
-    presente: "bg-[var(--sage-light)] text-[var(--dark-green)] dark:text-[#5CBF9D]",
-    falta: "bg-[var(--peach-light)] text-[var(--peach)]",
-    justificada: "bg-[var(--purple-light)] text-[var(--purple)]",
+  // Usando variáveis CSS dinâmicas do Design System para evitar piscadas no dark mode
+  const statusAvatarStyle = {
+    presente:    { bg: "var(--status-presente-bg)",    color: "var(--status-presente-text)" },
+    falta:       { bg: "var(--status-falta-bg)",       color: "var(--status-falta-text)" },
+    justificada: { bg: "var(--status-justificada-bg)", color: "var(--status-justificada-text)" },
   };
 
   const statusLabels = {
@@ -280,116 +275,160 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
   };
 
   const currentStatus = existingAtt?.status;
+  const avatarStyle = statusAvatarStyle[currentStatus] || { bg: "var(--surface-alt)", color: "var(--text-muted)" };
 
   const whatsappText = `Olá ${patient?.name?.split(" ")[0] || ""}, lembrete da sua consulta no dia ${sessionDate ? format(sessionDate, "dd/MM") : ""} às ${appointment.time}.`;
 
   return createPortal(
     <>
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={onClose}>
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-lg shrink-0 ${statusColors[currentStatus] || "bg-[var(--surface-alt)] text-[var(--text-secondary)]"}`}>
-                {initials}
+      {/* ── Modal Principal ── */}
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center z-[60]" onClick={onClose}>
+        <div
+          className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] w-full max-w-sm mx-4 shadow-2xl animate-scale-in overflow-hidden"
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Header colorido com gradiente baseado no status */}
+          <div
+            className="p-6 pb-5"
+            style={{ background: `linear-gradient(135deg, ${avatarStyle.bg} 0%, var(--surface) 100%)` }}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-4">
+                {/* Avatar */}
+                <div
+                  className="w-14 h-14 rounded-[16px] flex items-center justify-center text-[18px] font-extrabold shrink-0 shadow-sm"
+                  style={{ backgroundColor: avatarStyle.bg, color: avatarStyle.color }}
+                >
+                  {initials}
+                </div>
+                <div>
+                  <h2 className="text-[18px] font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "'Nunito Sans', sans-serif" }}>
+                    {patient?.name || "Paciente"}
+                  </h2>
+                  {/* Badge de status */}
+                  <span
+                    className="inline-block px-[10px] py-[3px] rounded-[999px] text-[10px] font-extrabold uppercase tracking-widest mt-1"
+                    style={{ backgroundColor: avatarStyle.bg, color: avatarStyle.color }}
+                  >
+                    {statusLabels[currentStatus] || "Agendado"}
+                  </span>
+                </div>
               </div>
-              <div>
-                <h2 className="text-lg font-bold text-[var(--text-primary)] font-heading leading-tight">{patient?.name || "Paciente"}</h2>
-                <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest mt-1 ${statusBadgeColors[currentStatus] || "bg-[var(--surface-alt)] text-[var(--text-muted)]"}`}>
-                  {statusLabels[currentStatus] || "Agendado"}
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-[10px] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] shrink-0"
+                style={{ transition: "all 150ms ease" }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+          </div>
+
+          <div className="px-6 pb-6">
+            {/* Info da sessão */}
+            <div className="flex items-center gap-2.5 p-3.5 bg-[var(--surface-alt)] border border-[var(--border)] rounded-[14px] mb-5">
+              <Clock size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+              <span className="text-[13px] font-semibold" style={{ color: "var(--text-secondary)" }}>
+                {sessionDate ? format(sessionDate, "dd/MM/yyyy", { locale: ptBR }) : ""} às {appointment.time}
+                <span className="ml-1.5 px-1.5 py-0.5 rounded-[6px] text-[11px] font-bold" style={{ backgroundColor: "var(--surface)", color: "var(--text-muted)" }}>
+                  {appointment.duration} min
                 </span>
-              </div>
-            </div>
-            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[var(--surface-alt)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all shrink-0">
-              <X size={18} />
-            </button>
-          </div>
-
-          <div className="space-y-3 mb-6 p-4 bg-[var(--surface-alt)] border border-[var(--border)] rounded-2xl">
-            <div className="flex items-center gap-3">
-              <Clock size={15} className="text-[var(--text-muted)] shrink-0" />
-              <span className="text-sm font-semibold text-[var(--text-secondary)]">
-                {sessionDate ? format(sessionDate, "dd/MM/yyyy", { locale: ptBR }) : ""} às {appointment.time} ({appointment.duration} min)
               </span>
             </div>
-            {patient?.phone && (
-              <div className="flex items-center gap-3">
-                <Phone size={15} className="text-[var(--text-muted)] shrink-0" />
-                <span className="text-sm font-semibold text-[var(--text-secondary)]">{formatPhone(patient.phone)}</span>
-              </div>
-            )}
-          </div>
 
-          <div className="space-y-2">
-            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-2">Status do Atendimento</p>
-            <button
-              onClick={() => handleQuickStatus(appointment, "presente", sessionDate)}
-              className={`w-full py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${
-                currentStatus === "presente"
-                  ? "bg-[var(--sage)] text-white border-[var(--sage)] shadow-sm"
-                  : "bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border)] hover:border-[var(--sage)] hover:text-[var(--dark-green)] dark:hover:text-[#5CBF9D]"
-              }`}
-            >
-              <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${currentStatus === "presente" ? "border-white" : "border-[var(--border)]"}`}>
-                {currentStatus === "presente" && <Check size={12} />}
-              </span>
-              Presença
-            </button>
-            <button
-              onClick={() => handleQuickStatus(appointment, "falta", sessionDate)}
-              className={`w-full py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${
-                currentStatus === "falta"
-                  ? "bg-[var(--peach)] text-white border-[var(--peach)] shadow-sm"
-                  : "bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border)] hover:border-[var(--peach)] hover:text-[var(--peach)]"
-              }`}
-            >
-              <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${currentStatus === "falta" ? "border-white" : "border-[var(--border)]"}`}>
-                {currentStatus === "falta" && <X size={12} />}
-              </span>
-              Falta
-            </button>
-            <button
-              onClick={() => handleQuickStatus(appointment, "justificada", sessionDate)}
-              className={`w-full py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${
-                currentStatus === "justificada"
-                  ? "bg-[var(--purple)] text-white border-[var(--purple)] shadow-sm"
-                  : "bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border)] hover:border-[var(--purple)] hover:text-[var(--purple)]"
-              }`}
-            >
-              <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${currentStatus === "justificada" ? "border-white" : "border-[var(--border)]"}`}>
-                {currentStatus === "justificada" && <AlertCircle size={12} />}
-              </span>
-              Justificado
-            </button>
-          </div>
+            {/* Seção Status */}
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] mb-2.5" style={{ color: "var(--text-muted)" }}>Status do Atendimento</p>
+            <div className="space-y-2 mb-5">
+              {/* Presença */}
+              <button
+                onClick={() => handleQuickStatus(appointment, "presente", sessionDate)}
+                className="w-full py-[11px] px-4 rounded-[12px] text-[12px] font-bold flex items-center gap-3"
+                style={currentStatus === "presente"
+                  ? { background: "var(--sage)", color: "white", border: "2px solid var(--sage)" }
+                  : { background: "var(--surface)", color: "var(--text-secondary)", border: "2px solid var(--border)" }
+                }
+              >
+                <span className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0" style={{ borderColor: currentStatus === "presente" ? "white" : "var(--border)" }}>
+                  {currentStatus === "presente" && <Check size={11} />}
+                </span>
+                Presença
+              </button>
 
-          <div className="mt-5 pt-5 border-t border-[var(--border)] space-y-2">
-            <a
-              href={`https://wa.me/55${phone}?text=${encodeURIComponent(whatsappText)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-[var(--blue-light)] text-[var(--blue)] rounded-xl hover:opacity-90 transition-all text-xs font-bold uppercase tracking-widest border border-[var(--blue)]/20"
-            >
-              <MessageCircle size={15} />
-              Lembrete WhatsApp
-            </a>
+              {/* Falta */}
+              <button
+                onClick={() => handleQuickStatus(appointment, "falta", sessionDate)}
+                className="w-full py-[11px] px-4 rounded-[12px] text-[12px] font-bold flex items-center gap-3"
+                style={currentStatus === "falta"
+                  ? { background: "var(--peach)", color: "white", border: "2px solid var(--peach)" }
+                  : { background: "var(--surface)", color: "var(--text-secondary)", border: "2px solid var(--border)" }
+                }
+              >
+                <span className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0" style={{ borderColor: currentStatus === "falta" ? "white" : "var(--border)" }}>
+                  {currentStatus === "falta" && <X size={11} />}
+                </span>
+                Falta
+              </button>
+
+              {/* Justificado */}
+              <button
+                onClick={() => handleQuickStatus(appointment, "justificada", sessionDate)}
+                className="w-full py-[11px] px-4 rounded-[12px] text-[12px] font-bold flex items-center gap-3"
+                style={currentStatus === "justificada"
+                  ? { background: "var(--purple)", color: "white", border: "2px solid var(--purple)" }
+                  : { background: "var(--surface)", color: "var(--text-secondary)", border: "2px solid var(--border)" }
+                }
+              >
+                <span className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0" style={{ borderColor: currentStatus === "justificada" ? "white" : "var(--border)" }}>
+                  {currentStatus === "justificada" && <AlertCircle size={11} />}
+                </span>
+                Justificado
+              </button>
+            </div>
+
+            {/* Ações */}
+            <div className="pt-4 border-t space-y-2" style={{ borderColor: "var(--border)" }}>
+              {/* WhatsApp */}
+              <a
+                href={`https://wa.me/55${phone}?text=${encodeURIComponent(whatsappText)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-[11px] px-4 rounded-[12px] text-[12px] font-bold"
+                style={{ background: "var(--blue-light)", color: "var(--status-confirmado-text)", border: "1px solid var(--status-confirmado-bg)" }}
+              >
+                <MessageCircle size={14} />
+                Lembrete WhatsApp
+              </a>
+
+              {/* Prontuário */}
+              <button
+                onClick={() => { onClose(); navigate(`/patients/${patient?.id}`); }}
+                className="flex items-center justify-center gap-2 w-full py-[11px] px-4 rounded-[12px] text-[12px] font-bold"
+                style={{ background: "var(--surface-alt)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+              >
+                <ExternalLink size={14} />
+                Ir para Prontuário
+              </button>
+
+              {/* Excluir */}
+              <button
+                onClick={handleDeleteAppointment}
+                className="flex items-center justify-center gap-2 w-full py-[11px] px-4 rounded-[12px] text-[12px] font-bold"
+                style={{ background: "rgba(239,68,68,0.08)", color: "#EF4444", border: "1px solid rgba(239,68,68,0.2)" }}
+              >
+                <Trash2 size={14} />
+                Excluir Agendamento
+              </button>
+            </div>
+
+            {/* Fechar */}
             <button
-              onClick={() => { onClose(); navigate(`/patients/${patient?.id}`); }}
-              className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-[var(--surface-alt)] text-[var(--text-primary)] rounded-xl hover:bg-[var(--border)] transition-all text-xs font-bold uppercase tracking-widest border border-[var(--border)]"
+              onClick={onClose}
+              className="w-full mt-4 py-2.5 text-[11px] font-bold uppercase tracking-wider"
+              style={{ color: "var(--text-muted)" }}
             >
-              <ExternalLink size={15} />
-              Ir para Prontuário
-            </button>
-            <button
-              onClick={handleDeleteAppointment}
-              className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-red-500/10 text-red-500 dark:text-red-400 rounded-xl hover:bg-red-500/20 transition-all text-xs font-bold uppercase tracking-widest border border-red-500/20"
-            >
-              <Trash2 size={15} />
-              Excluir Agendamento
+              Fechar
             </button>
           </div>
-          <button onClick={onClose} className="w-full mt-5 py-3 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors uppercase tracking-widest">
-            Fechar
-          </button>
         </div>
       </div>
 

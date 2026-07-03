@@ -21,6 +21,16 @@
   --purple-light: #F0ECFF;
   --note-bg: #FFF6DE;
   --note-text: #7A5F1E;
+
+  /* Cores de Status (Badges) - Modo Claro */
+  --status-presente-bg: #E4F5EE;
+  --status-presente-text: #3D786A;
+  --status-falta-bg: #FEEEE1;
+  --status-falta-text: #C97840;
+  --status-justificada-bg: #F0ECFF;
+  --status-justificada-text: #5B21B6;
+  --status-confirmado-bg: #E7F0FF;
+  --status-confirmado-text: #1D4ED8;
 }
 
 .dark {
@@ -37,11 +47,51 @@
   --purple-light: #1E1A30;
   --note-bg: #2A2210;
   --note-text: #E8D49C;
+
+  /* Cores de Status (Badges) - Modo Escuro */
+  --status-presente-bg: #1A3028;
+  --status-presente-text: #5CBF9D;
+  --status-falta-bg: #2E2018;
+  --status-falta-text: #F8A26B;
+  --status-justificada-bg: #1E1A30;
+  --status-justificada-text: #A78BFA;
+  --status-confirmado-bg: #152030;
+  --status-confirmado-text: #60A5FA;
 }
 
 @layer base {
-  *, *::before, *::after {
-    @apply transition-colors duration-300 ease-in-out;
+  /* Abordagem correta: apenas os elementos root recebem a transição. 
+     Elementos filhos que herdam cor não precisam de transição própria — herdam automaticamente.
+     Isso elimina o double-transition flicker. */
+  html {
+    transition: color-scheme 300ms ease-in-out;
+  }
+
+  /* Elementos que usam variáveis CSS de cor diretamente e precisam de transição */
+  .bg-\[var\(--surface\)\],
+  .bg-\[var\(--surface-alt\)\],
+  .bg-\[var\(--bg\)\],
+  .bg-\[var\(--border\)\],
+  .border-\[var\(--border\)\] {
+    transition: background-color 300ms ease-in-out, border-color 300ms ease-in-out;
+  }
+
+  /* Textos que usam vars de cor diretamente */
+  .text-\[var\(--text-primary\)\],
+  .text-\[var\(--text-secondary\)\],
+  .text-\[var\(--text-muted\)\],
+  .text-\[var\(--dark-green\)\] {
+    transition: color 300ms ease-in-out;
+  }
+
+  /* SVGs inline com stroke via currentColor */
+  svg path, svg circle {
+    transition: stroke 300ms ease-in-out, fill 300ms ease-in-out, color 300ms ease-in-out;
+  }
+
+  /* Botões e inputs — transição suave em todas as propriedades interativas */
+  button, input, select, textarea, a {
+    transition: background-color 200ms ease-out, color 200ms ease-out, border-color 200ms ease-out, box-shadow 150ms ease-out, opacity 150ms ease-out, transform 150ms ease-out;
   }
 
   html.dark {

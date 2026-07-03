@@ -46,10 +46,10 @@ export function KpiCard({ icon, iconBg, iconColor, label, value, sub, trend, urg
 }
 
 const STATUS_CONFIG = {
-  presente:   { dot: "#5CBF90", bg: "var(--sage-light)",   label: "Presente",   text: "#3D786A" },
-  falta:      { dot: "#F8A268", bg: "var(--peach-light)",  label: "Falta",      text: "#C97840" },
-  justificada:{ dot: "#7C5CFF", bg: "var(--purple-light)", label: "Justificada",text: "#7C5CFF" },
-  confirmado: { dot: "#2E7DFF", bg: "var(--blue-light)",   label: "Confirmado", text: "#2E7DFF" },
+  presente:   { dot: "#5CBF90", bg: "var(--status-presente-bg)",    label: "Presente",   text: "var(--status-presente-text)" },
+  falta:      { dot: "#F8A268", bg: "var(--status-falta-bg)",       label: "Falta",      text: "var(--status-falta-text)" },
+  justificada:{ dot: "#7C5CFF", bg: "var(--status-justificada-bg)",  label: "Justificada",text: "var(--status-justificada-text)" },
+  confirmado: { dot: "#2E7DFF", bg: "var(--status-confirmado-bg)",   label: "Confirmado", text: "var(--status-confirmado-text)" },
 };
 
 export function TimelineRow({ app, onClick }) {
@@ -78,7 +78,7 @@ export function TimelineRow({ app, onClick }) {
       onClick={onClick}
       className="flex items-center gap-3 py-3 px-2 border-b border-[var(--border)] last:border-b-0 cursor-pointer hover:bg-[var(--surface-alt)] rounded-[12px] transition-all duration-150 ease-out"
     >
-      <div className="flex items-center gap-1 bg-[var(--surface-alt)] dark:bg-[var(--surface)] px-2 py-0.5 rounded-[8px] text-[var(--text-primary)] flex-shrink-0">
+      <div className="flex items-center gap-1 bg-[var(--surface-alt)] px-2 py-0.5 rounded-[8px] text-[var(--text-primary)] flex-shrink-0">
         <Clock size={11} className="text-[var(--text-muted)]" />
         <span className="text-[11px] font-extrabold tabular-nums">
           {app.sortTime.slice(0, 5)}
