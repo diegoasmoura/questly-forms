@@ -259,14 +259,24 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
   };
 
   const phone = patient?.phone?.replace(/\D/g, "") || "";
-  const initials = (patient?.name || "?").split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
 
-  // Usando variáveis CSS dinâmicas do Design System para evitar piscadas no dark mode
-  const statusAvatarStyle = {
-    presente:    { bg: "var(--status-presente-bg)",    color: "var(--status-presente-text)" },
-    falta:       { bg: "var(--status-falta-bg)",       color: "var(--status-falta-text)" },
-    justificada: { bg: "var(--status-justificada-bg)", color: "var(--status-justificada-text)" },
-  };
+  // Mesma lógica do TimelineRow: 2 primeiros caracteres do nome (ex: "Jhersyka" → "JH")
+  const patientName = patient?.name || "Paciente";
+  const cleanName = patientName.trim();
+  const initials = cleanName.length >= 2 ? cleanName.substring(0, 2).toUpperCase() : cleanName.toUpperCase();
+
+  // Mesma paleta e hash determinístico do TimelineRow
+  const avatarColors = [
+    { bg: "var(--sage-light)",   text: "var(--dark-green)" },
+    { bg: "var(--blue-light)",   text: "var(--blue)" },
+    { bg: "var(--peach-light)",  text: "var(--peach)" },
+    { bg: "var(--purple-light)", text: "var(--purple)" },
+  ];
+  let hash = 0;
+  for (let i = 0; i < patientName.length; i++) {
+    hash = patientName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const avatarStyle = avatarColors[Math.abs(hash) % avatarColors.length];
 
   const statusLabels = {
     presente: "Realizado",
@@ -275,7 +285,6 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
   };
 
   const currentStatus = existingAtt?.status;
-  const avatarStyle = statusAvatarStyle[currentStatus] || { bg: "var(--surface-alt)", color: "var(--text-muted)" };
 
   const whatsappText = `Olá ${patient?.name?.split(" ")[0] || ""}, lembrete da sua consulta no dia ${sessionDate ? format(sessionDate, "dd/MM") : ""} às ${appointment.time}.`;
 
@@ -292,7 +301,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
             {/* Blob decorativo no canto */}
             <div
               className="absolute -top-8 -right-8 w-[120px] h-[120px] rounded-full opacity-20 blur-2xl pointer-events-none"
-              style={{ backgroundColor: avatarStyle.color }}
+              style={{ backgroundColor: avatarStyle.text }}
             />
 
             {/* Fechar */}
@@ -309,7 +318,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
               {/* Avatar com mesma lógica de cor do timeline (hash pelo nome) */}
               <div
                 className="w-[56px] h-[56px] rounded-[16px] flex items-center justify-center text-[18px] font-extrabold shrink-0 shadow-sm"
-                style={{ backgroundColor: avatarStyle.bg, color: avatarStyle.color }}
+                style={{ backgroundColor: avatarStyle.bg, color: avatarStyle.text }}
               >
                 {initials}
               </div>
@@ -323,7 +332,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
                 {/* Badge de status atual */}
                 <span
                   className="inline-flex items-center gap-1 px-[10px] py-[3px] rounded-[999px] text-[10px] font-extrabold uppercase tracking-widest mt-1"
-                  style={{ backgroundColor: avatarStyle.bg, color: avatarStyle.color }}
+                  style={{ backgroundColor: avatarStyle.bg, color: avatarStyle.text }}
                 >
                   {statusLabels[currentStatus] || "Agendado"}
                 </span>
