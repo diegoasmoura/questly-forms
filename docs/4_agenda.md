@@ -38,7 +38,16 @@ Os status (chips/badges) têm cores engessadas na paleta da identidade:
 - **Justificada:** Roxo (`--purple` e `--purple-light`). Uma ação neutra, mas resolvida clinicamente.
 
 ### Botões de Ação Rápida (Status)
-A escolha do status dentro do `AppointmentDetailModal` utiliza uma grade de botões com estilo único (os únicos que desviam sutilmente dos *Squircles* com bordas suaves, ganhando bordas rígidas no estilo `rounded-[14px]` + `box-shadow` profundo com a cor respectiva para incentivar o clique).
+A escolha do status dentro do `AppointmentDetailModal` utiliza uma grade de botões com estilo "tranquilo" (sem sombras neon ou cores que agridem o usuário no Dark Mode).
+No estado ativo, os botões ganham um preenchimento fosco (matte) correspondente à cor da ação e o texto fica em contraste. Evitar `box-shadow` na mesma cor do botão para não gerar efeitos "fluorescentes".
+
+## 4.3 Regra de Negócio: Faltas e Justificativas (Histórico vs Disponibilidade)
+
+Na gestão clínica, a integridade do histórico é vital:
+- **Cancelar (Abonar):** Paciente avisou com antecedência. A sessão original vira "Justificada" (histórico mantido) e libera o slot no calendário para eventuais encaixes avulsos, mas o registro de cancelamento não deve ser deletado. A interface usa vermelho para o alerta de cancelamento, mas o status no sistema indica que não haverá cobrança de falta indevida.
+- **Remarcar Sessão (Reagendar):** O mesmo que o anterior, porém o sistema cria uma nova Sessão Avulsa para a data escolhida. O botão no sub-modal segue a cor Âmbar para acompanhar a hierarquia visual do botão primário de "Justificado".
+
+> Nunca ofereça opções na interface que permitam a deleção total de uma falta justificada sob o pretexto de "liberar a agenda". Slots justificados já são considerados implicitamente livres para encaixes. Deletar a justificativa apagaria o histórico clínico e reativaria a regra de recorrência do paciente.
 
 ## 4.3 Fechamento em Cascata
 Sempre que uma ação é tomada no modal da agenda (ex: Justificar falta que abre um sub-modal), ao clicar em "Salvar", **toda a pilha de modais deve ser fechada simultaneamente**.
