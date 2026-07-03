@@ -42,8 +42,8 @@ export function useDashboardData() {
   const [payments, setPayments] = useState([]);
   const [appointments, setAppointments] = useState([]);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
+  const loadData = useCallback(async (isBackground = false) => {
+    if (isBackground !== true) setLoading(true);
     try {
       const [patientsData, formsData, attendancesData, paymentsData, appointmentsData] =
         await Promise.all([

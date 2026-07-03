@@ -40,3 +40,16 @@ O restante do Dashboard é comporto por `Widgets`, dispostos em Grid flexível (
    - Demografia dos pacientes ativos.
 5. **BirthdaysWidget & QuickNotesWidget:**
    - Cartões de utilidade diária para o profissional.
+
+---
+
+## 2.4 Gestão de Estado e Atualizações Silenciosas (Flicker-Free)
+
+O carregamento inicial da Dashboard bloqueia a renderização com uma tela de `LoadingScreen` (Carregando painel...).
+No entanto, **é estritamente proibido** engatilhar essa tela de loading para ações secundárias ou mutações (ex: mudar o status de "Pendente" para "Presente" na agenda). 
+
+### Regra Anti-Flicker (Anti-Piscada)
+Sempre que um modal (ex: `AppointmentDetailModal`) precisar recarregar os dados da Dashboard após salvar algo no banco, ele deve invocar a prop `onUpdate` utilizando a flag de background:
+`onUpdate={() => dashboardData.loadData(true)}`
+
+O hook `useDashboardData(isBackground = false)` garantirá que a flag `loading` não seja acionada (`setLoading(true)`), permitindo que os dados sejam buscados silenciosamente via API e a interface atualize de forma instantânea e fluida, sem desmontar o fundo da tela.
