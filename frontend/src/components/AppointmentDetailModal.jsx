@@ -287,143 +287,172 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
           className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] w-full max-w-sm mx-4 shadow-2xl animate-scale-in overflow-hidden"
           onClick={e => e.stopPropagation()}
         >
-          {/* Header colorido com gradiente baseado no status */}
-          <div
-            className="p-6 pb-5"
-            style={{ background: `linear-gradient(135deg, ${avatarStyle.bg} 0%, var(--surface) 100%)` }}
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-4">
-                {/* Avatar */}
-                <div
-                  className="w-14 h-14 rounded-[16px] flex items-center justify-center text-[18px] font-extrabold shrink-0 shadow-sm"
+          {/* ── HEADER ── */}
+          <div className="relative px-6 pt-6 pb-5 overflow-hidden">
+            {/* Blob decorativo no canto */}
+            <div
+              className="absolute -top-8 -right-8 w-[120px] h-[120px] rounded-full opacity-20 blur-2xl pointer-events-none"
+              style={{ backgroundColor: avatarStyle.color }}
+            />
+
+            {/* Fechar */}
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 p-1.5 rounded-[10px] z-10"
+              style={{ color: "var(--text-muted)", background: "var(--surface-alt)" }}
+            >
+              <X size={16} />
+            </button>
+
+            {/* Avatar + Info */}
+            <div className="flex items-center gap-4">
+              {/* Avatar com mesma lógica de cor do timeline (hash pelo nome) */}
+              <div
+                className="w-[56px] h-[56px] rounded-[16px] flex items-center justify-center text-[18px] font-extrabold shrink-0 shadow-sm"
+                style={{ backgroundColor: avatarStyle.bg, color: avatarStyle.color }}
+              >
+                {initials}
+              </div>
+              <div className="min-w-0">
+                <h2
+                  className="text-[18px] font-bold leading-tight truncate"
+                  style={{ color: "var(--text-primary)", fontFamily: "'Nunito Sans', sans-serif" }}
+                >
+                  {patient?.name || "Paciente"}
+                </h2>
+                {/* Badge de status atual */}
+                <span
+                  className="inline-flex items-center gap-1 px-[10px] py-[3px] rounded-[999px] text-[10px] font-extrabold uppercase tracking-widest mt-1"
                   style={{ backgroundColor: avatarStyle.bg, color: avatarStyle.color }}
                 >
-                  {initials}
-                </div>
-                <div>
-                  <h2 className="text-[18px] font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "'Nunito Sans', sans-serif" }}>
-                    {patient?.name || "Paciente"}
-                  </h2>
-                  {/* Badge de status */}
-                  <span
-                    className="inline-block px-[10px] py-[3px] rounded-[999px] text-[10px] font-extrabold uppercase tracking-widest mt-1"
-                    style={{ backgroundColor: avatarStyle.bg, color: avatarStyle.color }}
-                  >
-                    {statusLabels[currentStatus] || "Agendado"}
-                  </span>
-                </div>
+                  {statusLabels[currentStatus] || "Agendado"}
+                </span>
               </div>
-              <button
-                onClick={onClose}
-                className="p-1.5 rounded-[10px] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] shrink-0"
-                style={{ transition: "all 150ms ease" }}
+            </div>
+
+            {/* Info da sessão */}
+            <div
+              className="flex items-center gap-2 mt-4 px-3 py-2.5 rounded-[12px]"
+              style={{ background: "var(--surface-alt)", border: "1px solid var(--border)" }}
+            >
+              <Clock size={13} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+              <span className="text-[12px] font-semibold" style={{ color: "var(--text-secondary)" }}>
+                {sessionDate ? format(sessionDate, "dd/MM/yyyy", { locale: ptBR }) : ""} às {appointment.time}
+              </span>
+              <span
+                className="ml-auto text-[11px] font-bold px-2 py-0.5 rounded-[6px]"
+                style={{ background: "var(--border)", color: "var(--text-muted)" }}
               >
-                <X size={18} />
-              </button>
+                {appointment.duration} min
+              </span>
             </div>
           </div>
 
           <div className="px-6 pb-6">
-            {/* Info da sessão */}
-            <div className="flex items-center gap-2.5 p-3.5 bg-[var(--surface-alt)] border border-[var(--border)] rounded-[14px] mb-5">
-              <Clock size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
-              <span className="text-[13px] font-semibold" style={{ color: "var(--text-secondary)" }}>
-                {sessionDate ? format(sessionDate, "dd/MM/yyyy", { locale: ptBR }) : ""} às {appointment.time}
-                <span className="ml-1.5 px-1.5 py-0.5 rounded-[6px] text-[11px] font-bold" style={{ backgroundColor: "var(--surface)", color: "var(--text-muted)" }}>
-                  {appointment.duration} min
-                </span>
-              </span>
-            </div>
+            {/* ── SEÇÃO STATUS ── */}
+            <p
+              className="text-[10px] font-extrabold uppercase tracking-[0.12em] mb-3"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Status do Atendimento
+            </p>
 
-            {/* Seção Status */}
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] mb-2.5" style={{ color: "var(--text-muted)" }}>Status do Atendimento</p>
-            <div className="space-y-2 mb-5">
-              {/* Presença */}
+            {/* 3 botões lado a lado com cores próprias */}
+            <div className="grid grid-cols-3 gap-2 mb-5">
+              {/* Presença — Verde */}
               <button
                 onClick={() => handleQuickStatus(appointment, "presente", sessionDate)}
-                className="w-full py-[11px] px-4 rounded-[12px] text-[12px] font-bold flex items-center gap-3"
+                className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-[14px] font-bold text-[11px] transition-all duration-200"
                 style={currentStatus === "presente"
-                  ? { background: "var(--sage)", color: "white", border: "2px solid var(--sage)" }
-                  : { background: "var(--surface)", color: "var(--text-secondary)", border: "2px solid var(--border)" }
+                  ? { background: "#5CBF9D", color: "white", border: "2px solid #5CBF9D", boxShadow: "0 4px 12px rgba(92,191,157,0.35)" }
+                  : { background: "var(--sage-light)", color: "var(--dark-green)", border: "2px solid transparent" }
                 }
               >
-                <span className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0" style={{ borderColor: currentStatus === "presente" ? "white" : "var(--border)" }}>
-                  {currentStatus === "presente" && <Check size={11} />}
+                <span
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ background: currentStatus === "presente" ? "rgba(255,255,255,0.25)" : "var(--sage)" }}
+                >
+                  <Check size={16} color={currentStatus === "presente" ? "white" : "white"} />
                 </span>
                 Presença
               </button>
 
-              {/* Falta */}
+              {/* Falta — Vermelho */}
               <button
                 onClick={() => handleQuickStatus(appointment, "falta", sessionDate)}
-                className="w-full py-[11px] px-4 rounded-[12px] text-[12px] font-bold flex items-center gap-3"
+                className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-[14px] font-bold text-[11px] transition-all duration-200"
                 style={currentStatus === "falta"
-                  ? { background: "var(--peach)", color: "white", border: "2px solid var(--peach)" }
-                  : { background: "var(--surface)", color: "var(--text-secondary)", border: "2px solid var(--border)" }
+                  ? { background: "#EF4444", color: "white", border: "2px solid #EF4444", boxShadow: "0 4px 12px rgba(239,68,68,0.35)" }
+                  : { background: "rgba(239,68,68,0.08)", color: "#DC2626", border: "2px solid transparent" }
                 }
               >
-                <span className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0" style={{ borderColor: currentStatus === "falta" ? "white" : "var(--border)" }}>
-                  {currentStatus === "falta" && <X size={11} />}
+                <span
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ background: currentStatus === "falta" ? "rgba(255,255,255,0.25)" : "rgba(239,68,68,0.15)" }}
+                >
+                  <X size={16} color={currentStatus === "falta" ? "white" : "#DC2626"} />
                 </span>
                 Falta
               </button>
 
-              {/* Justificado */}
+              {/* Justificado — Âmbar */}
               <button
                 onClick={() => handleQuickStatus(appointment, "justificada", sessionDate)}
-                className="w-full py-[11px] px-4 rounded-[12px] text-[12px] font-bold flex items-center gap-3"
+                className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-[14px] font-bold text-[11px] transition-all duration-200"
                 style={currentStatus === "justificada"
-                  ? { background: "var(--purple)", color: "white", border: "2px solid var(--purple)" }
-                  : { background: "var(--surface)", color: "var(--text-secondary)", border: "2px solid var(--border)" }
+                  ? { background: "#F59E0B", color: "white", border: "2px solid #F59E0B", boxShadow: "0 4px 12px rgba(245,158,11,0.35)" }
+                  : { background: "rgba(245,158,11,0.1)", color: "#B45309", border: "2px solid transparent" }
                 }
               >
-                <span className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0" style={{ borderColor: currentStatus === "justificada" ? "white" : "var(--border)" }}>
-                  {currentStatus === "justificada" && <AlertCircle size={11} />}
+                <span
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ background: currentStatus === "justificada" ? "rgba(255,255,255,0.25)" : "rgba(245,158,11,0.2)" }}
+                >
+                  <AlertCircle size={16} color={currentStatus === "justificada" ? "white" : "#B45309"} />
                 </span>
                 Justificado
               </button>
             </div>
 
-            {/* Ações */}
-            <div className="pt-4 border-t space-y-2" style={{ borderColor: "var(--border)" }}>
+            {/* ── AÇÕES ── */}
+            <div className="space-y-2 pt-4" style={{ borderTop: "1px solid var(--border)" }}>
               {/* WhatsApp */}
               <a
                 href={`https://wa.me/55${phone}?text=${encodeURIComponent(whatsappText)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full py-[11px] px-4 rounded-[12px] text-[12px] font-bold"
-                style={{ background: "var(--blue-light)", color: "var(--status-confirmado-text)", border: "1px solid var(--status-confirmado-bg)" }}
+                className="flex items-center gap-3 w-full py-[11px] px-4 rounded-[12px] text-[12px] font-semibold"
+                style={{ background: "var(--blue-light)", color: "var(--status-confirmado-text)", border: "1px solid var(--blue-light)" }}
               >
-                <MessageCircle size={14} />
-                Lembrete WhatsApp
+                <MessageCircle size={15} />
+                <span>Lembrete WhatsApp</span>
               </a>
 
               {/* Prontuário */}
               <button
                 onClick={() => { onClose(); navigate(`/patients/${patient?.id}`); }}
-                className="flex items-center justify-center gap-2 w-full py-[11px] px-4 rounded-[12px] text-[12px] font-bold"
+                className="flex items-center gap-3 w-full py-[11px] px-4 rounded-[12px] text-[12px] font-semibold"
                 style={{ background: "var(--surface-alt)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
               >
-                <ExternalLink size={14} />
-                Ir para Prontuário
+                <ExternalLink size={15} />
+                <span>Ir para Prontuário</span>
               </button>
 
               {/* Excluir */}
               <button
                 onClick={handleDeleteAppointment}
-                className="flex items-center justify-center gap-2 w-full py-[11px] px-4 rounded-[12px] text-[12px] font-bold"
-                style={{ background: "rgba(239,68,68,0.08)", color: "#EF4444", border: "1px solid rgba(239,68,68,0.2)" }}
+                className="flex items-center gap-3 w-full py-[11px] px-4 rounded-[12px] text-[12px] font-semibold"
+                style={{ background: "rgba(239,68,68,0.07)", color: "#EF4444", border: "1px solid rgba(239,68,68,0.15)" }}
               >
-                <Trash2 size={14} />
-                Excluir Agendamento
+                <Trash2 size={15} />
+                <span>Excluir Agendamento</span>
               </button>
             </div>
 
-            {/* Fechar */}
+            {/* Fechar — texto simples */}
             <button
               onClick={onClose}
-              className="w-full mt-4 py-2.5 text-[11px] font-bold uppercase tracking-wider"
+              className="w-full mt-3 py-2 text-[11px] font-bold uppercase tracking-wider text-center"
               style={{ color: "var(--text-muted)" }}
             >
               Fechar
