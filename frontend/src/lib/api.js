@@ -202,6 +202,7 @@ export const api = {
   getAppointments: () => request("/appointments"),
   getPatientAppointments: (patientId) => request(`/appointments/patient/${patientId}`),
   deletePatientAppointments: (patientId) => request(`/appointments/patient/${patientId}`, { method: "DELETE" }),
+  deletePatientAppointmentsByTime: (patientId, time) => request(`/appointments/patient/${patientId}/time/${time}`, { method: "DELETE" }),
   saveAppointmentsBatch: (patientId, slots) => request("/appointments/batch", { 
     method: "POST", 
     body: JSON.stringify({ patientId, slots }) 

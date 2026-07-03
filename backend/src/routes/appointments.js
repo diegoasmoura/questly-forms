@@ -173,6 +173,24 @@ router.delete("/patient/:patientId", async (req, res) => {
   }
 });
 
+// Excluir agendamentos em lote de um paciente por horário
+router.delete("/patient/:patientId/time/:time", async (req, res) => {
+  const { patientId, time } = req.params;
+  try {
+    await prisma.appointment.deleteMany({
+      where: {
+        patientId,
+        time,
+        psychologistId: req.user.id
+      }
+    });
+    res.json({ success: true, message: `Todos os agendamentos das ${time} foram excluídos.` });
+  } catch (error) {
+    console.error("Error deleting appointments by time:", error);
+    res.status(500).json({ error: "Erro ao excluir agendamentos do paciente neste horário" });
+  }
+});
+
 // Salvar/Atualizar horários de um paciente (Lógica para 1x, 2x por semana etc) em lote
 router.post("/batch", async (req, res) => {
   const { patientId, slots } = req.body;

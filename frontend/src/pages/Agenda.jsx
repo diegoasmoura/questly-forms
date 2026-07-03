@@ -177,6 +177,7 @@ export default function Agenda() {
   const [agendaFormRecurring, setAgendaFormRecurring] = useState(true);
   const [agendaFormMaxSessions, setAgendaFormMaxSessions] = useState(0);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteChoice, setShowDeleteChoice] = useState(false);
   const [detailModal, setDetailModal] = useState({ open: false, session: null, date: null });
 
   const dateCellWrapper = useCallback(({ value, children }) => {
@@ -630,7 +631,7 @@ export default function Agenda() {
     }
   };
 
-  const handleDeleteAppointment = (session, date) => {
+  const executeDirectDelete = (session, date) => {
     const isExtra = session.type === "extra";
     const patientName = session.app.patient?.name || "este paciente";
 
@@ -639,34 +640,109 @@ export default function Agenda() {
       title: isExtra ? "Excluir sessão" : "Excluir agendamento",
       message: isExtra
         ? `Tem certeza que deseja excluir a sessão de ${patientName}? Esta ação não pode ser desfeita.`
-        : `Tem certeza que deseja excluir o horário de ${patientName}?`,
+        : `Tem certeza que deseja excluir o agendamento de ${patientName} para esta data?`,
       loading: false,
       onConfirm: async () => {
         setConfirmModal(prev => ({ ...prev, loading: true }));
         try {
           if (isExtra) {
             await api.deleteAttendance(session.app.id);
-            setSuccessMessage("Sessão removida!");
+            toast("Sessão extra removida!", "success");
           } else {
-            const app = appointments.find(a => a.id === session.app.id);
-            if (app && !app.scheduledDate && date) {
-              const dateStr = formatDateKey(date);
-              const skipDates = [...(app.skipDates || []), dateStr];
-              await api.updateAppointment(session.app.id, { skipDates });
-            } else {
-              await api.deleteAppointment(session.app.id);
-            }
-            setSuccessMessage("Agendamento removido!");
+            await api.deleteAppointment(session.app.id);
+            toast("Agendamento avulso removido!", "success");
           }
           await loadData();
           setConfirmModal({ open: false, title: "", message: "", onConfirm: null, loading: false });
         } catch (error) {
           console.error("Erro ao remover:", error);
-          setSuccessMessage(error.message || "Erro ao remover agendamento");
+          toast(error.message || "Erro ao remover agendamento", "error");
           setConfirmModal(prev => ({ ...prev, loading: false }));
         }
       }
     });
+  };
+
+  const handleDeleteSingleDate = async () => {
+    if (!editingApp || !agendaFormDate) return;
+    setSaving(true);
+    try {
+      const dateStr = formatDateKey(agendaFormDate);
+      const skipDates = [...(editingApp.skipDates || []), dateStr];
+      await api.updateAppointment(editingApp.id, { skipDates });
+      toast("Esta data foi desmarcada!", "success");
+      setShowDeleteChoice(false);
+      setEditingApp(null);
+      await loadData();
+    } catch (error) {
+      console.error("Erro ao desmarcar data:", error);
+      toast(error.message || "Erro ao desmarcar data", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteSeries = async () => {
+    if (!editingApp) return;
+    setConfirmModal({
+      open: true,
+      title: "Excluir série completa",
+      message: `Tem certeza que deseja excluir toda a série recorrente de ${editingApp.patient?.name || "este paciente"} neste dia da semana?`,
+      loading: false,
+      onConfirm: async () => {
+        setConfirmModal(prev => ({ ...prev, loading: true }));
+        try {
+          await api.deleteAppointment(editingApp.id);
+          toast("Série recorrente excluída!", "success");
+          setShowDeleteChoice(false);
+          setEditingApp(null);
+          await loadData();
+          setConfirmModal({ open: false, title: "", message: "", onConfirm: null, loading: false });
+        } catch (error) {
+          console.error("Erro ao excluir série:", error);
+          toast(error.message || "Erro ao excluir série", "error");
+          setConfirmModal(prev => ({ ...prev, loading: false }));
+        }
+      }
+    });
+  };
+
+  const handleDeleteAllInTime = async () => {
+    if (!editingApp) return;
+    setConfirmModal({
+      open: true,
+      title: "Excluir em Lote",
+      message: `Tem certeza que deseja excluir TODOS os agendamentos de ${editingApp.patient?.name || "este paciente"} às ${editingApp.time}? (Exclusão em lote por horário).`,
+      loading: false,
+      onConfirm: async () => {
+        setConfirmModal(prev => ({ ...prev, loading: true }));
+        try {
+          await api.deletePatientAppointmentsByTime(editingApp.patientId, editingApp.time);
+          toast(`Agendamentos das ${editingApp.time} excluídos em lote!`, "success");
+          setShowDeleteChoice(false);
+          setEditingApp(null);
+          await loadData();
+          setConfirmModal({ open: false, title: "", message: "", onConfirm: null, loading: false });
+        } catch (error) {
+          console.error("Erro ao excluir em lote:", error);
+          toast(error.message || "Erro ao excluir em lote", "error");
+          setConfirmModal(prev => ({ ...prev, loading: false }));
+        }
+      }
+    });
+  };
+
+  const handleDeleteAppointment = (session, date) => {
+    const isExtra = session.type === "extra";
+    const app = session.app;
+    
+    if (isExtra || app.scheduledDate) {
+      executeDirectDelete(session, date);
+    } else {
+      setEditingApp(app);
+      setAgendaFormDate(date);
+      setShowDeleteChoice(true);
+    }
   };
 
   const openDetailModal = (session, date) => {
@@ -1201,6 +1277,50 @@ export default function Agenda() {
               </button>
             </div>
             <button onClick={() => { setShowEditChoice(false); setEditingApp(null); }} className="w-full mt-3 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest">
+              Cancelar
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {showDeleteChoice && editingApp && createPortal(
+        <div className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm flex items-center justify-center z-[9999]" onClick={() => { setShowDeleteChoice(false); setEditingApp(null); }}>
+          <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-4 text-red-500">
+                <Trash2 size={22} />
+              </div>
+              <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Excluir Agendamento</h3>
+              <p className="text-sm font-bold text-slate-500 mt-1">
+                {editingApp.patient?.name || "Paciente"} &bull; {editingApp.time}
+              </p>
+              <p className="text-xs text-slate-400 mt-2 font-medium">
+                Este horário se repete semanalmente. Como deseja excluir?
+              </p>
+            </div>
+            <div className="space-y-2">
+              <button 
+                onClick={handleDeleteSingleDate} 
+                disabled={saving}
+                className="w-full py-3 px-4 bg-slate-100 text-slate-700 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-slate-200 transition-all disabled:opacity-50"
+              >
+                Apenas esta data
+              </button>
+              <button 
+                onClick={handleDeleteSeries} 
+                className="w-full py-3 px-4 bg-red-50 text-red-600 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-red-100 transition-all"
+              >
+                Toda a série recorrente
+              </button>
+              <button 
+                onClick={handleDeleteAllInTime} 
+                className="w-full py-3 px-4 bg-red-500 text-white rounded-xl text-sm font-black uppercase tracking-widest hover:bg-red-600 shadow-lg shadow-red-200 transition-all"
+              >
+                Todos os dias neste horário
+              </button>
+            </div>
+            <button onClick={() => { setShowDeleteChoice(false); setEditingApp(null); }} className="w-full mt-4 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest">
               Cancelar
             </button>
           </div>
