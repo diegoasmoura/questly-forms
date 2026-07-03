@@ -110,7 +110,7 @@ export default function Home() {
         <KpiCard icon={<Calendar size={16} />} iconBg="var(--blue-light)" iconColor="var(--blue)" label="Sessões hoje" value={todayEvents.length} sub={`${todayEvents.filter(e => e.attendance?.status === "presente").length} confirmadas`} />
         <KpiCard icon={<CheckCheck size={16} />} iconBg="var(--sage-light)" iconColor="var(--sage)" label="Presença no mês" value={`${taxaPresenca}%`} trend={{ current: taxaPresenca, previous: prevTaxaPresenca, unit: "%" }} sub={`${presencas} de ${totalMesAtendimentos} sessões`} />
         <KpiCard icon={<DollarSign size={16} />} iconBg="var(--peach-light)" iconColor="var(--peach)" label="Recebido no mês" value={fmtCurrency(totalPaid)} trend={{ current: totalPaid, previous: prevTotalPaid, unit: "R$" }} sub={prevTotalPaid > 0 ? "vs mês anterior" : "primeiro mês"} />
-        <KpiCard icon={<Banknote size={16} />} iconBg="var(--purple-light)" iconColor="var(--purple)" label="Sessões a cobrar" value={aReceberCount} sub={aReceberCount > 0 ? "sessões sem pagamento" : "tudo em dia ✓"} urgent={aReceberCount > 0} />
+        <KpiCard icon={<Banknote size={16} />} iconBg="var(--purple-light)" iconColor="var(--purple)" label="Sessões a cobrar" value={aReceberCount} sub={aReceberCount > 0 ? "sessões sem pagamento" : "tudo em dia ✓"} />
         <KpiCard icon={<FileText size={16} />} iconBg="var(--sage-light)" iconColor="var(--dark-green)" label="Instrumentos" value={`${totalResponses}/${totalSent}`} sub={`${completionRate}% de resposta`} />
       </div>
 
