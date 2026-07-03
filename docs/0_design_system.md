@@ -185,6 +185,7 @@ Nunca devem competir com texto ou elementos interativos.
 | Tooltips em botões de ação | obrigatório (`title=""`) |
 | Alt text em imagens | obrigatório |
 | Focus visible | `focus:ring-2 focus:ring-[#5CBF9D]` |
+| Gráficos Recharts | Remover tap-highlight e outline nos wrappers e no `activeDot` |
 
 ---
 

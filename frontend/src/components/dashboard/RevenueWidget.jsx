@@ -13,46 +13,45 @@ export function RevenueWidget({ revenueData }) {
         </div>
       </div>
 
-      {/* MOBILE SPARKLINE (Hidden on Desktop) */}
-      <div className="flex md:hidden flex-1 w-full min-h-0 -mx-2 -mb-2">
+      <div className="flex flex-1 w-full min-h-0 mt-4 -ml-4 md:ml-0">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={revenueData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="colorFaturamentoMobile" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--peach)" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="var(--peach)" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <Tooltip 
-              contentStyle={{ backgroundColor: "var(--surface)", borderColor: "var(--border)", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
-              labelStyle={{ fontSize: "10px", fontWeight: "bold", color: "var(--text-muted)" }}
-              itemStyle={{ fontSize: "12px", fontWeight: "extrabold", color: "var(--peach)" }}
-              formatter={(value) => [`R$ ${value}`, "Faturamento"]}
-            />
-            <Area type="monotone" dataKey="faturamento" stroke="var(--peach)" strokeWidth={3} fillOpacity={1} fill="url(#colorFaturamentoMobile)" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* DESKTOP FULL CHART (Hidden on Mobile) */}
-      <div className="hidden md:flex flex-1 w-full min-h-0 mt-2">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={revenueData} margin={{ top: 10, right: 10, left: -5, bottom: 0 }}>
+          <AreaChart data={revenueData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="colorFaturamento" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="var(--peach)" stopOpacity={0.25}/>
                 <stop offset="95%" stopColor="var(--peach)" stopOpacity={0}/>
               </linearGradient>
             </defs>
-            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "var(--text-muted)", fontWeight: 600 }} padding={{ left: 15, right: 15 }} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "var(--text-muted)", fontWeight: 600 }} tickFormatter={(value) => `R$ ${value}`} />
+            <XAxis 
+              dataKey="name" 
+              axisLine={false} 
+              tickLine={false} 
+              tick={{ fontSize: 10, fill: "var(--text-muted)", fontWeight: 700 }} 
+              padding={{ left: 10, right: 10 }} 
+            />
+            <YAxis 
+              axisLine={false} 
+              tickLine={false} 
+              tick={{ fontSize: 10, fill: "var(--text-muted)", fontWeight: 700 }} 
+              tickFormatter={(value) => `R$ ${value}`} 
+              width={55}
+            />
             <Tooltip 
+              cursor={false}
               contentStyle={{ backgroundColor: "var(--surface)", borderColor: "var(--border)", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
               labelStyle={{ fontSize: "10px", fontWeight: "bold", color: "var(--text-muted)" }}
               itemStyle={{ fontSize: "12px", fontWeight: "extrabold", color: "var(--peach)" }}
               formatter={(value) => [`R$ ${value}`, "Faturamento"]}
             />
-            <Area type="monotone" dataKey="faturamento" stroke="var(--peach)" strokeWidth={2} fillOpacity={1} fill="url(#colorFaturamento)" />
+            <Area 
+              type="monotone" 
+              dataKey="faturamento" 
+              stroke="var(--peach)" 
+              strokeWidth={3} 
+              fillOpacity={1} 
+              fill="url(#colorFaturamento)" 
+              activeDot={{ r: 5, fill: "var(--peach)", stroke: "var(--surface)", strokeWidth: 2, style: { outline: "none" } }}
+            />
           </AreaChart>
         </ResponsiveContainer>
       </div>

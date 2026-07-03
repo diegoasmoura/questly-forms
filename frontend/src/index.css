@@ -539,3 +539,11 @@
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* Remove contorno de foco e caixa de destaque ao tocar nos gráficos (Mobile/Desktop) */
+.recharts-wrapper,
+.recharts-surface,
+.recharts-responsive-container {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
