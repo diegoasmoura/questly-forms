@@ -634,11 +634,6 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
         </div>
       </div>
 
-
-
-      )}
-
-
       {confirmModal.open && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center z-[80]" onClick={() => !confirmModal.loading && setConfirmModal({ ...confirmModal, open: false })}>
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
