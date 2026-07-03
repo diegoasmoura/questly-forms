@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
-import { X, Upload } from "lucide-react";
+import { X, Upload, Trash2 } from "lucide-react";
+import { getAvatarProps } from "./dashboard/Shared";
 
 const PRESETS = [
   { style: "open-peeps", seed: "Jasper" },
@@ -82,51 +83,60 @@ export default function AvatarPickerModal({ onClose }) {
     }
   };
 
-  const currentInitials = user?.name?.split(" ")[0]?.slice(0, 2)?.toUpperCase() || "U";
+  const { initials, color: avatarColor } = getAvatarProps(user?.name);
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-slate-800">Seu Avatar</h2>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-100 text-slate-400">
+    <div className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 animate-fade-in">
+      {/* Invisible backdrop for closing on click outside (optional, if you want click outside) */}
+      <div className="absolute inset-0" onClick={onClose} />
+      
+      <div className="relative bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-card-hover w-full max-w-[420px] max-h-[90vh] overflow-y-auto p-6 flex flex-col gap-6" onClick={e => e.stopPropagation()}>
+        
+        <div className="flex items-center justify-between">
+          <h2 className="text-[18px] font-extrabold text-[var(--text-primary)]">Seu Avatar</h2>
+          <button onClick={onClose} className="p-2 rounded-[12px] hover:bg-[var(--surface-alt)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
             <X size={20} />
           </button>
         </div>
 
-        <div className="flex flex-col items-center mb-6">
-          <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border-2 border-slate-200">
+        <div className="flex flex-col items-center">
+          <div 
+            className="w-[84px] h-[84px] rounded-[18px] flex items-center justify-center overflow-hidden border border-[var(--border)] shadow-sm"
+            style={{ backgroundColor: previewUrl ? "transparent" : avatarColor.bg, color: avatarColor.text }}
+          >
             {previewUrl ? (
               <img src={previewUrl} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-xl font-bold text-slate-400">{currentInitials}</span>
+              <span className="text-[28px] font-extrabold tracking-wide">{initials}</span>
             )}
           </div>
         </div>
 
-        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Escolha um avatar</p>
-        <div className="grid grid-cols-5 gap-1 mb-4">
-          {PRESETS.map((preset) => (
-            <button
-              key={`${preset.style}-${preset.seed}`}
-              onClick={() => handlePresetSelect(preset)}
-              className="p-0 rounded transition-all flex items-center justify-center"
-            >
-              <img
-                src={getAvatarUrl(preset.style, preset.seed)}
-                alt=""
-                className={`w-12 h-12 rounded bg-slate-50 ${
-                  selectedPreset?.seed === preset.seed && selectedPreset?.style === preset.style
-                    ? "ring-2 ring-brand-500"
-                    : "hover:ring-2 hover:ring-slate-300"
-                }`}
-              />
-            </button>
-          ))}
+        <div>
+          <p className="text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-widest mb-3">Escolha um avatar</p>
+          <div className="grid grid-cols-5 gap-2">
+            {PRESETS.map((preset) => (
+              <button
+                key={`${preset.style}-${preset.seed}`}
+                onClick={() => handlePresetSelect(preset)}
+                className="p-0 rounded-[12px] transition-all flex items-center justify-center overflow-hidden"
+              >
+                <img
+                  src={getAvatarUrl(preset.style, preset.seed)}
+                  alt=""
+                  className={`w-[60px] h-[60px] rounded-[12px] bg-[var(--surface-alt)] transition-all ${
+                    selectedPreset?.seed === preset.seed && selectedPreset?.style === preset.style
+                      ? "ring-2 ring-[var(--sage)] shadow-sm scale-[0.95]"
+                      : "hover:ring-2 hover:ring-[var(--border)] hover:bg-[var(--bg)]"
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="border-t border-slate-200 pt-4 mb-4">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Ou envie sua foto</p>
+        <div className="border-t border-[var(--border)] pt-5">
+          <p className="text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-widest mb-3">Ou envie sua foto</p>
           <input
             ref={fileRef}
             type="file"
@@ -136,41 +146,41 @@ export default function AvatarPickerModal({ onClose }) {
           />
           <button
             onClick={() => fileRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-slate-300 hover:border-brand-400 hover:bg-brand-50/50 transition-all w-full justify-center text-sm font-semibold text-slate-500 hover:text-brand-600"
+            className="flex items-center gap-2 px-4 py-3 rounded-[14px] border-2 border-dashed border-[var(--border)] hover:border-[var(--sage)] hover:bg-[var(--sage-light)] dark:hover:bg-[#1A3028] transition-all w-full justify-center text-[13px] font-bold text-[var(--text-secondary)] hover:text-[var(--dark-green)] dark:hover:text-[#5CBF9D]"
           >
             <Upload size={16} />
             Escolher imagem
           </button>
           {uploadFile && (
-            <p className="text-xs text-slate-400 mt-1.5">{uploadFile.name}</p>
+            <p className="text-[11px] text-[var(--text-muted)] mt-2 text-center font-semibold truncate px-2">{uploadFile.name}</p>
           )}
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-600 font-medium">
+          <div className="p-3 rounded-[12px] bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 text-[13px] text-red-600 dark:text-red-400 font-medium">
             {error}
           </div>
         )}
 
-        <div className="flex items-center gap-2 border-t border-slate-200 pt-4">
-          <button
-            onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all"
-          >
+        <div className="flex items-center gap-3 pt-2 border-t border-[var(--border)]">
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-[12px] border border-[var(--border)] text-[13px] font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors">
             Cancelar
           </button>
+          
           {user?.avatarUrl && (
             <button
               onClick={handleRemove}
-              className="py-2.5 px-4 rounded-xl border border-red-200 text-sm font-semibold text-red-500 hover:bg-red-50 transition-all"
+              className="w-[42px] h-[42px] rounded-[12px] border border-red-200 dark:border-red-900/30 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center justify-center transition-colors flex-shrink-0"
+              title="Remover avatar"
             >
-              Remover
+              <Trash2 size={16} />
             </button>
           )}
+          
           <button
             onClick={handleSave}
             disabled={saving || (!selectedPreset && !uploadFile)}
-            className="flex-1 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-bold hover:bg-brand-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 py-2.5 rounded-[12px] bg-[var(--sage)] text-white text-[13px] font-bold hover:bg-[var(--dark-green)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             {saving ? "Salvando..." : "Salvar"}
           </button>
