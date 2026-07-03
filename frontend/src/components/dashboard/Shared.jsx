@@ -15,6 +15,26 @@ export function fmtPct(current, previous) {
   return pct > 0 ? `+${pct}%` : `${pct}%`;
 }
 
+export function getAvatarProps(name) {
+  const cleanName = (name || "Paciente").trim();
+  const initials = cleanName.length >= 2 ? cleanName.substring(0, 2).toUpperCase() : cleanName.toUpperCase();
+
+  const colors = [
+    { bg: "var(--sage-light)", text: "var(--dark-green)" },
+    { bg: "var(--blue-light)", text: "var(--blue)" },
+    { bg: "var(--peach-light)", text: "var(--peach)" },
+    { bg: "var(--purple-light)", text: "var(--purple)" }
+  ];
+  
+  let hash = 0;
+  for (let i = 0; i < cleanName.length; i++) {
+    hash = cleanName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  
+  const color = colors[Math.abs(hash) % colors.length];
+  return { initials, color };
+}
+
 export function KpiCard({ icon, iconBg, iconColor, label, value, sub, trend, urgent }) {
   let trendEl = null;
   if (trend) {
@@ -47,31 +67,16 @@ export function KpiCard({ icon, iconBg, iconColor, label, value, sub, trend, urg
 
 const STATUS_CONFIG = {
   presente:   { dot: "#5CBF90", bg: "var(--status-presente-bg)",    label: "Presente",   text: "var(--status-presente-text)" },
-  falta:      { dot: "#F8A268", bg: "var(--status-falta-bg)",       label: "Falta",      text: "var(--status-falta-text)" },
+  falta:      { dot: "#EF4444", bg: "var(--chip-falta-bg)",         label: "Falta",      text: "var(--chip-falta-text)" },
   justificada:{ dot: "#7C5CFF", bg: "var(--status-justificada-bg)",  label: "Justificada",text: "var(--status-justificada-text)" },
-  confirmado: { dot: "#2E7DFF", bg: "var(--status-confirmado-bg)",   label: "Confirmado", text: "var(--status-confirmado-text)" },
+  confirmado: { dot: "#F8A268", bg: "var(--peach-light)",            label: "Agendado",   text: "#C97840" },
 };
 
 export function TimelineRow({ app, onClick }) {
   const status = app.attendance?.status || "confirmado";
   const sc = STATUS_CONFIG[status] || STATUS_CONFIG.confirmado;
   const patientName = app.patient?.name || "Paciente";
-
-  const cleanName = patientName.trim();
-  const ini = cleanName.length >= 2 ? cleanName.substring(0, 2).toUpperCase() : cleanName.toUpperCase();
-
-  const colors = [
-    { bg: "var(--sage-light)", text: "var(--dark-green)" },
-    { bg: "var(--blue-light)", text: "var(--blue)" },
-    { bg: "var(--peach-light)", text: "var(--peach)" },
-    { bg: "var(--purple-light)", text: "var(--purple)" }
-  ];
-  let hash = 0;
-  for (let i = 0; i < patientName.length; i++) {
-    hash = patientName.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const colorIndex = Math.abs(hash) % colors.length;
-  const avatarColor = colors[colorIndex];
+  const { initials, color: avatarColor } = getAvatarProps(patientName);
 
   return (
     <div
@@ -85,10 +90,10 @@ export function TimelineRow({ app, onClick }) {
         </span>
       </div>
       <div 
-        className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-[10px] font-extrabold flex-shrink-0"
+        className="w-[30px] h-[30px] rounded-[8px] flex items-center justify-center text-[10px] font-extrabold flex-shrink-0"
         style={{ backgroundColor: avatarColor.bg, color: avatarColor.text }}
       >
-        {ini}
+        {initials}
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-[13px] font-bold text-[var(--text-primary)] truncate m-0 leading-tight">

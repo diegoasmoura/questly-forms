@@ -1,4 +1,5 @@
 import { CakeSlice } from "lucide-react";
+import { getAvatarProps } from "./Shared";
 
 export function BirthdaysWidget({ upcomingBirthdays }) {
   return (
@@ -13,11 +14,14 @@ export function BirthdaysWidget({ upcomingBirthdays }) {
         ) : (
           <div className="flex flex-col gap-2.5">
             {upcomingBirthdays.slice(0, 4).map((p) => {
-              const ini = p.name?.split(" ")?.map((n) => n[0])?.join("")?.toUpperCase()?.slice(0, 2) || "?";
+              const { initials, color: avatarColor } = getAvatarProps(p.name);
               return (
                 <div key={p.id} className="flex items-center gap-2.5">
-                  <div className="w-[30px] h-[30px] rounded-full bg-gradient-to-br from-[#F8A26B] to-[#7C5CFF] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
-                    {ini}
+                  <div 
+                    className="w-[30px] h-[30px] rounded-[8px] flex items-center justify-center text-[10px] font-extrabold flex-shrink-0"
+                    style={{ backgroundColor: avatarColor.bg, color: avatarColor.text }}
+                  >
+                    {initials}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-semibold text-[var(--text-primary)] truncate leading-tight">{p.name.split(" ")[0]}</p>
