@@ -99,14 +99,14 @@ const BotanicalSprig = ({ className = "" }) => (
   </svg>
 );
 
-/* ─── Mancha aquarelada com blur ──────────────────────────────────── */
-const WatercolorBlob = ({ className = "", color = "var(--sage-light)" }) => (
+/* ─── Mancha aquarelada com blur (Efeito "Aura") ────────────────────── */
+const WatercolorBlob = ({ className = "", color = "var(--sage)", opacity = 0.12 }) => (
   <div
     className={`rounded-[60%_40%_55%_45%_/_50%_60%_40%_55%] ${className}`}
     style={{
       background: color,
-      filter: "blur(40px)",
-      opacity: 0.15,
+      filter: "blur(80px)",
+      opacity: opacity,
     }}
   />
 );
@@ -207,43 +207,44 @@ export default function DecorativeElements() {
       className="fixed inset-0 pointer-events-none overflow-hidden z-0"
       aria-hidden="true"
     >
-      {/* Canto superior esquerdo — folha grande verde-sage (empurrada para a borda) */}
-      <LeafDetailed className="absolute -top-16 -left-16 w-32 h-48 text-[var(--sage)] opacity-[0.10] rotate-12" />
-
-      {/* Canto inferior direito — folha espelhada verde escuro (escondida no mobile) */}
-      <LeafDetailed className="hidden md:block absolute -bottom-20 -right-20 w-48 h-64 text-[var(--dark-green)] opacity-[0.08] -rotate-6 scale-x-[-1]" />
-
-      {/* Canto superior direito — galho botânico pêssego (empurrada para a borda e escondida no mobile) */}
-      <BotanicalSprig className="hidden md:block absolute -top-12 -right-16 w-40 h-40 text-[var(--peach)] opacity-[0.12] rotate-45" />
-
-      {/* Centro esquerda — galho botânico roxo suave (escondido no mobile para não passar por cima dos cards) */}
-      <BotanicalSprig className="hidden md:block absolute top-[40%] -left-16 w-32 h-32 text-[var(--purple)] opacity-[0.08] -rotate-30 scale-x-[-1]" />
-
-      {/* Manchas aquareladas — nas extremidades absolutas */}
+      {/* 🌟 1. Aura Aquarelada (Blur Gigante, fica totalmente atrás e suave) */}
+      {/* Aura pêssego no canto superior direito (atrás do header/perfil) */}
       <WatercolorBlob
-        className="absolute -top-32 -right-10 w-64 h-64"
-        color="var(--peach-light)"
+        className="absolute -top-32 -right-32 w-[500px] h-[500px]"
+        color="var(--peach)"
+        opacity={0.08}
       />
+      {/* Aura verde-sage no canto inferior esquerdo (atrás da navegação/sidebar) */}
       <WatercolorBlob
-        className="absolute -bottom-32 -left-10 w-64 h-64"
-        color="var(--sage-light)"
+        className="absolute -bottom-40 -left-32 w-[600px] h-[600px]"
+        color="var(--sage)"
+        opacity={0.07}
       />
+      {/* Aura roxa (apenas Desktop) para aquecer o centro-direita */}
       <WatercolorBlob
-        className="hidden lg:block absolute top-[35%] -right-32 w-48 h-48"
-        color="var(--purple-light)"
+        className="hidden lg:block absolute top-[30%] -right-40 w-[450px] h-[450px]"
+        color="var(--purple)"
+        opacity={0.04}
       />
 
-      {/* Círculos orgânicos (apenas desktop para não poluir o mobile) */}
-      <OrganicCircle className="hidden md:block absolute top-[20%] -right-10 w-44 h-44 text-[var(--peach)] opacity-30" />
-      <OrganicCircle className="hidden md:block absolute bottom-[20%] -left-10 w-36 h-36 text-[var(--sage)] opacity-25" />
+      {/* 🍃 2. Folhagem Sutil (Apenas as pontas e sem atrapalhar conteúdo) */}
+      {/* Folha gigante no canto inferior direito, quase transparente */}
+      <LeafDetailed className="hidden lg:block absolute -bottom-16 -right-16 w-[350px] h-[400px] text-[var(--sage)] opacity-[0.05] -rotate-12 scale-x-[-1]" />
+      
+      {/* Galho botânico saindo sutilmente do topo esquerdo no desktop */}
+      <BotanicalSprig className="hidden md:block absolute -top-10 -left-10 w-48 h-48 text-[var(--dark-green)] opacity-[0.04] rotate-12" />
 
-      {/* Pontos de tinta — nos cantos */}
-      <InkDots className="absolute top-2 left-2 w-32 h-16 text-[var(--dark-green)] opacity-40" />
-      <InkDots className="absolute bottom-4 right-2 w-32 h-16 text-[var(--purple)] opacity-30" />
+      {/* 🎨 3. Gotas de Tinta (Espalhadas em áreas geralmente vazias) */}
+      {/* Desktop: Perto do título da Home ou começo dos widgets */}
+      <InkDots className="hidden lg:block absolute top-[10%] left-[22%] w-32 h-16 text-[var(--dark-green)] opacity-[0.08]" />
+      {/* Mobile: Bem discreto no topo */}
+      <InkDots className="absolute top-2 left-4 w-24 h-12 text-[var(--sage)] opacity-[0.06] lg:hidden" />
 
-      {/* Pinceladas horizontais (apenas desktop para não cruzar textos no mobile) */}
-      <HandBrushStroke className="hidden lg:block absolute bottom-8 -left-10 w-80 h-9 text-[var(--sage)]" />
-      <HandBrushStroke className="hidden lg:block absolute top-[50%] -right-16 w-64 h-7 text-[var(--peach)] rotate-[-3deg]" />
+      {/* 🖌️ 4. Pincelada Orgânica (Cortando o espaço negativo superior no desktop) */}
+      <HandBrushStroke className="hidden lg:block absolute top-[18%] left-[20%] w-[600px] h-10 text-[var(--peach)] opacity-[0.04] rotate-[-2deg]" />
+      
+      {/* ⭕ Círculos Imperfeitos */}
+      <OrganicCircle className="hidden xl:block absolute bottom-[25%] right-[10%] w-72 h-72 text-[var(--sage)] opacity-[0.05]" />
     </div>
   );
 }
