@@ -56,29 +56,21 @@ const InkDots = ({ className = "" }) => (
 export default function DecorativeElements() {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
-      {/* ─── MOBILE & DESKTOP ─── */}
-      
-      {/* Galho verde saindo sutilmente da esquerda (posição segura) */}
-      <BotanicalSprig className="absolute top-[10%] -left-8 w-40 h-40 opacity-90 rotate-12" />
-
-      {/* Círculo Pêssego limpo no canto superior direito */}
-      <PeachCircle className="absolute -top-10 -right-10 w-40 h-40 opacity-80" />
-
-      {/* Canto inferior esquerdo: Mancha Pêssego + Pincelada Verde */}
-      <div className="absolute bottom-4 -left-10 opacity-90 scale-75 md:scale-100 origin-bottom-left">
+      {/* ─── 1. Canto Superior Esquerdo (Atrás do Header) ─── */}
+      <div className="absolute -top-6 -left-6 opacity-[0.08] scale-75 md:scale-100 origin-top-left">
         <PeachBlob className="absolute top-0 left-0 w-64 h-48" />
         <SageBrush className="absolute top-12 left-4 w-72 h-20 rotate-[-10deg]" />
       </div>
 
-      {/* Pontilhados orgânicos para dar o tom artesanal */}
-      <InkDots className="absolute top-[25%] right-6 w-24 h-20" />
-      <InkDots className="absolute bottom-[20%] left-6 w-24 h-20 hidden md:block" />
+      {/* ─── 2. Canto Central/Inferior Direito (Lembretes) ─── */}
+      <InkDots className="absolute bottom-[10%] right-8 w-24 h-20 opacity-[0.05]" />
 
-      {/* ─── APENAS DESKTOP ─── */}
-      {/* Mais galhos e formas preenchendo as grandes áreas cinzas/brancas */}
-      <BotanicalSprig className="hidden lg:block absolute bottom-12 -right-6 w-56 h-56 opacity-80 scale-x-[-1] -rotate-12" />
-      <PeachBlob className="hidden lg:block absolute top-[40%] -right-16 w-80 h-64 opacity-60 rotate-45" />
-      <PeachCircle className="hidden xl:block absolute top-[55%] left-[5%] w-32 h-32 opacity-60" />
+      {/* ─── 3. Canto Inferior Direito (Agenda/Perfil) ─── */}
+      <BotanicalSprig className="absolute -bottom-10 -right-6 w-56 h-56 opacity-[0.06] scale-x-[-1] -rotate-12" />
+
+      {/* ─── 4. Canto Central Esquerdo / Topo Direito ─── */}
+      <PeachCircle className="absolute top-[30%] -right-12 w-48 h-48 opacity-[0.05]" />
+      <BotanicalSprig className="hidden md:block absolute top-[40%] -left-12 w-40 h-40 opacity-[0.05] rotate-12" />
     </div>
   );
 }
