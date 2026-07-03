@@ -31,6 +31,19 @@
   --status-justificada-text: #5B21B6;
   --status-confirmado-bg: #E7F0FF;
   --status-confirmado-text: #1D4ED8;
+
+  /* Chips de Ação do Modal (inativo) — Modo Claro: texto escuro sobre fundo suave */
+  --chip-presente-bg: #E4F5EE;
+  --chip-presente-text: #2D6A57;
+  --chip-falta-bg: #FEE2E2;
+  --chip-falta-text: #B91C1C;
+  --chip-justificado-bg: #FEF3C7;
+  --chip-justificado-text: #92400E;
+
+  /* Bordas dos botões de ação — Modo Claro */
+  --btn-action-primary-border: rgba(46, 125, 255, 0.35);
+  --btn-action-neutral-border: #CBD5E1;
+  --btn-action-danger-border: rgba(239, 68, 68, 0.35);
 }
 
 .dark {
@@ -57,6 +70,19 @@
   --status-justificada-text: #A78BFA;
   --status-confirmado-bg: #152030;
   --status-confirmado-text: #60A5FA;
+
+  /* Chips de Ação do Modal (inativo) — Modo Escuro: texto claro/luminoso para contraste WCAG AA */
+  --chip-presente-bg: rgba(92, 191, 157, 0.15);
+  --chip-presente-text: #6EE7B7;
+  --chip-falta-bg: rgba(239, 68, 68, 0.15);
+  --chip-falta-text: #FCA5A5;
+  --chip-justificado-bg: rgba(245, 158, 11, 0.15);
+  --chip-justificado-text: #FDE68A;
+
+  /* Bordas dos botões de ação — Modo Escuro: mais opacas para vencer o fundo escuro */
+  --btn-action-primary-border: rgba(46, 125, 255, 0.60);
+  --btn-action-neutral-border: #3D4F6A;
+  --btn-action-danger-border: rgba(239, 68, 68, 0.55);
 }
 
 @layer base {

@@ -31,4 +31,9 @@ Este documento estabelece as regras e padrões de arquitetura para o projeto Que
 - **Dados Sensíveis:** Não commite chaves de API cruas, senhas de Supabase ou strings de banco de dados diretamente no código. Utilize variáveis de ambiente (`.env`).
 - **Tratamento de Exceções:** Todos os componentes devem prever estado de `loading` (carregamento) e `error` (falha na API), além do `empty state` (nenhum dado disponível).
 
+## 5. Modais e Fluxo de UI
+- **Pilha de Modais:** Mantenha a hierarquia de `z-index` clara quando modais se sobrepõem (ex: `z-[60]` para o principal, `z-[70]` para secundários, `z-[80]` para confirmação). Quando um modal secundário for aberto, evite ocultar completamente o anterior (não usar hidden), deixando-o atrás do backdrop para manter o contexto visual, a menos que especificado de outra forma.
+- **Fechamento em Cascata:** Ao concluir uma ação de sucesso em um modal interno (como excluir ou confirmar reagendamento), feche a pilha inteira de modais para retornar imediatamente à tela principal, evitando múltiplos cliques para sair.
+- **Botões de Ação (Listas Verticais):** Grupos de ações em modais devem manter uma consistência visual para reduzir a carga cognitiva. Alinhe conteúdo à esquerda (`justify-start`) e uniformize cores base (ex: `var(--surface-alt)` e `var(--text-secondary)`), destacando cores apenas nos ícones quando estritamente necessário (ex: ícone do WhatsApp).
+
 Siga estas regras em toda iteração do projeto para assegurar que a base de código permaneça escalável, limpa e adequada ao trabalho em equipe.

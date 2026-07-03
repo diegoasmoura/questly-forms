@@ -58,7 +58,7 @@ export default function Home() {
   }
 
   return (
-    <div className="p-6 pb-6 animate-fade-in flex flex-col gap-5 min-h-full relative overflow-y-auto">
+    <div className="p-6 pb-6 animate-fade-in flex flex-col gap-5 min-h-full min-w-0 relative overflow-y-auto">
       <DecorativeElements />
 
       {/* TOP BAR */}
@@ -127,7 +127,7 @@ export default function Home() {
       </div>
 
       {/* WIDGETS */}
-      <div className="flex flex-col lg:flex-row gap-4 items-stretch flex-1 min-h-0">
+      <div className="flex flex-col lg:flex-row gap-4 items-stretch flex-1 min-h-0 min-w-0">
         <AgendaWidget today={new Date()} todayEvents={todayEvents} upcomingDays={upcomingDays} TimelineRow={TimelineRow} onEventClick={(app) => setDetailModal({ open: true, app })} />
         <div className="w-full lg:w-[40%] flex flex-col gap-4 min-h-0">
           <RevenueWidget revenueData={revenueData} />

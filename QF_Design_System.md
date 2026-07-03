@@ -205,7 +205,15 @@ Avatar:        gradiente linear sage→peach quando sem foto
 Badge sino:    -top-[3px] -right-[3px], 7px, bg peach, border bg
 ```
 
-### 7.6 Sidebar
+### 7.6 Botões de Ação Secundários (Listas em Modais)
+
+```
+Layout:        flex, items-center, justify-start (alinhamento à esquerda), gap-3
+Cores base:    bg-[var(--surface-alt)], text-[var(--text-secondary)], border-[var(--btn-action-neutral-border)]
+Ícones:        Manter cores neutras (text-muted) na maioria, exceto quando representando marca externa (ex: WhatsApp verde #25D366)
+```
+
+### 7.7 Sidebar
 
 ```
 Logo:       "QF" em Caveat Brush, gradiente sage→dark-green
