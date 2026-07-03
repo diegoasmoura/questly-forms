@@ -66,7 +66,7 @@ export default function Home() {
       <DecorativeElements />
 
       {/* TOP BAR */}
-      <div className="relative flex items-start justify-between gap-5 pb-5 border-b border-[var(--border)] overflow-visible flex-shrink-0">
+      <div className="relative z-10 flex items-start justify-between gap-5 pb-5 border-b border-[var(--border)] overflow-visible flex-shrink-0">
         <span className="absolute w-[150px] h-[150px] rounded-full bg-[var(--peach-light)] opacity-20 blur-3xl -top-[60px] right-24 pointer-events-none" />
         <span className="absolute w-[90px] h-[90px] rounded-full bg-[var(--sage-light)] opacity-20 blur-3xl -bottom-[45px] right-[280px] pointer-events-none" />
         <span className="absolute w-[70px] h-[70px] rounded-full bg-[var(--purple-light)] opacity-20 blur-3xl top-[8px] -right-[8px] pointer-events-none" />
@@ -120,7 +120,7 @@ export default function Home() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3 flex-shrink-0">
+      <div className="relative z-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3 flex-shrink-0">
         <KpiCard icon={<Calendar size={16} />} iconBg="var(--blue-light)" iconColor="var(--blue)" label="Sessões hoje" value={todayEvents.length} sub={`${todayEvents.filter(e => e.attendance?.status === "presente").length} confirmadas`} />
         <KpiCard icon={<CheckCheck size={16} />} iconBg="var(--sage-light)" iconColor="var(--sage)" label="Presença no mês" value={`${taxaPresenca}%`} trend={{ current: taxaPresenca, previous: prevTaxaPresenca, unit: "%" }} sub={`${presencas} de ${totalMesAtendimentos} sessões`} />
         <KpiCard icon={<Banknote size={16} />} iconBg="var(--purple-light)" iconColor="var(--purple)" label="Sessões a cobrar" value={aReceberCount} sub={aReceberCount > 0 ? "sessões sem pagamento" : "tudo em dia ✓"} />
@@ -129,7 +129,7 @@ export default function Home() {
       </div>
 
       {/* WIDGETS */}
-      <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:flex-1 lg:min-h-0 min-w-0 flex-shrink-0 pb-10">
+      <div className="relative z-10 flex flex-col lg:flex-row gap-4 items-stretch lg:flex-1 lg:min-h-0 min-w-0 flex-shrink-0 pb-10">
         <AgendaWidget today={new Date()} todayEvents={todayEvents} upcomingDays={upcomingDays} TimelineRow={TimelineRow} onEventClick={(app) => setDetailModal({ open: true, app })} />
         <div className="w-full lg:w-[40%] flex flex-col gap-4 lg:min-h-0 flex-shrink-0">
           <RevenueWidget revenueData={revenueData} />
