@@ -1,27 +1,28 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
+import { Suspense, lazy } from "react";
 
 // Components
 import Layout from "./components/Layout";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import ToastContainer from "./components/Toast";
 
-// Pages
-import Landing from "./pages/Landing";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Home from "./pages/Home";
-import Patients from "./pages/Patients";
-import PatientRecord from "./pages/PatientRecord";
-import MyForms from "./pages/MyForms";
-import Library from "./pages/Library";
-import CustomFormBuilder from "./pages/CustomFormBuilder";
-import FormPreview from "./pages/FormPreview";
-import FormResponses from "./pages/FormResponses";
-import ResponseDetail from "./pages/ResponseDetail";
-import ShareLink from "./pages/ShareLink";
-import PatientForm from "./pages/PatientForm";
-import Agenda from "./pages/Agenda";
+// Pages (Lazy Loaded for Code-Splitting)
+const Landing = lazy(() => import("./pages/Landing"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const Home = lazy(() => import("./pages/Home"));
+const Patients = lazy(() => import("./pages/Patients"));
+const PatientRecord = lazy(() => import("./pages/PatientRecord"));
+const MyForms = lazy(() => import("./pages/MyForms"));
+const Library = lazy(() => import("./pages/Library"));
+const CustomFormBuilder = lazy(() => import("./pages/CustomFormBuilder"));
+const FormPreview = lazy(() => import("./pages/FormPreview"));
+const FormResponses = lazy(() => import("./pages/FormResponses"));
+const ResponseDetail = lazy(() => import("./pages/ResponseDetail"));
+const ShareLink = lazy(() => import("./pages/ShareLink"));
+const PatientForm = lazy(() => import("./pages/PatientForm"));
+const Agenda = lazy(() => import("./pages/Agenda"));
 
 function LoadingScreen() {
   return (
@@ -55,30 +56,32 @@ export default function App() {
   return (
     <ErrorBoundary>
       <ToastContainer />
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-        <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-        
-        <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-        <Route path="/dashboard" element={<Navigate to="/home" replace />} />
-        <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
-        <Route path="/patients/:id" element={<ProtectedRoute><PatientRecord /></ProtectedRoute>} />
-        <Route path="/agenda" element={<ProtectedRoute><Agenda /></ProtectedRoute>} />
-        <Route path="/my-forms" element={<ProtectedRoute><MyForms /></ProtectedRoute>} />
-        <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
-        
-        <Route path="/forms/new" element={<ProtectedRoute><CustomFormBuilder /></ProtectedRoute>} />
-        <Route path="/forms/:id/edit" element={<ProtectedRoute><CustomFormBuilder /></ProtectedRoute>} />
-        <Route path="/forms/:id/preview" element={<ProtectedRoute><FormPreview /></ProtectedRoute>} />
-        <Route path="/forms/:id/responses" element={<ProtectedRoute><FormResponses /></ProtectedRoute>} />
-        <Route path="/responses/:id" element={<ProtectedRoute><ResponseDetail /></ProtectedRoute>} />
-        
-        <Route path="/share/:token" element={<ShareLink />} />
-        <Route path="/form/:token" element={<PatientForm />} />
-        
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <Suspense fallback={<LoadingScreen />}>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+          
+          <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<Navigate to="/home" replace />} />
+          <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
+          <Route path="/patients/:id" element={<ProtectedRoute><PatientRecord /></ProtectedRoute>} />
+          <Route path="/agenda" element={<ProtectedRoute><Agenda /></ProtectedRoute>} />
+          <Route path="/my-forms" element={<ProtectedRoute><MyForms /></ProtectedRoute>} />
+          <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
+          
+          <Route path="/forms/new" element={<ProtectedRoute><CustomFormBuilder /></ProtectedRoute>} />
+          <Route path="/forms/:id/edit" element={<ProtectedRoute><CustomFormBuilder /></ProtectedRoute>} />
+          <Route path="/forms/:id/preview" element={<ProtectedRoute><FormPreview /></ProtectedRoute>} />
+          <Route path="/forms/:id/responses" element={<ProtectedRoute><FormResponses /></ProtectedRoute>} />
+          <Route path="/responses/:id" element={<ProtectedRoute><ResponseDetail /></ProtectedRoute>} />
+          
+          <Route path="/share/:token" element={<ShareLink />} />
+          <Route path="/form/:token" element={<PatientForm />} />
+          
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     </ErrorBoundary>
   );
 }

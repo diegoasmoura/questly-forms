@@ -6,6 +6,11 @@ import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import "./index.css";
 
+import { registerSW } from 'virtual:pwa-register';
+
+// Registra o Service Worker (PWA)
+registerSW({ immediate: true });
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
