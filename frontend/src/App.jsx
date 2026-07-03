@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import { Suspense, lazy } from "react";
@@ -7,6 +8,12 @@ import Layout from "./components/Layout";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import ToastContainer from "./components/Toast";
 
+// Pages estáticas para rota crítica (LCP inicial instantâneo)
+import Landing from "./pages/Landing";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+
+// Pages carregadas sob demanda (Lazy Loading)
 // Pages (Lazy Loaded for Code-Splitting)
 const Landing = lazy(() => import("./pages/Landing"));
 const Login = lazy(() => import("./pages/Login"));

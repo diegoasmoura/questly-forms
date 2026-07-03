@@ -5,6 +5,10 @@ import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import "./index.css";
+import { registerSW } from "virtual:pwa-register";
+
+// Registro automático do Service Worker do PWA
+registerSW({ immediate: true });
 
 import { registerSW } from 'virtual:pwa-register';
 
