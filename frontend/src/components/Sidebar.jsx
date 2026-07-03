@@ -36,7 +36,7 @@ export default function Sidebar() {
 
   return (
     <div
-      className={`bg-[var(--surface)] border-r border-[var(--border)] flex flex-col relative h-full flex-shrink-0 z-[10000] transition-[width] duration-300 ease-in-out ${
+      className={`hidden md:flex bg-[var(--surface)] border-r border-[var(--border)] flex-col relative h-full flex-shrink-0 z-[10000] transition-[width] duration-300 ease-in-out ${
         collapsed ? "w-[84px]" : "w-[220px]"
       }`}
     >

@@ -105,8 +105,8 @@ const WatercolorBlob = ({ className = "", color = "var(--sage-light)" }) => (
     className={`rounded-[60%_40%_55%_45%_/_50%_60%_40%_55%] ${className}`}
     style={{
       background: color,
-      filter: "blur(28px)",
-      opacity: 0.55,
+      filter: "blur(40px)",
+      opacity: 0.15,
     }}
   />
 );
@@ -125,7 +125,7 @@ const OrganicCircle = ({ className = "" }) => (
       stroke="currentColor"
       strokeWidth="1.2"
       fill="none"
-      opacity="0.25"
+      opacity="0.10"
     />
     {/* Círculo interior */}
     <path
@@ -133,10 +133,10 @@ const OrganicCircle = ({ className = "" }) => (
       stroke="currentColor"
       strokeWidth="0.9"
       fill="none"
-      opacity="0.15"
+      opacity="0.08"
     />
     {/* Preenchimento muito suave no centro */}
-    <circle cx="100" cy="100" r="30" fill="currentColor" opacity="0.05" />
+    <circle cx="100" cy="100" r="30" fill="currentColor" opacity="0.02" />
   </svg>
 );
 
@@ -201,50 +201,49 @@ const HandBrushStroke = ({ className = "" }) => (
   </svg>
 );
 
-/* ─── Composição padrão (layer fixo de fundo) ─────────────────────── */
 export default function DecorativeElements() {
   return (
     <div
       className="fixed inset-0 pointer-events-none overflow-hidden z-0"
       aria-hidden="true"
     >
-      {/* Canto superior esquerdo — folha grande verde-sage */}
-      <LeafDetailed className="absolute -top-10 -left-6 w-28 h-40 text-[var(--sage)] opacity-[0.18] rotate-12" />
+      {/* Canto superior esquerdo — folha grande verde-sage (empurrada para a borda) */}
+      <LeafDetailed className="absolute -top-16 -left-16 w-32 h-48 text-[var(--sage)] opacity-[0.10] rotate-12" />
 
-      {/* Canto inferior direito — folha espelhada verde escuro */}
-      <LeafDetailed className="absolute -bottom-8 -right-4 w-32 h-44 text-[var(--dark-green)] opacity-[0.14] -rotate-6 scale-x-[-1]" />
+      {/* Canto inferior direito — folha espelhada verde escuro (escondida no mobile) */}
+      <LeafDetailed className="hidden md:block absolute -bottom-20 -right-20 w-48 h-64 text-[var(--dark-green)] opacity-[0.08] -rotate-6 scale-x-[-1]" />
 
-      {/* Canto superior direito — galho botânico pêssego */}
-      <BotanicalSprig className="absolute top-8 -right-6 w-36 h-36 text-[var(--peach)] opacity-[0.20] rotate-45" />
+      {/* Canto superior direito — galho botânico pêssego (empurrada para a borda e escondida no mobile) */}
+      <BotanicalSprig className="hidden md:block absolute -top-12 -right-16 w-40 h-40 text-[var(--peach)] opacity-[0.12] rotate-45" />
 
-      {/* Centro esquerda — galho botânico roxo suave */}
-      <BotanicalSprig className="absolute top-1/2 -left-8 w-28 h-28 text-[var(--purple)] opacity-[0.15] -rotate-30 scale-x-[-1]" />
+      {/* Centro esquerda — galho botânico roxo suave (escondido no mobile para não passar por cima dos cards) */}
+      <BotanicalSprig className="hidden md:block absolute top-[40%] -left-16 w-32 h-32 text-[var(--purple)] opacity-[0.08] -rotate-30 scale-x-[-1]" />
 
-      {/* Manchas aquareladas — fora das áreas de card */}
+      {/* Manchas aquareladas — nas extremidades absolutas */}
       <WatercolorBlob
-        className="absolute -top-20 right-[15%] w-64 h-64"
+        className="absolute -top-32 -right-10 w-64 h-64"
         color="var(--peach-light)"
       />
       <WatercolorBlob
-        className="absolute bottom-[-60px] left-[8%] w-56 h-56"
+        className="absolute -bottom-32 -left-10 w-64 h-64"
         color="var(--sage-light)"
       />
       <WatercolorBlob
-        className="absolute top-[35%] -right-20 w-48 h-48"
+        className="hidden lg:block absolute top-[35%] -right-32 w-48 h-48"
         color="var(--purple-light)"
       />
 
-      {/* Círculos orgânicos */}
-      <OrganicCircle className="absolute top-[18%] right-[10%] w-44 h-44 text-[var(--peach)] opacity-60" />
-      <OrganicCircle className="absolute bottom-[22%] left-[5%] w-36 h-36 text-[var(--sage)] opacity-50" />
+      {/* Círculos orgânicos (apenas desktop para não poluir o mobile) */}
+      <OrganicCircle className="hidden md:block absolute top-[20%] -right-10 w-44 h-44 text-[var(--peach)] opacity-30" />
+      <OrganicCircle className="hidden md:block absolute bottom-[20%] -left-10 w-36 h-36 text-[var(--sage)] opacity-25" />
 
-      {/* Pontos de tinta — espalhados no topo */}
-      <InkDots className="absolute top-16 left-[15%] w-44 h-20 text-[var(--dark-green)] opacity-80" />
-      <InkDots className="absolute bottom-24 right-[20%] w-40 h-16 text-[var(--purple)] opacity-70" />
+      {/* Pontos de tinta — nos cantos */}
+      <InkDots className="absolute top-2 left-2 w-32 h-16 text-[var(--dark-green)] opacity-40" />
+      <InkDots className="absolute bottom-4 right-2 w-32 h-16 text-[var(--purple)] opacity-30" />
 
-      {/* Pinceladas horizontais — zona inferior e média */}
-      <HandBrushStroke className="absolute bottom-16 left-[10%] w-80 h-9 text-[var(--sage)]" />
-      <HandBrushStroke className="absolute top-[55%] right-[5%] w-64 h-7 text-[var(--peach)] rotate-[-3deg]" />
+      {/* Pinceladas horizontais (apenas desktop para não cruzar textos no mobile) */}
+      <HandBrushStroke className="hidden lg:block absolute bottom-8 -left-10 w-80 h-9 text-[var(--sage)]" />
+      <HandBrushStroke className="hidden lg:block absolute top-[50%] -right-16 w-64 h-7 text-[var(--peach)] rotate-[-3deg]" />
     </div>
   );
 }

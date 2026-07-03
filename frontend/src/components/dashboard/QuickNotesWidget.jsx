@@ -23,7 +23,7 @@ export function QuickNotesWidget({ notes, newNoteText, setNewNoteText, addNote, 
   };
 
   return (
-    <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5 flex flex-col flex-1 min-h-0">
+    <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5 flex flex-col lg:flex-1 min-h-[200px] lg:min-h-0">
       <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--text-muted)] m-0 mb-3 flex-shrink-0">
         Lembretes Rápidos
       </p>

@@ -512,3 +512,12 @@
 .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #475569;
 }
+
+/* Utilitário para ocultar barra de rolagem mas manter o scroll */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
