@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { api } from "../lib/api";
+import AppointmentDetailModal from "../components/AppointmentDetailModal";
 import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import {
   Calendar,
   ChevronLeft,
   ChevronRight,
-  Clock,
   Users,
   Check,
   X,
@@ -17,9 +17,6 @@ import {
   AlertTriangle,
   Plus,
   Pencil,
-  Trash2,
-  Phone,
-  MessageCircle,
   UserCheck,
   UserX
 } from "lucide-react";
@@ -71,8 +68,8 @@ function StatsBar({ appointments, attendances }) {
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Agendamentos</p>
         </div>
       </div>
-      <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-400">
-        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+      <div className="card p-3 flex items-center gap-3 border-l-4 border-brand-400">
+        <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600">
           <UserCheck size={18} />
         </div>
         <div>
@@ -109,13 +106,13 @@ function SessionCard({ session, date, onClick }) {
   const attendanceStatus = attendance?.status;
 
   const statusStyles = {
-    presente: "border-emerald-500 bg-emerald-50/30",
+    presente: "border-brand-500 bg-brand-50/30",
     falta: "border-red-500 bg-red-50/30",
     justificada: "border-amber-500 bg-amber-50/30",
     default: "border-slate-200 bg-white hover:border-slate-300"
   };
 
-  const initials = patientName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+  const initials = patientName.split(" ")[0].slice(0, 2).toUpperCase();
   const firstName = patientName.split(" ")[0] || "?";
 
   return (
@@ -124,7 +121,7 @@ function SessionCard({ session, date, onClick }) {
       className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all shadow-sm ${statusStyles[attendanceStatus] || statusStyles.default}`}
     >
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 ${
-        attendanceStatus === "presente" ? "bg-emerald-100 text-emerald-600" :
+        attendanceStatus === "presente" ? "bg-brand-100 text-brand-600" :
         attendanceStatus === "falta" ? "bg-red-100 text-red-600" :
         attendanceStatus === "justificada" ? "bg-amber-100 text-amber-600" :
         "bg-slate-100 text-slate-500"
@@ -142,7 +139,7 @@ function SessionCard({ session, date, onClick }) {
       </div>
       <div className="shrink-0 ml-2">
         <span className={`w-2 h-2 rounded-full block ${
-          attendanceStatus === "presente" ? "bg-emerald-500" :
+          attendanceStatus === "presente" ? "bg-brand-500" :
           attendanceStatus === "falta" ? "bg-red-500" :
           attendanceStatus === "justificada" ? "bg-amber-500" :
           "bg-slate-300"
@@ -154,7 +151,7 @@ function SessionCard({ session, date, onClick }) {
 
 export default function Agenda() {
   const [calendarDate, setCalendarDate] = useState(new Date());
-  const [selectedDay, setSelectedDay] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [attendances, setAttendances] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -461,6 +458,22 @@ export default function Agenda() {
     ].sort((a, b) => (a.attendance?.sessionTime || a.app.time || "00:00").localeCompare(b.attendance?.sessionTime || b.app.time || "00:00"));
   }, [appointments, attendances]);
 
+  const getMonthSessions = useCallback((month) => {
+    if (!month) return [];
+    const year = month.getFullYear();
+    const monthNum = month.getMonth();
+    const daysInMonth = new Date(year, monthNum + 1, 0).getDate();
+    const result = [];
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, monthNum, day);
+      const sessions = getDayAppointments(date);
+      if (sessions.length > 0) {
+        result.push({ date, sessions });
+      }
+    }
+    return result;
+  }, [getDayAppointments]);
+
   const getMonthEvents = useCallback((month) => {
     if (!month || !appointments.length) return [];
     const year = month.getFullYear();
@@ -687,6 +700,10 @@ export default function Agenda() {
     return getDayAppointments(selectedDay);
   }, [selectedDay, getDayAppointments]);
 
+  const monthSessions = useMemo(() => {
+    return getMonthSessions(calendarDate);
+  }, [calendarDate, getMonthSessions]);
+
   const monthEvents = useMemo(() => {
     return getMonthEvents(calendarDate);
   }, [calendarDate, getMonthEvents]);
@@ -695,7 +712,7 @@ export default function Agenda() {
     <div className="p-4 sm:p-6 h-full flex flex-col space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Agenda</h1>
+          <h1 className="text-2xl font-bold text-slate-800 tracking-tight font-heading">Agenda</h1>
           <p className="text-sm text-slate-500">Gestão de sessões e presenças</p>
         </div>
       </div>
@@ -710,13 +727,13 @@ export default function Agenda() {
         ) : (
           <div className="flex gap-6 h-full animate-fade-in">
             {/* Left: Calendar */}
-            <div className="w-[70%] flex flex-col min-h-0">
+            <div className="w-[75%] flex flex-col min-h-0">
               <div className="p-4 pb-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col flex-1 min-h-0 overflow-hidden agenda-calendar">
                 <BigCalendar
                   localizer={rbcLocalizer}
                   events={monthEvents}
                   date={calendarDate}
-                  onNavigate={setCalendarDate}
+                  onNavigate={(date) => { setCalendarDate(date); setSelectedDay(null); }}
                   onSelectSlot={({ start }) => setSelectedDay(start)}
                   onSelectEvent={(event) => openDetailModal(event.session, event.start)}
                   selectable
@@ -744,7 +761,7 @@ export default function Agenda() {
                       const time = event.session?.app?.time || "";
                       const status = event.session?.attendance?.status;
                       let barColor = "bg-slate-400";
-                      if (status === "presente") barColor = "bg-emerald-500";
+                      if (status === "presente") barColor = "bg-brand-500";
                       else if (status === "falta") barColor = "bg-red-500";
                       else if (status === "justificada") barColor = "bg-amber-500";
                       return (
@@ -758,7 +775,7 @@ export default function Agenda() {
                       const label = format(toolbarProps.date, "MMMM 'de' yyyy", { locale: ptBR });
                       return (
                         <div className="shrink-0 mb-3 flex items-center justify-between">
-                          <p className="text-sm font-bold text-slate-600 capitalize">{label}</p>
+                          <p onClick={() => setSelectedDay(null)} className="text-sm font-bold text-slate-600 capitalize cursor-pointer hover:text-brand-600 transition-colors">{label}</p>
                           <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
                             <button onClick={() => toolbarProps.onNavigate("PREV")} className="p-1 hover:bg-slate-100 rounded transition-all text-slate-500">
                               <ChevronLeft size={16} />
@@ -777,7 +794,7 @@ export default function Agenda() {
                 {/* Legend */}
                 <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-slate-100 shrink-0">
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-brand-500" />
                     <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Realizado</span>
                   </div>
                   <div className="flex items-center gap-1.5">
@@ -797,7 +814,7 @@ export default function Agenda() {
             </div>
 
             {/* Right: Detail Panel */}
-            <div className="w-[30%] flex flex-col gap-3">
+            <div className="w-[25%] flex flex-col gap-3">
               <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight shrink-0">Agendamentos</h3>
               <div className="flex-1 min-h-0">
                 {selectedDay ? (
@@ -817,14 +834,14 @@ export default function Agenda() {
                         </span>
                         <button
                           onClick={() => setShowAddModal(true)}
-                          className="w-8 h-8 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center justify-center transition-all shadow-sm shadow-emerald-200"
+                          className="w-8 h-8 bg-brand-600 hover:bg-brand-700 text-white rounded-lg flex items-center justify-center transition-all shadow-sm shadow-brand-200"
                           title="Adicionar agendamento"
                         >
                           <Plus size={16} />
                         </button>
                       </div>
                     </div>
-                    <div className="space-y-2 overflow-y-auto min-h-0 flex-1">
+                    <div className="space-y-2 overflow-y-auto min-h-0 flex-1 pr-1.5">
                       {daySessions.length === 0 ? (
                         <div className="py-10 text-center">
                           <Users size={24} className="mx-auto text-slate-300 mb-2" />
@@ -843,10 +860,60 @@ export default function Agenda() {
                     </div>
                   </div>
                 ) : (
-                  <div className="h-full flex items-center justify-center">
-                    <div className="text-center py-10">
-                      <Calendar size={32} className="mx-auto text-slate-300 mb-3" />
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Selecione um dia</p>
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col h-full min-h-0">
+                    <div className="flex items-start justify-between mb-4 shrink-0">
+                      <div>
+                        <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Visão do Mês</h4>
+                        <p className="text-xs font-bold text-slate-500 mt-0.5">
+                          {format(calendarDate, "MMMM 'de' yyyy", { locale: ptBR })}
+                        </p>
+                      </div>
+                      <span className="px-2.5 py-1 bg-white border border-slate-200 text-slate-600 text-[10px] font-black rounded-full shadow-sm">
+                        {monthSessions.reduce((acc, d) => acc + d.sessions.length, 0)} SESSÕES
+                      </span>
+                    </div>
+                    <div className="space-y-3 overflow-y-auto min-h-0 flex-1 pr-1.5">
+                      {monthSessions.length === 0 ? (
+                        <div className="py-10 text-center">
+                          <Calendar size={24} className="mx-auto text-slate-300 mb-2" />
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nenhuma sessão neste mês</p>
+                        </div>
+                      ) : (
+                        monthSessions.map(({ date, sessions }) => (
+                          <div key={formatDateKey(date)}>
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <button
+                                onClick={() => setSelectedDay(date)}
+                                className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-brand-600 transition-colors"
+                              >
+                                {format(date, "EEE dd/MM", { locale: ptBR })}
+                              </button>
+                              <div className="flex-1 border-t border-slate-200" />
+                            </div>
+                            {sessions.map((session, idx) => {
+                              const app = session.app;
+                              const name = app.patient?.name || "Paciente";
+                              const initials = name.split(" ")[0].slice(0, 2).toUpperCase();
+                              return (
+                                <div
+                                  key={app.id + idx}
+                                  onClick={() => openDetailModal(session, date)}
+                                  className="flex items-center gap-2 p-3 rounded-lg border border-slate-200 bg-white hover:border-slate-300 transition-all group cursor-pointer mb-1"
+                                >
+                                  <div className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-500 font-black text-[9px] shrink-0">
+                                    {initials}
+                                  </div>
+                                  <p className="text-xs font-bold text-slate-800 truncate flex-1 min-w-0 group-hover:text-slate-900 transition-colors">
+                                    {name}
+                                  </p>
+                                  <span className="text-[10px] font-bold text-slate-500 shrink-0">{app.time} &bull; {app.duration}min</span>
+                                  <ChevronRight size={13} className="text-slate-300 group-hover:text-brand-500 group-hover:translate-x-0.5 transition-all shrink-0" />
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 )}
@@ -857,7 +924,7 @@ export default function Agenda() {
       </div>
 
       {justModal.open && createPortal(
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[9999]" onClick={() => setJustModal({ ...justModal, open: false })}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={() => setJustModal({ ...justModal, open: false })}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-6">
               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${justModal.isEdit ? "bg-amber-100 text-amber-600" : "bg-slate-100 text-slate-600"}`}>
@@ -968,7 +1035,7 @@ export default function Agenda() {
       )}
 
       {confirmModal.open && createPortal(
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[9999]" onClick={() => !confirmModal.loading && setConfirmModal({ ...confirmModal, open: false })}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={() => !confirmModal.loading && setConfirmModal({ ...confirmModal, open: false })}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
             <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-6 mx-auto">
               <AlertTriangle size={32} />
@@ -997,7 +1064,7 @@ export default function Agenda() {
       )}
 
       {showAddModal && createPortal(
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[9999]" onClick={() => setShowAddModal(false)}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={() => setShowAddModal(false)}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-slate-100 text-slate-600 rounded-2xl flex items-center justify-center">
@@ -1061,7 +1128,7 @@ export default function Agenda() {
                     type="checkbox"
                     checked={addForm.recurring}
                     onChange={e => setAddForm({ ...addForm, recurring: e.target.checked })}
-                    className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    className="w-5 h-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                   />
                   <div>
                     <span className="text-sm font-bold text-slate-700">
@@ -1078,7 +1145,7 @@ export default function Agenda() {
                     <input
                       type="number"
                       min={0}
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-black text-center focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-black text-center focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all"
                       value={addForm.maxSessions || ""}
                       onChange={e => setAddForm({ ...addForm, maxSessions: Math.max(0, parseInt(e.target.value) || 0) })}
                       placeholder="0 = ilimitado"
@@ -1109,7 +1176,7 @@ export default function Agenda() {
       )}
 
       {showEditChoice && editingApp && createPortal(
-        <div className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm flex items-center justify-center z-[9999]" onClick={() => { setShowEditChoice(false); setEditingApp(null); }}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={() => { setShowEditChoice(false); setEditingApp(null); }}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
             <div className="text-center mb-6">
               <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
@@ -1140,7 +1207,7 @@ export default function Agenda() {
       )}
 
       {showEditModal && agendaFormDate && createPortal(
-        <div className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm flex items-center justify-center z-[9999]" onClick={() => { setShowEditModal(false); setEditingApp(null); setEditMode(null); }}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={() => { setShowEditModal(false); setEditingApp(null); setEditMode(null); }}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-lg mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -1230,143 +1297,20 @@ export default function Agenda() {
         document.body
       )}
 
-      {detailModal.open && detailModal.session && createPortal(
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[9999]" onClick={() => setDetailModal({ open: false, session: null, date: null })}>
-          <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
-            <div className="flex items-start justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-lg shrink-0 ${
-                  detailModal.session.attendance?.status === "presente" ? "bg-emerald-100 text-emerald-600" :
-                  detailModal.session.attendance?.status === "falta" ? "bg-red-100 text-red-600" :
-                  detailModal.session.attendance?.status === "justificada" ? "bg-amber-100 text-amber-600" :
-                  "bg-slate-100 text-slate-600"
-                }`}>
-                  {(detailModal.session.app.patient?.name || "?")
-                    .split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-                </div>
-                <div>
-                  <h2 className="text-lg font-black text-slate-800 uppercase tracking-tight leading-tight">
-                    {detailModal.session.app.patient?.name || "Paciente"}
-                  </h2>
-                  <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest mt-1 ${
-                    detailModal.session.attendance?.status === "presente" ? "bg-emerald-100 text-emerald-700" :
-                    detailModal.session.attendance?.status === "falta" ? "bg-red-100 text-red-700" :
-                    detailModal.session.attendance?.status === "justificada" ? "bg-amber-100 text-amber-700" :
-                    "bg-slate-100 text-slate-500"
-                  }`}>
-                    {detailModal.session.attendance?.status === "presente" ? "Realizado" :
-                     detailModal.session.attendance?.status === "falta" ? "Falta" :
-                     detailModal.session.attendance?.status === "justificada" ? "Justificada" :
-                     "Agendado"}
-                  </span>
-                </div>
-              </div>
-              <button onClick={() => setDetailModal({ open: false, session: null, date: null })} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all shrink-0">
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="space-y-3 mb-6 p-4 bg-slate-50 rounded-2xl">
-              <div className="flex items-center gap-3">
-                <Clock size={15} className="text-slate-400 shrink-0" />
-                <span className="text-sm font-bold text-slate-700">
-                  {detailModal.date ? format(detailModal.date, "dd/MM/yyyy", { locale: ptBR }) : ""} às {detailModal.session.app.time} ({detailModal.session.app.duration} min)
-                </span>
-              </div>
-              {detailModal.session.app.patient?.phone && (
-                <div className="flex items-center gap-3">
-                  <Phone size={15} className="text-slate-400 shrink-0" />
-                  <span className="text-sm font-bold text-slate-700">{detailModal.session.app.patient.phone}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Status do Atendimento</p>
-              <button onClick={() => handleQuickStatus(detailModal.session, "presente", detailModal.date)}
-                className={`w-full py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${
-                  detailModal.session.attendance?.status === "presente"
-                    ? "bg-emerald-500 text-white border-emerald-500 shadow-sm"
-                    : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:text-emerald-600"
-                }`}>
-                <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                  detailModal.session.attendance?.status === "presente"
-                    ? "border-white"
-                    : "border-slate-300"
-                }`}>
-                  {detailModal.session.attendance?.status === "presente" && <Check size={12} />}
-                </span>
-                Presença
-              </button>
-              <button onClick={() => handleQuickStatus(detailModal.session, "falta", detailModal.date)}
-                className={`w-full py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${
-                  detailModal.session.attendance?.status === "falta"
-                    ? "bg-red-500 text-white border-red-500 shadow-sm"
-                    : "bg-white text-slate-600 border-slate-200 hover:border-red-300 hover:text-red-600"
-                }`}>
-                <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                  detailModal.session.attendance?.status === "falta"
-                    ? "border-white"
-                    : "border-slate-300"
-                }`}>
-                  {detailModal.session.attendance?.status === "falta" && <X size={12} />}
-                </span>
-                Falta
-              </button>
-              <button onClick={() => handleQuickStatus(detailModal.session, "justificada", detailModal.date)}
-                className={`w-full py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${
-                  detailModal.session.attendance?.status === "justificada"
-                    ? "bg-amber-500 text-white border-amber-500 shadow-sm"
-                    : "bg-white text-slate-600 border-slate-200 hover:border-amber-300 hover:text-amber-600"
-                }`}>
-                <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                  detailModal.session.attendance?.status === "justificada"
-                    ? "border-white"
-                    : "border-slate-300"
-                }`}>
-                  {detailModal.session.attendance?.status === "justificada" && <AlertCircle size={12} />}
-                </span>
-                Justificado
-              </button>
-            </div>
-
-            <div className="mt-5 pt-5 border-t border-slate-100 space-y-2">
-              <a
-                href={`https://wa.me/55${detailModal.session.app.patient?.phone?.replace(/\D/g, "") || ""}?text=${encodeURIComponent(`Olá ${detailModal.session.app.patient?.name?.split(" ")[0] || ""}, lembrete da sua consulta no dia ${detailModal.date ? format(detailModal.date, "dd/MM") : ""} às ${detailModal.session.app.time}.`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition-all text-xs font-black uppercase tracking-widest border border-emerald-200"
-              >
-                <MessageCircle size={15} />
-                Lembrete WhatsApp
-              </a>
-              <button
-                onClick={() => {
-                  const session = detailModal.session;
-                  const d = detailModal.date;
-                  setDetailModal({ open: false, session: null, date: null });
-                  handleDeleteAppointment(session, d);
-                }}
-                className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all text-xs font-black uppercase tracking-widest border border-red-200"
-              >
-                <Trash2 size={15} />
-                Excluir Agendamento
-              </button>
-            </div>
-            <button
-              onClick={() => setDetailModal({ open: false, session: null, date: null })}
-              className="w-full mt-5 py-3 text-xs font-black text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest"
-            >
-              Fechar
-            </button>
-          </div>
-        </div>,
-        document.body
+      {detailModal.open && detailModal.session && (
+        <AppointmentDetailModal
+          appointment={detailModal.session.app}
+          patient={detailModal.session.app.patient}
+          nextDate={detailModal.date}
+          sessionType={detailModal.session.type}
+          onClose={() => setDetailModal({ open: false, session: null, date: null })}
+          onUpdate={loadData}
+        />
       )}
 
       {successMessage && (
         <div className="fixed bottom-8 right-8 z-[100] animate-slide-up">
-          <div className="bg-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-500/50 backdrop-blur-sm">
+          <div className="bg-brand-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-brand-500/50 backdrop-blur-sm">
             <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
               <Check size={18} className="text-white" />
             </div>

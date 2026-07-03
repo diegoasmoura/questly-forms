@@ -1,38 +1,55 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: "class",
   content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
       colors: {
         brand: {
-          50: "#f0fdf4",
-          100: "#dcfce7",
-          200: "#bbf7d0",
-          300: "#86efac",
-          400: "#4ade80",
-          500: "#22c55e",
-          600: "#16a34a",
-          700: "#15803d",
-          800: "#166534",
-          900: "#14532d",
-          950: "#052e16",
+          50: "#E4F5EE",
+          100: "#C9EBDB",
+          200: "#A8DFC5",
+          300: "#87D3AF",
+          400: "#6DC99E",
+          500: "#5CBF9D",
+          600: "#4DAF8A",
+          700: "#3D786A",
+          800: "#2E5C50",
+          900: "#1F4036",
+          950: "#10241E",
         },
-        slate: {
-          50: "#f8fafc",
-          100: "#f1f5f9",
-          200: "#e2e8f0",
-          300: "#cbd5e1",
-          400: "#94a3b8",
-          500: "#64748b",
-          600: "#475569",
-          700: "#334155",
-          800: "#1e293b",
-          900: "#0f172a",
-          950: "#020617",
+        secondary: {
+          50: "#E7F0FF",
+          100: "#C8DDFF",
+          200: "#A5C7FF",
+          300: "#82B0FF",
+          400: "#5C96FF",
+          500: "#2E7DFF",
+          600: "#1A6AE6",
+          700: "#0D55C4",
+          800: "#0A4096",
+          900: "#072C69",
+          950: "#03183B",
         },
+        peach: "#F8A26B",
+        "peach-light": "#FEEEE1",
+        purple: "#7C5CFF",
+        "purple-light": "#F0ECFF",
+        "dark-green": "#3D786A",
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
+        sans: ["Nunito Sans", "system-ui", "sans-serif"],
+        heading: ["Playfair Display", "Georgia", "serif"],
+        handwritten: ["Caveat", "cursive"],
+        brand: ["Caveat Brush", "cursive"],
+      },
+      boxShadow: {
+        card: "0 8px 24px rgba(30,31,34,0.06)",
+        "card-hover": "0 8px 30px rgba(30,31,34,0.10)",
+      },
+      borderRadius: {
+        card: "20px",
+        button: "999px",
       },
       keyframes: {
         "fade-in": {
@@ -43,21 +60,10 @@ export default {
           "0%": { opacity: "0", transform: "translateX(-10px)" },
           "100%": { opacity: "1", transform: "translateX(0)" },
         },
-        "skew-scroll": {
-          "0%": {
-            transform:
-              "rotatex(20deg) rotatez(-15deg) skewx(15deg) translatez(0) translatey(0)",
-          },
-          "100%": {
-            transform:
-              "rotatex(20deg) rotatez(-15deg) skewx(15deg) translatez(0) translatey(-50%)",
-          },
-        },
       },
       animation: {
         "fade-in": "fade-in 0.3s ease-out",
         "slide-in": "slide-in 0.3s ease-out",
-        "skew-scroll": "skew-scroll 20s linear infinite",
       },
     },
   },

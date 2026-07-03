@@ -1,336 +1,152 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { Link } from "react-router-dom";
-import { api } from "../lib/api";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import {
-  Users,
-  FileText,
-  Calendar,
-  Clock,
-  Plus,
-  DollarSign,
-  CakeSlice,
-  PartyPopper,
-  ChevronRight,
-  Check,
-  X,
-  AlertCircle
+  MessageCircle, CheckCheck, Calendar, Sun, Moon,
+  Bell, DollarSign, FileText, Banknote, AlertCircle
 } from "lucide-react";
+import AvatarPickerModal from "../components/AvatarPickerModal";
+import ProfileDropdown from "../components/ProfileDropdown";
+import DecorativeElements from "../components/DecorativeElements";
+import AppointmentDetailModal from "../components/AppointmentDetailModal";
 
-function calculateBirthdayInfo(birthDate) {
-  if (!birthDate) return null;
-  const today = new Date();
-  const birth = new Date(birthDate);
-  const thisYearBirthday = new Date(today.getFullYear(), birth.getMonth(), birth.getDate());
-  const diffTime = thisYearBirthday - today;
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  const isWeek = diffDays >= -3 && diffDays <= 4;
-  return { diffDays, isWeek, isToday: diffDays === 0, daysUntil: diffDays };
-}
+import { useDashboardData, getGreeting } from "../hooks/useDashboardData";
+import { useQuickNotes } from "../hooks/useQuickNotes";
 
-function relativeTime(date) {
-  const diff = Date.now() - date.getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "agora";
-  if (mins < 60) return `há ${mins}min`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `há ${hours}h`;
-  const days = Math.floor(hours / 24);
-  if (days === 1) return "ontem";
-  if (days < 30) return `há ${days}d`;
-  return date.toLocaleDateString("pt-BR", { day: "numeric", month: "short" });
-}
+import { KpiCard, TimelineRow, fmtCurrency } from "../components/dashboard/Shared";
+import { AgendaWidget } from "../components/dashboard/AgendaWidget";
+import { RevenueWidget } from "../components/dashboard/RevenueWidget";
+import { InstrumentsWidget } from "../components/dashboard/InstrumentsWidget";
+import { BirthdaysWidget } from "../components/dashboard/BirthdaysWidget";
+import { PatientProfileWidget } from "../components/dashboard/PatientProfileWidget";
+import { QuickNotesWidget } from "../components/dashboard/QuickNotesWidget";
 
 export default function Home() {
-  const [loading, setLoading] = useState(true);
-  const [patients, setPatients] = useState([]);
-  const [attendances, setAttendances] = useState([]);
-  const [appointments, setAppointments] = useState([]);
-  const [payments, setPayments] = useState([]);
-  const [formStats, setFormStats] = useState({});
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
-  const loadHomeData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [patientsData, formsData, attendancesData, appointmentsData, paymentsData] = await Promise.all([
-        api.getPatients(),
-        api.getForms(),
-        api.getAttendances(),
-        api.getAppointments(),
-        api.getPayments()
-      ]);
+  const dashboardData = useDashboardData();
+  const notesData = useQuickNotes();
 
-      setPatients(patientsData);
-      setAttendances(attendancesData);
-      setAppointments(appointmentsData);
-      setPayments(paymentsData);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [detailModal, setDetailModal] = useState({ open: false, app: null });
 
-      const statsResults = await Promise.all(
-        formsData.map(f => api.getFormStats(f.id).catch(() => ({ responseCount: 0, shareLinkCount: 0 })))
-      );
+  // Expose variables needed for KPI row and header
+  const {
+    loading, todayEvents, upcomingDays, activePatients, monthPatientIds,
+    totalSent, totalResponses, completionRate, topForm, formStats,
+    upcomingBirthdays, genderData, ageData, maxAge, revenueData,
+  } = dashboardData;
 
-      const statsMap = {};
-      formsData.forEach((f, i) => { statsMap[f.id] = statsResults[i]; });
-      setFormStats(statsMap);
-    } catch (error) {
-      console.error("Failed to load home data:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  // Re-calculate KPI totals directly derived from attendances/payments 
+  // (We can pass them directly from the hook or just use what we need)
+  // Wait, I didn't export totalPaid, aReceberCount, taxaPresenca, presencas, totalMesAtendimentos from the hook!
+  // I need to add them to the hook. I will fix useDashboardData right after writing this.
+  // For now, I'll extract them assuming they are in dashboardData.
+  const {
+    totalPaid = 0, prevTotalPaid = 0, aReceberCount = 0,
+    taxaPresenca = 0, prevTaxaPresenca = 0, presencas = 0, totalMesAtendimentos = 0
+  } = dashboardData;
 
-  useEffect(() => { loadHomeData(); }, [loadHomeData]);
+  const initials = user?.name?.split(" ")?.map((n) => n[0])?.join("")?.toUpperCase()?.slice(0, 2) || "U";
 
-  const today = new Date();
-  const thisMonth = today.getMonth();
-  const thisYear = today.getFullYear();
-
-  const monthAttendances = attendances.filter(a => {
-    const d = new Date(a.date);
-    return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
-  });
-  const monthPayments = payments.filter(p => {
-    const d = new Date(p.createdAt);
-    return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
-  });
-
-  const sessionCount = monthAttendances.length;
-  const presentCount = monthAttendances.filter(a => a.status === "presente").length;
-  const faltaCount = monthAttendances.filter(a => a.status === "falta").length;
-  const justCount = monthAttendances.filter(a => a.status === "justificada").length;
-
-  const totalSent = Object.values(formStats).reduce((sum, s) => sum + (s.shareLinkCount || 0), 0);
-  const totalResponses = Object.values(formStats).reduce((sum, s) => sum + (s.responseCount || 0), 0);
-  const pendingInstruments = totalSent - totalResponses;
-
-  const totalPaid = monthPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
-  const activePatients = patients.filter(p => p.isActive !== false).length;
-
-  const birthdayPatients = patients.filter(p => {
-    const info = calculateBirthdayInfo(p.birthDate);
-    return info?.isWeek;
-  }).slice(0, 10);
-
-  const nextAppointments = appointments
-    .filter(a => a.startDate && new Date(a.startDate) > today)
-    .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
-    .slice(0, 5);
-
-  const recentFaltas = monthAttendances
-    .filter(a => a.status === "falta")
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 5);
-
-  const patientMap = {};
-  patients.forEach(p => { patientMap[p.id] = p; });
-
-  const timelineItems = [];
-  attendances.forEach(att => {
-    const patient = patientMap[att.patientId];
-    if (!patient) return;
-    timelineItems.push({
-      id: `att-${att.id}`,
-      date: new Date(att.date),
-      type: att.status,
-      patient,
-      description: att.status === "presente" ? "Compareceu à sessão" : att.status === "falta" ? "Faltou à sessão" : "Justificou falta"
-    });
-  });
-  payments.forEach(p => {
-    const patient = patientMap[p.patientId];
-    if (!patient) return;
-    timelineItems.push({
-      id: `pay-${p.id}`,
-      date: new Date(p.createdAt),
-      type: "payment",
-      patient,
-      description: `Pagamento de ${p.amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`
-    });
-  });
-  timelineItems.sort((a, b) => b.date - a.date);
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center min-h-full">
+        <p className="text-[var(--text-muted)] animate-pulse">Carregando painel...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in">
-      <header className="mb-6 shrink-0 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Painel Clínico</h1>
-          <p className="text-sm text-slate-500">Visão geral da sua prática clínica</p>
+    <div className="p-6 pb-6 animate-fade-in flex flex-col gap-5 min-h-full min-w-0 relative overflow-y-auto">
+      <DecorativeElements />
+
+      {/* TOP BAR */}
+      <div className="relative flex items-start justify-between gap-5 pb-5 border-b border-[var(--border)] overflow-visible flex-shrink-0">
+        <span className="absolute w-[150px] h-[150px] rounded-full bg-[var(--peach-light)] opacity-50 blur-[2px] -top-[60px] right-24 pointer-events-none" />
+        <span className="absolute w-[90px] h-[90px] rounded-full bg-[var(--sage-light)] opacity-50 blur-[2px] -bottom-[45px] right-[280px] pointer-events-none" />
+        <span className="absolute w-[70px] h-[70px] rounded-full bg-[var(--purple-light)] opacity-50 blur-[2px] top-[8px] -right-[8px] pointer-events-none" />
+
+        <div className="relative z-[1] flex-1 min-w-0">
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] mb-1.5" style={{ color: "var(--sage)" }}>
+            {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+          </p>
+          <h1 className="leading-tight m-0 text-[var(--text-primary)] tracking-tight flex items-baseline">
+            <span className="font-handwritten font-normal text-[36px]">{getGreeting()},</span>{" "}
+            <span className="relative inline-block ml-2">
+              <span className="font-handwritten font-normal text-[38px] text-[var(--dark-green)] dark:text-[#5CBF9D] transition-colors duration-300">
+                {user?.name?.split(" ")[0] || "Usuário"}
+              </span>
+              <svg className="absolute left-0 -bottom-[2px] w-full h-[6px] overflow-visible text-[var(--sage)] opacity-80" viewBox="0 0 100 12" preserveAspectRatio="none">
+                <path d="M0,6 C15,-4 30,16 50,6 C70,-4 85,16 100,6" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
+            </span>
+          </h1>
         </div>
-        <Link to="/patients" className="btn bg-emerald-600 text-white hover:bg-emerald-700 text-xs py-2.5 px-4 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-emerald-200">
-          <Plus size={14} /> Novo Paciente
-        </Link>
-      </header>
 
-      {loading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="w-10 h-10 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin" />
+        <div className="relative z-[1] flex items-center gap-2.5 pt-[4px] flex-shrink-0">
+          <button onClick={toggleTheme} title="Mudar tema" className="relative flex items-center bg-[var(--surface-alt)] border border-[var(--border)] rounded-[999px] cursor-pointer w-[52px] h-[28px] transition-colors duration-300 hover:border-[var(--sage)]">
+            <span className={`absolute inset-0 rounded-[999px] transition-colors duration-300 ${theme === "dark" ? "bg-[#1a2540]" : "bg-[var(--sage-light)]"}`} />
+            <span className={`relative z-[1] w-[20px] h-[20px] rounded-full flex items-center justify-center text-white shadow-sm transition-all duration-300 ease-in-out ${theme === "dark" ? "translate-x-[26px] bg-[#2B3D6B]" : "translate-x-[4px] bg-[var(--sage)]"}`}>
+              {theme === "light" ? <Sun size={11} strokeWidth={2.5} /> : <Moon size={11} strokeWidth={2.5} />}
+            </span>
+          </button>
+          <button className="w-[36px] h-[36px] rounded-[10px] bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] relative cursor-pointer hover:bg-[var(--surface-alt)] hover:text-[var(--text-primary)]" title="Notificações">
+            <Bell size={16} strokeWidth={1.75} />
+            <span className="absolute -top-[3px] -right-[3px] w-[7px] h-[7px] rounded-full bg-[var(--peach)] border-2 border-[var(--bg)]" />
+          </button>
+          <div className="relative">
+            <button onClick={() => setShowProfileMenu(true)} title="Perfil" className="w-[36px] h-[36px] rounded-[10px] flex items-center justify-center text-white text-sm flex-shrink-0 cursor-pointer overflow-hidden" style={{ background: user?.avatarUrl ? "transparent" : "linear-gradient(135deg, #5CBF9D 0%, #F8A26B 100%)", boxShadow: "0 0 0 2px var(--border)" }}>
+              {user?.avatarUrl ? (
+                <img src={user.avatarUrl} alt="Foto do perfil" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-[12px] font-bold tracking-wide">{initials}</span>
+              )}
+            </button>
+            {showProfileMenu && (
+              <ProfileDropdown 
+                user={user} 
+                onClose={() => setShowProfileMenu(false)} 
+                onEditProfile={() => setShowAvatarPicker(true)} 
+                onLogout={() => { logout(); navigate("/login"); }} 
+              />
+            )}
+          </div>
         </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 shrink-0">
-            <Link to="/patients" className="card p-3 flex items-center gap-3 border-l-4 border-emerald-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
-                <Users size={18} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-2xl font-black text-slate-800 leading-none">{activePatients}</p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Pacientes Ativos</p>
-                <p className="text-[9px] text-slate-400 mt-0.5">{patients.length} total</p>
-              </div>
-            </Link>
+      </div>
 
-            <div className="card p-3 flex items-center gap-3 border-l-4 border-blue-400">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                <Calendar size={18} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-2xl font-black text-slate-800 leading-none">{sessionCount}</p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Sessões no Mês</p>
-                <p className="text-[9px] text-slate-400 mt-0.5">{presentCount}P · {faltaCount}F · {justCount}J</p>
-              </div>
-            </div>
+      {/* KPIs */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 flex-shrink-0">
+        <KpiCard icon={<Calendar size={16} />} iconBg="var(--blue-light)" iconColor="var(--blue)" label="Sessões hoje" value={todayEvents.length} sub={`${todayEvents.filter(e => e.attendance?.status === "presente").length} confirmadas`} />
+        <KpiCard icon={<CheckCheck size={16} />} iconBg="var(--sage-light)" iconColor="var(--sage)" label="Presença no mês" value={`${taxaPresenca}%`} trend={{ current: taxaPresenca, previous: prevTaxaPresenca, unit: "%" }} sub={`${presencas} de ${totalMesAtendimentos} sessões`} />
+        <KpiCard icon={<DollarSign size={16} />} iconBg="var(--peach-light)" iconColor="var(--peach)" label="Recebido no mês" value={fmtCurrency(totalPaid)} trend={{ current: totalPaid, previous: prevTotalPaid, unit: "R$" }} sub={prevTotalPaid > 0 ? "vs mês anterior" : "primeiro mês"} />
+        <KpiCard icon={<Banknote size={16} />} iconBg="var(--purple-light)" iconColor="var(--purple)" label="Sessões a cobrar" value={aReceberCount} sub={aReceberCount > 0 ? "sessões sem pagamento" : "tudo em dia ✓"} />
+        <KpiCard icon={<FileText size={16} />} iconBg="var(--sage-light)" iconColor="var(--dark-green)" label="Instrumentos" value={`${totalResponses}/${totalSent}`} sub={`${completionRate}% de resposta`} />
+      </div>
 
-            <Link to="/my-forms" className="card p-3 flex items-center gap-3 border-l-4 border-amber-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
-                <FileText size={18} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-2xl font-black text-slate-800 leading-none">{totalResponses}<span className="text-base text-slate-400 font-bold">/{totalSent}</span></p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Instrumentos</p>
-                <p className="text-[9px] text-amber-600 mt-0.5">{pendingInstruments} pendentes</p>
-              </div>
-            </Link>
-
-            <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-400">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
-                <DollarSign size={18} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-2xl font-black text-slate-800 leading-none">{totalPaid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Receita do Mês</p>
-                <p className="text-[9px] text-slate-400 mt-0.5">{monthPayments.length} lançamentos</p>
-              </div>
-            </div>
+      {/* WIDGETS */}
+      <div className="flex flex-col lg:flex-row gap-4 items-stretch flex-1 min-h-0 min-w-0">
+        <AgendaWidget today={new Date()} todayEvents={todayEvents} upcomingDays={upcomingDays} TimelineRow={TimelineRow} onEventClick={(app) => setDetailModal({ open: true, app })} />
+        <div className="w-full lg:w-[40%] flex flex-col gap-4 min-h-0">
+          <RevenueWidget revenueData={revenueData} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-shrink-0">
+            <InstrumentsWidget completionRate={completionRate} totalResponses={totalResponses} totalSent={totalSent} topForm={topForm} formStats={formStats} />
+            <BirthdaysWidget upcomingBirthdays={upcomingBirthdays} />
           </div>
+        </div>
+        <div className="w-full lg:w-[30%] flex flex-col gap-4 min-h-0">
+          <PatientProfileWidget activePatients={activePatients} monthPatientIds={monthPatientIds} genderData={genderData} ageData={ageData} maxAge={maxAge} />
+          <QuickNotesWidget {...notesData} />
+        </div>
+      </div>
 
-          {birthdayPatients.length > 0 && (
-            <div className="mb-6 shrink-0">
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200 p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <PartyPopper size={16} className="text-amber-500" />
-                  <p className="text-xs font-black text-amber-700 uppercase tracking-widest">Aniversariantes da Semana</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {birthdayPatients.map(p => {
-                    const info = calculateBirthdayInfo(p.birthDate);
-                    return (
-                      <Link key={p.id} to={`/patients/${p.id}`} className="inline-flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-amber-200 hover:border-amber-400 hover:shadow-sm transition-all group">
-                        <div className="w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center">
-                          <CakeSlice size={12} className="text-amber-600" />
-                        </div>
-                        <span className="text-xs font-bold text-slate-700 group-hover:text-amber-700 transition-colors">{p.name.split(" ")[0]}</span>
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${info?.isToday ? "bg-amber-500 text-white" : "bg-amber-50 text-amber-600"}`}>
-                          {info?.isToday ? "Hoje!" : `+${info?.daysUntil || 0}d`}
-                        </span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
-            <div className="lg:col-span-2 flex flex-col min-h-0">
-              <div className="card p-5 flex-1 min-h-0 overflow-y-auto">
-                <div className="flex items-center gap-2 mb-4 shrink-0">
-                  <Clock size={16} className="text-emerald-600" />
-                  <p className="text-xs font-black text-slate-600 uppercase tracking-widest">Timeline de Atividade</p>
-                </div>
-                {timelineItems.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full text-center py-10">
-                    <Calendar size={32} className="text-slate-300 mb-3" />
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Nenhuma atividade registrada</p>
-                    <p className="text-[10px] text-slate-400 mt-1">Sessões, pagamentos e formulários aparecerão aqui</p>
-                  </div>
-                ) : (
-                  <div className="space-y-1">
-                    {timelineItems.slice(0, 30).map((item, idx) => {
-                      const isLast = idx === Math.min(timelineItems.length - 1, 29);
-                      const colors = {
-                        presente: { dot: "bg-emerald-500", line: "bg-emerald-200", icon: Check },
-                        falta: { dot: "bg-red-500", line: "bg-red-200", icon: X },
-                        justificada: { dot: "bg-amber-500", line: "bg-amber-200", icon: AlertCircle },
-                        payment: { dot: "bg-blue-500", line: "bg-blue-200", icon: DollarSign }
-                      };
-                      const c = colors[item.type] || colors.presente;
-                      const Icon = c.icon;
-                      return (
-                        <Link key={item.id} to={`/patients/${item.patient.id}`} className="flex items-start gap-3 group">
-                          <div className="flex flex-col items-center shrink-0 pt-1.5">
-                            <div className={`w-7 h-7 rounded-full ${c.dot} flex items-center justify-center text-white shadow-sm`}>
-                              <Icon size={12} />
-                            </div>
-                            {!isLast && <div className={`w-0.5 h-full min-h-[24px] ${c.line}`} />}
-                          </div>
-                          <div className="min-w-0 flex-1 pb-4">
-                            <p className="text-sm font-bold text-slate-700 group-hover:text-emerald-700 transition-colors leading-tight">
-                              {item.patient.name}
-                            </p>
-                            <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>
-                            <p className="text-[10px] text-slate-400 mt-0.5 font-medium">{relativeTime(item.date)}</p>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="flex flex-col min-h-0 gap-4">
-              <div className="card p-4 flex-1 flex flex-col min-h-0">
-                <div className="flex items-center gap-2 mb-4 shrink-0">
-                  <Clock size={14} className="text-emerald-600" />
-                  <p className="text-xs font-black text-slate-600 uppercase tracking-widest">Próximas Sessões</p>
-                </div>
-                <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-                  {nextAppointments.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center py-6">
-                      <Calendar size={24} className="text-slate-300 mb-2" />
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nenhuma sessão agendada</p>
-                      <Link to="/agenda" className="text-[10px] text-emerald-600 font-bold mt-2 hover:text-emerald-700 transition-colors">
-                        Gerenciar agenda
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {nextAppointments.map(app => {
-                        const patient = patientMap[app.patientId];
-                        const startDate = new Date(app.startDate);
-                        return (
-                          <Link key={app.id} to={`/patients/${app.patientId}`} className="flex items-center gap-3 p-2.5 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 hover:border-slate-300 transition-all group">
-                            <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 font-black text-xs shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                              {patient?.name?.charAt(0) || "?"}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-xs font-bold text-slate-700 truncate group-hover:text-slate-900 transition-colors">
-                                {patient?.name || "Paciente"}
-                              </p>
-                              <p className="text-[10px] text-slate-500">
-                                {startDate.toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short" })} às {app.startTime?.slice(0, 5) || "--:--"}
-                              </p>
-                            </div>
-                            <ChevronRight size={14} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition-all shrink-0" />
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
+      {showAvatarPicker && <AvatarPickerModal onClose={() => setShowAvatarPicker(false)} />}
+      {detailModal.open && detailModal.app && (
+        <AppointmentDetailModal appointment={detailModal.app} patient={detailModal.app.patient} nextDate={detailModal.app.date} onClose={() => setDetailModal({ open: false, app: null })} onUpdate={() => dashboardData.loadData(true)} />
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
+import { Suspense, lazy } from "react";
 
 // Components
 import Layout from "./components/Layout";
@@ -13,6 +14,10 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 
 // Pages carregadas sob demanda (Lazy Loading)
+// Pages (Lazy Loaded for Code-Splitting)
+const Landing = lazy(() => import("./pages/Landing"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
 const Home = lazy(() => import("./pages/Home"));
 const Patients = lazy(() => import("./pages/Patients"));
 const PatientRecord = lazy(() => import("./pages/PatientRecord"));
@@ -30,7 +35,7 @@ function LoadingScreen() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100">
       <div className="animate-pulse flex flex-col items-center gap-4">
-        <div className="w-10 h-10 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin" />
+        <div className="w-10 h-10 rounded-full border-2 border-brand-600 border-t-transparent animate-spin" />
         <p className="text-sm text-slate-600 font-medium">Carregando aplicação...</p>
       </div>
     </div>

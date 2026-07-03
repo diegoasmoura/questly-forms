@@ -1,17 +1,15 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { 
-  Home, 
-  Users, 
-  Library, 
-  FileText, 
-  LogOut, 
-  ChevronLeft, 
+import {
+  Home,
+  Users,
+  FileText,
+  Calendar,
+  Library,
   ChevronRight,
-  Calendar
+  LogOut,
 } from "lucide-react";
 import { useState } from "react";
-import { motion } from "framer-motion";
 
 const menuItems = [
   { icon: Home, label: "Home", path: "/home" },
@@ -21,217 +19,97 @@ const menuItems = [
   { icon: Library, label: "Acervo Clínico", path: "/library" },
 ];
 
-const getInitials = (name) => {
-  if (!name) return "U";
-  const parts = name.trim().split(" ");
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  }
-  return name.slice(0, 2).toUpperCase();
-};
-
-const getAvatarGradient = (name) => {
-  if (!name) return "from-blue-500 to-indigo-600";
-  const gradients = [
-    "from-blue-400 to-blue-600",
-    "from-indigo-400 to-indigo-600",
-    "from-cyan-400 to-blue-500",
-    "from-sky-400 to-indigo-500",
-    "from-blue-500 to-violet-600",
-  ];
-  const hash = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return gradients[hash % gradients.length];
-};
+/* Largura da zona do ícone — igual à sidebar colapsada, para que
+   os ícones NUNCA se desloquem durante a animação de expandir/retrair. */
+const ICON_ZONE = "84px";
 
 export default function Sidebar() {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
-  const initials = getInitials(user?.name);
-  const gradient = getAvatarGradient(user?.name);
-
   return (
     <div
-      className="bg-slate-900 flex flex-col h-screen sticky top-0 overflow-hidden transition-[width] duration-300 ease-out"
-      style={{ width: collapsed ? 72 : 256 }}
+      className={`bg-[var(--surface)] border-r border-[var(--border)] flex flex-col relative h-full flex-shrink-0 z-[10000] transition-[width] duration-300 ease-in-out ${
+        collapsed ? "w-[84px]" : "w-[220px]"
+      }`}
     >
-      {/* Header */}
-      <div className="h-16 flex items-center justify-between px-3 border-b border-slate-800 shrink-0">
-        <div className="flex items-center justify-start min-w-0">
-          {!collapsed && (
-            <div className="overflow-hidden" key={`brand-${collapsed}`}>
-              <motion.span
-                className="text-xl font-bold text-white tracking-tight whitespace-nowrap inline-block"
-                initial={{ width: 0 }}
-                animate={{ width: "auto" }}
-                transition={{ 
-                  width: { duration: 0.4, ease: "easeOut" }
-                }}
-              >
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    opacity: { duration: 0.1 },
-                    y: { duration: 0.2 }
-                  }}
-                >
-                  Q
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.08, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  u
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.16, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  e
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.24, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  s
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.32, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  t
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.40, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  l
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.48, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  y
-                </motion.span>
-                <motion.span
-                  className="inline-block ml-1"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.56, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  F
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.64, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  o
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.72, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  r
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.80, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  m
-                </motion.span>
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.88, opacity: { duration: 0.1 }, y: { duration: 0.2 } }}
-                >
-                  s
-                </motion.span>
-              </motion.span>
-            </div>
-          )}
-        </div>
-        <button 
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0"
-          aria-label={collapsed ? "Expandir sidebar" : "Recolher sidebar"}
+      {/* Toggle chevron */}
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className="absolute top-[30px] -right-[13px] w-[26px] h-[26px] rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[var(--text-secondary)] z-10 hover:bg-[var(--surface-alt)] transition-all cursor-pointer"
+        aria-label={collapsed ? "Expandir menu" : "Retrair menu"}
+      >
+        <ChevronRight
+          size={13}
+          className={`transition-transform duration-300 ease-in-out ${
+            collapsed ? "" : "rotate-180"
+          }`}
+        />
+      </button>
+
+      {/* Logo — ícone centralizado na zona fixa de 84px */}
+      <div className="flex items-center h-[44px] mt-6 overflow-hidden flex-shrink-0">
+        <div
+          className="flex items-center justify-center flex-shrink-0"
+          style={{ width: ICON_ZONE }}
         >
-          {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-        </button>
-      </div>
-
-      {/* User Profile */}
-      <div className="px-3 py-4 shrink-0">
-        {collapsed ? (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className={`rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold shadow-md w-[32px] h-[32px] mx-auto`}
-            whileHover={{ scale: 1.05 }}
-          >
-            {initials}
-          </motion.div>
-        ) : (
-          <div className="flex items-center rounded-xl bg-slate-800/50 p-1.5">
-            <span className="text-sm font-semibold text-white truncate">
-              {user?.name}
-            </span>
+          {/* Símbolo QF usando CSS e Fonte Nativa para máxima nitidez (Padrão SaaS Moderno) */}
+          <div className="w-[46px] h-[46px] rounded-xl bg-gradient-to-br from-[#5CBF9D] to-[#3D786A] shadow-sm flex items-center justify-center text-white flex-shrink-0 border border-white/10">
+            <span className="font-brand text-[26px] leading-none tracking-tight pt-1 pr-0.5">QF</span>
           </div>
-        )}
+        </div>
+        <span
+          className={`font-brand text-[22px] text-[var(--text-primary)] whitespace-nowrap transition-all duration-300 ease-in-out ${
+            collapsed
+              ? "opacity-0 translate-x-[-8px] pointer-events-none"
+              : "opacity-100 translate-x-0"
+          }`}
+        >
+          Questly Forms
+        </span>
       </div>
 
-      {/* Menu Items */}
-      <nav className={`flex-1 space-y-0.5 overflow-hidden ${collapsed ? "px-2" : "px-3"}`}>
+      {/* Navigation — items fixos, sem scroll */}
+      <nav className="flex flex-col gap-1.5 w-full pt-5 flex-shrink-0">
         {menuItems.map((item) => {
-          const isActive = location.pathname === item.path 
-            || (item.path !== "/home" && location.pathname.startsWith(item.path))
-            || (item.path === "/my-forms" && location.pathname.startsWith("/forms"));
+          const isActive =
+            location.pathname === item.path ||
+            (item.path !== "/home" &&
+              location.pathname.startsWith(item.path)) ||
+            (item.path === "/my-forms" &&
+              location.pathname.startsWith("/forms"));
+          const Icon = item.icon;
           return (
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center rounded-lg transition-colors duration-200 ${
-                isActive 
-                  ? "bg-emerald-600 text-white" 
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
-              } ${collapsed ? "justify-center py-2.5" : "py-2.5 px-3"}`}
+              className={`flex items-center h-[46px] rounded-[14px] mx-[8px] transition-colors duration-200 ease-in-out cursor-pointer ${
+                isActive
+                  ? "bg-[var(--sage-light)] text-[var(--dark-green)] dark:text-[#5CBF9D]"
+                  : "text-[var(--text-muted)] hover:bg-[var(--surface-alt)] hover:text-[var(--text-primary)]"
+              }`}
               title={collapsed ? item.label : ""}
             >
-              <item.icon size={18} className="shrink-0" />
-              <span 
-                className="text-sm font-medium transition-all duration-300 overflow-hidden whitespace-nowrap"
-                style={{ 
-                  opacity: collapsed ? 0 : 1,
-                  width: collapsed ? 0 : "auto",
-                  marginLeft: collapsed ? 0 : 12
-                }}
+              {/* Zona fixa do ícone — sempre centrado nos mesmos 84px - 2*8px margin */}
+              <div
+                className="flex items-center justify-center flex-shrink-0"
+                style={{ width: `calc(${ICON_ZONE} - 16px)` }}
+              >
+                <Icon size={21} />
+              </div>
+              <span
+                className={`text-sm font-semibold whitespace-nowrap transition-all duration-300 ease-in-out ${
+                  collapsed
+                    ? "opacity-0 translate-x-[-8px] pointer-events-none w-0"
+                    : "opacity-100 translate-x-0 w-auto"
+                }`}
               >
                 {item.label}
               </span>
@@ -240,25 +118,30 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Footer / Logout */}
-      <div className="px-3 py-4 border-t border-slate-800 shrink-0">
+      {/* Spacer — empurra o Sair pro fundo */}
+      <div className="flex-1" />
+
+      {/* Footer — colado ao fundo da viewport */}
+      <div className="border-t border-[var(--border)] pt-2 pb-2 w-full flex-shrink-0">
         <button
           onClick={handleLogout}
-          className={`flex items-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors duration-200 ${
-            collapsed ? "justify-center py-2.5 w-full" : "py-2.5 px-3"
-          }`}
-          title={collapsed ? "Logout" : ""}
+          className="flex items-center h-[46px] rounded-[14px] mx-[8px] text-[var(--text-muted)] hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/40 dark:hover:text-red-400 transition-colors duration-200 ease-in-out cursor-pointer w-[calc(100%-16px)]"
+          title="Sair"
         >
-          <LogOut size={18} className="shrink-0" />
-          <span 
-            className="text-sm font-medium transition-all duration-300 overflow-hidden whitespace-nowrap"
-            style={{ 
-              opacity: collapsed ? 0 : 1,
-              width: collapsed ? 0 : "auto",
-              marginLeft: collapsed ? 0 : 12
-            }}
+          <div
+            className="flex items-center justify-center flex-shrink-0"
+            style={{ width: `calc(${ICON_ZONE} - 16px)` }}
           >
-            Logout
+            <LogOut size={21} />
+          </div>
+          <span
+            className={`text-sm font-semibold whitespace-nowrap transition-all duration-300 ease-in-out ${
+              collapsed
+                ? "opacity-0 translate-x-[-8px] pointer-events-none w-0"
+                : "opacity-100 translate-x-0 w-auto"
+            }`}
+          >
+            Sair
           </span>
         </button>
       </div>

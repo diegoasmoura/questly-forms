@@ -95,7 +95,7 @@ function computeYsqResult(data, getScore) {
 
 const severityFromAvg = (avg) => {
   if (avg === null || avg === undefined) return null;
-  if (avg <= 2.0) return { level: "Baixa", color: "text-emerald-600 bg-emerald-50 border-emerald-100" };
+  if (avg <= 2.0) return { level: "Baixa", color: "text-secondary-600 bg-secondary-50 border-secondary-100" };
   if (avg <= 3.5) return { level: "Moderada", color: "text-amber-600 bg-amber-50 border-amber-200" };
   if (avg <= 4.5) return { level: "Alta", color: "text-orange-600 bg-orange-50 border-orange-200" };
   return { level: "Muito Alta", color: "text-red-600 bg-red-50 border-red-200" };
@@ -130,7 +130,7 @@ export const scoreTest = (templateId, data) => {
     const totalScore = Object.values(items).reduce((sum, val) => sum + (Number(val) || 0), 0);
     
     let severity = "Mínima";
-    let color = "text-emerald-600 bg-emerald-50 border-emerald-100";
+    let color = "text-secondary-600 bg-secondary-50 border-secondary-100";
     
     if (totalScore >= 20) {
       severity = "Grave";
@@ -166,7 +166,7 @@ export const scoreTest = (templateId, data) => {
     const totalScore = Object.values(items).reduce((sum, val) => sum + (Number(val) || 0), 0);
     
     let severity = "Mínima";
-    let color = "text-emerald-600 bg-emerald-50 border-emerald-100";
+    let color = "text-secondary-600 bg-secondary-50 border-secondary-100";
     
     if (totalScore >= 15) {
       severity = "Ansiedade Grave";

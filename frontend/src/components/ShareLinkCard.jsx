@@ -36,7 +36,7 @@ export default function ShareLinkCard({
               <h3 className="font-semibold text-base text-slate-900">{link.form?.title || "Formulário"}</h3>
               {link.responseCount > 0 && (
                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium mt-1 inline-block ${
-                  link.responseCount > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-100 text-emerald-600'
+                  link.responseCount > 0 ? 'bg-secondary-100 text-secondary-700' : 'bg-secondary-100 text-secondary-600'
                 }`}>
                   {link.responseCount} resposta{link.responseCount !== 1 ? 's' : ''}
                 </span>
@@ -53,10 +53,10 @@ export default function ShareLinkCard({
         <div className="px-4 py-3 bg-white/60 border-t border-black/5">
           <div className="flex items-center gap-4 flex-wrap">
             <span className="text-slate-600 text-xs shrink-0">
-              <span className="font-medium text-emerald-700">Criado:</span> {new Date(link.createdAt).toLocaleDateString('pt-BR')}
+              <span className="font-medium text-brand-700">Criado:</span> {new Date(link.createdAt).toLocaleDateString('pt-BR')}
             </span>
             {link.lastResponseAt && (
-              <span className="text-emerald-600 text-xs shrink-0">
+              <span className="text-brand-600 text-xs shrink-0">
                 <span className="font-medium">Última:</span> {new Date(link.lastResponseAt).toLocaleDateString('pt-BR')}
               </span>
             )}
@@ -66,10 +66,10 @@ export default function ShareLinkCard({
             </div>
             <button
               onClick={handleCopy}
-              className="flex items-center gap-1 text-emerald-600 hover:text-slate-800 transition-colors bg-emerald-100 hover:bg-emerald-200 px-2 py-1 rounded-lg text-[10px] font-medium shrink-0"
+              className="flex items-center gap-1 text-brand-600 hover:text-slate-800 transition-colors bg-brand-100 hover:bg-brand-200 px-2 py-1 rounded-lg text-[10px] font-medium shrink-0"
               title="Copiar link"
             >
-              {copied ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
+              {copied ? <Check size={11} className="text-brand-500" /> : <Copy size={11} />}
               {copied ? "Copiado!" : "Copiar"}
             </button>
             <button
@@ -89,15 +89,15 @@ export default function ShareLinkCard({
 
 export function ShareLinkStats({ counts }) {
   return (
-    <div className="flex items-center gap-4 p-2.5 bg-emerald-50 rounded-lg border border-emerald-100 text-xs">
+    <div className="flex items-center gap-4 p-2.5 bg-secondary-50 rounded-lg border border-secondary-100 text-xs">
       <span className="flex items-center gap-1.5">
         <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-        <span className="font-medium text-emerald-700">{counts.PENDENTE || 0}</span>
+        <span className="font-medium text-amber-700">{counts.PENDENTE || 0}</span>
         <span className="text-slate-500">pendente{(counts.PENDENTE || 0) !== 1 ? 's' : ''}</span>
       </span>
       <span className="flex items-center gap-1.5">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-        <span className="font-medium text-emerald-700">{counts.RESPONDIDO || 0}</span>
+        <span className="w-1.5 h-1.5 rounded-full bg-secondary-500" />
+        <span className="font-medium text-secondary-700">{counts.RESPONDIDO || 0}</span>
         <span className="text-slate-500">resposta{(counts.RESPONDIDO || 0) !== 1 ? 's' : ''}</span>
       </span>
     </div>

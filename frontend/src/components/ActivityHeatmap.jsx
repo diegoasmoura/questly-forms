@@ -105,7 +105,7 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
 
   const getColor = (count) => {
     if (count === 0) return "bg-slate-200";
-    return "bg-emerald-500";
+    return "bg-secondary-500";
   };
 
   const dayLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -153,7 +153,7 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
             <span className="text-xs text-slate-500">Intensidade</span>
             <div className="flex gap-1">
               <div className="w-4 h-4 rounded-sm bg-slate-200" title="Sem resposta" />
-              <div className="w-4 h-4 rounded-sm bg-emerald-500" title="Com resposta" />
+              <div className="w-4 h-4 rounded-sm bg-secondary-500" title="Com resposta" />
             </div>
           </div>
         </div>
@@ -206,9 +206,9 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
                     className={`
                       rounded-sm transition-all cursor-pointer
                       ${!day.date ? 'bg-transparent cursor-default' : day.isFuture ? 'bg-slate-200 cursor-not-allowed opacity-50' : getColor(day.count)}
-                      ${day.isToday ? 'ring-2 ring-emerald-500 ring-offset-1' : ''}
+                      ${day.isToday ? 'ring-2 ring-brand-500 ring-offset-1' : ''}
                       ${selectedDay?.date === day.date ? 'ring-2 ring-blue-500 ring-offset-1' : ''}
-                      ${!day.isFuture && day.date ? 'hover:ring-2 hover:ring-emerald-400' : ''}
+                      ${!day.isFuture && day.date ? 'hover:ring-2 hover:ring-brand-400' : ''}
                     `}
                     style={{ 
                       width: `${cellSize}px`, 
@@ -236,7 +236,7 @@ export function ActivityHeatmap({ data = {}, title = "Atividade" }) {
           <p className="text-sm font-semibold text-slate-800 mb-1">
             {formatSelectedDate(selectedDay.date)}
           </p>
-          <p className="text-2xl font-bold text-emerald-600">
+          <p className="text-2xl font-bold text-secondary-600">
             {selectedDay.count} {selectedDay.count === 1 ? 'resposta' : 'respostas'}
           </p>
         </div>

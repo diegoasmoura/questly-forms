@@ -29,8 +29,8 @@ export default function FormPreview() {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="animate-spin text-emerald-500" size={32} />
-          <p className="text-sm text-emerald-600">Carregando...</p>
+          <Loader2 className="animate-spin text-brand-500" size={32} />
+          <p className="text-sm text-brand-600">Carregando...</p>
         </div>
       </div>
     );

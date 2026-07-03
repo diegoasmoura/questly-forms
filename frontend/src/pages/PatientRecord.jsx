@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { api } from "../lib/api";
 import { formatCPF, formatPhone, formatCEP } from "../lib/utils";
@@ -230,7 +230,7 @@ export default function PatientRecord() {
   }, [payments, periodFilter, customMonth]);
 
   const [calendarDate, setCalendarDate] = useState(new Date());
-  const [selectedCalendarDay, setSelectedCalendarDay] = useState(new Date());
+  const [selectedCalendarDay, setSelectedCalendarDay] = useState(null);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
   const [calendarPeriodFilter, setCalendarPeriodFilter] = useState("thisMonth");
   const [calendarCustomMonth, setCalendarCustomMonth] = useState(() => {
@@ -347,6 +347,24 @@ export default function PatientRecord() {
     };
   }, [appointments, myAppointmentIds, calendarDate]);
 
+  const getMonthSessions = useCallback((month) => {
+    const year = month.getFullYear();
+    const monthIndex = month.getMonth();
+    const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+    const result = [];
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateObj = new Date(year, monthIndex, d);
+      const dateStr = format(dateObj, "yyyy-MM-dd");
+      const sessions = appointments.filter(app => appointmentOccursOnDate(app, dateStr));
+      if (sessions.length > 0) {
+        result.push({ date: dateObj, sessions });
+      }
+    }
+    return result;
+  }, [appointments]);
+
+  const monthSessions = useMemo(() => getMonthSessions(calendarDate), [getMonthSessions, calendarDate]);
+
   const [savingAgenda, setSavingAgenda] = useState(false);
   const [showAgendaModal, setShowAgendaModal] = useState(false);
   const [agendaFormDate, setAgendaFormDate] = useState(null);
@@ -367,15 +385,26 @@ export default function PatientRecord() {
   const handleOpenNewSlotModal = (day) => {
     let targetDate = day;
     if (!targetDate) {
-      const displayedYear = calendarDate.getFullYear();
-      const displayedMonth = calendarDate.getMonth();
-      const selectedYear = selectedCalendarDay.getFullYear();
-      const selectedMonth = selectedCalendarDay.getMonth();
-      const isSelectedInDisplayedMonth = displayedYear === selectedYear && displayedMonth === selectedMonth;
-      if (isSelectedInDisplayedMonth) {
-        targetDate = selectedCalendarDay;
+      if (selectedCalendarDay) {
+        const displayedYear = calendarDate.getFullYear();
+        const displayedMonth = calendarDate.getMonth();
+        const selectedYear = selectedCalendarDay.getFullYear();
+        const selectedMonth = selectedCalendarDay.getMonth();
+        const isSelectedInDisplayedMonth = displayedYear === selectedYear && displayedMonth === selectedMonth;
+        if (isSelectedInDisplayedMonth) {
+          targetDate = selectedCalendarDay;
+        } else {
+          const now = new Date();
+          if (displayedYear === now.getFullYear() && displayedMonth === now.getMonth()) {
+            targetDate = now;
+          } else {
+            targetDate = getFirstBusinessDay(displayedYear, displayedMonth);
+          }
+        }
       } else {
         const now = new Date();
+        const displayedYear = calendarDate.getFullYear();
+        const displayedMonth = calendarDate.getMonth();
         if (displayedYear === now.getFullYear() && displayedMonth === now.getMonth()) {
           targetDate = now;
         } else {
@@ -862,6 +891,21 @@ export default function PatientRecord() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!formData.name || !formData.cpf || !formData.birthDate) {
+      setEditTab("identity");
+      setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Identificação.");
+      return;
+    }
+    if (!formData.email || !formData.phone) {
+      setEditTab("contact");
+      setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Contato.");
+      return;
+    }
+    if (!formData.emergencyPhone || !formData.emergencyName) {
+      setEditTab("emergency");
+      setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Emergência.");
+      return;
+    }
     console.log("handleSave - Enviando dados:", JSON.stringify(formData, null, 2));
     setSaving(true);
     setErrorMessage("");
@@ -1277,7 +1321,7 @@ export default function PatientRecord() {
     return (
       <div className="h-full flex items-center justify-center p-20">
         <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-10 h-10 rounded-full border-2 border-emerald-900 border-t-transparent animate-spin" />
+          <div className="w-10 h-10 rounded-full border-2 border-brand-900 border-t-transparent animate-spin" />
           <p className="text-sm text-slate-600 font-medium">Carregando prontuário...</p>
         </div>
       </div>
@@ -1299,7 +1343,7 @@ export default function PatientRecord() {
 
   return (
     <>
-    <div className="p-6 h-screen flex flex-col overflow-hidden animate-fade-in">
+    <div className="p-6 h-full flex flex-col overflow-hidden animate-fade-in">
       <Link to="/patients" className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-4 group transition-colors shrink-0">
         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
         Voltar para Lista de Pacientes
@@ -1312,8 +1356,8 @@ export default function PatientRecord() {
           <div className="lg:col-span-1 flex flex-col min-h-0">
             <div className="card p-6 flex-1 flex flex-col min-h-0">
               <div className="flex flex-col items-center text-center mb-6 shrink-0">
-                <div className="w-20 h-20 rounded-2xl bg-emerald-900 flex items-center justify-center text-white font-bold text-3xl mb-3 shadow-xl shadow-emerald-900/20">
-                  {patient.name.charAt(0).toUpperCase()}
+                <div className="w-20 h-20 rounded-2xl bg-brand-900 flex items-center justify-center text-white font-black text-2xl mb-3 shadow-xl shadow-brand-900/20">
+                  {patient.name.split(" ")[0].slice(0, 2).toUpperCase()}
                 </div>
                 <h1 className="text-xl font-bold text-slate-900">{patient.name}</h1>
                 <p className="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-widest">Prontuário #{patient.id.slice(0, 8).toUpperCase()}</p>
@@ -1324,7 +1368,7 @@ export default function PatientRecord() {
                   <div className="flex items-center justify-between px-2 py-1.5">
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Email</p>
-                      <p className="text-xs text-emerald-700 font-medium truncate">{patient.email}</p>
+                      <p className="text-xs text-brand-700 font-medium truncate">{patient.email}</p>
                     </div>
                   </div>
                 )}
@@ -1332,13 +1376,13 @@ export default function PatientRecord() {
                   <div className="flex items-center justify-between px-2 py-1.5">
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Telefone</p>
-                      <p className="text-xs text-emerald-700 font-medium truncate">{patient.phone}</p>
+                      <p className="text-xs text-brand-700 font-medium truncate">{patient.phone}</p>
                     </div>
                   </div>
                 )}
                 <div className="px-2 py-1.5">
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nascimento</p>
-                  <p className="text-xs text-emerald-700 font-medium">
+                  <p className="text-xs text-brand-700 font-medium">
                     {patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : "Não informado"}
                     {patient.birthDate && (() => {
                       const today = new Date();
@@ -1352,7 +1396,7 @@ export default function PatientRecord() {
                 </div>
                 <div className="px-2 py-1.5">
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Paciente desde</p>
-                  <p className="text-xs text-emerald-700 font-medium">{new Date(patient.createdAt).toLocaleDateString('pt-BR')}</p>
+                  <p className="text-xs text-brand-700 font-medium">{new Date(patient.createdAt).toLocaleDateString('pt-BR')}</p>
                 </div>
               </div>
 
@@ -1388,12 +1432,12 @@ export default function PatientRecord() {
                   Evolução e respostas do paciente
                 </p>
               </div>
-              <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-emerald-100 shadow-sm">
+              <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-brand-100 shadow-sm">
                 <TabButton
                   active={activeTab === "sessions"}
                   onClick={() => handleTabChange("sessions")}
                   icon={<Clock size={14} />}
-                  label="Frequência"
+                  label="Histórico"
                 />
                 <TabButton
                   active={activeTab === "settings"}
@@ -1430,8 +1474,8 @@ export default function PatientRecord() {
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Stats Summary */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-400">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-brand-400">
+                  <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600">
                     <UserCheck size={18} />
                   </div>
                   <div>
@@ -1492,8 +1536,8 @@ export default function PatientRecord() {
                     }}
                     className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
                       periodFilter === opt.key
-                        ? "bg-emerald-600 text-white shadow-md"
-                        : "bg-white text-slate-500 border border-slate-200 hover:border-emerald-200 hover:text-emerald-600"
+                        ? "bg-brand-600 text-white shadow-md"
+                        : "bg-white text-slate-500 border border-slate-200 hover:border-brand-200 hover:text-brand-600"
                     }`}
                   >
                     {opt.label}
@@ -1501,7 +1545,7 @@ export default function PatientRecord() {
                 ))}
                 {periodFilter === "custom" && (
                   <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronLeft size={16} /></button>
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"><ChevronLeft size={16} /></button>
                     <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
                       {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
                         const monthVal = i + 1;
@@ -1512,7 +1556,7 @@ export default function PatientRecord() {
                     <select value={customMonth.split("-")[0]} onChange={e => { const month = customMonth.split("-")[1]; setCustomMonth(`${e.target.value}-${month}`); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
                       {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year}>{year}</option>; })}
                     </select>
-                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronRight size={16} /></button>
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"><ChevronRight size={16} /></button>
                   </div>
                 )}
               </div>
@@ -1525,13 +1569,13 @@ export default function PatientRecord() {
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
                 {loadingAttendances ? (
                   <div className="text-center py-20 opacity-50 flex-1 flex items-center justify-center">
-                    <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <div className="w-10 h-10 border-4 border-brand-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                     <p className="text-sm font-bold uppercase tracking-widest">Carregando histórico...</p>
                   </div>
                 ) : filteredAttendances.length === 0 ? (
                   <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
-                    <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mb-5">
-                      <Calendar size={32} className="text-emerald-300" />
+                    <div className="w-16 h-16 rounded-2xl bg-brand-50 flex items-center justify-center mb-5">
+                      <Calendar size={32} className="text-brand-300" />
                     </div>
                     <p className="text-sm font-bold text-slate-700 uppercase tracking-widest">Nenhum registro no período</p>
                     <p className="text-xs text-slate-400 mt-2 max-w-xs leading-relaxed">Registros de presença aparecerão aqui conforme você marcar as sessões na agenda do paciente.</p>
@@ -1547,7 +1591,7 @@ export default function PatientRecord() {
                       const isChainEnd = !hasFilho && isFilho;
                       
                       const statusConfig = {
-                        presente: { color: "bg-emerald-500", label: "Presente", bg: "bg-emerald-50", text: "text-emerald-700", icon: <Check size={12} /> },
+                        presente: { color: "bg-brand-500", label: "Presente", bg: "bg-brand-50", text: "text-brand-700", icon: <Check size={12} /> },
                         falta: { color: "bg-red-500", label: "Falta", bg: "bg-red-50", text: "text-red-700", icon: <X size={12} /> },
                         justificada: { color: "bg-amber-500", label: "Justificada", bg: "bg-amber-50", text: "text-amber-700", icon: isReagendado ? <RefreshCcw size={12} /> : <AlertCircle size={12} /> },
                       };
@@ -1576,12 +1620,12 @@ export default function PatientRecord() {
                                   </span>
                                   {att.paymentId ? (
                                     <>
-                                      <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1 shadow-sm">
+                                      <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-brand-100 text-brand-700 border border-brand-200 flex items-center gap-1 shadow-sm">
                                         <DollarSign size={8} />
                                         Pago
                                       </span>
                                       <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border shadow-sm flex items-center gap-1 ${
-                                        att.payment?.receiptIssued ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200'
+                                        att.payment?.receiptIssued ? 'bg-brand-50 text-brand-600 border-brand-200' : 'bg-amber-50 text-amber-600 border-amber-200'
                                       }`}>
                                         <Receipt size={8} />
                                         {att.payment?.receiptIssued ? 'Recibo Emitido' : 'Recibo Pendente'}
@@ -1647,8 +1691,8 @@ export default function PatientRecord() {
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Stats Summary */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-400">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-brand-400">
+                  <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600">
                     <Calendar size={18} />
                   </div>
                   <div>
@@ -1702,6 +1746,7 @@ export default function PatientRecord() {
                   <button
                     key={opt.key}
                     onClick={() => {
+                      setSelectedCalendarDay(null);
                       setCalendarPeriodFilter(opt.key);
                       const now = new Date();
                       if (opt.key === "thisMonth") {
@@ -1718,8 +1763,8 @@ export default function PatientRecord() {
                     }}
                     className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
                       calendarPeriodFilter === opt.key
-                        ? "bg-emerald-600 text-white shadow-md"
-                        : "bg-white text-slate-500 border border-slate-200 hover:border-emerald-200 hover:text-emerald-600"
+                        ? "bg-brand-600 text-white shadow-md"
+                        : "bg-white text-slate-500 border border-slate-200 hover:border-brand-200 hover:text-brand-600"
                     }`}
                   >
                     {opt.label}
@@ -1727,18 +1772,18 @@ export default function PatientRecord() {
                 ))}
                 {calendarPeriodFilter === "custom" && (
                   <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                    <button onClick={() => { const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronLeft size={16} /></button>
-                    <select value={calendarCustomMonth} onChange={e => { setCalendarCustomMonth(e.target.value); const [y, m] = e.target.value.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
+                    <button onClick={() => { setSelectedCalendarDay(null); const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"><ChevronLeft size={16} /></button>
+                    <select value={calendarCustomMonth} onChange={e => { setSelectedCalendarDay(null); setCalendarCustomMonth(e.target.value); const [y, m] = e.target.value.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
                       {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
                         const monthVal = i + 1;
                         const currentYear = calendarCustomMonth.split("-")[0];
                         return <option key={`${currentYear}-${String(monthVal).padStart(2, "0")}`} value={`${currentYear}-${String(monthVal).padStart(2, "0")}`}>{name}</option>;
                       })}
                     </select>
-                    <select value={calendarCustomMonth.split("-")[0]} onChange={e => { const month = calendarCustomMonth.split("-")[1]; const val = `${e.target.value}-${month}`; setCalendarCustomMonth(val); const [y, m] = val.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
+                    <select value={calendarCustomMonth.split("-")[0]} onChange={e => { setSelectedCalendarDay(null); const month = calendarCustomMonth.split("-")[1]; const val = `${e.target.value}-${month}`; setCalendarCustomMonth(val); const [y, m] = val.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
                       {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year}>{year}</option>; })}
                     </select>
-                    <button onClick={() => { const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronRight size={16} /></button>
+                    <button onClick={() => { setSelectedCalendarDay(null); const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"><ChevronRight size={16} /></button>
                   </div>
                 )}
               </div>
@@ -1748,7 +1793,7 @@ export default function PatientRecord() {
                 {loadingAppointments ? (
                   <div className="flex-1 flex items-center justify-center">
                     <div className="text-center">
-                      <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                      <div className="w-10 h-10 border-4 border-brand-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                       <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Carregando agenda...</p>
                     </div>
                   </div>
@@ -1761,7 +1806,7 @@ export default function PatientRecord() {
 
                         <DayPicker
                           month={calendarDate}
-                        onMonthChange={setCalendarDate}
+                        onMonthChange={(date) => { setSelectedCalendarDay(null); setCalendarDate(date); }}
                         onDayClick={(day) => handleDayClick(day)}
                         locale={ptBR}
                         modifiers={{
@@ -1793,12 +1838,12 @@ export default function PatientRecord() {
                             let bgClass = "";
                             if (modifiers?.conflict) bgClass = "bg-red-50";
                             else if (modifiers?.others) bgClass = "bg-amber-50";
-                            else if (modifiers?.mine) bgClass = "bg-emerald-50";
+                            else if (modifiers?.mine) bgClass = "bg-brand-50";
 
                             return (
                               <button {...props} className={`relative w-full h-full flex items-center justify-center text-sm font-bold cursor-pointer transition-colors ${isToday ? "" : "hover:bg-slate-100"} ${bgClass}`}>
                                 {modifiers?.mine && showAllAppointments && (
-                                  <div className="absolute bottom-1 left-1.5 right-1.5 h-[3px] rounded-full bg-emerald-500" />
+                                  <div className="absolute bottom-1 left-1.5 right-1.5 h-[3px] rounded-full bg-brand-500" />
                                 )}
                                 <span className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-black ${
                                   isToday ? "bg-slate-800 text-white" : dayStr === selectedStr ? "ring-2 ring-slate-400" : "text-slate-700"
@@ -1810,7 +1855,13 @@ export default function PatientRecord() {
                           },
                           MonthCaption: ({ calendarMonth }) => (
                             <div className="shrink-0 mb-3">
-                              <p className="text-sm font-bold text-slate-600 capitalize">
+                              <p
+                                className="text-sm font-bold text-slate-600 capitalize cursor-pointer hover:text-brand-600 transition-colors"
+                                onClick={() => {
+                                  setCalendarDate(calendarMonth.date);
+                                  setSelectedCalendarDay(null);
+                                }}
+                              >
                                 {format(calendarMonth.date, "MMMM 'de' yyyy", { locale: ptBR })}
                               </p>
                             </div>
@@ -1827,7 +1878,7 @@ export default function PatientRecord() {
                       {/* Legend */}
                       <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-slate-100 shrink-0">
                         <div className="flex items-center gap-1.5">
-                          <div className="w-3 h-3 rounded bg-emerald-50 border border-emerald-300" />
+                          <div className="w-3 h-3 rounded bg-brand-50 border border-brand-300" />
                           <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{patient?.name?.split(" ")[0] || "Paciente"}</span>
                         </div>
                         {showAllAppointments && (
@@ -1849,7 +1900,7 @@ export default function PatientRecord() {
                       <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight shrink-0">Agendamentos</h3>
                       <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
                       {showEditChoice && editingAppointment && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm" onClick={() => { setShowEditChoice(false); setEditingAppointment(null); }}>
+                        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => { setShowEditChoice(false); setEditingAppointment(null); }}>
                           <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
                             <div className="text-center mb-6">
                               <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
@@ -1899,7 +1950,7 @@ export default function PatientRecord() {
                               </p>
                             </div>
                           </div>
-                          <div className="space-y-1.5 overflow-y-auto min-h-0">
+                          <div className="space-y-1.5 overflow-y-auto min-h-0 pr-1.5">
                             {appointments
                               .filter(a => {
                                 const dateStr = format(selectedCalendarDay, "yyyy-MM-dd");
@@ -1935,12 +1986,12 @@ export default function PatientRecord() {
                                   }`}>
                                     <div className="flex items-center gap-2 min-w-0 flex-1">
                                       <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] shrink-0 ${
-                                        conflict ? "bg-red-100 text-red-600" : isOtherPatient ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
+                                        conflict ? "bg-red-100 text-red-600" : isOtherPatient ? "bg-amber-50 text-amber-600" : "bg-brand-50 text-brand-600"
                                       }`}>
                                         <Clock size={14} />
                                       </div>
                                       <div className="min-w-0">
-                                        <p className={`text-xs font-bold truncate ${isOtherPatient ? "text-amber-600" : "text-emerald-700"}`}>
+                                        <p className={`text-xs font-bold truncate ${isOtherPatient ? "text-amber-600" : "text-brand-700"}`}>
                                           {(isOtherPatient ? app.patient?.name : patient?.name)?.split(" ")[0] || "Paciente"}
                                         </p>
                                         <p className="text-[9px] font-bold text-slate-500">{app.maxSessions ? `${app.maxSessions} sessões` : app.startDate ? "Semanal" : app.scheduledDate ? format(new Date(app.scheduledDate), "dd/MM/yy") : "Avulso"}</p>
@@ -1957,7 +2008,7 @@ export default function PatientRecord() {
                                         <button
                                           type="button"
                                           onClick={() => handleEditClick(app, selectedCalendarDay)}
-                                          className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all border border-slate-200 hover:border-emerald-200"
+                                          className="p-1.5 text-slate-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all border border-slate-200 hover:border-brand-200"
                                           title="Editar"
                                         >
                                           <Pencil size={13} />
@@ -2008,27 +2059,58 @@ export default function PatientRecord() {
                           </div>
                         </div>
                       ) : (
-                          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
-                            <div className="flex items-start justify-between mb-3 shrink-0">
+                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
+                          <div className="flex items-start justify-between mb-3 shrink-0">
                             <div>
-                              <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Agenda Completa</h4>
-                              <p className="text-xs font-bold text-slate-500 mt-0.5">Todos os horários do mês</p>
+                              <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Visão do Mês</h4>
+                              <p className="text-xs font-bold text-slate-500 mt-0.5">
+                                {format(calendarDate, "MMMM 'de' yyyy", { locale: ptBR })}
+                              </p>
                             </div>
+                            <span className="px-2.5 py-1 bg-white border border-slate-200 text-slate-600 text-[10px] font-black rounded-full shadow-sm">
+                              {monthSessions.reduce((acc, d) => acc + d.sessions.length, 0)} SESSÕES
+                            </span>
                           </div>
-                          <div className="space-y-1.5 overflow-y-auto min-h-0">
-                            {[...new Set(appointments.filter(a => myAppointmentIds.has(a.id)).map(a => a.time))].sort().map(time => {
-                              const slotsAtTime = appointments.filter(a => myAppointmentIds.has(a.id) && a.time === time);
-                              return (
-                                <div key={time} className="p-2.5 rounded-xl border border-slate-200 bg-white">
-                                  <p className="text-xs font-bold text-slate-800">{time} • {slotsAtTime[0]?.duration}min</p>
-                                  <p className="text-[9px] font-bold text-slate-500">{slotsAtTime.length} horário{slotsAtTime.length > 1 ? 's' : ''}</p>
-                                </div>
-                              );
-                            })}
-                            {appointments.filter(a => myAppointmentIds.has(a.id)).length === 0 && (
-                              <div className="text-center py-4">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nenhum horário cadastrado</p>
+                          <div className="space-y-3 overflow-y-auto min-h-0 flex-1 pr-1.5">
+                            {monthSessions.length === 0 ? (
+                              <div className="text-center py-10">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nenhuma sessão neste mês</p>
                               </div>
+                            ) : (
+                              monthSessions.map(({ date, sessions }) => (
+                                <div key={format(date, "yyyy-MM-dd")}>
+                                  <div className="flex items-center gap-2 mb-1.5">
+                                    <button
+                                      onClick={() => setSelectedCalendarDay(date)}
+                                      className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-brand-600 transition-colors"
+                                    >
+                                      {format(date, "EEE dd/MM", { locale: ptBR })}
+                                    </button>
+                                    <div className="flex-1 border-t border-slate-200" />
+                                  </div>
+                                  {sessions.map(app => {
+                                    const conflict = conflicts[app.id];
+                                    const appPatientId = app.patient?.id ?? app.patientId;
+                                    const isOtherPatient = appPatientId && appPatientId !== id;
+                                    const displayName = (isOtherPatient ? app.patient?.name : patient?.name) || "Paciente";
+                                    const initials = displayName.split(" ")[0].slice(0, 2).toUpperCase();
+                                    return (
+                                      <div key={app.id} className={`flex items-center gap-2 p-3 rounded-lg border mb-1 ${conflict ? "border-red-200 bg-red-50/30" : isOtherPatient ? "border-amber-200 bg-amber-50/30" : "border-slate-200 bg-white hover:border-slate-300"} transition-all`}>
+                                        <div className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-500 font-black text-[9px] shrink-0">
+                                          {initials}
+                                        </div>
+                                        <p className={`text-xs font-bold truncate flex-1 min-w-0 ${isOtherPatient ? "text-amber-600" : "text-slate-800"}`}>{displayName}</p>
+                                        <span className="text-[10px] font-bold text-slate-500 shrink-0">{app.time} &bull; {app.duration}min</span>
+                                        {conflict && (
+                                          <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-200 shrink-0">
+                                            Conflito
+                                          </span>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              ))
                             )}
                           </div>
                         </div>
@@ -2058,8 +2140,8 @@ export default function PatientRecord() {
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Financial Dashboard */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-400">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-brand-400">
+                  <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600">
                     <DollarSign size={18} />
                   </div>
                   <div>
@@ -2131,8 +2213,8 @@ export default function PatientRecord() {
                     }}
                     className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
                       periodFilter === opt.key
-                        ? "bg-emerald-600 text-white shadow-md"
-                        : "bg-white text-slate-500 border border-slate-200 hover:border-emerald-200 hover:text-emerald-600"
+                        ? "bg-brand-600 text-white shadow-md"
+                        : "bg-white text-slate-500 border border-slate-200 hover:border-brand-200 hover:text-brand-600"
                     }`}
                   >
                     {opt.label}
@@ -2140,7 +2222,7 @@ export default function PatientRecord() {
                 ))}
                 {periodFilter === "custom" && (
                   <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronLeft size={16} /></button>
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"><ChevronLeft size={16} /></button>
                     <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
                       {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
                         const monthVal = i + 1;
@@ -2151,7 +2233,7 @@ export default function PatientRecord() {
                     <select value={customMonth.split("-")[0]} onChange={e => { const month = customMonth.split("-")[1]; setCustomMonth(`${e.target.value}-${month}`); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
                       {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year}>{year}</option>; })}
                     </select>
-                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronRight size={16} /></button>
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"><ChevronRight size={16} /></button>
                   </div>
                 )}
               </div>
@@ -2164,7 +2246,7 @@ export default function PatientRecord() {
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
                 {loadingPayments ? (
                   <div className="text-center py-20 opacity-50">
-                    <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <div className="w-10 h-10 border-4 border-brand-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                     <p className="text-sm font-bold uppercase tracking-widest">Carregando financeiro...</p>
                   </div>
                 ) : filteredPayments.length === 0 ? (
@@ -2215,7 +2297,7 @@ export default function PatientRecord() {
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-2 flex-wrap min-w-0">
                                 {payment.receiptIssued ? (
-                                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-lg border border-emerald-200 whitespace-nowrap">
+                                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-brand-100 text-brand-700 text-[10px] font-bold rounded-lg border border-brand-200 whitespace-nowrap">
                                     <Check size={10} />
                                     NOTA DE SERVIÇO
                                   </span>
@@ -2256,7 +2338,7 @@ export default function PatientRecord() {
                                 </button>
                                 <button 
                                   onClick={() => handleGenerateReceipt(payment)}
-                                  className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                                  className="p-2 text-brand-600 hover:bg-brand-50 rounded-lg transition-all"
                                   title="Gerar Prestação de Contas (PDF)"
                                 >
                                   <Download size={16} />
@@ -2281,7 +2363,7 @@ export default function PatientRecord() {
                       </tbody>
                     </table>
                   </div>
-                )}
+                )}  
                 </div>
                 {/* Action Buttons */}
                 <div className="flex items-center gap-3 shrink-0 justify-end">
@@ -2330,8 +2412,8 @@ export default function PatientRecord() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pendentes</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-emerald-400">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-brand-400">
+                  <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600">
                     <Check size={18} />
                   </div>
                   <div>
@@ -2378,8 +2460,8 @@ export default function PatientRecord() {
                     }}
                     className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
                       periodFilter === opt.key
-                        ? "bg-emerald-600 text-white shadow-md"
-                        : "bg-white text-slate-500 border border-slate-200 hover:border-emerald-200 hover:text-emerald-600"
+                        ? "bg-brand-600 text-white shadow-md"
+                        : "bg-white text-slate-500 border border-slate-200 hover:border-brand-200 hover:text-brand-600"
                     }`}
                   >
                     {opt.label}
@@ -2387,7 +2469,7 @@ export default function PatientRecord() {
                 ))}
                 {periodFilter === "custom" && (
                   <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronLeft size={16} /></button>
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"><ChevronLeft size={16} /></button>
                     <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
                       {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
                         const monthVal = i + 1;
@@ -2398,7 +2480,7 @@ export default function PatientRecord() {
                     <select value={customMonth.split("-")[0]} onChange={e => { const month = customMonth.split("-")[1]; setCustomMonth(`${e.target.value}-${month}`); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
                       {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year}>{year}</option>; })}
                     </select>
-                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"><ChevronRight size={16} /></button>
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"><ChevronRight size={16} /></button>
                   </div>
                 )}
               </div>
@@ -2411,7 +2493,7 @@ export default function PatientRecord() {
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
                 {loadingLinks ? (
                   <div className="text-center py-20 opacity-50 flex-1 flex items-center justify-center">
-                    <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <div className="w-10 h-10 border-4 border-brand-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                     <p className="text-sm font-bold uppercase tracking-widest">Carregando instrumentos...</p>
                   </div>
                 ) : filteredLinks.length === 0 ? (
@@ -2446,11 +2528,11 @@ export default function PatientRecord() {
                             <td className="px-2 py-3 whitespace-nowrap">
                               <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
                                 link.status === "RESPONDIDO" 
-                                  ? "bg-emerald-50 text-emerald-700" 
+                                  ? "bg-brand-50 text-brand-700" 
                                   : "bg-amber-50 text-amber-700"
                               }`}>
                                 <span className={`w-1.5 h-1.5 rounded-full ${
-                                  link.status === "RESPONDIDO" ? "bg-emerald-500" : "bg-amber-500"
+                                  link.status === "RESPONDIDO" ? "bg-brand-500" : "bg-amber-500"
                                 }`} />
                                 {link.status === "RESPONDIDO" ? "Respondido" : "Pendente"}
                               </span>
@@ -2470,7 +2552,7 @@ export default function PatientRecord() {
                                       await navigator.clipboard.writeText(shareUrl);
                                       alert("Link copiado!");
                                     }}
-                                    className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded-lg transition-colors"
+                                    className="text-[10px] font-bold text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100 px-2 py-1 rounded-lg transition-colors"
                                   >
                                     Link
                                   </button>
@@ -2525,7 +2607,7 @@ export default function PatientRecord() {
                             </span>
                           )}
                         </div>
-                        <label className="text-[11px] font-bold uppercase text-emerald-600 hover:text-emerald-700 cursor-pointer transition-colors flex items-center gap-1">
+                        <label className="text-[11px] font-bold uppercase text-brand-600 hover:text-brand-700 cursor-pointer transition-colors flex items-center gap-1">
                           <Plus size={14} />
                           {uploading ? 'Enviando...' : 'Anexar'}
                           <input type="file" multiple className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" disabled={uploading} onChange={handleUploadAttachment} />
@@ -2555,7 +2637,7 @@ export default function PatientRecord() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-0.5">
-                                <button type="button" onClick={() => handleDownloadAttachment(att)} className="p-1.5 hover:bg-emerald-50 rounded text-slate-400 hover:text-emerald-600 transition-colors" title="Baixar">
+                                <button type="button" onClick={() => handleDownloadAttachment(att)} className="p-1.5 hover:bg-brand-50 rounded text-slate-400 hover:text-brand-600 transition-colors" title="Baixar">
                                   <Download size={14} />
                                 </button>
                                 <button type="button" onClick={() => handleDeleteAttachment(att.id)} className="p-1.5 hover:bg-red-50 rounded text-slate-400 hover:text-red-500 transition-colors" title="Excluir">
@@ -2564,7 +2646,7 @@ export default function PatientRecord() {
                               </div>
                             </div>
                           ))}
-                          <label className="flex items-center justify-center gap-1.5 py-2.5 text-xs text-slate-500 hover:text-emerald-600 cursor-pointer transition-colors rounded-lg border border-dashed border-slate-200 bg-white/60">
+                          <label className="flex items-center justify-center gap-1.5 py-2.5 text-xs text-slate-500 hover:text-brand-600 cursor-pointer transition-colors rounded-lg border border-dashed border-slate-200 bg-white/60">
                             <Plus size={14} />
                             <span className="font-medium">Adicionar mais</span>
                             <input type="file" multiple className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" disabled={uploading} onChange={handleUploadAttachment} />
@@ -2602,12 +2684,12 @@ export default function PatientRecord() {
           {activeTab === "timeline" && (
             loadingLinks ? (
               <div className="text-center py-12 text-slate-500">
-                <div className="animate-spin w-6 h-6 border-2 border-emerald-900 border-t-transparent rounded-full mx-auto mb-2" />
+                <div className="animate-spin w-6 h-6 border-2 border-brand-900 border-t-transparent rounded-full mx-auto mb-2" />
                 <p className="text-xs">Carregando instrumentos...</p>
               </div>
             ) : patientShareLinks.length === 0 ? (
               <div className="card p-20 text-center border-dashed border-2">
-                <FileText size={48} className="mx-auto text-emerald-200 mb-6" />
+                <FileText size={48} className="mx-auto text-brand-200 mb-6" />
                 <h3 className="text-xl font-bold text-slate-900 mb-2">Nenhum registro ainda</h3>
                 <p className="text-slate-600 max-w-sm mx-auto">Envie um instrumento ou escala para este paciente para começar a construir seu prontuário digital.</p>
                 <Link to="/my-forms" className="btn btn-primary mt-8">Ir para Meus Instrumentos</Link>
@@ -2622,7 +2704,7 @@ export default function PatientRecord() {
                   return (
                     <div>
                       <h4 className="text-sm font-black uppercase tracking-[0.2em] text-slate-500 mb-4 flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                        <div className="w-2 h-2 rounded-full bg-brand-500" />
                         {answered.length === 1 ? 'Respondido' : 'Respondidos'} ({answered.length})
                       </h4>
                       <div className="space-y-4">
@@ -2633,23 +2715,23 @@ export default function PatientRecord() {
                           return (
                             <div 
                               key={response.id}
-                              className="card overflow-hidden group hover:border-emerald-300 transition-all duration-300"
+                              className="card overflow-hidden group hover:border-brand-300 transition-all duration-300"
                             >
                               <div className="w-full flex items-center justify-between p-6 min-h-[100px]">
                                 <div className="flex items-center gap-4 flex-1">
-                                  <div className="w-14 h-14 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center group-hover:bg-emerald-700 group-hover:text-white transition-colors duration-300 shadow-sm shrink-0">
+                                  <div className="w-14 h-14 rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center group-hover:bg-brand-700 group-hover:text-white transition-colors duration-300 shadow-sm shrink-0">
                                     <FileText size={22} />
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <h4 className="font-bold text-base text-slate-900 group-hover:text-emerald-700 transition-colors">{link.form?.title}</h4>
+                                    <h4 className="font-bold text-base text-slate-900 group-hover:text-brand-700 transition-colors">{link.form?.title}</h4>
                                     <div className="flex items-center gap-3 mt-2 flex-wrap">
                                       <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">
                                         Enviado em {new Date(link.createdAt).toLocaleDateString('pt-BR')} · {new Date(link.createdAt).toLocaleTimeString('pt-BR')}
                                       </p>
-                                      <span className="text-xs font-bold px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full">
+                                      <span className="text-xs font-bold px-3 py-1 bg-brand-50 text-brand-700 rounded-full">
                                         ✓ Respondido
                                       </span>
-                                      <p className="text-xs font-bold text-emerald-600">
+                                      <p className="text-xs font-bold text-brand-600">
                                         {new Date(response.createdAt).toLocaleDateString('pt-BR')} · {new Date(response.createdAt).toLocaleTimeString('pt-BR')}
                                       </p>
                                     </div>
@@ -2682,18 +2764,18 @@ export default function PatientRecord() {
                                       e.stopPropagation();
                                       toggleResponse(e, response.id);
                                     }}
-                                    className="p-2 hover:bg-emerald-50 rounded-lg transition-colors"
+                                    className="p-2 hover:bg-brand-50 rounded-lg transition-colors"
                                   >
                                     <ChevronRight
                                       size={22}
-                                      className={`text-emerald-400 transition-all duration-300 ${selectedResponseId === response.id ? 'rotate-90 text-slate-900 scale-110' : ''}`}
+                                      className={`text-brand-400 transition-all duration-300 ${selectedResponseId === response.id ? 'rotate-90 text-slate-900 scale-110' : ''}`}
                                     />
                                   </button>
                                 </div>
                               </div>
 
                               {selectedResponseId === response.id && (
-                                <div className="p-6 bg-emerald-50/50 border-t border-emerald-50 max-h-[70vh] overflow-y-auto">
+                                <div className="p-6 bg-brand-50/50 border-t border-brand-50 max-h-[70vh] overflow-y-auto">
                                   {/* Clinical Score Summary */}
                                   {(() => {
                                     if (!result || result.type !== "clinical") return null;
@@ -2734,7 +2816,7 @@ export default function PatientRecord() {
                                             </span>
                                             <p className="text-[10px] text-slate-500 font-bold uppercase mt-2">Score total de {result.maxScore} pontos</p>
                                             {scoreDiff !== null && (
-                                              <p className={`text-[10px] font-black mt-1 ${scoreDiff > 0 ? 'text-red-600' : scoreDiff < 0 ? 'text-emerald-600' : 'text-slate-500'}`}>
+                                              <p className={`text-[10px] font-black mt-1 ${scoreDiff > 0 ? 'text-red-600' : scoreDiff < 0 ? 'text-brand-600' : 'text-slate-500'}`}>
                                                 {scoreDiff > 0 ? '↑' : scoreDiff < 0 ? '↓' : ''} {Math.abs(scoreDiff)} pts vs. anterior
                                               </p>
                                             )}
@@ -2748,7 +2830,7 @@ export default function PatientRecord() {
                                           </div>
                                         )}
                                         
-                                        <div className="p-4 bg-emerald-50/80 rounded-xl border border-emerald-100/50">
+                                        <div className="p-4 bg-brand-50/80 rounded-xl border border-brand-100/50">
                                           <p className="text-sm text-slate-800 leading-relaxed font-medium italic">"{result.interpretation}"</p>
                                         </div>
 
@@ -2773,7 +2855,7 @@ export default function PatientRecord() {
                                                   </div>
                                                   <div className="mt-1.5 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                                                     <div
-                                                      className={`h-full rounded-full ${s.level === 'Muito Alta' ? 'bg-red-500' : s.level === 'Alta' ? 'bg-orange-500' : s.level === 'Moderada' ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                                                      className={`h-full rounded-full ${s.level === 'Muito Alta' ? 'bg-red-500' : s.level === 'Alta' ? 'bg-orange-500' : s.level === 'Moderada' ? 'bg-amber-500' : 'bg-brand-500'}`}
                                                       style={{ width: `${s.average !== null ? (s.average / 6) * 100 : 0}%` }}
                                                     />
                                                   </div>
@@ -2828,7 +2910,7 @@ export default function PatientRecord() {
                       <div className="space-y-4">
                         {pending.map(link => {
                           return (
-                            <div key={link.id} className="card p-6 bg-white border-emerald-100 hover:border-emerald-200 transition-all">
+                            <div key={link.id} className="card p-6 bg-white border-brand-100 hover:border-brand-200 transition-all">
                               <div className="flex items-start justify-between gap-4">
                                 <div className="flex-1 min-w-0">
                                   <h5 className="font-semibold text-base text-slate-900 mb-2">{link.form?.title}</h5>
@@ -2866,7 +2948,7 @@ export default function PatientRecord() {
 
       {/* Agenda Modal */}
       {showAgendaModal && agendaFormDate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm" onClick={() => { setShowAgendaModal(false); setEditingAppointment(null); setEditMode(null); }}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => { setShowAgendaModal(false); setEditingAppointment(null); setEditMode(null); }}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-lg mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -2931,7 +3013,7 @@ export default function PatientRecord() {
                     type="checkbox"
                     checked={agendaFormRecurring}
                     onChange={e => setAgendaFormRecurring(e.target.checked)}
-                    className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    className="w-5 h-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                   />
                   <div>
                     <span className="text-sm font-bold text-slate-700">
@@ -2968,7 +3050,7 @@ export default function PatientRecord() {
               <button
                 onClick={handleSaveNewSlot}
                 disabled={savingAgenda}
-                className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-emerald-200"
+                className="px-6 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-brand-200"
               >
                 {savingAgenda ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -2986,7 +3068,7 @@ export default function PatientRecord() {
 
       {/* Edit Patient Modal */}
       {showEditModal && formData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="card w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-slate-200 shrink-0">
               <div className="flex items-center justify-between mb-4">
@@ -3003,6 +3085,7 @@ export default function PatientRecord() {
                 {[
                   { id: "identity", label: "Identificação", icon: UserCheck },
                   { id: "contact", label: "Contato", icon: Contact },
+                  { id: "emergency", label: "Emergência", icon: Phone },
                   { id: "address", label: "Endereço", icon: MapPin },
                 ].map(tab => (
                   <button
@@ -3010,7 +3093,7 @@ export default function PatientRecord() {
                     onClick={() => setEditTab(tab.id)}
                     className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
                       editTab === tab.id
-                        ? "bg-white text-emerald-700 shadow-sm"
+                        ? "bg-white text-brand-700 shadow-sm"
                         : "text-slate-500 hover:text-slate-700"
                     }`}
                   >
@@ -3035,8 +3118,8 @@ export default function PatientRecord() {
                     <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
                       <div className="flex items-center gap-3">
                         {formData.isActive ? (
-                          <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                            <UserCheck size={20} className="text-emerald-600" />
+                          <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center">
+                            <UserCheck size={20} className="text-brand-600" />
                           </div>
                         ) : (
                           <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
@@ -3051,7 +3134,7 @@ export default function PatientRecord() {
                       <button
                         type="button"
                         onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
-                        className={`relative w-14 h-7 rounded-full transition-colors ${formData.isActive ? "bg-emerald-500" : "bg-slate-300"}`}
+                        className={`relative w-14 h-7 rounded-full transition-colors ${formData.isActive ? "bg-brand-500" : "bg-slate-300"}`}
                       >
                         <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${formData.isActive ? "left-8" : "left-1"}`} />
                       </button>
@@ -3083,11 +3166,7 @@ export default function PatientRecord() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">RG</label>
-                        <input type="text" className="input text-sm" value={formData.rg} onChange={e => setFormData({ ...formData, rg: e.target.value })} placeholder="Documento" />
-                      </div>
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-semibold text-slate-600 mb-2">Estado Civil</label>
                         <select className="input text-sm" value={formData.maritalStatus} onChange={e => setFormData({ ...formData, maritalStatus: e.target.value })}>
@@ -3113,15 +3192,18 @@ export default function PatientRecord() {
                       <label className="block text-xs font-semibold text-slate-600 mb-2">E-mail *</label>
                       <input type="email" required className="input text-sm" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="email@exemplo.com" />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone *</label>
-                        <input type="tel" required className="input text-sm" value={formData.phone} onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência *</label>
-                        <input type="tel" required className="input text-sm" value={formData.emergencyPhone} onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
-                      </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone *</label>
+                      <input type="tel" required className="input text-sm" value={formData.phone} onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
+                    </div>
+                  </div>
+                )}
+
+                {editTab === "emergency" && (
+                  <div className="space-y-5">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência *</label>
+                      <input type="tel" required className="input text-sm" value={formData.emergencyPhone} onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })} placeholder="(00) 00000-0000" maxLength={15} />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-600 mb-2">Nome Emergência *</label>
@@ -3200,14 +3282,14 @@ export default function PatientRecord() {
 
       {/* Share Modal */}
       {showShareModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-900/20 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="card w-full max-w-2xl p-6 animate-scale-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-semibold text-slate-900">Enviar Instrumento para {patient?.name}</h2>
                 <p className="text-xs text-slate-600 mt-1">Crie um link para que o paciente preencha o instrumento</p>
               </div>
-              <button onClick={() => setShowShareModal(false)} className="text-slate-500 hover:text-emerald-600">
+              <button onClick={() => setShowShareModal(false)} className="text-slate-500 hover:text-brand-600">
                 <Plus size={24} className="rotate-45" />
               </button>
             </div>
@@ -3237,10 +3319,10 @@ export default function PatientRecord() {
               }
             }} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-emerald-700 mb-2">Selecione um Instrumento *</label>
+                <label className="block text-sm font-medium text-brand-700 mb-2">Selecione um Instrumento *</label>
                 {loadingForms ? (
                   <div className="text-center py-4 text-slate-500">
-                    <div className="animate-spin w-4 h-4 border-2 border-emerald-900 border-t-transparent rounded-full mx-auto" />
+                    <div className="animate-spin w-4 h-4 border-2 border-brand-900 border-t-transparent rounded-full mx-auto" />
                   </div>
                 ) : (
                   <select
@@ -3324,7 +3406,7 @@ export default function PatientRecord() {
 
       {/* Payment Modal */}
       {showPaymentModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="card w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-slate-200">
               <div className="flex items-center justify-between mb-2">
@@ -3404,7 +3486,7 @@ export default function PatientRecord() {
                           checked={paymentFormData.receiptIssued}
                           onChange={e => setPaymentFormData({...paymentFormData, receiptIssued: e.target.checked})}
                         />
-                        <div className="w-10 h-5 bg-slate-200 rounded-full peer-checked:bg-emerald-500 transition-colors"></div>
+                        <div className="w-10 h-5 bg-slate-200 rounded-full peer-checked:bg-brand-500 transition-colors"></div>
                         <div className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform peer-checked:left-6"></div>
                       </div>
                       <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest group-hover:text-slate-800">Nota de Serviço Emitida</span>
@@ -3413,10 +3495,10 @@ export default function PatientRecord() {
                     {/* Upload Recibo */}
                     <div className="mt-2 space-y-2">
                       {paymentFormData.existingReceiptAttachmentId && paymentFormData.existingReceiptFilename ? (
-                        <div className="flex items-center justify-between px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg">
+                        <div className="flex items-center justify-between px-3 py-2 bg-brand-50 border border-brand-200 rounded-lg">
                           <div className="flex items-center gap-2 min-w-0">
-                            <Paperclip size={14} className="text-emerald-600 shrink-0" />
-                            <span className="text-xs font-medium text-emerald-700 truncate">
+                            <Paperclip size={14} className="text-brand-600 shrink-0" />
+                            <span className="text-xs font-medium text-brand-700 truncate">
                               {paymentFormData.existingReceiptFilename}
                             </span>
                           </div>
@@ -3424,7 +3506,7 @@ export default function PatientRecord() {
                             <button
                               type="button"
                               onClick={() => handleDownloadReceipt(paymentFormData.existingReceiptAttachmentId, paymentFormData.existingReceiptFilename)}
-                              className="p-1.5 text-emerald-700 hover:bg-emerald-100 rounded-lg transition-colors"
+                              className="p-1.5 text-brand-700 hover:bg-brand-100 rounded-lg transition-colors"
                               title="Baixar Recibo"
                             >
                               <Download size={14} />
@@ -3440,7 +3522,7 @@ export default function PatientRecord() {
                           </div>
                         </div>
                       ) : (
-                        <label className={`flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium cursor-pointer transition-all ${paymentFormData.receiptFile ? 'border-emerald-200' : 'hover:border-emerald-300'}`}>
+                        <label className={`flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium cursor-pointer transition-all ${paymentFormData.receiptFile ? 'border-brand-200' : 'hover:border-brand-300'}`}>
                           <Paperclip size={14} />
                           {paymentFormData.receiptFile ? paymentFormData.receiptFile.name : 'Anexar Recibo (PDF/IMG)'}
                           <input 
@@ -3485,7 +3567,7 @@ export default function PatientRecord() {
                       return sorted.map(att => (
                         <label key={att.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
                           selectedAttendances.includes(att.id) 
-                            ? "bg-emerald-50 border-emerald-300 shadow-sm" 
+                            ? "bg-brand-50 border-brand-300 shadow-sm" 
                             : "bg-white border-slate-100 hover:border-slate-300"
                         }`}>
                           <div className="flex items-center gap-3">
@@ -3502,7 +3584,7 @@ export default function PatientRecord() {
                               }}
                             />
                             <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${
-                              selectedAttendances.includes(att.id) ? "bg-emerald-500 border-emerald-500" : "border-slate-300"
+                              selectedAttendances.includes(att.id) ? "bg-brand-500 border-brand-500" : "border-slate-300"
                             }`}>
                               {selectedAttendances.includes(att.id) && <Check size={10} className="text-white" />}
                             </div>
@@ -3530,7 +3612,7 @@ export default function PatientRecord() {
                     })()}
                   </div>
                   {selectedAttendances.length > 0 && (
-                    <div className="mt-4 p-3 bg-emerald-900 text-white rounded-xl flex items-center justify-between shadow-lg animate-fade-in">
+                    <div className="mt-4 p-3 bg-brand-900 text-white rounded-xl flex items-center justify-between shadow-lg animate-fade-in">
                       <p className="text-[10px] font-black uppercase tracking-widest">{selectedAttendances.length} selecionadas</p>
                       <p className="text-xs font-bold">Total: R$ {paymentFormData.amount || "0,00"}</p>
                     </div>
@@ -3572,8 +3654,8 @@ function TabButton({ active, onClick, icon, label }) {
       onClick={onClick}
       className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
         active 
-          ? "bg-emerald-900 text-white shadow-md" 
-          : "text-slate-600 hover:text-slate-900 hover:bg-emerald-50"
+          ? "bg-brand-900 text-white shadow-md" 
+          : "text-slate-600 hover:text-slate-900 hover:bg-brand-50"
       }`}
     >
       {icon}

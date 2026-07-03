@@ -1,73 +1,148 @@
+@import './fonts.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg: #FAF8F4;
+  --surface: #FFFFFF;
+  --surface-alt: #F5F4EF;
+  --border: #E8ECEF;
+  --text-primary: #1F2937;
+  --text-secondary: #495057;
+  --text-muted: #6B7280;
+  --sage: #5CBF9D;
+  --sage-light: #E4F5EE;
+  --dark-green: #3D786A;
+  --blue: #2E7DFF;
+  --blue-light: #E7F0FF;
+  --peach: #F8A26B;
+  --peach-light: #FEEEE1;
+  --purple: #7C5CFF;
+  --purple-light: #F0ECFF;
+  --note-bg: #FFF6DE;
+  --note-text: #7A5F1E;
+
+  /* Cores de Status (Badges) - Modo Claro */
+  --status-presente-bg: #E4F5EE;
+  --status-presente-text: #3D786A;
+  --status-falta-bg: #FEEEE1;
+  --status-falta-text: #C97840;
+  --status-justificada-bg: #F0ECFF;
+  --status-justificada-text: #5B21B6;
+  --status-confirmado-bg: #E7F0FF;
+  --status-confirmado-text: #1D4ED8;
+
+  /* Chips de Ação do Modal (inativo) — Modo Claro: texto escuro sobre fundo suave */
+  --chip-presente-bg: #E4F5EE;
+  --chip-presente-text: #2D6A57;
+  --chip-falta-bg: #FEE2E2;
+  --chip-falta-text: #B91C1C;
+  --chip-justificado-bg: #FEF3C7;
+  --chip-justificado-text: #92400E;
+
+  /* Bordas dos botões de ação — Modo Claro */
+  --btn-action-primary-border: rgba(46, 125, 255, 0.35);
+  --btn-action-neutral-border: #CBD5E1;
+  --btn-action-danger-border: rgba(239, 68, 68, 0.35);
+}
+
+.dark {
+  --bg: #101722;
+  --surface: #192231;
+  --surface-alt: #202B3C;
+  --border: #2B3650;
+  --text-primary: #F6F7FB;
+  --text-secondary: #C3C9D0;
+  --text-muted: #A8B2C1;
+  --sage-light: #1A3028;
+  --blue-light: #152030;
+  --peach-light: #2E2018;
+  --purple-light: #1E1A30;
+  --note-bg: #2A2210;
+  --note-text: #E8D49C;
+
+  /* Cores de Status (Badges) - Modo Escuro */
+  --status-presente-bg: #1A3028;
+  --status-presente-text: #5CBF9D;
+  --status-falta-bg: #2E2018;
+  --status-falta-text: #F8A26B;
+  --status-justificada-bg: #1E1A30;
+  --status-justificada-text: #A78BFA;
+  --status-confirmado-bg: #152030;
+  --status-confirmado-text: #60A5FA;
+
+  /* Chips de Ação do Modal (inativo) — Modo Escuro: texto claro/luminoso para contraste WCAG AA */
+  --chip-presente-bg: rgba(92, 191, 157, 0.15);
+  --chip-presente-text: #6EE7B7;
+  --chip-falta-bg: rgba(239, 68, 68, 0.15);
+  --chip-falta-text: #FCA5A5;
+  --chip-justificado-bg: rgba(245, 158, 11, 0.15);
+  --chip-justificado-text: #FDE68A;
+
+  /* Bordas dos botões de ação — Modo Escuro: mais opacas para vencer o fundo escuro */
+  --btn-action-primary-border: rgba(46, 125, 255, 0.60);
+  --btn-action-neutral-border: #3D4F6A;
+  --btn-action-danger-border: rgba(239, 68, 68, 0.55);
+}
+
 @layer base {
-  :root {
-    --color-bone: #F9F6F0;
+  /* Abordagem correta: apenas os elementos root recebem a transição. 
+     Elementos filhos que herdam cor não precisam de transição própria — herdam automaticamente.
+     Isso elimina o double-transition flicker. */
+  html {
+    transition: color-scheme 300ms ease-in-out;
   }
-}
 
-@layer components {
-  .card-bone {
-    background-color: #F9F6F0;
+  /* Elementos que usam variáveis CSS de cor diretamente e precisam de transição suave de tema */
+  .bg-\[var\(--surface\)\],
+  .bg-\[var\(--surface-alt\)\],
+  .bg-\[var\(--bg\)\],
+  .bg-\[var\(--border\)\],
+  .border-\[var\(--border\)\] {
+    transition: all 300ms ease-in-out;
   }
-}
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
+  /* Textos que usam vars de cor diretamente */
+  .text-\[var\(--text-primary\)\],
+  .text-\[var\(--text-secondary\)\],
+  .text-\[var\(--text-muted\)\],
+  .text-\[var\(--dark-green\)\] {
+    transition: color 300ms ease-in-out;
   }
-  to {
-    opacity: 1;
-  }
-}
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
+  /* SVGs inline com stroke via currentColor */
+  svg path, svg circle {
+    transition: stroke 300ms ease-in-out, fill 300ms ease-in-out, color 300ms ease-in-out;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
-.animate-fade-in {
-  animation: fadeSlideIn 0.25s ease-out forwards;
-}
-
-@keyframes fadeSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
+  /* Botões e inputs — transição suave em todas as propriedades interativas */
+  button, input, select, textarea, a {
+    transition: background-color 200ms ease-out, color 200ms ease-out, border-color 200ms ease-out, box-shadow 150ms ease-out, opacity 150ms ease-out, transform 150ms ease-out;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
-.animate-slide-down {
-  animation: slideDown 0.25s ease-out forwards;
-}
-
-/* Skew Scroll Animation */
-@keyframes skew-scroll {
-  0% {
-    transform:
-      rotatex(20deg) rotatez(-15deg) skewx(15deg) translatez(0) translatey(0);
+  html.dark {
+    color-scheme: dark;
   }
-  100% {
-    transform:
-      rotatex(20deg) rotatez(-15deg) skewx(15deg) translatez(0) translatey(-50%);
-  }
-}
 
-.animate-skew-scroll {
-  animation: skew-scroll 20s linear infinite;
-  will-change: transform;
+  /* Playfair Display para títulos — elegante, editorial, nunca o Caveat Brush */
+  h1, h2, h3, h4 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+  }
+
+  /* Caveat apenas em palavras de destaque pontuais */
+  .highlight {
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+  }
+
+  /* Caveat Brush restrito ao monograma/logo */
+  .font-brand {
+    font-family: 'Caveat Brush', cursive;
+  }
 }
 
 @layer base {
@@ -75,10 +150,10 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-slate-100 text-slate-700 font-sans antialiased;
+    @apply bg-[#FAF8F4] dark:bg-[#101722] text-[#1F2937] dark:text-[#F6F7FB] font-sans antialiased;
   }
   ::selection {
-    @apply bg-emerald-200 text-emerald-900;
+    @apply bg-[#5CBF9D] text-white;
   }
   ::-webkit-scrollbar {
     width: 8px;
@@ -97,52 +172,57 @@
 }
 
 @layer components {
+  .card-bone {
+    background-color: var(--surface-alt);
+  }
+
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-[999px] px-5 py-2.5 text-sm font-bold transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-11;
   }
   .btn-primary {
-    @apply bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500 shadow-sm;
-    transition: background-color 0.3s ease, transform 0.15s ease, box-shadow 0.3s ease;
+    @apply bg-gradient-to-r from-[#5CBF9D] to-[#3D786A] text-white hover:from-[#4DAF8A] hover:to-[#2E5C50] focus:ring-[#5CBF9D];
+    box-shadow: 0 6px 16px rgba(92, 191, 157, 0.35);
+    transition: background 0.3s ease, transform 0.15s ease-out, box-shadow 0.15s ease-out;
   }
   .btn-primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
-  } 
+    box-shadow: 0 8px 20px rgba(92, 191, 157, 0.45);
+  }
   .btn-primary:active {
-    transform: translateY(0);
-    box-shadow: 0 1px 2px rgba(5, 150, 105, 0.2);
+    transform: scale(0.97);
+    box-shadow: 0 2px 8px rgba(92, 191, 157, 0.25);
   }
   .btn-secondary {
-    @apply bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 focus:ring-slate-300;
+    @apply bg-[var(--surface)] text-[var(--text-primary)] border border-[var(--border)] hover:bg-[var(--surface-alt)] focus:ring-2 focus:ring-[#5CBF9D] transition-all duration-150 ease-out;
   }
   .btn-ghost {
-    @apply text-slate-600 hover:text-slate-800 hover:bg-slate-200;
+    @apply text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-all duration-150 ease-out;
   }
   .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-600;
+    @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-600 transition-all duration-150 ease-out;
   }
   .input {
-    @apply w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200;
+    @apply w-full rounded-[999px] border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#5CBF9D] focus:border-transparent transition-all duration-150 ease-out;
   }
   .card {
-    @apply bg-white rounded-xl border border-slate-200 shadow-sm;
-    transition: box-shadow 0.2s ease, border-color 0.2s ease, max-height 0.3s ease, background-color 0.2s ease;
+    @apply bg-[var(--surface)] rounded-[20px] border border-[var(--border)] shadow-card;
+    transition: box-shadow 0.15s ease-out, border-color 0.15s ease-out, max-height 0.3s ease-out, background-color 0.2s ease-out, transform 0.15s ease-out;
   }
-  
+
   .card-expandable {
     transition: max-height 0.3s ease-out, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
     overflow: hidden;
   }
   .card-hover {
-    @apply hover:shadow-md hover:border-slate-300 hover:bg-white transition-all duration-200;
+    @apply hover:shadow-md hover:border-slate-300 hover:bg-white hover:scale-[1.02] transition-all duration-150 ease-out;
   }
 }
 
-/* SurveyJS theme customizations */
+/* SurveyJS theme */
 .sd-root {
-  --sjs-primary-backcolor: #166534;
-  --sjs-primary-backcolor-light: #dcfce7;
-  --sjs-primary-backcolor-dark: #14532d;
+  --sjs-primary-backcolor: #5CBF9D;
+  --sjs-primary-backcolor-light: #E4F5EE;
+  --sjs-primary-backcolor-dark: #3D786A;
   --sjs-base-unit: 8px;
   --sjs-corner-radius: 8px;
   --sjs-shadow-small: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
@@ -157,18 +237,15 @@
   --sjs-general-forecolor-light: #64748b;
 }
 
-/* Survey Creator theme */
 .sc-root {
-  --sjs-primary-backcolor: #166534;
+  --sjs-primary-backcolor: #5CBF9D;
   --sjs-general-backcolor-dim: #f8fafc;
 }
 
-/* Remove SurveyJS Non-Commercial Banner */
 .svc-creator__non-commercial-text {
   display: none !important;
 }
 
-/* Ensure Survey Creator fills its container */
 .svc-creator-component {
   height: 100% !important;
   width: 100% !important;
@@ -183,7 +260,6 @@
   overflow: hidden !important;
 }
 
-/* Fix flickering add question buttons */
 .svc-tabbed-menu-item-container {
   will-change: transform;
 }
@@ -192,19 +268,16 @@
   display: none !important;
 }
 
-/* Property grid styling */
 .svc-property-grid {
   background: #ffffff !important;
 }
 
-/* Ensure icons are visible in property grid */
 .svc-string-editor,
 .svc-item-value__content,
 .svc-question__content {
   color: inherit !important;
 }
 
-/* Survey Preview - Allow dynamic width */
 .sd-table {
   width: 100% !important;
   display: table !important;
@@ -223,12 +296,11 @@
   padding: 8px 4px !important;
 }
 
-/* Survey container */
 .survey-container {
   width: 100% !important;
 }
 
-/* React Big Calendar customization */
+/* Calendar styles */
 .agenda-calendar {
   --rbc-today-bg: #f1f5f9;
 }
@@ -388,4 +460,55 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeSlideIn 0.25s ease-out forwards;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.25s ease-out forwards;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+.sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }

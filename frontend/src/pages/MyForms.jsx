@@ -128,7 +128,7 @@ export default function MyForms() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-800">Meus Instrumentos</h1>
+          <h1 className="text-2xl font-semibold text-slate-800 font-heading">Meus Instrumentos</h1>
           <p className="text-sm text-slate-500">Gerencie seus modelos personalizados.</p>
         </div>
         <div className="flex items-center gap-2">
@@ -158,14 +158,14 @@ export default function MyForms() {
         <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
           <button
             onClick={() => handleViewMode("grid")}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode === "grid" ? "bg-emerald-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode === "grid" ? "bg-brand-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
           >
             <LayoutGrid size={18} />
             <span className="text-xs font-bold">Cards</span>
           </button>
           <button
             onClick={() => handleViewMode("list")}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode === "list" ? "bg-emerald-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode === "list" ? "bg-brand-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
           >
             <List size={18} />
             <span className="text-xs font-bold">Lista</span>
@@ -196,10 +196,10 @@ export default function MyForms() {
               {[1, 2, 3].map((i) => (
                 <div key={i} className="card p-4 animate-pulse">
                   <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 bg-emerald-50 rounded-xl" />
+                    <div className="h-10 w-10 bg-brand-50 rounded-xl" />
                     <div className="flex-1">
-                      <div className="h-5 bg-emerald-100 rounded w-1/3 mb-2" />
-                      <div className="h-4 bg-emerald-50 rounded w-1/4" />
+                      <div className="h-5 bg-brand-100 rounded w-1/3 mb-2" />
+                      <div className="h-4 bg-brand-50 rounded w-1/4" />
                     </div>
                   </div>
                 </div>
@@ -263,14 +263,14 @@ export default function MyForms() {
 
       {/* Share Modal - Reuse existing logic */}
       {showShareModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-900/20 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="card w-full max-w-2xl p-6 animate-scale-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-semibold text-slate-900">Links de Envio</h2>
-                <p className="text-xs text-emerald-600 mt-1">{selectedForm?.title}</p>
+                <p className="text-xs text-brand-600 mt-1">{selectedForm?.title}</p>
               </div>
-              <button onClick={() => setShowShareModal(false)} className="text-slate-400 hover:text-emerald-600">
+              <button onClick={() => setShowShareModal(false)} className="text-slate-400 hover:text-brand-600">
                 <Plus size={24} className="rotate-45" />
               </button>
             </div>
@@ -292,13 +292,13 @@ export default function MyForms() {
 
               {loadingLinks ? (
                 <div className="text-center py-8 text-slate-400">
-                  <div className="animate-spin w-6 h-6 border-2 border-emerald-900 border-t-transparent rounded-full mx-auto mb-2" />
+                  <div className="animate-spin w-6 h-6 border-2 border-brand-900 border-t-transparent rounded-full mx-auto mb-2" />
                   <p className="text-xs">Carregando links...</p>
                 </div>
               ) : existingLinks.length === 0 ? (
-                <div className="text-center py-8 bg-emerald-50 rounded-lg border border-emerald-100">
-                  <Share2 size={32} className="mx-auto text-emerald-300 mb-2" />
-                  <p className="text-sm text-emerald-600">Nenhum link criado ainda</p>
+                <div className="text-center py-8 bg-brand-50 rounded-lg border border-brand-100">
+                  <Share2 size={32} className="mx-auto text-brand-300 mb-2" />
+                  <p className="text-sm text-brand-600">Nenhum link criado ainda</p>
                   <p className="text-xs text-slate-400 mt-1">Clique em "Novo Link" para começar</p>
                 </div>
               ) : (
@@ -308,16 +308,16 @@ export default function MyForms() {
                     const isActive = link.active && (!link.expiresAt || new Date(link.expiresAt) > new Date());
                     
                     return (
-                      <div key={link.id} className={`p-4 rounded-lg border transition-all ${isActive ? 'card-bone border-emerald-100 hover:border-emerald-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+                      <div key={link.id} className={`p-4 rounded-lg border transition-all ${isActive ? 'card-bone border-brand-100 hover:border-brand-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
                         <div className="flex items-start justify-between gap-3 mb-3">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+                              <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-brand-500' : 'bg-gray-400'}`} />
                               <span className="text-xs font-medium text-slate-900">
                                 {isActive ? "Ativo" : "Inativo"}
                               </span>
                               {link.patient && (
-                                <span className="text-[10px] px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full font-medium">
+                                <span className="text-[10px] px-2 py-0.5 bg-brand-50 text-brand-700 rounded-full font-medium">
                                   {link.patient.name}
                                 </span>
                               )}
@@ -336,7 +336,7 @@ export default function MyForms() {
                         <div className="flex items-center gap-2">
                           <input
                             readOnly
-                            className="input flex-1 bg-emerald-50 font-mono text-[10px] py-1.5"
+                            className="input flex-1 bg-brand-50 font-mono text-[10px] py-1.5"
                             value={shareUrl}
                           />
                           <button
@@ -392,15 +392,15 @@ function FormListRow({ form, stats, onDelete, onDuplicate }) {
   const isTemplate = form.source === "template";
 
   return (
-    <div className="card p-4 flex items-center gap-4 hover:border-emerald-200 transition-all">
-      <Link to={`/forms/${form.id}/edit`} className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors ${isTemplate ? "bg-amber-50 text-amber-600 hover:bg-amber-100" : "bg-emerald-50 text-slate-900 hover:bg-emerald-100"}`}>
+    <div className="card p-4 flex items-center gap-4 hover:border-brand-200 transition-all">
+      <Link to={`/forms/${form.id}/edit`} className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors ${isTemplate ? "bg-amber-50 text-amber-600 hover:bg-amber-100" : "bg-brand-50 text-slate-900 hover:bg-brand-100"}`}>
         {isTemplate ? <BookTemplate size={20} /> : <FileText size={20} />}
       </Link>
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <Link to={`/forms/${form.id}/edit`} className="group/name block min-w-0 truncate">
-            <h4 className="font-bold text-slate-900 group-hover:text-emerald-600 transition-colors truncate">
+            <h4 className="font-bold text-slate-900 group-hover:text-brand-600 transition-colors truncate">
               {form.title}
             </h4>
           </Link>
@@ -416,7 +416,7 @@ function FormListRow({ form, stats, onDelete, onDuplicate }) {
             </span>
           )}
           {form.validated && (
-            <span className="text-[10px] font-medium px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full">Validado</span>
+            <span className="text-[10px] font-medium px-2 py-0.5 bg-brand-50 text-brand-600 rounded-full">Validado</span>
           )}
         </div>
       </div>
@@ -445,7 +445,7 @@ function FormListRow({ form, stats, onDelete, onDuplicate }) {
         <div className="relative">
           <button
             onClick={() => setShowOptions(!showOptions)}
-            className="p-2 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-emerald-50 transition-colors"
+            className="p-2 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-brand-50 transition-colors"
             title="Mais opções"
           >
             <MoreVertical size={18} />
@@ -453,11 +453,11 @@ function FormListRow({ form, stats, onDelete, onDuplicate }) {
           {showOptions && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShowOptions(false)} />
-              <div className="absolute right-0 mt-2 w-48 card-bone border border-emerald-100 rounded-xl shadow-lg z-20 py-2">
-                <button onClick={() => { onDuplicate(form.id); setShowOptions(false); }} className="w-full px-4 py-2 text-left text-sm font-medium text-emerald-700 hover:bg-emerald-50 flex items-center gap-3">
+              <div className="absolute right-0 mt-2 w-48 card-bone border border-brand-100 rounded-xl shadow-lg z-20 py-2">
+                <button onClick={() => { onDuplicate(form.id); setShowOptions(false); }} className="w-full px-4 py-2 text-left text-sm font-medium text-brand-700 hover:bg-brand-50 flex items-center gap-3">
                   <Copy size={16} /> Duplicar
                 </button>
-                <div className="my-1 border-t border-emerald-50" />
+                <div className="my-1 border-t border-brand-50" />
                 <button onClick={() => { onDelete(form.id); setShowOptions(false); }} className="w-full px-4 py-2 text-left text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-3">
                   <Trash2 size={16} /> Excluir
                 </button>
@@ -483,14 +483,14 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
   const isTemplate = form.source === "template";
 
   return (
-    <div className="card group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full card-bone overflow-hidden border-emerald-100/50">
+    <div className="card group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full card-bone overflow-hidden border-brand-100/50">
       <div className="p-6 flex-1">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors duration-300 ${
               isTemplate 
                 ? "bg-amber-50 text-amber-600 group-hover:bg-amber-500 group-hover:text-white" 
-                : "bg-emerald-50 text-slate-900 group-hover:bg-emerald-900 group-hover:text-white"
+                : "bg-brand-50 text-slate-900 group-hover:bg-brand-900 group-hover:text-white"
             }`}>
               {isTemplate ? <BookTemplate size={24} /> : <FileText size={24} />}
             </div>
@@ -503,7 +503,7 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
           <div className="relative">
             <button 
               onClick={() => setShowOptions(!showOptions)}
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-900 hover:bg-emerald-50 transition-colors"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-900 hover:bg-brand-50 transition-colors"
             >
               <MoreVertical size={18} />
             </button>
@@ -514,15 +514,15 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
                   className="fixed inset-0 z-10" 
                   onClick={() => setShowOptions(false)}
                 />
-                <div className="absolute right-0 mt-2 w-48 card-bone border border-emerald-100 rounded-2xl shadow-xl z-20 py-2 animate-scale-in">
+                <div className="absolute right-0 mt-2 w-48 card-bone border border-brand-100 rounded-2xl shadow-xl z-20 py-2 animate-scale-in">
                   <button 
                     onClick={() => { onDuplicate(form.id); setShowOptions(false); }}
-                    className="w-full px-4 py-2 text-left text-sm font-medium text-emerald-700 hover:bg-emerald-50 flex items-center gap-3 transition-colors"
+                    className="w-full px-4 py-2 text-left text-sm font-medium text-brand-700 hover:bg-brand-50 flex items-center gap-3 transition-colors"
                   >
                     <Copy size={16} />
                     Duplicar
                   </button>
-                  <div className="my-1 border-t border-emerald-50" />
+                  <div className="my-1 border-t border-brand-50" />
                   <button 
                     onClick={() => { onDelete(form.id); setShowOptions(false); }}
                     className="w-full px-4 py-2 text-left text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
@@ -552,7 +552,7 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
             </span>
           )}
           {form.validated && (
-            <span className="text-[10px] font-medium px-2 py-1 bg-emerald-50 text-emerald-600 rounded-full">Validado</span>
+            <span className="text-[10px] font-medium px-2 py-1 bg-brand-50 text-brand-600 rounded-full">Validado</span>
           )}
           {form.audiences && form.audiences.length > 0 && (
             <span className="text-[10px] font-medium px-2 py-1 bg-indigo-50 text-indigo-600 rounded-full">
@@ -572,7 +572,7 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
         )}
       </div>
 
-      <div className="p-4 bg-emerald-50/50 border-t border-emerald-50 flex items-center justify-between gap-2">
+      <div className="p-4 bg-brand-50/50 border-t border-brand-50 flex items-center justify-between gap-2">
         <Link 
           to={`/forms/${form.id}/preview`}
           className="btn btn-secondary text-xs flex-1"
@@ -719,14 +719,14 @@ function CreateFormModal({ onClose, onCreated }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-900/20 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="card w-full max-w-xl p-8 animate-scale-in">
-        <div className="flex items-center justify-between mb-8 bg-white pb-4 border-b border-emerald-50">
+        <div className="flex items-center justify-between mb-8 bg-white pb-4 border-b border-brand-50">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Novo Instrumento</h2>
-            <p className="text-sm text-emerald-600 mt-1">Defina as informações básicas do seu instrumento.</p>
+            <h2 className="text-2xl font-bold text-slate-900 font-heading">Novo Instrumento</h2>
+            <p className="text-sm text-brand-600 mt-1">Defina as informações básicas do seu instrumento.</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-emerald-50 text-slate-400 hover:text-slate-900 transition-all">
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-brand-50 text-slate-400 hover:text-slate-900 transition-all">
             <Plus size={28} className="rotate-45" />
           </button>
         </div>
@@ -783,7 +783,7 @@ function CreateFormModal({ onClose, onCreated }) {
                   onClick={() => handleTypeChange(type)}
                   className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
                     formData.type === type
-                      ? "bg-emerald-500 text-white shadow-lg"
+                      ? "bg-brand-500 text-white shadow-lg"
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                   }`}
                 >
@@ -805,7 +805,7 @@ function CreateFormModal({ onClose, onCreated }) {
                   onClick={() => toggleAudience(opt.value)}
                   className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
                     formData.audiences.includes(opt.value)
-                      ? "bg-emerald-500 text-white shadow-lg"
+                      ? "bg-brand-500 text-white shadow-lg"
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                   }`}
                 >
@@ -824,7 +824,7 @@ function CreateFormModal({ onClose, onCreated }) {
                 type="checkbox"
                 checked={formData.validated}
                 onChange={(e) => setFormData(prev => ({ ...prev, validated: e.target.checked }))}
-                className="w-4 h-4 rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
+                className="w-4 h-4 rounded border-slate-300 text-brand-500 focus:ring-brand-500"
               />
               <span className="text-sm font-medium text-slate-700">Instrumento validado cientificamente</span>
             </label>
@@ -844,7 +844,7 @@ function CreateFormModal({ onClose, onCreated }) {
             <button
               type="submit"
               disabled={saving}
-              className="btn btn-primary flex-1 py-4 font-bold shadow-xl shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn btn-primary flex-1 py-4 font-bold shadow-xl shadow-brand-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? (
                 <div className="flex items-center justify-center gap-2">

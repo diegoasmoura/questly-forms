@@ -304,9 +304,15 @@ const resetImportModal = () => {
       return;
     }
     
-    if (!newPatient.email || !newPatient.phone || !newPatient.emergencyPhone || !newPatient.emergencyName) {
+    if (!newPatient.email || !newPatient.phone) {
       setAddFormTab("contact");
       setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Contato.");
+      return;
+    }
+
+    if (!newPatient.emergencyPhone || !newPatient.emergencyName) {
+      setAddFormTab("emergency");
+      setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Emergência.");
       return;
     }
 
@@ -374,7 +380,7 @@ const resetImportModal = () => {
     <div className="p-6 h-full flex flex-col overflow-hidden animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-800">Pacientes</h1>
+          <h1 className="text-2xl font-semibold text-slate-800 font-heading">Pacientes</h1>
           <p className="text-sm text-slate-500">Gerencie seus pacientes e seus históricos clínicos.</p>
         </div>
         
@@ -397,7 +403,7 @@ const resetImportModal = () => {
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
               >
-                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
                   <UserPlus size={18} />
                 </div>
                 <div>
@@ -412,7 +418,7 @@ const resetImportModal = () => {
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
               >
-                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
                   <FileSpreadsheet size={18} />
                 </div>
                 <div>
@@ -440,14 +446,14 @@ const resetImportModal = () => {
         <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
           <button
             onClick={() => handleViewMode("grid")}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode === "grid" ? "bg-emerald-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode === "grid" ? "bg-brand-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
           >
             <LayoutGrid size={18} />
             <span className="text-xs font-bold">Cards</span>
           </button>
           <button
             onClick={() => handleViewMode("list")}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode === "list" ? "bg-emerald-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode === "list" ? "bg-brand-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
           >
             <List size={18} />
             <span className="text-xs font-bold">Lista</span>
@@ -503,7 +509,7 @@ const resetImportModal = () => {
                       }}
                       className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
                         <UserPlus size={18} />
                       </div>
                       <div>
@@ -557,12 +563,12 @@ const resetImportModal = () => {
         </div>
 
       {showImportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="card w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-slate-200 shrink-0">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-xl font-bold text-emerald-600">Importar Dados</h2>
+                  <h2 className="text-xl font-bold text-brand-600">Importar Dados</h2>
                   <p className="text-xs text-slate-500 mt-1">
                     {importStep === 'idle' && 'Baixe o modelo, preencha e envie'}
                     {importStep === 'parsing' && 'Lendo arquivo...'}
@@ -578,7 +584,7 @@ const resetImportModal = () => {
               </div>
               {importStep === 'importing' && (
                 <div className="mt-3 h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: importProgress + '%' }} />
+                  <div className="h-full bg-brand-500 rounded-full transition-all" style={{ width: importProgress + '%' }} />
                 </div>
               )}
             </div>
@@ -588,12 +594,12 @@ const resetImportModal = () => {
                 <>
                   <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200">
                     <div className="flex items-start gap-4">
-                      <div className="w-9 h-9 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold shrink-0">1</div>
+                      <div className="w-9 h-9 rounded-xl bg-slate-900 text-brand-400 flex items-center justify-center font-bold shrink-0">1</div>
                       <div className="flex-1">
                         <h3 className="text-sm font-bold text-slate-800 mb-1">Baixe o modelo</h3>
                         <p className="text-xs text-slate-500 mb-3">Use a planilha padrao.</p>
                         <button onClick={generateExcelTemplate} className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50">
-                          <Download size={14} className="text-emerald-500" />
+                          <Download size={14} className="text-brand-500" />
                           Baixar modelo
                         </button>
                       </div>
@@ -601,11 +607,11 @@ const resetImportModal = () => {
                   </div>
                   <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200">
                     <div className="flex items-start gap-4">
-                      <div className="w-9 h-9 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold shrink-0">2</div>
+                      <div className="w-9 h-9 rounded-xl bg-slate-900 text-brand-400 flex items-center justify-center font-bold shrink-0">2</div>
                       <div className="flex-1">
                         <h3 className="text-sm font-bold text-slate-800 mb-1">Envie sua planilha</h3>
                         <p className="text-xs text-slate-500 mb-3">Faça upload para validar.</p>
-                        <label className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 cursor-pointer">
+                        <label className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl text-xs font-bold hover:bg-brand-700 cursor-pointer">
                           <Upload size={14} />
                           Enviar
                           <input type="file" className="hidden" accept=".xlsx,.xls,.csv" onChange={handleFileChange} />
@@ -615,14 +621,14 @@ const resetImportModal = () => {
                   </div>
                   <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-start gap-2">
                     <AlertTriangle size={14} className="text-blue-500 shrink-0 mt-0.5" />
-                    <p className="text-xs text-blue-700">Campos obrigatorios: Nome, CPF, Data, E-mail, Telefone, Nome e Telefone Emergencia.</p>
+                    <p className="text-xs text-blue-700">Campos obrigatorios: Nome, CPF, Data (Identificação), E-mail, Telefone (Contato), Telefone e Nome Emergência (Emergência).</p>
                   </div>
                 </>
               )}
 
               {importStep === 'parsing' && (
                 <div className="py-16 flex flex-col items-center gap-4">
-                  <div className="w-10 h-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-10 h-10 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
                   <p className="text-sm text-slate-500">Lendo arquivo...</p>
                 </div>
               )}
@@ -656,7 +662,7 @@ const resetImportModal = () => {
                   <div className="rounded-xl border border-slate-200 overflow-hidden">
                     <div className="bg-slate-50 px-4 py-2 border-b border-slate-200 flex items-center justify-between">
                       <p className="text-xs font-bold text-slate-600">Prévia - {importedPatients.length}</p>
-                      {importErrors.length === 0 && importResults.length === 0 && <span className="text-xs font-bold text-emerald-600">OK</span>}
+                      {importErrors.length === 0 && importResults.length === 0 && <span className="text-xs font-bold text-brand-600">OK</span>}
                     </div>
                     <div className="overflow-x-auto max-h-56">
                       <table className="w-full text-xs">
@@ -683,7 +689,7 @@ const resetImportModal = () => {
 
               {importStep === 'importing' && (
                 <div className="py-16 flex flex-col items-center gap-4">
-                  <div className="w-10 h-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-10 h-10 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
                   <p className="text-sm text-slate-500">Cadastrando...</p>
                 </div>
               )}
@@ -706,7 +712,7 @@ const resetImportModal = () => {
       )}
       {/* Add Patient Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="card w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
             {/* Header */}
             <div className="p-6 border-b border-slate-200 shrink-0">
@@ -725,6 +731,7 @@ const resetImportModal = () => {
                 {[
                   { id: "identity", label: "Identificação", icon: UserCheck },
                   { id: "contact", label: "Contato", icon: Contact },
+                  { id: "emergency", label: "Emergência", icon: Phone },
                   { id: "address", label: "Endereço", icon: MapPin },
                 ].map(tab => (
                   <button
@@ -732,7 +739,7 @@ const resetImportModal = () => {
                     onClick={() => setAddFormTab(tab.id)}
                     className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
                       addFormTab === tab.id
-                        ? "bg-white text-emerald-700 shadow-sm"
+                        ? "bg-white text-brand-700 shadow-sm"
                         : "text-slate-500 hover:text-slate-700"
                     }`}
                   >
@@ -762,8 +769,8 @@ const resetImportModal = () => {
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
                           {newPatient.isActive ? (
-                            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                              <UserCheck size={20} className="text-emerald-600" />
+                            <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center">
+                              <UserCheck size={20} className="text-brand-600" />
                             </div>
                           ) : (
                             <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
@@ -779,7 +786,7 @@ const resetImportModal = () => {
                           type="button"
                           onClick={() => setNewPatient({ ...newPatient, isActive: !newPatient.isActive })}
                           className={`relative w-14 h-7 rounded-full transition-colors ${
-                            newPatient.isActive ? "bg-emerald-500" : "bg-slate-300"
+                            newPatient.isActive ? "bg-brand-500" : "bg-slate-300"
                           }`}
                         >
                           <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${
@@ -846,18 +853,7 @@ const resetImportModal = () => {
                       </div>
                     </div>
 
-                    {/* Linha 3: RG | Estado Civil | Profissão */}
-                    <div className="grid grid-cols-3 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">RG</label>
-                        <input
-                          type="text"
-                          className="input text-sm"
-                          value={newPatient.rg}
-                          onChange={e => setNewPatient({ ...newPatient, rg: e.target.value })}
-                          placeholder="Documento"
-                        />
-                      </div>
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-semibold text-slate-600 mb-2">Estado Civil</label>
                         <select
@@ -902,33 +898,36 @@ const resetImportModal = () => {
                       />
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone *</label>
-                        <input
-                          type="tel"
-                          required
-                          className="input text-sm"
-                          value={newPatient.phone}
-                          onChange={e => setNewPatient({ ...newPatient, phone: formatPhone(e.target.value) })}
-                          placeholder="(00) 00000-0000"
-                          maxLength={15}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência *</label>
-                        <input
-                          type="tel"
-                          required
-                          className="input text-sm"
-                          value={newPatient.emergencyPhone}
-                          onChange={e => setNewPatient({ ...newPatient, emergencyPhone: formatPhone(e.target.value) })}
-                          placeholder="(00) 00000-0000"
-                          maxLength={15}
-                        />
-                      </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone *</label>
+                      <input
+                        type="tel"
+                        required
+                        className="input text-sm"
+                        value={newPatient.phone}
+                        onChange={e => setNewPatient({ ...newPatient, phone: formatPhone(e.target.value) })}
+                        placeholder="(00) 00000-0000"
+                        maxLength={15}
+                      />
                     </div>
+                  </div>
+                )}
 
+                {/* TAB: Emergência */}
+                {addFormTab === "emergency" && (
+                  <div className="space-y-5">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência *</label>
+                      <input
+                        type="tel"
+                        required
+                        className="input text-sm"
+                        value={newPatient.emergencyPhone}
+                        onChange={e => setNewPatient({ ...newPatient, emergencyPhone: formatPhone(e.target.value) })}
+                        placeholder="(00) 00000-0000"
+                        maxLength={15}
+                      />
+                    </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-600 mb-2">Nome Emergência *</label>
                       <input
@@ -1052,7 +1051,7 @@ const resetImportModal = () => {
                           <Paperclip size={16} className="text-slate-500" />
                           <h4 className="text-sm font-semibold text-slate-700">Laudos e Anexos</h4>
                         </div>
-                        <label className={`flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium cursor-pointer transition-all ${uploading ? 'opacity-50' : 'hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700'}`}>
+                        <label className={`flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium cursor-pointer transition-all ${uploading ? 'opacity-50' : 'hover:bg-brand-50 hover:border-brand-300 hover:text-brand-700'}`}>
                           {uploading ? (
                             <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
                           ) : (
@@ -1180,7 +1179,7 @@ const resetImportModal = () => {
         {/* Success Toast */}
         {successMessage && (
         <div className="fixed bottom-8 right-8 z-[100] animate-slide-up">
-          <div className="bg-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-500/50 backdrop-blur-sm">
+          <div className="bg-brand-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-brand-500/50 backdrop-blur-sm">
             <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
               <Check size={18} className="text-white" />
             </div>
@@ -1256,9 +1255,15 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
       return;
     }
     
-    if (!formData.email || !formData.phone || !formData.emergencyPhone || !formData.emergencyName) {
+    if (!formData.email || !formData.phone) {
       setEditTab("contact");
       setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Contato.");
+      return;
+    }
+
+    if (!formData.emergencyPhone || !formData.emergencyName) {
+      setEditTab("emergency");
+      setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Emergência.");
       return;
     }
 
@@ -1327,7 +1332,7 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="card w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
         <div className="p-6 border-b border-slate-200 shrink-0">
           <div className="flex items-center justify-between mb-4">
@@ -1344,6 +1349,7 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
             {[
               { id: "identity", label: "Identificação", icon: UserCheck },
               { id: "contact", label: "Contato", icon: Contact },
+              { id: "emergency", label: "Emergência", icon: Phone },
               { id: "address", label: "Endereço", icon: MapPin },
             ].map(tab => (
               <button
@@ -1351,7 +1357,7 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                 onClick={() => setEditTab(tab.id)}
                 className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
                   editTab === tab.id
-                    ? "bg-white text-emerald-700 shadow-sm"
+                    ? "bg-white text-brand-700 shadow-sm"
                     : "text-slate-500 hover:text-slate-700"
                 }`}
               >
@@ -1379,8 +1385,8 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
                       {formData.isActive ? (
-                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                          <UserCheck size={20} className="text-emerald-600" />
+                        <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center">
+                          <UserCheck size={20} className="text-brand-600" />
                         </div>
                       ) : (
                         <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
@@ -1395,7 +1401,7 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                     <button
                       type="button"
                       onClick={togglePatientStatus}
-                      className={`relative w-14 h-7 rounded-full transition-colors ${formData.isActive ? "bg-emerald-500" : "bg-slate-300"}`}
+                      className={`relative w-14 h-7 rounded-full transition-colors ${formData.isActive ? "bg-brand-500" : "bg-slate-300"}`}
                     >
                       <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${formData.isActive ? "left-8" : "left-1"}`} />
                     </button>
@@ -1467,18 +1473,7 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                   </div>
                 </div>
 
-                {/* Linha 3: RG | Estado Civil | Profissão */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">RG</label>
-                    <input
-                      type="text"
-                      className="input text-sm"
-                      value={formData.rg}
-                      onChange={e => setFormData({ ...formData, rg: e.target.value })}
-                      placeholder="Documento"
-                    />
-                  </div>
+                <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-2">Estado Civil</label>
                     <select
@@ -1522,33 +1517,35 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                   />
                 </div>
                 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone *</label>
-                    <input
-                      type="tel"
-                      required
-                      className="input text-sm"
-                      value={formData.phone}
-                      onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
-                      placeholder="(00) 00000-0000"
-                      maxLength={15}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência *</label>
-                    <input
-                      type="tel"
-                      required
-                      className="input text-sm"
-                      value={formData.emergencyPhone}
-                      onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })}
-                      placeholder="(00) 00000-0000"
-                      maxLength={15}
-                    />
-                  </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone *</label>
+                  <input
+                    type="tel"
+                    required
+                    className="input text-sm"
+                    value={formData.phone}
+                    onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
+                    placeholder="(00) 00000-0000"
+                    maxLength={15}
+                  />
                 </div>
+              </div>
+            )}
 
+            {editTab === "emergency" && (
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência *</label>
+                  <input
+                    type="tel"
+                    required
+                    className="input text-sm"
+                    value={formData.emergencyPhone}
+                    onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })}
+                    placeholder="(00) 00000-0000"
+                    maxLength={15}
+                  />
+                </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-2">Nome Emergência *</label>
                   <input
@@ -1698,12 +1695,12 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                   
                   {loadingAppointments ? (
                     <div className="py-8 text-center">
-                      <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
+                      <div className="w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto" />
                     </div>
                   ) : appointments.length === 0 ? (
-                    <div className="py-8 text-center bg-white/50 rounded-xl border border-dashed border-emerald-200">
-                      <Calendar size={24} className="mx-auto text-emerald-300 mb-2" />
-                      <p className="text-xs text-emerald-600 font-medium">Nenhum horário definido</p>
+                    <div className="py-8 text-center bg-white/50 rounded-xl border border-dashed border-brand-200">
+                      <Calendar size={24} className="mx-auto text-brand-300 mb-2" />
+                      <p className="text-xs text-brand-600 font-medium">Nenhum horário definido</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -1712,11 +1709,11 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                         return (
                           <div 
                             key={app.id} 
-                            className={`bg-white p-4 rounded-xl border transition-all animate-scale-in shadow-sm ${conflict ? 'border-red-200 bg-red-50/20' : 'border-emerald-100'}`}
+                            className={`bg-white p-4 rounded-xl border transition-all animate-scale-in shadow-sm ${conflict ? 'border-red-200 bg-red-50/20' : 'border-brand-100'}`}
                           >
                             <div className="flex items-center justify-between mb-4">
                               <div className="flex items-center gap-2">
-                                <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${conflict ? 'bg-red-100 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                                <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${conflict ? 'bg-red-100 text-red-600' : 'bg-brand-50 text-brand-600'}`}>
                                   Horário #{idx + 1}
                                 </span>
                                 {conflict && (
@@ -1798,15 +1795,15 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                     </div>
                   )}
 
-                  <div className="mt-6 pt-6 border-t border-emerald-100">
-                    <label className="block text-[10px] font-bold text-emerald-800 uppercase mb-2">Próxima Sessão (Excepcional)</label>
+                  <div className="mt-6 pt-6 border-t border-brand-100">
+                    <label className="block text-[10px] font-bold text-brand-800 uppercase mb-2">Próxima Sessão (Excepcional)</label>
                     <input
                       type="date"
                       className="input text-xs font-semibold"
                       value={formData.nextSession}
                       onChange={e => setFormData({ ...formData, nextSession: e.target.value })}
                     />
-                    <p className="text-[10px] text-emerald-600/70 mt-2 font-medium italic">
+                    <p className="text-[10px] text-brand-600/70 mt-2 font-medium italic">
                       * Use este campo para marcar uma sessão fora do horário fixo habitual.
                     </p>
                   </div>
@@ -1833,7 +1830,7 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                       <Paperclip size={16} className="text-slate-500" />
                       <h4 className="text-sm font-semibold text-slate-700">Laudos e Anexos</h4>
                     </div>
-                    <label className={`flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium cursor-pointer transition-all ${uploading ? 'opacity-50' : 'hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700'}`}>
+                    <label className={`flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium cursor-pointer transition-all ${uploading ? 'opacity-50' : 'hover:bg-brand-50 hover:border-brand-300 hover:text-brand-700'}`}>
                       {uploading ? (
                         <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
                       ) : (
@@ -1877,7 +1874,7 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                             <button
                               type="button"
                               onClick={() => handleDownloadAttachment(att)}
-                              className="p-1 hover:bg-emerald-50 rounded text-slate-400 hover:text-emerald-600 transition-colors"
+                              className="p-1 hover:bg-brand-50 rounded text-slate-400 hover:text-brand-600 transition-colors"
                               title="Baixar"
                             >
                               <Download size={14} />
@@ -1933,7 +1930,7 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
 
         {/* Cleanup Selection Modal */}
         {cleanupModal.open && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[110]" onClick={() => setCleanupModal({ ...cleanupModal, open: false })}>
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={() => setCleanupModal({ ...cleanupModal, open: false })}>
             <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
               <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-6 mx-auto">
                 <Trash2 size={32} />
@@ -2013,7 +2010,7 @@ function PatientCard({ patient, onDelete, onEdit }) {
   const attendance = patient.attendanceStats || { presente: 0, falta: 0, justificada: 0 };
 
   return (
-    <div className={`card group hover:shadow-xl transition-all duration-300 flex flex-col h-full card-bone border-slate-100 relative ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'ring-2 ring-amber-400 border-amber-200 bg-gradient-to-br from-white to-amber-50/30 shadow-lg shadow-amber-100/50' : 'hover:border-emerald-200'}`}>
+    <div className={`card group hover:shadow-xl transition-all duration-300 flex flex-col h-full card-bone border-slate-100 relative ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'ring-2 ring-amber-400 border-amber-200 bg-gradient-to-br from-white to-amber-50/30 shadow-lg shadow-amber-100/50' : 'hover:border-brand-200'}`}>
       {isBirthdayWeek && (
         <div className="absolute -top-3 -right-3 w-10 h-10 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-amber-100 animate-bounce z-10">
           <PartyPopper size={20} className="text-amber-500" />
@@ -2024,16 +2021,16 @@ function PatientCard({ patient, onDelete, onEdit }) {
       <div className="p-5 pb-0 flex items-start justify-between relative z-0">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-xl transition-all duration-300 ${isActive ? (isBirthdayWeek ? 'bg-amber-500 text-white shadow-lg shadow-amber-200' : 'bg-slate-900 text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white') : 'bg-slate-200 text-slate-500'}`}>
-              {patient.name.charAt(0).toUpperCase()}
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-xl transition-all duration-300 ${isActive ? (isBirthdayWeek ? 'bg-amber-500 text-white shadow-lg shadow-amber-200' : 'bg-slate-900 text-brand-400 group-hover:bg-brand-600 group-hover:text-white') : 'bg-slate-200 text-slate-500'}`}>
+              {patient.name.split(" ")[0].slice(0, 2).toUpperCase()}
             </div>
           </div>
           <div className="flex flex-col gap-1">
-            <h3 className={`text-lg font-bold leading-tight transition-colors truncate max-w-[160px] ${isBirthdayWeek ? 'text-amber-900' : 'text-slate-900 group-hover:text-emerald-700'}`}>
+            <h3 className={`text-lg font-bold leading-tight transition-colors truncate max-w-[160px] ${isBirthdayWeek ? 'text-amber-900' : 'text-slate-900 group-hover:text-brand-700'}`}>
               {patient.name}
             </h3>
             <div className="flex items-center gap-2">
-              <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border ${isActive ? (isBirthdayWeek ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-100') : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+              <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border ${isActive ? (isBirthdayWeek ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-brand-50 text-brand-700 border-brand-100') : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
                 {isActive ? 'Ativo' : 'Inativo'}
               </span>
               {daysUntilBirthday !== null && (
@@ -2064,12 +2061,12 @@ function PatientCard({ patient, onDelete, onEdit }) {
             {/* Attendance Section */}
             <div className="p-4 border-r border-slate-100">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1">
-                <Calendar size={12} className="text-emerald-500" /> Sessões
+                <Calendar size={12} className="text-brand-500" /> Sessões
               </p>
               <div className="flex items-end gap-4">
                 <div className="flex flex-col">
                   <span className="text-2xl font-black text-slate-900 leading-none">{attendance.presente}</span>
-                  <span className="text-[10px] font-bold text-emerald-600 uppercase mt-1.5">Pres.</span>
+                  <span className="text-[10px] font-bold text-brand-600 uppercase mt-1.5">Pres.</span>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-2xl font-black text-slate-400 leading-none">{attendance.falta}</span>
@@ -2081,7 +2078,7 @@ function PatientCard({ patient, onDelete, onEdit }) {
             {/* Forms Section */}
             <div className="p-4">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1">
-                <FileText size={12} className="text-emerald-500" /> Instrumentos
+                <FileText size={12} className="text-brand-500" /> Instrumentos
               </p>
               <div className="flex items-end gap-4">
                 <div className="flex flex-col">
@@ -2089,8 +2086,8 @@ function PatientCard({ patient, onDelete, onEdit }) {
                   <span className="text-[10px] font-bold text-slate-500 uppercase mt-1.5">Env.</span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-2xl font-black text-emerald-600 leading-none">{responseCount}</span>
-                  <span className="text-[10px] font-bold text-emerald-600 uppercase mt-1.5">Resp.</span>
+                  <span className="text-2xl font-black text-brand-600 leading-none">{responseCount}</span>
+                  <span className="text-[10px] font-bold text-brand-600 uppercase mt-1.5">Resp.</span>
                 </div>
               </div>
             </div>
@@ -2103,13 +2100,13 @@ function PatientCard({ patient, onDelete, onEdit }) {
         <div className="flex flex-col gap-2 mb-4">
           {patient.phone && (
             <div className="flex items-center gap-2 text-xs text-slate-500">
-              <Phone size={12} className="text-emerald-500" />
+              <Phone size={12} className="text-brand-500" />
               <span className="font-medium">{patient.phone}</span>
             </div>
           )}
           {patient.email && (
             <div className="flex items-center gap-2 text-xs text-slate-500">
-              <Mail size={12} className="text-emerald-500" />
+              <Mail size={12} className="text-brand-500" />
               <span className="font-medium truncate">{patient.email}</span>
             </div>
           )}
@@ -2119,7 +2116,7 @@ function PatientCard({ patient, onDelete, onEdit }) {
           <Link to={`/patients/${patient.id}`} className="flex-1 btn bg-slate-900 text-white hover:bg-slate-800 text-xs py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-slate-200">
             <FileText size={14} /> Prontuário
           </Link>
-          <button onClick={() => onEdit(patient)} className="btn bg-white border border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50 text-xs px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
+          <button onClick={() => onEdit(patient)} className="btn bg-white border border-slate-200 text-slate-400 hover:text-brand-600 hover:border-brand-200 hover:bg-brand-50 text-xs px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
             <Pencil size={14} /> Editar
           </button>
           <button onClick={() => onDelete(patient.id)} className="btn bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 text-xs px-3 py-2.5 rounded-xl font-bold flex items-center justify-center gap-1 transition-all">
@@ -2139,15 +2136,15 @@ function PatientListRow({ patient, onDelete, onEdit }) {
   const attendance = patient.attendanceStats || { presente: 0, falta: 0, justificada: 0 };
 
   return (
-    <div className={`card p-4 flex items-center gap-5 transition-all duration-300 relative overflow-hidden ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'border-l-4 border-l-amber-400 bg-amber-50/20' : 'hover:border-emerald-200 hover:shadow-lg'}`}>
-      <Link to={`/patients/${patient.id}`} className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg shrink-0 transition-all ${isActive ? (isBirthdayWeek ? 'bg-amber-500 text-white' : 'bg-slate-900 text-emerald-400') : 'bg-slate-200 text-slate-500'}`}>
-        {isBirthdayWeek ? <PartyPopper size={20} /> : patient.name.charAt(0).toUpperCase()}
+    <div className={`card p-4 flex items-center gap-5 transition-all duration-300 relative overflow-hidden ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'border-l-4 border-l-amber-400 bg-amber-50/20' : 'hover:border-brand-200 hover:shadow-lg'}`}>
+      <Link to={`/patients/${patient.id}`} className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg shrink-0 transition-all ${isActive ? (isBirthdayWeek ? 'bg-amber-500 text-white' : 'bg-slate-900 text-brand-400') : 'bg-slate-200 text-slate-500'}`}>
+        {isBirthdayWeek ? <PartyPopper size={20} /> : patient.name.split(" ")[0].slice(0, 2).toUpperCase()}
       </Link>
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-3 mb-1">
           <Link to={`/patients/${patient.id}`} className="group/name">
-            <h4 className={`font-bold transition-colors truncate text-base ${isBirthdayWeek ? 'text-amber-900' : 'text-slate-900 group-hover:text-emerald-600'}`}>
+            <h4 className={`font-bold transition-colors truncate text-base ${isBirthdayWeek ? 'text-amber-900' : 'text-slate-900 group-hover:text-brand-600'}`}>
               {patient.name}
             </h4>
           </Link>
@@ -2169,11 +2166,11 @@ function PatientListRow({ patient, onDelete, onEdit }) {
         </div>
         <div className="flex items-center gap-4 text-xs text-slate-500">
           <div className="flex items-center gap-1.5">
-            <Phone size={12} className="text-emerald-500" />
+            <Phone size={12} className="text-brand-500" />
             <span>{patient.phone || '--'}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <Mail size={12} className="text-emerald-500" />
+            <Mail size={12} className="text-brand-500" />
             <span className="truncate max-w-[120px]">{patient.email || '--'}</span>
           </div>
         </div>
@@ -2183,12 +2180,12 @@ function PatientListRow({ patient, onDelete, onEdit }) {
       <div className="flex items-center gap-10 px-8 border-x border-slate-100">
         <div className="flex flex-col">
           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1">
-            <Calendar size={10} className="text-emerald-500" /> Sessões
+            <Calendar size={10} className="text-brand-500" /> Sessões
           </p>
           <div className="flex gap-4">
             <div className="flex flex-col">
               <span className="text-lg font-black text-slate-900 leading-none">{attendance.presente}</span>
-              <span className="text-[9px] font-bold text-emerald-600 uppercase mt-1">Pres.</span>
+              <span className="text-[9px] font-bold text-brand-600 uppercase mt-1">Pres.</span>
             </div>
             <div className="flex flex-col">
               <span className="text-lg font-black text-slate-400 leading-none">{attendance.falta}</span>
@@ -2198,7 +2195,7 @@ function PatientListRow({ patient, onDelete, onEdit }) {
         </div>
         <div className="flex flex-col">
           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1">
-            <FileText size={10} className="text-emerald-500" /> Instrumentos
+            <FileText size={10} className="text-brand-500" /> Instrumentos
           </p>
           <div className="flex gap-4">
             <div className="flex flex-col">
@@ -2206,8 +2203,8 @@ function PatientListRow({ patient, onDelete, onEdit }) {
               <span className="text-[9px] font-bold text-slate-500 uppercase mt-1">Env.</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-black text-emerald-600 leading-none">{responseCount}</span>
-              <span className="text-[9px] font-bold text-emerald-600 uppercase mt-1">Resp.</span>
+              <span className="text-lg font-black text-brand-600 leading-none">{responseCount}</span>
+              <span className="text-[9px] font-bold text-brand-600 uppercase mt-1">Resp.</span>
             </div>
           </div>
         </div>
@@ -2217,7 +2214,7 @@ function PatientListRow({ patient, onDelete, onEdit }) {
         <Link to={`/patients/${patient.id}`} className="p-2.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-md shadow-slate-200">
           <FileText size={18} />
         </Link>
-        <button onClick={() => onEdit(patient)} className="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50 transition-all">
+        <button onClick={() => onEdit(patient)} className="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-brand-600 hover:border-brand-200 hover:bg-brand-50 transition-all">
           <Pencil size={18} />
         </button>
         <button onClick={() => onDelete(patient.id)} className="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all">

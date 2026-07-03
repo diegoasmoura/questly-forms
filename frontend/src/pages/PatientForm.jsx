@@ -36,7 +36,7 @@ export default function PatientForm() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-emerald-50 flex items-center justify-center">
+      <div className="min-h-screen bg-brand-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="animate-spin text-slate-500" size={32} />
           <p className="text-sm text-slate-600">Carregando formulário...</p>
@@ -47,7 +47,7 @@ export default function PatientForm() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-emerald-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-brand-50 flex items-center justify-center px-4">
         <div className="card max-w-md w-full p-8 text-center">
           <AlertCircle size={48} className="mx-auto text-red-400 mb-4" />
           <h1 className="text-xl font-semibold text-slate-900 mb-2">Formulário Indisponível</h1>
@@ -63,11 +63,11 @@ export default function PatientForm() {
   if (!form || !schema) return null;
 
   return (
-    <div className="min-h-screen bg-emerald-50">
-      <header className="bg-white border-b border-emerald-100">
+    <div className="min-h-screen bg-brand-50">
+      <header className="bg-white border-b border-brand-100">
         <div className="max-w-3xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <div className="w-8 h-8 rounded-sm rotate-45 bg-emerald-900 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-sm rotate-45 bg-brand-900 flex items-center justify-center">
               <span className="text-white font-bold text-sm -rotate-45">Q</span>
             </div>
             <span className="text-sm font-medium text-slate-900">Questly Forms</span>

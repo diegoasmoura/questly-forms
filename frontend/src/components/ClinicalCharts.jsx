@@ -414,7 +414,7 @@ export function AttendanceHeatmap({ data = [], title = 'Calendário de Atendimen
                     {week.map((day, dayIndex) => (
                       <div
                         key={`${weekIndex}-${dayIndex}`}
-                        className="w-[12px] h-[12px] rounded-sm cursor-pointer transition-all hover:ring-2 hover:ring-emerald-400"
+                        className="w-[12px] h-[12px] rounded-sm cursor-pointer transition-all hover:ring-2 hover:ring-brand-400"
                         style={{ backgroundColor: getColor(day.count) }}
                         title={`${day.date.toLocaleDateString('pt-BR')}: ${day.count > 0 ? `${day.count} resposta(s)` : 'Sem atendimento'}`}
                       />
