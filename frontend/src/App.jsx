@@ -1,7 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
-import { Suspense, lazy } from "react";
 
 // Components
 import Layout from "./components/Layout";
@@ -15,9 +14,6 @@ import Register from "./pages/Register";
 
 // Pages carregadas sob demanda (Lazy Loading)
 // Pages (Lazy Loaded for Code-Splitting)
-const Landing = lazy(() => import("./pages/Landing"));
-const Login = lazy(() => import("./pages/Login"));
-const Register = lazy(() => import("./pages/Register"));
 const Home = lazy(() => import("./pages/Home"));
 const Patients = lazy(() => import("./pages/Patients"));
 const PatientRecord = lazy(() => import("./pages/PatientRecord"));
