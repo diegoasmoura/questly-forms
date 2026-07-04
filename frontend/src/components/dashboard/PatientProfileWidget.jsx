@@ -15,7 +15,21 @@ export function PatientProfileWidget({ activePatients, monthPatientIds, genderDa
       </div>
 
       <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Gênero</p>
-      <div className="flex gap-3 items-center mb-4">
+      
+      {/* MOBILE (Pills) */}
+      <div className="flex md:hidden flex-wrap gap-2 mb-4">
+        {genderData.map(g => (
+          <div key={g.label} className="flex items-center gap-1.5 bg-[var(--surface-alt)] px-3 py-1.5 rounded-[8px]">
+            <span className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ background: g.color }} />
+            <span className="text-[11px] font-semibold text-[var(--text-secondary)]">
+              {g.label} <span className="font-extrabold text-[var(--text-primary)] ml-0.5">{g.pct}%</span>
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* DESKTOP (Pie Chart) */}
+      <div className="hidden md:flex gap-3 items-center mb-4">
         <div className="relative w-[60px] h-[60px] flex-shrink-0">
           <svg viewBox="0 0 72 72" className="w-full h-full -rotate-90">
             <circle cx="36" cy="36" r="28" fill="none" stroke="var(--surface-alt)" strokeWidth="10" />

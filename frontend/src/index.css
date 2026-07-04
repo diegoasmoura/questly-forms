@@ -485,6 +485,24 @@
   animation: slideDown 0.25s ease-out forwards;
 }
 
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes scaleOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+
+.animate-fade-out {
+  animation: fadeOut 0.2s ease-out forwards;
+}
+
+.animate-scale-out {
+  animation: scaleOut 0.2s ease-out forwards;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
@@ -511,4 +529,21 @@
 }
 .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #475569;
+}
+
+/* Utilitário para ocultar barra de rolagem mas manter o scroll */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Remove contorno de foco e caixa de destaque ao tocar nos gráficos (Mobile/Desktop) */
+.recharts-wrapper,
+.recharts-surface,
+.recharts-responsive-container {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
 }

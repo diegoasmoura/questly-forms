@@ -11,49 +11,67 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: "autoUpdate",
-      includeAssets: ["favicon.png", "logo-nobg.png", "logo-icon.png"],
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.png', 'logo-nobg.png', 'logo-icon.png', 'favicon.svg'],
       manifest: {
-        name: "Questly Forms",
-        short_name: "Questly",
-        description: "Gestão Clínica e Formulários Inteligentes",
-        theme_color: "#5CBF9D",
-        background_color: "#FAF8F4",
-        display: "standalone",
-        orientation: "portrait",
-        start_url: "/",
+        name: 'Questly Forms',
+        short_name: 'Questly',
+        description: 'Gestão Clínica e Formulários Inteligentes',
+        theme_color: '#5CBF9D',
+        background_color: '#FAF8F4',
+        display: 'standalone',
+        orientation: 'portrait',
+        start_url: '/',
         icons: [
           {
-            src: "favicon.png",
-            sizes: "192x192",
-            type: "image/png"
+            src: 'favicon.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any maskable'
           },
           {
-            src: "favicon.png",
-            sizes: "512x512",
-            type: "image/png"
+            src: 'favicon.png',
+            sizes: '512x512',
+            type: 'image/png'
           }
         ]
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,woff,ttf}"],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,woff,ttf}'],
         runtimeCaching: [
           {
             urlPattern: /^\/api\/patients.*/i,
-            handler: "NetworkFirst",
+            handler: 'NetworkFirst',
             options: {
-              cacheName: "patients-cache",
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 7 // 1 semana
-              },
+              cacheName: 'patients-cache',
+              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 7 },
               networkTimeoutSeconds: 5,
               backgroundSync: {
-                name: "patients-sync",
-                options: {
-                  maxRetentionTime: 24 * 60 // 24 horas em minutos
-                }
+                name: 'patients-sync',
+                options: { maxRetentionTime: 24 * 60 }
               }
+            }
+          },
+          {
+            urlPattern: /^\/api\/forms.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-forms-cache',
+              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 7 },
+              networkTimeoutSeconds: 5
+            }
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com/,
+            handler: 'StaleWhileRevalidate',
+            options: { cacheName: 'google-fonts-stylesheets' }
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-webfonts',
+              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 }
             }
           }
         ]

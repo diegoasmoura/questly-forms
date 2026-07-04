@@ -151,6 +151,11 @@ Fade-in (páginas):  0.3s ease-out (opacity 0→1, translateY 10px→0)
 Slide-in (sidebar): 0.3s ease-out (opacity 0→1, translateX -10px→0)
 ```
 
+### 6.1 Regras para Modais no Mobile
+- **Sem "Pulos" Verticais (Fixed Height)**: Modais dinâmicos (que expandem com novos campos) não devem estar centralizados verticalmente, pois crescem para cima e para baixo. Eles devem possuir **ancoragem no topo** (ex: `items-start pt-[8vh]`) e **altura fixa absoluta** (ex: `h-[70vh] md:h-[580px]`), garantindo que a caixa nunca mude de tamanho ao interagir com formulários e nunca cubra a navegação inferior.
+- **Scroll Mask (Efeito Fade-out)**: Em vez de exibir barras de rolagem nativas dentro de modais, o design prevê um **esmaecimento na base** do modal (usando um overlay com `bg-gradient-to-t from-[var(--surface)] to-transparent pointer-events-none`). Isso cria uma dica visual premium de que "há mais conteúdo abaixo", dispensando a barra e mantendo o visual super limpo.
+- **Transição de Saída (Exit Animations)**: Modais **nunca devem fechar abruptamente**. Ações de fechamento disparam um estado `isClosing` (usando uma função wrapper como `triggerClose`), aplicando as animações `animate-fade-out` e `animate-scale-out` por 200ms antes da função de desmonte real (`onClose`) ser invocada.
+
 ---
 
 ## 7. Elementos Decorativos
@@ -180,6 +185,7 @@ Nunca devem competir com texto ou elementos interativos.
 | Tooltips em botões de ação | obrigatório (`title=""`) |
 | Alt text em imagens | obrigatório |
 | Focus visible | `focus:ring-2 focus:ring-[#5CBF9D]` |
+| Gráficos Recharts | Remover tap-highlight e outline nos wrappers e no `activeDot` |
 
 ---
 

@@ -1,4 +1,5 @@
 import Sidebar from "./Sidebar";
+import BottomNav from "./BottomNav";
 import { useLocation } from "react-router-dom";
 
 export default function Layout({ children }) {
@@ -18,7 +19,10 @@ export default function Layout({ children }) {
 
       {/* Único elemento que rola. Herda altura do pai via h-full (não via
           viewport), então nunca fica fora de sincronia com a Sidebar. */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-0 h-full relative z-10 overflow-y-auto overflow-x-hidden">
+      <div 
+        className="flex-1 flex flex-col min-w-0 min-h-0 h-full relative z-10 overflow-y-auto overflow-x-hidden md:!pb-0"
+        style={{ paddingBottom: 'calc(65px + env(safe-area-inset-bottom))' }}
+      >
         <main
           className={`flex-1 flex flex-col min-h-0 min-w-0 ${
             isFormBuilder ? "overflow-hidden" : ""
@@ -27,6 +31,8 @@ export default function Layout({ children }) {
           {children}
         </main>
       </div>
+
+      <BottomNav />
     </div>
   );
 }

@@ -6,11 +6,10 @@ const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 export function AgendaWidget({ today, todayEvents, upcomingDays, onEventClick, TimelineRow }) {
   return (
-    <div className="w-full lg:w-[30%] bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5 flex flex-col min-h-0">
+    <div className="w-full lg:w-[30%] bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5 flex flex-col lg:min-h-0">
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--text-muted)] m-0 flex items-center gap-1.5">
           Agenda de Hoje
-          <Leaf size={12} className="text-[var(--sage)] opacity-60" />
         </p>
         <div className="flex items-center gap-3">
           <span className="text-[12px] font-semibold text-[var(--text-muted)]">

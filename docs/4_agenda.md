@@ -22,6 +22,10 @@ return createPortal(
 ```
 O *backdrop* deve sempre utilizar a sobreposição de `bg-black/40` somada ao desfoque estrito `backdrop-blur-[3px]`. Não alterar essa espessura para manter consistência visual com os demais modais flutuantes.
 
+### Físicas do Modal (Mobile vs Web)
+- **Top Alignment**: O modal deve estar ancorado ao topo (`items-start pt-[8vh]`) em vez de centralizado (`items-center`), garantindo que não pule ou mude o topo de lugar ao expandir formulários filhos (Progressive Disclosure).
+- **Fixed Height**: Utilizar altura fixa (ex: `h-[70vh] md:h-[580px]`) em conjunto com rolagem interna oculta (`hide-scrollbar`) provida de uma **máscara de esmaecimento (fade-out bottom)** para indicar que há rolagem. Nunca sobrepor a navegação mobile (bottom nav).
+
 ### Fontes (Tipografia do Modal)
 Os Títulos (como o nome do Paciente no Modal) usam a mesma tipografia global da interface: `Nunito Sans` (classe `font-sans`).
 A espessura de destaque costuma ser `font-bold` (peso 700). Evita-se carregar outras fontes (`Playfair`, `Caveat`) dentro desses modais puramente funcionais, exceto por razões extremas.
