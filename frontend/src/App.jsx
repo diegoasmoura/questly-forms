@@ -7,6 +7,11 @@ import Layout from "./components/Layout";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import ToastContainer from "./components/Toast";
 
+// Pages estáticas para rota crítica (LCP inicial instantâneo)
+import Landing from "./pages/Landing";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+
 // Pages (Lazy Loaded for Code-Splitting)
 const Home = lazy(() => import("./pages/Home"));
 const Patients = lazy(() => import("./pages/Patients"));
