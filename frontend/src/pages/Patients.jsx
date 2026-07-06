@@ -378,8 +378,8 @@ const resetImportModal = () => {
   );
 
   return (
-    <div className="p-6 h-full flex flex-col overflow-hidden animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
+    <div className="py-6 h-full flex flex-col overflow-hidden animate-fade-in">
+      <div className="px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div>
           <h1 className="text-2xl font-semibold text-slate-800 font-heading">Pacientes</h1>
           <p className="text-sm text-slate-500">Gerencie seus pacientes e seus históricos clínicos.</p>
@@ -433,7 +433,7 @@ const resetImportModal = () => {
       </div>
 
       {/* Search & Filters */}
-      <div className="flex items-center justify-between gap-4 mb-6">
+      <div className="px-6 flex items-center justify-between gap-4 mb-6">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input
@@ -463,7 +463,7 @@ const resetImportModal = () => {
       </div>
 
       {/* patients List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto px-6">
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map(i => (
@@ -2069,29 +2069,29 @@ function PatientCard({ patient, onDelete, onEdit }) {
 
       {/* Footer Info & Actions */}
       <div className="p-5 mt-auto flex flex-col gap-4 border-t border-[var(--border)]">
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1.5 min-w-0">
           {patient.phone && (
-            <div className="flex items-center gap-2 text-[12px] text-[var(--text-secondary)]">
-              <Phone size={14} className="text-[var(--text-muted)]" />
-              <span className="font-semibold">{formatPhone(patient.phone) || patient.phone}</span>
+            <div className="flex items-center gap-2 text-[12px] text-[var(--text-secondary)] min-w-0">
+              <Phone size={14} className="text-[var(--text-muted)] shrink-0" />
+              <span className="font-semibold truncate">{formatPhone(patient.phone) || patient.phone}</span>
             </div>
           )}
           {patient.email && (
-            <div className="flex items-center gap-2 text-[12px] text-[var(--text-secondary)]">
-              <Mail size={14} className="text-[var(--text-muted)]" />
+            <div className="flex items-center gap-2 text-[12px] text-[var(--text-secondary)] min-w-0">
+              <Mail size={14} className="text-[var(--text-muted)] shrink-0" />
               <span className="font-semibold truncate">{patient.email}</span>
             </div>
           )}
         </div>
         
-        <div className="flex gap-2">
-          <Link to={`/patients/${patient.id}`} className="flex-1 py-2.5 rounded-[12px] font-bold text-[12px] flex items-center justify-center gap-2 transition-all hover:opacity-90 shadow-sm" style={{ background: "var(--sage)", color: "white" }}>
+        <div className="flex gap-2 flex-wrap sm:flex-nowrap">
+          <Link to={`/patients/${patient.id}`} className="flex-1 min-w-[120px] py-2.5 rounded-[12px] font-bold text-[12px] flex items-center justify-center gap-2 transition-all hover:opacity-90 shadow-sm" style={{ background: "var(--sage)", color: "white" }}>
             <FileText size={14} /> Prontuário
           </Link>
-          <button onClick={() => onEdit(patient)} className="px-4 py-2.5 rounded-[12px] font-bold text-[12px] flex items-center justify-center gap-2 transition-all hover:bg-[var(--bg)]" style={{ background: "var(--surface-alt)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
+          <button onClick={() => onEdit(patient)} className="px-3 py-2.5 rounded-[12px] font-bold text-[12px] flex items-center justify-center gap-1.5 transition-all hover:bg-[var(--bg)] shrink-0" style={{ background: "var(--surface-alt)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
             <Pencil size={14} /> Editar
           </button>
-          <button onClick={() => onDelete(patient.id)} className="px-3 py-2.5 rounded-[12px] font-bold text-[12px] flex items-center justify-center transition-all hover:bg-red-50 hover:border-red-200" style={{ background: "var(--surface-alt)", color: "var(--text-muted)", border: "1px solid var(--border)" }}>
+          <button onClick={() => onDelete(patient.id)} className="w-10 h-[38px] rounded-[12px] flex items-center justify-center transition-all hover:bg-red-50 hover:border-red-200 shrink-0" style={{ background: "var(--surface-alt)", color: "var(--text-muted)", border: "1px solid var(--border)" }}>
             <Trash2 size={14} className="hover:text-red-500 transition-colors" />
           </button>
         </div>
