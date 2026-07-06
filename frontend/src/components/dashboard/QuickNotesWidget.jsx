@@ -23,12 +23,12 @@ export function QuickNotesWidget({ notes, newNoteText, setNewNoteText, addNote, 
   };
 
   return (
-    <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5 flex flex-col lg:flex-1 min-h-[200px] lg:min-h-0">
+    <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] p-5 flex flex-col lg:flex-1 lg:min-h-0">
       <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--text-muted)] m-0 mb-3 flex-shrink-0">
         Lembretes Rápidos
       </p>
       
-      <div className="flex-1 overflow-y-auto pr-1 mb-2 min-h-0 custom-scrollbar">
+      <div className="lg:flex-1 overflow-y-auto pr-1 mb-2 lg:min-h-0 custom-scrollbar">
         {notes.length === 0 ? (
           <div className="h-full flex items-center justify-center">
             <p className="text-[12px] text-[var(--text-muted)] py-4 text-center">Nenhum lembrete cadastrado</p>

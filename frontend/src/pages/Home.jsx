@@ -52,7 +52,7 @@ export default function Home() {
   }
 
   return (
-    <div className="px-6 pt-6 pb-6 animate-fade-in flex flex-col gap-5 min-h-full min-w-0 relative">
+    <div className="px-4 sm:px-6 pt-6 pb-4 md:pb-6 animate-fade-in flex flex-col gap-5 h-full overflow-y-auto lg:overflow-hidden min-w-0 relative [&::-webkit-scrollbar]:hidden">
       <DecorativeElements />
 
       {/* KPIs */}
@@ -79,7 +79,6 @@ export default function Home() {
           <QuickNotesWidget {...notesData} />
         </div>
       </div>
-
 
       {detailModal.open && detailModal.app && (
         <AppointmentDetailModal appointment={detailModal.app} patient={detailModal.app.patient} nextDate={detailModal.app.date} onClose={() => setDetailModal({ open: false, app: null })} onUpdate={() => dashboardData.loadData(true)} />

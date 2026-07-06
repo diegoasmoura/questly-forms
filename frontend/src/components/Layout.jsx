@@ -21,8 +21,7 @@ export default function Layout({ children }) {
       {/* Único elemento que rola. Herda altura do pai via h-full (não via
           viewport), então nunca fica fora de sincronia com a Sidebar. */}
       <div 
-        className="flex-1 flex flex-col min-w-0 min-h-0 h-full relative z-10 overflow-y-auto overflow-x-hidden md:!pb-0"
-        style={{ paddingBottom: 'calc(65px + env(safe-area-inset-bottom))' }}
+        className="flex-1 flex flex-col min-w-0 min-h-0 h-full relative z-10 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden"
       >
         <GlobalHeader />
 
@@ -33,6 +32,9 @@ export default function Layout({ children }) {
         >
           {children}
         </main>
+        
+        {/* Physical spacer for BottomNav on mobile to fix Safari scroll calculation bugs */}
+        <div className="md:hidden shrink-0 w-full" style={{ height: 'calc(65px + env(safe-area-inset-bottom))' }} />
       </div>
 
       <BottomNav />
