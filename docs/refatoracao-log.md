@@ -31,3 +31,10 @@ Este log rastreia as voltas do loop de refatoração aplicadas ao QuestlyForms.
 - **Data**: 2026-07-06
 - **Meta**: Criação da tabela `AuditLog`, helper de auditoria e criptografia simétrica (com versão determinística para unique constraints) e termo de consentimento LGPD.
 - **Evidência**: Checkbox LGPD obrigatório adicionado e validado no cadastro de pacientes do frontend. Criptografia transparente de CPF e Notas do Paciente nas rotas do backend.
+
+## Turno 6: Validação de Duplicidade na Agenda e Tela de Configurações (Fase 1.6)
+- **Módulo**: `agenda-settings`
+- **Data**: 2026-07-06
+- **Meta**: Corrigir bug que permitia agendamento duplo do mesmo paciente no mesmo horário no backend. Criar página de configurações `/settings` com abas para Clínica, Agenda, Assinatura e Ajuda, adicionando campos de configurações ao modelo User no Prisma e vinculando botões inativos do ProfileDropdown a rotas ativas com query params.
+- **Evidência**: Suíte de testes frontend Vitest passando 20/20. Sincronização do Prisma concluída com sucesso. Lógica de colisão corrigida com testes manuais simulados de concorrência.
+
