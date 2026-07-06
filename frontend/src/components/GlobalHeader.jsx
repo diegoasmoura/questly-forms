@@ -31,14 +31,21 @@ export default function GlobalHeader() {
       return {
         type: 'page',
         title: "Agenda",
-        subtitle: "Seus compromissos e sessões"
+        subtitle: "Gestão de sessões e presenças"
       };
     }
-    if (path.startsWith("/my-forms") || path.startsWith("/library") || path.startsWith("/forms")) {
+    if (path.startsWith("/my-forms") || path.startsWith("/forms")) {
       return {
         type: 'page',
-        title: "Instrumentos",
-        subtitle: "Seus formulários e avaliações"
+        title: "Meus Instrumentos",
+        subtitle: "Gerencie seus modelos personalizados."
+      };
+    }
+    if (path.startsWith("/library")) {
+      return {
+        type: 'page',
+        title: "Acervo Clínico",
+        subtitle: "Explore e utilize instrumentos validados por especialistas."
       };
     }
     if (path.startsWith("/crm")) {
@@ -72,26 +79,19 @@ export default function GlobalHeader() {
           <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] mb-1.5" style={{ color: "var(--sage)" }}>
             {content.subtitle}
           </p>
-          
-          {content.type === 'greeting' ? (
-            <h1 className="leading-tight m-0 text-[var(--text-primary)] tracking-tight flex items-baseline">
-              <span className="font-handwritten font-normal text-[28px] md:text-[36px]">{content.title}</span>{" "}
-              {content.titleHighlight && (
-                <span className="relative inline-block ml-2">
-                  <span className="font-handwritten font-normal text-[30px] md:text-[38px] text-[var(--dark-green)] dark:text-[#5CBF9D] transition-colors duration-300">
-                    {content.titleHighlight}
-                  </span>
-                  <svg className="absolute left-0 -bottom-[2px] w-full h-[6px] overflow-visible text-[var(--sage)] opacity-80" viewBox="0 0 100 12" preserveAspectRatio="none">
-                    <path d="M0,6 C15,-4 30,16 50,6 C70,-4 85,16 100,6" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-                  </svg>
+          <h1 className="leading-tight m-0 text-[var(--text-primary)] tracking-tight flex items-baseline">
+            <span className="font-handwritten font-normal text-[30px] md:text-[38px]">{content.title}</span>{" "}
+            {content.titleHighlight && (
+              <span className="relative inline-block ml-2">
+                <span className="font-handwritten font-normal text-[30px] md:text-[38px] text-[var(--dark-green)] dark:text-[#5CBF9D] transition-colors duration-300">
+                  {content.titleHighlight}
                 </span>
-              )}
-            </h1>
-          ) : (
-            <h1 className="leading-tight m-0 text-[var(--text-primary)] tracking-tight font-sans font-bold text-[24px] md:text-[28px]">
-              {content.title}
-            </h1>
-          )}
+                <svg className="absolute left-0 -bottom-[2px] w-full h-[6px] overflow-visible text-[var(--sage)] opacity-80" viewBox="0 0 100 12" preserveAspectRatio="none">
+                  <path d="M0,6 C15,-4 30,16 50,6 C70,-4 85,16 100,6" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+              </span>
+            )}
+          </h1>
         </div>
 
         <div className="relative z-10 flex items-center gap-2.5 pt-[4px] shrink-0">

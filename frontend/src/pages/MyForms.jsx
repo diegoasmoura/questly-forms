@@ -125,12 +125,8 @@ export default function MyForms() {
 
   return (
     <div className="p-6 h-full flex flex-col overflow-hidden animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-800 font-heading">Meus Instrumentos</h1>
-          <p className="text-sm text-slate-500">Gerencie seus modelos personalizados.</p>
-        </div>
+      {/* Toolbar */}
+      <div className="flex justify-end items-center gap-4 mb-6 shrink-0">
         <div className="flex items-center gap-2">
           <Link to="/library" className="btn btn-secondary text-xs">
             <BookTemplate size={16} />
