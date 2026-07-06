@@ -9,16 +9,18 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(uuid())
-  email     String     @unique
-  name      String
-  password  String
-  avatarUrl String?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  forms     Form[]
-  patients  Patient[]
-  responses Response[]
+  id            String         @id @default(uuid())
+  email         String         @unique
+  name          String
+  password      String
+  avatarUrl     String?
+  bookingSlug   String?        @unique
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  forms         Form[]
+  patients      Patient[]
+  responses     Response[]
+  bookingConfig BookingConfig?
 }
 
 model Patient {
@@ -208,4 +210,15 @@ model Response {
   form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
   patient   Patient? @relation(fields: [patientId], references: [id])
   user      User?    @relation(fields: [userId], references: [id])
+}
+
+model BookingConfig {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  active         Boolean  @default(true)
+  slotDuration   Int      @default(50)
+  workingDays    Json     
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
