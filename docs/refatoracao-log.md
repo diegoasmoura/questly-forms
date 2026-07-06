@@ -38,3 +38,10 @@ Este log rastreia as voltas do loop de refatoração aplicadas ao QuestlyForms.
 - **Meta**: Corrigir bug que permitia agendamento duplo do mesmo paciente no mesmo horário no backend. Criar página de configurações `/settings` com abas para Clínica, Agenda, Assinatura e Ajuda, adicionando campos de configurações ao modelo User no Prisma e vinculando botões inativos do ProfileDropdown a rotas ativas com query params.
 - **Evidência**: Suíte de testes frontend Vitest passando 20/20. Sincronização do Prisma concluída com sucesso. Lógica de colisão corrigida com testes manuais simulados de concorrência.
 
+## Turno 7: Correção do Erro ao Gerar PDF (Fase 1.7)
+- **Módulo**: `export-pdf-fix`
+- **Data**: 2026-07-06
+- **Meta**: Solucionar o erro de tipo `TypeError: Cannot read properties of undefined (reading 'finalY')` que impedia o download de prontuários. Substituímos referências de `doc.previousAutoTable` para `doc.lastAutoTable` e aplicamos encadeamento opcional (`doc.lastAutoTable?.finalY`) com valores de fallback seguros.
+- **Evidência**: Vitest 20/20 verde. Download de arquivos PDF funciona normalmente sem gerar exceções no console ou nas notificações de toast.
+
+
