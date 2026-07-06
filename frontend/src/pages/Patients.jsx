@@ -247,7 +247,8 @@ const resetImportModal = () => {
     sessionTime: "",
     sessionDuration: "50",
     sessionFrequency: "semanal",
-    nextSession: ""
+    nextSession: "",
+    lgpdConsent: false
   });
   const [attachments, setAttachments] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -298,9 +299,9 @@ const resetImportModal = () => {
     e.preventDefault();
     
     // Manual validation to guide user to the right tab
-    if (!newPatient.name || !newPatient.cpf || !newPatient.birthDate) {
+    if (!newPatient.name || !newPatient.cpf || !newPatient.birthDate || !newPatient.lgpdConsent) {
       setAddFormTab("identity");
-      setErrorMessage("Por favor, preencha todos os campos obrigatórios na aba Identificação.");
+      setErrorMessage("Por favor, preencha todos os campos obrigatórios e aceite o Termo de Consentimento LGPD na aba Identificação.");
       return;
     }
     
@@ -345,7 +346,8 @@ const resetImportModal = () => {
         sessionTime: "",
         sessionDuration: "50",
         sessionFrequency: "semanal",
-        nextSession: ""
+        nextSession: "",
+        lgpdConsent: false
       });
       setAttachments([]);
       setAddFormTab("identity");
@@ -879,6 +881,22 @@ const resetImportModal = () => {
                           placeholder="Cargo/área"
                         />
                       </div>
+                    </div>
+
+                    {/* Consentimento LGPD */}
+                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 mt-4">
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          required
+                          className="mt-1 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                          checked={newPatient.lgpdConsent || false}
+                          onChange={e => setNewPatient({ ...newPatient, lgpdConsent: e.target.checked })}
+                        />
+                        <div className="text-xs text-slate-600 leading-relaxed font-medium">
+                          Declaro que obtive o <strong>consentimento expresso</strong> do paciente (ou responsável legal) para coleta e tratamento de dados pessoais e de saúde de natureza sensível, em estrita conformidade com a <strong>LGPD (Lei nº 13.709/2018)</strong> e resoluções do CFP.
+                        </div>
+                      </label>
                     </div>
                   </div>
                 )}
