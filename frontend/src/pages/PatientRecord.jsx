@@ -1122,8 +1122,7 @@ export default function PatientRecord() {
       }
     });
     
-    // Seção Detalhes Consolidados
-    let currentY = doc.lastAutoTable.finalY + 15;
+    let currentY = (doc.lastAutoTable?.finalY || 100) + 15;
     
     // Linha Divisória antes da próxima seção
     doc.setDrawColor(204, 204, 204);
@@ -1312,7 +1311,7 @@ export default function PatientRecord() {
       }
     });
     
-    let finalY = doc.lastAutoTable.finalY + 10;
+    let finalY = (doc.lastAutoTable?.finalY || 120) + 10;
     
     // Observações
     if (payment.notes) {

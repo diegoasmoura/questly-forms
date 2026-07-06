@@ -113,8 +113,7 @@ export const generatePremiumSummary = (patient, response) => {
   });
 
   // 4) BLOCO 3: PONTO DE ATENÇÃO
-  // Usamos doc.lastAutoTable.finalY ou pegamos o valor retornado pelo autoTable
-  let finalY = doc.previousAutoTable.finalY;
+  let finalY = doc.lastAutoTable?.finalY || 120;
   currentY = finalY + 15;
   
   doc.setFillColor(254, 252, 232); 
@@ -232,7 +231,7 @@ export const exportCompletePatientRecordPdf = (record) => {
     margin: { left: 15, right: 15 }
   });
 
-  let finalY = doc.previousAutoTable.finalY || currentY + 30;
+  let finalY = doc.lastAutoTable?.finalY || currentY + 30;
 
   // Se a página estiver acabando, adiciona nova página
   if (finalY > 230) {
@@ -270,7 +269,7 @@ export const exportCompletePatientRecordPdf = (record) => {
     margin: { left: 15, right: 15 }
   });
 
-  finalY = doc.previousAutoTable.finalY || currentY + 30;
+  finalY = doc.lastAutoTable?.finalY || currentY + 30;
 
   if (finalY > 230) {
     doc.addPage();
