@@ -61,3 +61,25 @@ Sugerimos as seguintes implementações estratégicas para o QuestlyForms:
 
 3. **Laudos e Atestados com Assinatura Eletrônica**:
    - Módulo de assinatura eletrônica simples (com registro de IP, geolocalização e hashes de segurança) para permitir que psicólogos enviem laudos e declarações assinadas digitalmente diretamente pelo sistema.
+
+---
+
+## 4. Referências e Comprovações de Mercado
+
+Para validar os focos, limitações e posicionamento dos concorrentes identificados no relatório, compilamos os dados oficiais das plataformas:
+
+* **Corpora (app.usecorpora.com.br)**: Focado em prontuário eletrônico moderno e automações via IA (transcrição de sessões, reescrita de notas, lousa de sessão e digitalização de notas manuais). O plano profissional é pago e foca nesses recursos de IA.
+* **Sintropia (sintropia.app)**: Plataforma focada em prontuário baseado em IA com sua ferramenta própria, a **LUMA**, e sistema de *Smartnotes* (anotações inteligentes), projetada para anonimizar dados antes do processamento clínico.
+* **Psicoplanner (psicoplanner.com.br)**: Oferece agenda online simples, lembretes de WhatsApp integrados, prontuários básicos, sala de vídeo integrada e transcrição de áudio via IA.
+* **GestorPsi (gestorpsi.com.br)**: Focado em clínicas multidisciplinares maiores e instituições de ensino. Apresenta módulos complexos de gestão de estabelecimentos, reserva de salas físicas e equipamentos, além de controle rígido de acesso a prontuários.
+* **Allminds (allminds.app)**: Integra prontuário eletrônico básico com ferramentas de marketing, como inclusão do profissional em portal público de buscas, materiais de marketing de captação de pacientes e consultorias de vendas.
+* **Clínica Ágil**: Oferece prontuário, agendamento de consultas automatizado, telepsicologia com vídeo integrado, faturamento, emissão de notas fiscais (NFSe) e assinatura eletrônica.
+
+---
+
+## 5. Validação da Estratégia de Whitespace do QuestlyForms
+
+A análise de mercado comprova que o **Whitespace** (nicho de mercado inexplorado) é real:
+* Enquanto **Corpora** e **Sintropia** disputam ferramentas de transcrição de texto livre por IA, nenhuma delas oferece bibliotecas de testes estruturados baseados em evidência e cálculo automatizado de severidade em tempo real (como o **YSQ-L3** de 232 itens do QuestlyForms).
+* O QuestlyForms possui uma vantagem única e proprietária ao centralizar a **evolução científica baseada em escalas psicométricas (DASS-21, PHQ-9, GAD-7, BDI-II, etc.)**, atraindo terapeutas orientados a resultados quantificáveis.
+
