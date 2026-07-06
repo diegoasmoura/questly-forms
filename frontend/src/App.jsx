@@ -27,6 +27,7 @@ const PatientForm = lazy(() => import("./pages/PatientForm"));
 const Agenda = lazy(() => import("./pages/Agenda"));
 const CrmDashboard = lazy(() => import("./pages/CrmDashboard"));
 const Booking = lazy(() => import("./pages/Booking"));
+const Settings = lazy(() => import("./pages/Settings"));
 
 function LoadingScreen() {
   return (
@@ -84,6 +85,7 @@ export default function App() {
           <Route path="/share/:token" element={<ShareLink />} />
           <Route path="/form/:token" element={<PatientForm />} />
           <Route path="/booking/:slug" element={<Booking />} />
+          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

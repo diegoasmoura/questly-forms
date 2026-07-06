@@ -9,19 +9,33 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  name          String
-  password      String
-  avatarUrl     String?
-  bookingSlug   String?        @unique
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  forms         Form[]
-  patients      Patient[]
-  responses     Response[]
-  bookingConfig BookingConfig?
-  auditLogs     AuditLog[]
+  id                  String         @id @default(uuid())
+  email               String         @unique
+  name                String
+  password            String
+  avatarUrl           String?
+  bookingSlug         String?        @unique
+  // Configurações da Clínica
+  clinicName          String?
+  crp                 String?
+  clinicPhone         String?
+  clinicAddress       String?
+  clinicLogo          String?
+  therapeuticApproach String?
+  // Preferências de Agenda
+  sessionDuration     Int            @default(50)
+  sessionInterval     Int            @default(10)
+  workStartTime       String         @default("08:00")
+  workEndTime         String         @default("20:00")
+  workDays            Json           @default("[1,2,3,4,5]")
+  timezone            String         @default("America/Sao_Paulo")
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  forms               Form[]
+  patients            Patient[]
+  responses           Response[]
+  bookingConfig       BookingConfig?
+  auditLogs           AuditLog[]
 }
 
 model Patient {

@@ -247,6 +247,10 @@ export const api = {
     body: JSON.stringify(data)
   }),
   deletePayment: (id) => request(`/payments/${id}`, { method: "DELETE" }),
+  
+  // Settings
+  getSettings: () => request("/settings"),
+  updateSettings: (data) => request("/settings", { method: "PUT", body: JSON.stringify(data) }),
 };
 
 export { ApiError };
