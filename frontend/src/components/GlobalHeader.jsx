@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { Sun, Moon, Bell } from "lucide-react";
@@ -15,6 +15,50 @@ export default function GlobalHeader() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
+  const location = useLocation();
+
+  const getHeaderContent = () => {
+    const path = location.pathname;
+    
+    if (path.startsWith("/patients")) {
+      return {
+        type: 'page',
+        title: "Pacientes",
+        subtitle: "Gestão de prontuários e evolução clínica"
+      };
+    }
+    if (path.startsWith("/agenda")) {
+      return {
+        type: 'page',
+        title: "Agenda",
+        subtitle: "Seus compromissos e sessões"
+      };
+    }
+    if (path.startsWith("/my-forms") || path.startsWith("/library") || path.startsWith("/forms")) {
+      return {
+        type: 'page',
+        title: "Instrumentos",
+        subtitle: "Seus formulários e avaliações"
+      };
+    }
+    if (path.startsWith("/crm")) {
+      return {
+        type: 'page',
+        title: "CRM - Funil de Captação",
+        subtitle: "Gerencie leads, triagens e acompanhe a atração de novos pacientes."
+      };
+    }
+    
+    // Default (Home)
+    return {
+      type: 'greeting',
+      title: `${getGreeting()},`,
+      titleHighlight: user?.name?.split(" ")[0] || "Usuário",
+      subtitle: new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
+    };
+  };
+
+  const content = getHeaderContent();
   const initials = user?.name?.split(" ")?.map((n) => n[0])?.join("")?.toUpperCase()?.slice(0, 2) || "U";
 
   return (
@@ -26,19 +70,28 @@ export default function GlobalHeader() {
 
         <div className="relative z-10 flex-1 min-w-0">
           <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] mb-1.5" style={{ color: "var(--sage)" }}>
-            {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            {content.subtitle}
           </p>
-          <h1 className="leading-tight m-0 text-[var(--text-primary)] tracking-tight flex items-baseline">
-            <span className="font-handwritten font-normal text-[28px] md:text-[36px]">{getGreeting()},</span>{" "}
-            <span className="relative inline-block ml-2">
-              <span className="font-handwritten font-normal text-[30px] md:text-[38px] text-[var(--dark-green)] dark:text-[#5CBF9D] transition-colors duration-300">
-                {user?.name?.split(" ")[0] || "Usuário"}
-              </span>
-              <svg className="absolute left-0 -bottom-[2px] w-full h-[6px] overflow-visible text-[var(--sage)] opacity-80" viewBox="0 0 100 12" preserveAspectRatio="none">
-                <path d="M0,6 C15,-4 30,16 50,6 C70,-4 85,16 100,6" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-              </svg>
-            </span>
-          </h1>
+          
+          {content.type === 'greeting' ? (
+            <h1 className="leading-tight m-0 text-[var(--text-primary)] tracking-tight flex items-baseline">
+              <span className="font-handwritten font-normal text-[28px] md:text-[36px]">{content.title}</span>{" "}
+              {content.titleHighlight && (
+                <span className="relative inline-block ml-2">
+                  <span className="font-handwritten font-normal text-[30px] md:text-[38px] text-[var(--dark-green)] dark:text-[#5CBF9D] transition-colors duration-300">
+                    {content.titleHighlight}
+                  </span>
+                  <svg className="absolute left-0 -bottom-[2px] w-full h-[6px] overflow-visible text-[var(--sage)] opacity-80" viewBox="0 0 100 12" preserveAspectRatio="none">
+                    <path d="M0,6 C15,-4 30,16 50,6 C70,-4 85,16 100,6" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                  </svg>
+                </span>
+              )}
+            </h1>
+          ) : (
+            <h1 className="leading-tight m-0 text-[var(--text-primary)] tracking-tight font-sans font-bold text-[24px] md:text-[28px]">
+              {content.title}
+            </h1>
+          )}
         </div>
 
         <div className="relative z-10 flex items-center gap-2.5 pt-[4px] shrink-0">

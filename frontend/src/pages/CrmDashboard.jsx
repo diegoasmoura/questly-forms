@@ -209,15 +209,11 @@ export default function CrmDashboard() {
   return (
     <div className="flex flex-col h-full min-h-0 space-y-6">
       
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0 px-2">
-        <div>
-          <h1 className="text-3xl font-black text-slate-800 tracking-tight">CRM - Funil de Captação</h1>
-          <p className="text-sm text-slate-500 font-medium">Gerencie leads, triagens e acompanhe a atração de novos pacientes.</p>
-        </div>
+      {/* Toolbar */}
+      <div className="flex justify-end items-center gap-4 shrink-0 px-2 mt-2">
         <button 
           onClick={() => setShowAddLeadModal(true)}
-          className="btn btn-primary flex items-center gap-2"
+          className="btn btn-primary flex items-center gap-2 shadow-sm"
         >
           <Plus size={18} />
           Novo Lead (Contato)

@@ -2078,7 +2078,7 @@ function PatientCard({ patient, onDelete, onEdit }) {
   const { initials, color: avatarColor } = getAvatarProps(patient.name);
 
   return (
-    <div className={`relative bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300 flex flex-col h-full group ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'ring-2 ring-amber-400 border-amber-200' : ''}`}>
+    <div className={`relative bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm hover:shadow-md hover:border-slate-400 transition-all duration-300 flex flex-col h-full group ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'border-amber-400/60 shadow-[0_0_15px_rgba(251,191,36,0.15)]' : ''}`}>
       {isBirthdayWeek && (
         <div className="absolute -top-3 -right-3 w-10 h-10 bg-white rounded-[14px] shadow-xl flex items-center justify-center border border-amber-100 animate-bounce z-20 pointer-events-none">
           <PartyPopper size={20} className="text-amber-500" />
@@ -2125,29 +2125,29 @@ function PatientCard({ patient, onDelete, onEdit }) {
       </div>
 
       {/* Footer: Data Grid & Arrow */}
-      <div className="mt-auto p-4 border-t border-[var(--border)] bg-slate-50/50 rounded-b-[24px] flex items-center justify-between relative z-10 pointer-events-none">
+      <div className="mt-auto p-4 border-t border-[var(--border)] bg-[var(--surface-alt)]/50 rounded-b-[24px] flex items-center justify-between relative z-10 pointer-events-none">
         
         <div className="flex flex-col sm:flex-row flex-1 gap-3 sm:gap-6">
           <div className="flex flex-col min-w-max">
-            <span className="text-[9px] font-extrabold text-slate-400 tracking-wider uppercase mb-1">Sessões</span>
+            <span className="text-[9px] font-extrabold text-[var(--text-muted)] tracking-wider uppercase mb-1">Sessões</span>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold text-[var(--text-primary)]">{attendance.presente} <span className="font-normal text-slate-500">presenças</span></span>
+              <span className="text-[11px] font-bold text-[var(--text-primary)]">{attendance.presente} <span className="font-normal opacity-70">presenças</span></span>
               {attendance.falta > 0 && (
-                <span className="text-[11px] font-bold text-amber-600 bg-amber-50 rounded-[4px] px-1">{attendance.falta} <span className="font-normal">faltas</span></span>
+                <span className="text-[11px] font-bold text-amber-500 bg-amber-500/10 rounded-[4px] px-1.5 py-0.5">{attendance.falta} <span className="font-normal">faltas</span></span>
               )}
             </div>
           </div>
           
-          <div className="flex flex-col sm:border-l border-slate-200 sm:pl-4 min-w-max">
-            <span className="text-[9px] font-extrabold text-slate-400 tracking-wider uppercase mb-1">Instrumentos</span>
+          <div className="flex flex-col sm:border-l border-[var(--border)] sm:pl-4 min-w-max">
+            <span className="text-[9px] font-extrabold text-[var(--text-muted)] tracking-wider uppercase mb-1">Instrumentos</span>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold text-[var(--text-primary)]">{sentCount} <span className="font-normal text-slate-500">enviados</span></span>
-              <span className="text-[11px] font-bold text-[var(--text-primary)]">{responseCount} <span className="font-normal text-slate-500">resp.</span></span>
+              <span className="text-[11px] font-bold text-[var(--text-primary)]">{sentCount} <span className="font-normal opacity-70">enviados</span></span>
+              <span className="text-[11px] font-bold text-[var(--text-primary)]">{responseCount} <span className="font-normal opacity-70">resp.</span></span>
             </div>
           </div>
         </div>
         
-        <div className="w-8 h-8 shrink-0 ml-2 rounded-[12px] flex items-center justify-center bg-[var(--sage)] text-white shadow-sm opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all">
+        <div className="w-8 h-8 shrink-0 ml-2 rounded-[12px] flex items-center justify-center bg-[var(--sage)] text-white shadow-sm opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all pointer-events-auto">
           <ChevronRight size={16} />
         </div>
       </div>
@@ -2204,28 +2204,28 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
           
           {/* Sessões */}
           <div className="flex flex-col justify-center">
-             <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Sessões</span>
-             <span className="text-[var(--text-primary)] font-bold">{attendance.presente} <span className="text-slate-500 font-normal">concluídas</span></span>
+             <span className="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Sessões</span>
+             <span className="text-[var(--text-primary)] font-bold">{attendance.presente} <span className="opacity-70 font-normal">concluídas</span></span>
           </div>
           
           {/* Faltas */}
-          <div className="flex flex-col justify-center border-l border-slate-200 pl-3">
-             <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Faltas</span>
+          <div className="flex flex-col justify-center border-l border-[var(--border)] pl-3">
+             <span className="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Faltas</span>
              {attendance.falta > 0 ? (
-               <span className="text-amber-600 font-bold">{attendance.falta} <span className="text-amber-600/70 font-normal">registradas</span></span>
+               <span className="text-amber-500 font-bold bg-amber-500/10 px-1.5 py-0.5 rounded-[4px] self-start inline-flex">{attendance.falta} <span className="opacity-80 font-normal ml-1">registradas</span></span>
              ) : (
-               <span className="text-slate-400 font-medium">Nenhuma</span>
+               <span className="text-[var(--text-muted)] font-medium">Nenhuma</span>
              )}
           </div>
 
           {/* Enviados */}
-          <div className="flex flex-col justify-center border-l border-slate-200 pl-3">
-             <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Formulários</span>
-             <span className="text-[var(--text-primary)] font-bold">{sentCount} <span className="text-slate-500 font-normal">enviados</span></span>
+          <div className="flex flex-col justify-center border-l border-[var(--border)] pl-3">
+             <span className="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Formulários</span>
+             <span className="text-[var(--text-primary)] font-bold">{sentCount} <span className="opacity-70 font-normal">enviados</span></span>
           </div>
 
           {/* Respondidos */}
-          <div className="flex flex-col justify-center border-l border-slate-200 pl-3">
+          <div className="flex flex-col justify-center border-l border-[var(--border)] pl-3">
              <span className="text-[9px] text-[var(--sage)] font-bold uppercase tracking-widest mb-0.5">Retorno</span>
              <span className="text-[var(--sage)] font-bold">{responseCount} <span className="text-[var(--sage)]/70 font-normal">respondidos</span></span>
           </div>

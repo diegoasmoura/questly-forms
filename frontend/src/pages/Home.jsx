@@ -52,7 +52,7 @@ export default function Home() {
   }
 
   return (
-    <div className="px-6 pb-6 animate-fade-in flex flex-col gap-5 min-h-full min-w-0 relative">
+    <div className="px-6 pt-6 pb-6 animate-fade-in flex flex-col gap-5 min-h-full min-w-0 relative">
       <DecorativeElements />
 
       {/* KPIs */}
