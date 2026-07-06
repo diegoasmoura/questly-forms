@@ -134,6 +134,8 @@ export const api = {
   updatePatient: (id, data) => request(`/patients/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   deletePatient: (id) => request(`/patients/${id}`, { method: "DELETE" }),
   updatePatientFunnel: (id, data) => request(`/patients/${id}/funnel`, { method: "PATCH", body: JSON.stringify(data) }),
+  exportPatientRecord: (id) => request(`/patients/${id}/export`),
+  sendWhatsAppReminder: (data) => request("/notifications/send-reminder", { method: "POST", body: JSON.stringify(data) }),
 
   // Attachments
   getAttachments: (patientId) => request(`/attachments/patient/${patientId}`),
@@ -245,6 +247,10 @@ export const api = {
     body: JSON.stringify(data)
   }),
   deletePayment: (id) => request(`/payments/${id}`, { method: "DELETE" }),
+  
+  // Settings
+  getSettings: () => request("/settings"),
+  updateSettings: (data) => request("/settings", { method: "PUT", body: JSON.stringify(data) }),
 };
 
 export { ApiError };

@@ -1,6 +1,8 @@
 import { Router } from "express";
 import prisma from "../db.js";
 import { authMiddleware } from "../middleware/auth.js";
+import { encrypt, decrypt, encryptDeterministic, decryptDeterministic } from "../lib/crypto.js";
+import { logAudit } from "../lib/audit.js";
 
 const router = Router();
 
@@ -37,6 +39,8 @@ router.get("/", async (req, res) => {
 
       // Remove the full attendances list to keep the response light
       const { attendances, ...patientData } = patient;
+      if (patientData.cpf) patientData.cpf = decryptDeterministic(patientData.cpf);
+      if (patientData.notes) patientData.notes = decrypt(patientData.notes);
       return {
         ...patientData,
         attendanceStats: stats
@@ -79,10 +83,58 @@ router.get("/:id", async (req, res) => {
       }
     });
     if (!patient) return res.status(404).json({ error: "Paciente não encontrado" });
+    if (patient.cpf) patient.cpf = decryptDeterministic(patient.cpf);
+    if (patient.notes) patient.notes = decrypt(patient.notes);
     res.json(patient);
   } catch (error) {
     console.error("Error fetching patient:", error.message);
     res.status(500).json({ error: "Erro ao buscar paciente" });
+  }
+});
+
+router.get("/:id/export", async (req, res) => {
+  try {
+    const patient = await prisma.patient.findFirst({
+      where: { id: req.params.id, psychologistId: req.user.id },
+      include: {
+        responses: {
+          include: {
+            form: {
+              select: {
+                title: true,
+                type: true,
+                schema: true
+              }
+            }
+          },
+          orderBy: { createdAt: "desc" }
+        },
+        appointments: {
+          orderBy: { startDate: "desc" }
+        },
+        attendances: {
+          orderBy: { date: "desc" }
+        },
+        payments: {
+          orderBy: { paymentDate: "desc" }
+        },
+        attachments: {
+          orderBy: { createdAt: "desc" }
+        }
+      }
+    });
+
+    if (!patient) {
+      return res.status(404).json({ error: "Paciente não encontrado" });
+    }
+
+    if (patient.cpf) patient.cpf = decryptDeterministic(patient.cpf);
+    if (patient.notes) patient.notes = decrypt(patient.notes);
+
+    res.json(patient);
+  } catch (error) {
+    console.error("Error exporting patient data:", error.message);
+    res.status(500).json({ error: "Erro ao exportar prontuário" });
   }
 });
 
@@ -154,12 +206,23 @@ router.post("/", async (req, res) => {
         if (isNaN(value)) return;
       }
 
+      if (key === "cpf") {
+        value = encryptDeterministic(value);
+      } else if (key === "notes") {
+        value = encrypt(value);
+      }
+
       insertData[key] = value;
     });
 
     const patient = await prisma.patient.create({
       data: insertData
     });
+
+    await logAudit(req, "CREATE", "Patient", patient.id, { name: patient.name });
+
+    if (patient.cpf) patient.cpf = decryptDeterministic(patient.cpf);
+    if (patient.notes) patient.notes = decrypt(patient.notes);
     
     res.status(201).json(patient);
   } catch (error) {
@@ -262,11 +325,25 @@ router.put("/:id", async (req, res) => {
       cleanData.inactivatedAt = null;
     }
 
+    if (cleanData.hasOwnProperty('cpf') && cleanData.cpf) {
+      const cleanCpf = cleanData.cpf.replace(/\D/g, "");
+      cleanData.cpf = encryptDeterministic(cleanCpf);
+    }
+    if (cleanData.hasOwnProperty('notes') && cleanData.notes) {
+      cleanData.notes = encrypt(cleanData.notes);
+    }
+
     const updated = await prisma.patient.update({
       where: { id: req.params.id },
       data: cleanData,
     });
     console.log("Updated patient from DB:", JSON.stringify(updated, null, 2));
+
+    await logAudit(req, "UPDATE", "Patient", updated.id, { name: updated.name });
+
+    if (updated.cpf) updated.cpf = decryptDeterministic(updated.cpf);
+    if (updated.notes) updated.notes = decrypt(updated.notes);
+
     res.json(updated);
   } catch (error) {
     console.error("Error updating patient:", error);
@@ -290,6 +367,7 @@ router.delete("/:id", async (req, res) => {
     });
     if (!patient) return res.status(404).json({ error: "Paciente não encontrado" });
     await prisma.patient.delete({ where: { id: req.params.id } });
+    await logAudit(req, "DELETE", "Patient", req.params.id, { name: patient.name });
     res.json({ success: true });
   } catch (error) {
     console.error("Error deleting patient:", error.message);
@@ -351,12 +429,20 @@ router.patch("/:id/funnel", async (req, res) => {
           missingFields
         });
       }
+      if (updateData.hasOwnProperty("cpf") && updateData.cpf) {
+        updateData.cpf = encryptDeterministic(updateData.cpf);
+      }
     }
 
     const updated = await prisma.patient.update({
       where: { id: req.params.id },
       data: updateData
     });
+
+    await logAudit(req, "UPDATE", "Patient", updated.id, { funnelStep: updated.funnelStep });
+
+    if (updated.cpf) updated.cpf = decryptDeterministic(updated.cpf);
+    if (updated.notes) updated.notes = decrypt(updated.notes);
 
     res.json(updated);
   } catch (error) {

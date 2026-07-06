@@ -244,4 +244,317 @@ export const clinicalTemplates = [
       ]
     }
   },
+  {
+    id: "anamnese_adulto",
+    title: "Anamnese Clínica - Adulto",
+    description: "Roteiro completo para avaliação inicial de pacientes adultos, cobrindo queixa principal, histórico de sintomas, dinâmica familiar e antecedentes de saúde.",
+    type: "Anamnese",
+    audiences: ["Adulto"],
+    schema: {
+      stepper: true,
+      title: "Anamnese Clínica - Adulto",
+      pages: [
+        {
+          title: "Histórico Atual",
+          questions: [
+            { id: "queixa_principal", type: "text", title: "Queixa Principal (O que motivou a busca por terapia?)", multiline: true, required: true },
+            { id: "historico_sintomas", type: "text", title: "Histórico dos Sintomas (Início, frequência, fatores desencadeantes)", multiline: true, required: true },
+            { id: "tratamentos_anteriores", type: "boolean", title: "Já realizou tratamento psiquiátrico ou psicoterapêutico anterior?", required: true }
+          ]
+        },
+        {
+          title: "Dinâmica Familiar e Social",
+          questions: [
+            { id: "contexto_familiar", type: "text", title: "Relações Familiares (Estrutura atual, clima emocional, conflitos)", multiline: true, required: true },
+            { id: "apoio_social", type: "text", title: "Rede de Apoio (Amigos, hobbies, lazer, isolamento)", multiline: true, required: false }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    id: "anamnese_infantil",
+    title: "Anamnese Clínica - Infantil",
+    description: "Roteiro detalhado para entrevista com pais ou responsáveis, cobrindo gestação, desenvolvimento neuropsicomotor, socialização e queixa escolar.",
+    type: "Anamnese",
+    audiences: ["Infantil"],
+    schema: {
+      stepper: true,
+      title: "Anamnese Clínica - Infantil",
+      pages: [
+        {
+          title: "Dados de Desenvolvimento",
+          questions: [
+            { id: "gestacao_parto", type: "text", title: "Histórico de Gestação e Parto (Ocorrências notáveis, sentimentos da mãe)", multiline: true, required: true },
+            { id: "desenvolvimento_motor", type: "text", title: "Desenvolvimento Neuropsicomotor (Idade em que engatinhou, andou, falou)", multiline: true, required: true },
+            { id: "sono_alimentacao", type: "text", title: "Sono e Alimentação (Rotinas, dificuldades, autonomia)", multiline: true, required: true }
+          ]
+        },
+        {
+          title: "Vida Escolar e Social",
+          questions: [
+            { id: "escola_comportamento", type: "text", title: "Comportamento na Escola (Adaptação, rendimento, queixas)", multiline: true, required: true },
+            { id: "socializacao_brincar", type: "text", title: "Socialização e Brincar (Como interage com outras crianças e familiares)", multiline: true, required: true }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    id: "anamnese_adolescente",
+    title: "Anamnese Clínica - Adolescente",
+    description: "Foco nas dinâmicas de transição, autonomia, uso de redes sociais, relações de grupo e rendimento escolar.",
+    type: "Anamnese",
+    audiences: ["Adolescente"],
+    schema: {
+      stepper: true,
+      title: "Anamnese Clínica - Adolescente",
+      pages: [
+        {
+          title: "Identidade e Relações",
+          questions: [
+            { id: "queixa_adolescente", type: "text", title: "Queixa sob a perspectiva do adolescente e da família", multiline: true, required: true },
+            { id: "relacoes_pares", type: "text", title: "Relações com Colegas e Amigos (Pertencimento a grupos, bullying)", multiline: true, required: true },
+            { id: "redes_sociais", type: "choice", title: "Uso de Redes Sociais e Telas", options: [
+              { value: "baixo", label: "Baixo (até 2 horas diárias)" },
+              { value: "moderado", label: "Moderado (2 a 5 horas diárias)" },
+              { value: "excessivo", label: "Excessivo (mais de 5 horas diárias)" }
+            ], multiple: false, required: true }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    id: "anamnese_idoso",
+    title: "Anamnese Clínica - Idoso",
+    description: "Avaliação do envelhecimento ativo, autonomia funcional, declínio cognitivo e rede de suporte na terceira idade.",
+    type: "Anamnese",
+    audiences: ["Idoso"],
+    schema: {
+      stepper: true,
+      title: "Anamnese Clínica - Idoso",
+      pages: [
+        {
+          title: "Saúde e Autonomia",
+          questions: [
+            { id: "queixa_idoso", type: "text", title: "Queixa Principal e histórico de saúde", multiline: true, required: true },
+            { id: "declinio_cognitivo", type: "boolean", title: "Paciente ou familiares relatam episódios de perda de memória recente?", required: true },
+            { id: "autonomia_atividades", type: "text", title: "Autonomia Funcional (Banho, alimentação, finanças, locomoção)", multiline: true, required: true }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    id: "rpd_tcc",
+    title: "Registro de Pensamentos Disfuncionais (RPD)",
+    description: "Template de monitoramento diário baseado na Terapia Cognitivo-Comportamental para identificação e reestruturação de pensamentos automáticos.",
+    type: "Acompanhamento",
+    audiences: ["Adulto", "Adolescente"],
+    schema: {
+      stepper: false,
+      title: "Registro de Pensamentos Disfuncionais",
+      pages: [
+        {
+          title: "Registro RPD",
+          questions: [
+            { id: "situacao", type: "text", title: "Situação (Quem, o quê, quando e onde?)", multiline: true, required: true },
+            { id: "pensamento_automatico", type: "text", title: "Pensamentos Automáticos (O que passou pela cabeça?)", multiline: true, required: true },
+            { id: "emocoes", type: "text", title: "Emoções (Tristeza, ansiedade, raiva etc. e intensidade de 0 a 100)", multiline: false, required: true },
+            { id: "comportamento", type: "text", title: "Comportamento (O que você fez a seguir?)", multiline: true, required: true },
+            { id: "resposta_alternativa", type: "text", title: "Resposta Racional/Alternativa (O que você pode pensar em vez disso?)", multiline: true, required: true }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    id: "registro_abc_comportamental",
+    title: "Registro de Comportamento (Modelo ABC)",
+    description: "Análise funcional de contingências comportamentais baseada na Análise do Comportamento (Antecedente - Comportamento - Consequência).",
+    type: "Acompanhamento",
+    audiences: ["Adulto", "Adolescente"],
+    schema: {
+      stepper: false,
+      title: "Registro de Comportamento (Modelo ABC)",
+      pages: [
+        {
+          title: "Análise Funcional",
+          questions: [
+            { id: "antecedente", type: "text", title: "Antecedente (O que aconteceu imediatamente antes do comportamento?)", multiline: true, required: true },
+            { id: "comportamento", type: "text", title: "Comportamento (O que você fez ou disse especificamente?)", multiline: true, required: true },
+            { id: "consequencia", type: "text", title: "Consequência (O que aconteceu logo após o comportamento?)", multiline: true, required: true }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    id: "anamnese_psicanalitica",
+    title: "Anamnese Psicanalítica",
+    description: "Roteiro voltado à dinâmica inconsciente, histórico de sonhos, associações livres e mecanismos de defesa.",
+    type: "Anamnese",
+    audiences: ["Adulto"],
+    schema: {
+      stepper: true,
+      title: "Entrevista Psicanalítica Inicial",
+      pages: [
+        {
+          title: "Dinâmica do Inconsciente",
+          questions: [
+            { id: "queixa_manifesta", type: "text", title: "Queixa Manifesta e Associação Livre", multiline: true, required: true },
+            { id: "sonhos_recorrentes", type: "text", title: "Histórico de sonhos recorrentes ou fantasias notáveis", multiline: true, required: false },
+            { id: "relacoes_parentais", type: "text", title: "Relações parentais primitivas e dinâmicas edípicas", multiline: true, required: true }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    id: "anamnese_humanista",
+    title: "Anamnese Humanista-Existencial",
+    description: "Roteiro voltado ao momento presente, autoconceito, potencialidade, vivências e sentido de vida.",
+    type: "Anamnese",
+    audiences: ["Adulto"],
+    schema: {
+      stepper: true,
+      title: "Entrevista Existencial Inicial",
+      pages: [
+        {
+          title: "Vivência Atual",
+          questions: [
+            { id: "percepcao_si", type: "text", title: "Percepção de si e do mundo neste momento da vida", multiline: true, required: true },
+            { id: "recursos_internos", type: "text", title: "Recursos e potencialidades percebidos no sujeito", multiline: true, required: true },
+            { id: "sentido_vida", type: "text", title: "Busca de sentido e metas existenciais", multiline: true, required: true }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    id: "dass21",
+    title: "DASS-21: Escala de Depressão, Ansiedade e Estresse",
+    description: "Instrumento psicométrico de triagem com 21 itens para mensurar a gravidade dos sintomas de depressão, ansiedade e estresse na última semana.",
+    type: "Avaliação",
+    audiences: ["Adulto", "Adolescente"],
+    schema: {
+      stepper: true,
+      title: "DASS-21",
+      pages: [
+        {
+          title: "Perguntas de 1 a 21",
+          questions: [
+            { id: "dass_1", type: "likert", title: "Achei difícil me acalmar.", options: [{value:"0",label:"0 - Não se aplicou de maneira alguma a mim"},{value:"1",label:"1 - Aplicou-se a mim em algum grau ou por algum tempo"},{value:"2",label:"2 - Aplicou-se a mim em um grau considerável ou por uma boa parte do tempo"},{value:"3",label:"3 - Aplicou-se a mim muito ou na maioria do tempo"}], required: true },
+            { id: "dass_2", type: "likert", title: "Senti minha boca seca.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_3", type: "likert", title: "Não consegui vivenciar nenhum sentimento positivo.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_4", type: "likert", title: "Tive dificuldade em respirar (ex: respiração rápida, falta de ar na ausência de esforço físico).", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_5", type: "likert", title: "Achei difícil ter iniciativa para fazer as coisas.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_6", type: "likert", title: "Tive a tendência de reagir de forma exagerada às situações.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_7", type: "likert", title: "Senti tremores (ex: nas mãos).", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_8", type: "likert", title: "Senti que estava sempre nervoso.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_9", type: "likert", title: "Preocupe-me com situações em que eu pudesse entrar em pânico e parecer ridículo.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_10", type: "likert", title: "Senti que não tinha nada a desejar para o futuro.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_11", type: "likert", title: "Senti-me impaciente.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_12", type: "likert", title: "Achei difícil relaxar.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_13", type: "likert", title: "Senti-me deprimido e sem ânimo.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_14", type: "likert", title: "Fui intolerante com qualquer coisa que me impedisse de continuar o que estava fazendo.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_15", type: "likert", title: "Senti que estava prestes a entrar em pânico.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_16", type: "likert", title: "Fui incapaz de me entusiasmar com qualquer coisa.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_17", type: "likert", title: "Senti que não tinha muito valor como pessoa.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_18", type: "likert", title: "Senti que estava bastante emotivo/sensível.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_19", type: "likert", title: "Percebi batimentos cardíacos na ausência de esforço físico (ex: palpitações).", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_20", type: "likert", title: "Senti medo sem nenhum motivo aparente.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
+            { id: "dass_21", type: "likert", title: "Senti que a vida não tinha sentido.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    id: "bdi_ii",
+    title: "BDI-II: Inventário de Depressão de Beck",
+    description: "Questionário psicométrico com 21 grupos de afirmações para avaliar a intensidade de sintomas depressivos no paciente adulto e adolescente.",
+    type: "Avaliação",
+    audiences: ["Adulto", "Adolescente"],
+    schema: {
+      stepper: true,
+      title: "BDI-II",
+      pages: [
+        {
+          title: "Sintomas Depressivos",
+          questions: [
+            { id: "bdi_1", type: "choice", title: "1. Tristeza", options: [
+              { value: "0", label: "0 - Não me sinto triste." },
+              { value: "1", label: "1 - Eu me sinto triste a maior parte do tempo." },
+              { value: "2", label: "2 - Estou sempre triste e não consigo sair disso." },
+              { value: "3", label: "3 - Estou tão triste ou infeliz que não consigo aguentar." }
+            ], multiple: false, required: true },
+            { id: "bdi_2", type: "choice", title: "2. Pessimismo", options: [
+              { value: "0", label: "0 - Não estou desanimado quanto ao meu futuro." },
+              { value: "1", label: "1 - Eu me sinto mais desanimado quanto ao meu futuro do que costumava estar." },
+              { value: "2", label: "2 - Não espero que as coisas deem certo para mim." },
+              { value: "3", label: "3 - Sinto que meu futuro é sem esperança e que as coisas só vão piorar." }
+            ], multiple: false, required: true },
+            { id: "bdi_3", type: "choice", title: "3. Fracasso Passado", options: [
+              { value: "0", label: "0 - Não me sinto um fracasso." },
+              { value: "1", label: "1 - Sinto que fracassei mais do que a maioria das pessoas." },
+              { value: "2", label: "2 - Quando olho para trás, vejo muitos fracassos." },
+              { value: "3", label: "3 - Sinto que sou um fracasso total como pessoa." }
+            ], multiple: false, required: true },
+            { id: "bdi_4", type: "choice", title: "4. Perda de Prazer", options: [
+              { value: "0", label: "0 - Obtenho tanto prazer quanto antes com as coisas que gosto." },
+              { value: "1", label: "1 - Não sinto tanto prazer com as coisas como costumava sentir." },
+              { value: "2", label: "2 - Obtenho muito pouco prazer com as coisas que costumava gostar." },
+              { value: "3", label: "3 - Não consigo obter nenhum prazer com as coisas que costumava gostar." }
+            ], multiple: false, required: true }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    id: "bai",
+    title: "BAI: Inventário de Ansiedade de Beck",
+    description: "Questionário de 21 itens para medir a severidade de sintomas de ansiedade comuns nos últimos dias.",
+    type: "Avaliação",
+    audiences: ["Adulto", "Adolescente"],
+    schema: {
+      stepper: true,
+      title: "BAI",
+      pages: [
+        {
+          title: "Sintomas de Ansiedade",
+          questions: [
+            { id: "bai_1", type: "likert", title: "Dormência ou formigamento.", options: [{value:"0",label:"0 - Absolutamente não"},{value:"1",label:"1 - Levemente"},{value:"2",label:"2 - Moderadamente"},{value:"3",label:"3 - Gravemente"}], required: true },
+            { id: "bai_2", type: "likert", title: "Sensação de calor.", options: [{value:"0",label:"0 - Absolutamente não"},{value:"1",label:"1 - Levemente"},{value:"2",label:"2 - Moderadamente"},{value:"3",label:"3 - Gravemente"}], required: true },
+            { id: "bai_3", type: "likert", title: "Tremores nas pernas.", options: [{value:"0",label:"0 - Absolutamente não"},{value:"1",label:"1 - Levemente"},{value:"2",label:"2 - Moderadamente"},{value:"3",label:"3 - Gravemente"}], required: true },
+            { id: "bai_4", type: "likert", title: "Incapaz de relaxar.", options: [{value:"0",label:"0 - Absolutamente não"},{value:"1",label:"1 - Levemente"},{value:"2",label:"2 - Moderadamente"},{value:"3",label:"3 - Gravemente"}], required: true }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    id: "asrs18",
+    title: "ASRS-18: Triagem de TDAH em Adultos",
+    description: "Versão preliminar de autoavaliação baseada no DSM-V para identificar sintomas de Transtorno de Déficit de Atenção e Hiperatividade em adultos.",
+    type: "Avaliação",
+    audiences: ["Adulto"],
+    schema: {
+      stepper: true,
+      title: "ASRS-18",
+      pages: [
+        {
+          title: "Parte A - Sintomas de Desatenção",
+          questions: [
+            { id: "asrs_1", type: "likert", title: "Com que frequência você comete erros por descuido quando tem de trabalhar em um projeto chato ou difícil?", options: [{value:"0",label:"0 - Nunca"},{value:"1",label:"1 - Raramente"},{value:"2",label:"2 - Às vezes"},{value:"3",label:"3 - Frequentemente"},{value:"4",label:"4 - Muito frequentemente"}], required: true },
+            { id: "asrs_2", type: "likert", title: "Com que frequência você tem dificuldade para manter a atenção quando está fazendo um trabalho chato ou repetitivo?", options: [{value:"0",label:"0 - Nunca"},{value:"1",label:"1 - Raramente"},{value:"2",label:"2 - Às vezes"},{value:"3",label:"3 - Frequentemente"},{value:"4",label:"4 - Muito frequentemente"}], required: true },
+            { id: "asrs_3", type: "likert", title: "Com que frequência você tem dificuldade para se concentrar no que as pessoas dizem, mesmo quando estão falando diretamente com você?", options: [{value:"0",label:"0 - Nunca"},{value:"1",label:"1 - Raramente"},{value:"2",label:"2 - Às vezes"},{value:"3",label:"3 - Frequentemente"},{value:"4",label:"4 - Muito frequentemente"}], required: true }
+          ]
+        }
+      ]
+    }
+  }
 ];
+
