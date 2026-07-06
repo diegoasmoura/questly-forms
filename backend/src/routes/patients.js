@@ -86,6 +86,49 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.get("/:id/export", async (req, res) => {
+  try {
+    const patient = await prisma.patient.findFirst({
+      where: { id: req.params.id, psychologistId: req.user.id },
+      include: {
+        responses: {
+          include: {
+            form: {
+              select: {
+                title: true,
+                type: true,
+                schema: true
+              }
+            }
+          },
+          orderBy: { createdAt: "desc" }
+        },
+        appointments: {
+          orderBy: { startDate: "desc" }
+        },
+        attendances: {
+          orderBy: { date: "desc" }
+        },
+        payments: {
+          orderBy: { paymentDate: "desc" }
+        },
+        attachments: {
+          orderBy: { createdAt: "desc" }
+        }
+      }
+    });
+
+    if (!patient) {
+      return res.status(404).json({ error: "Paciente não encontrado" });
+    }
+
+    res.json(patient);
+  } catch (error) {
+    console.error("Error exporting patient data:", error.message);
+    res.status(500).json({ error: "Erro ao exportar prontuário" });
+  }
+});
+
 router.post("/", async (req, res) => {
   try {
     const data = req.body;

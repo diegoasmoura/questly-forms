@@ -4,7 +4,7 @@ import { api } from "../lib/api";
 import { toast } from "../components/Toast";
 import { formatCPF, formatPhone, formatCEP } from "../lib/utils";
 import { useAuth } from "../context/AuthContext";
-import { generatePremiumSummary } from "../lib/pdf";
+import { generatePremiumSummary, exportCompletePatientRecordPdf } from "../lib/pdf";
 import { scoreTest } from "../lib/scoring";
 import { ClinicalTrendChart, transformResponsesToTrendData, AttendanceHeatmap, transformResponsesToHeatmapData } from "../components/ClinicalCharts";
 import FormResponsesView from "../components/FormResponsesView";
@@ -1372,6 +1372,17 @@ export default function PatientRecord() {
       generatePremiumSummary(patient, response);
     } catch (error) {
       alert(error.message);
+    }
+  };
+
+  const handleExportCompletePdf = async () => {
+    try {
+      toast("Gerando prontuário em PDF...", "info");
+      const record = await api.exportPatientRecord(id);
+      exportCompletePatientRecordPdf(record);
+      toast("PDF gerado com sucesso!", "success");
+    } catch (error) {
+      toast("Erro ao exportar prontuário: " + error.message, "error");
     }
   };
 
@@ -2774,6 +2785,13 @@ export default function PatientRecord() {
                 </div>
                 {/* Action Buttons */}
                 <div className="flex items-center gap-3 shrink-0 justify-end">
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary text-xs flex items-center gap-1.5" 
+                    onClick={handleExportCompletePdf}
+                  >
+                    <Download size={14} /> Exportar PDF
+                  </button>
                   <button className="btn btn-primary text-xs" onClick={handleSave}>
                     <Save size={14} /> Salvar
                   </button>

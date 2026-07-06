@@ -134,6 +134,7 @@ export const api = {
   updatePatient: (id, data) => request(`/patients/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   deletePatient: (id) => request(`/patients/${id}`, { method: "DELETE" }),
   updatePatientFunnel: (id, data) => request(`/patients/${id}/funnel`, { method: "PATCH", body: JSON.stringify(data) }),
+  exportPatientRecord: (id) => request(`/patients/${id}/export`),
 
   // Attachments
   getAttachments: (patientId) => request(`/attachments/patient/${patientId}`),
