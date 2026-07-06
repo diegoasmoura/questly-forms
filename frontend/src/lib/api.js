@@ -135,6 +135,7 @@ export const api = {
   deletePatient: (id) => request(`/patients/${id}`, { method: "DELETE" }),
   updatePatientFunnel: (id, data) => request(`/patients/${id}/funnel`, { method: "PATCH", body: JSON.stringify(data) }),
   exportPatientRecord: (id) => request(`/patients/${id}/export`),
+  sendWhatsAppReminder: (data) => request("/notifications/send-reminder", { method: "POST", body: JSON.stringify(data) }),
 
   // Attachments
   getAttachments: (patientId) => request(`/attachments/patient/${patientId}`),

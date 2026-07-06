@@ -10,6 +10,7 @@ import attachmentRoutes from "./routes/attachments.js";
 import appointmentRoutes from "./routes/appointments.js";
 import attendanceRoutes from "./routes/attendances.js";
 import paymentRoutes from "./routes/payments.js";
+import notificationRoutes from "./routes/notifications.js";
 
 dotenv.config();
 
@@ -79,6 +80,7 @@ app.use("/api/attachments", attachmentRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/attendances", attendanceRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use((err, req, res, next) => {
   if (err.message === 'Origem não permitida') {

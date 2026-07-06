@@ -1386,6 +1386,19 @@ export default function PatientRecord() {
     }
   };
 
+  const handleSendWhatsAppReminder = async (appointment) => {
+    try {
+      toast("Enviando lembrete de WhatsApp...", "info");
+      await api.sendWhatsAppReminder({
+        patientId: id,
+        appointmentId: appointment.id
+      });
+      toast("Lembrete enviado com sucesso!", "success");
+    } catch (error) {
+      toast("Erro ao enviar lembrete: " + error.message, "error");
+    }
+  };
+
   const toggleResponse = (e, responseId) => {
     e.preventDefault();
     e.stopPropagation();
@@ -2120,6 +2133,16 @@ export default function PatientRecord() {
                                         <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-200">
                                           Conflito
                                         </span>
+                                      )}
+                                      {!isOtherPatient && (
+                                        <button
+                                          type="button"
+                                          onClick={() => handleSendWhatsAppReminder(app)}
+                                          className="p-1.5 text-slate-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all border border-slate-200 hover:border-green-200"
+                                          title="Enviar Lembrete WhatsApp"
+                                        >
+                                          <Send size={13} />
+                                        </button>
                                       )}
                                       {!isOtherPatient && (
                                         <button
