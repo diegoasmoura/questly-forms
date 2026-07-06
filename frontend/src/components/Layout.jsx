@@ -1,5 +1,6 @@
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
+import GlobalHeader from "./GlobalHeader";
 import { useLocation } from "react-router-dom";
 
 export default function Layout({ children }) {
@@ -23,6 +24,8 @@ export default function Layout({ children }) {
         className="flex-1 flex flex-col min-w-0 min-h-0 h-full relative z-10 overflow-y-auto overflow-x-hidden md:!pb-0"
         style={{ paddingBottom: 'calc(65px + env(safe-area-inset-bottom))' }}
       >
+        <GlobalHeader />
+
         <main
           className={`flex-1 flex flex-col min-h-0 min-w-0 ${
             isFormBuilder ? "overflow-hidden" : ""

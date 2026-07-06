@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useNavigateWithTransition } from "../lib/useNavigateWithTransition";
 import { api } from "../lib/api";
@@ -52,6 +52,18 @@ export default function Patients() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState(() => localStorage.getItem("patients-view") || "grid");
+  const searchInputRef = useRef(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleViewMode = (mode) => {
     setViewMode(mode);
@@ -378,87 +390,96 @@ const resetImportModal = () => {
   );
 
   return (
-    <div className="py-6 h-full flex flex-col overflow-hidden animate-fade-in">
-      <div className="px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-800 font-heading">Pacientes</h1>
-          <p className="text-sm text-slate-500">Gerencie seus pacientes e seus históricos clínicos.</p>
-        </div>
+    <div className="h-full flex flex-col overflow-hidden animate-fade-in relative">
+      {/* New Sleek Toolbar */}
+      <div className="px-6 flex flex-col md:flex-row items-center justify-between gap-4 mb-6 mt-4 shrink-0 z-20">
         
-        <div className="relative registration-dropdown">
-          <button 
-            onClick={() => setShowRegistrationDropdown(!showRegistrationDropdown)} 
-            className="btn btn-primary px-4 flex items-center gap-2"
-          >
-            <Plus size={18} />
-            Cadastrar
-            <ChevronDown size={14} className={`transition-transform duration-200 ${showRegistrationDropdown ? 'rotate-180' : ''}`} />
-          </button>
-          
-          {showRegistrationDropdown && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-[60] animate-scale-in">
-              <button
-                onClick={() => {
-                  openAddModal();
-                  setShowRegistrationDropdown(false);
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
-              >
-                <div className="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
-                  <UserPlus size={18} />
-                </div>
-                <div>
-                  <p className="font-bold">Cadastrar paciente</p>
-                  <p className="text-[10px] text-slate-500">Manual, um por um</p>
-                </div>
-              </button>
-              <button
-                onClick={() => {
-                  setShowImportModal(true);
-                  setShowRegistrationDropdown(false);
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
-              >
-                <div className="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
-                  <FileSpreadsheet size={18} />
-                </div>
-                <div>
-                  <p className="font-bold">Importar dados</p>
-                  <p className="text-[10px] text-slate-500">Planilha Excel</p>
-                </div>
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Search & Filters */}
-      <div className="px-6 flex items-center justify-between gap-4 mb-6">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+        {/* Search */}
+        <div className="relative w-full md:max-w-md group">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[var(--sage)] transition-colors" size={18} />
           <input
+            ref={searchInputRef}
             type="text"
-            placeholder="Buscar por nome, email ou CPF..."
-            className="input pl-10"
+            placeholder="Procurar paciente..."
+            className="w-full bg-[var(--surface-alt)] border border-transparent rounded-[16px] pl-10 pr-12 py-2.5 text-sm outline-none focus:bg-[var(--surface)] focus:border-[var(--sage)] focus:ring-4 focus:ring-[var(--sage-light)] transition-all placeholder:text-slate-400 text-slate-700"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            <span className="hidden md:flex items-center justify-center px-1.5 py-0.5 rounded-[6px] bg-slate-200/50 text-[10px] font-bold text-slate-500 border border-slate-300 tracking-widest font-sans">
+              ⌘K
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
-          <button
-            onClick={() => handleViewMode("grid")}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode === "grid" ? "bg-brand-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
-          >
-            <LayoutGrid size={18} />
-            <span className="text-xs font-bold">Cards</span>
-          </button>
-          <button
-            onClick={() => handleViewMode("list")}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode === "list" ? "bg-brand-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
-          >
-            <List size={18} />
-            <span className="text-xs font-bold">Lista</span>
-          </button>
+
+        {/* Actions (View Toggle + Cadastrar) */}
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          
+          {/* View Toggle */}
+          <div className="flex items-center p-1 bg-[var(--surface-alt)] rounded-[14px] border border-[var(--border)]">
+            <button
+              onClick={() => handleViewMode("grid")}
+              title="Visualização em Cards"
+              className={`flex items-center justify-center w-9 h-9 rounded-[10px] transition-all ${viewMode === "grid" ? "bg-white shadow-sm text-[var(--sage)]" : "text-slate-400 hover:text-slate-600"}`}
+            >
+              <LayoutGrid size={18} />
+            </button>
+            <button
+              onClick={() => handleViewMode("list")}
+              title="Visualização em Lista"
+              className={`flex items-center justify-center w-9 h-9 rounded-[10px] transition-all ${viewMode === "list" ? "bg-white shadow-sm text-[var(--sage)]" : "text-slate-400 hover:text-slate-600"}`}
+            >
+              <List size={18} />
+            </button>
+          </div>
+
+          {/* Registration Dropdown */}
+          <div className="relative registration-dropdown flex-1 md:flex-none">
+            <button 
+              onClick={() => setShowRegistrationDropdown(!showRegistrationDropdown)} 
+              className="w-full md:w-auto bg-[var(--sage)] hover:opacity-90 text-white rounded-[14px] px-5 py-2.5 text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition-all"
+            >
+              <Plus size={18} />
+              Cadastrar
+              <ChevronDown size={16} className={`transition-transform duration-200 ${showRegistrationDropdown ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {showRegistrationDropdown && (
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-lg border border-slate-100 py-2 z-50 animate-scale-in">
+                <button
+                  onClick={() => {
+                    openAddModal();
+                    setShowRegistrationDropdown(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-[#5CBF9D15] text-[var(--sage)] flex items-center justify-center">
+                    <UserPlus size={18} />
+                  </div>
+                  <div>
+                    <p className="font-bold">Novo paciente</p>
+                    <p className="text-[10px] text-slate-500">Manual, um por um</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => {
+                    setShowImportModal(true);
+                    setShowRegistrationDropdown(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <FileSpreadsheet size={18} />
+                  </div>
+                  <div>
+                    <p className="font-bold">Importar dados</p>
+                    <p className="text-[10px] text-slate-500">Planilha Excel</p>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
 
@@ -539,7 +560,7 @@ const resetImportModal = () => {
             )}
           </div>
         ) : viewMode === "grid" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pt-6 pb-10 overflow-visible">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pt-6 pb-10 overflow-visible">
             {filteredPatients.map((patient) => (
               <PatientCard
                 key={patient.id}
@@ -550,13 +571,14 @@ const resetImportModal = () => {
             ))}
           </div>
         ) : (
-          <div className="space-y-4 pt-6 pb-10 overflow-visible">
-            {filteredPatients.map((patient) => (
+          <div className="flex flex-col bg-[var(--surface)] border border-[var(--border)] rounded-[16px] overflow-hidden shadow-sm mt-2 mb-10">
+            {filteredPatients.map((patient, index) => (
               <PatientListRow
                 key={patient.id}
                 patient={patient}
                 onDelete={handleDeletePatient}
                 onEdit={() => setEditPatient(patient)}
+                isLast={index === filteredPatients.length - 1}
               />
             ))}
           </div>
@@ -2003,6 +2025,50 @@ function calculateDaysUntilBirthday(birthDate) {
   return { days: diffDaysNext, isWeek };
 }
 
+function PatientActionMenu({ patient, onEdit, onDelete }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <button 
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(!isOpen); }}
+        className="p-1.5 rounded-[10px] text-[var(--text-muted)] hover:bg-[var(--surface-alt)] hover:text-[var(--text-primary)] transition-all"
+      >
+        <MoreVertical size={18} />
+      </button>
+      {isOpen && (
+        <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-[12px] shadow-lg border border-[var(--border)] py-1.5 z-50 animate-scale-in">
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); onEdit(patient); }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-semibold text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] hover:text-[var(--text-primary)] transition-colors text-left"
+          >
+            <Pencil size={14} /> Editar
+          </button>
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); onDelete(patient.id); }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-semibold text-red-500 hover:bg-red-50 transition-colors text-left"
+          >
+            <Trash2 size={14} /> Excluir
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PatientCard({ patient, onDelete, onEdit }) {
   const sentCount = patient._count?.shareLinks || 0;
   const responseCount = patient._count?.responses || 0;
@@ -2012,95 +2078,84 @@ function PatientCard({ patient, onDelete, onEdit }) {
   const { initials, color: avatarColor } = getAvatarProps(patient.name);
 
   return (
-    <div className={`relative bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm hover:shadow-card-hover transition-all duration-300 flex flex-col h-full ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'ring-2 ring-amber-400 border-amber-200' : ''}`}>
+    <div className={`relative bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300 flex flex-col h-full group ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'ring-2 ring-amber-400 border-amber-200' : ''}`}>
       {isBirthdayWeek && (
-        <div className="absolute -top-3 -right-3 w-10 h-10 bg-white rounded-[14px] shadow-xl flex items-center justify-center border border-amber-100 animate-bounce z-10">
+        <div className="absolute -top-3 -right-3 w-10 h-10 bg-white rounded-[14px] shadow-xl flex items-center justify-center border border-amber-100 animate-bounce z-20 pointer-events-none">
           <PartyPopper size={20} className="text-amber-500" />
         </div>
       )}
 
+      {/* Invisible link overlay for the whole card */}
+      <Link to={`/patients/${patient.id}`} className="absolute inset-0 z-0 rounded-[24px]" />
+
       {/* Top Bar: Identity */}
-      <div className="p-5 flex items-start gap-4 relative z-0">
+      <div className="p-4 flex items-start gap-3 relative z-10 pointer-events-none">
         <div 
-          className={`w-14 h-14 rounded-[16px] flex items-center justify-center font-extrabold text-[18px] transition-all duration-300 shrink-0 ${!isActive && !isBirthdayWeek ? 'grayscale opacity-60' : ''}`}
+          className={`w-12 h-12 rounded-[14px] flex items-center justify-center font-extrabold text-[16px] transition-all duration-300 shrink-0 ${!isActive && !isBirthdayWeek ? 'grayscale opacity-60' : ''}`}
           style={isBirthdayWeek ? { backgroundColor: '#F59E0B', color: 'white' } : { backgroundColor: avatarColor.bg, color: avatarColor.text }}
         >
           {initials}
         </div>
-        <div className="flex flex-col min-w-0 flex-1">
-          <h3 className="text-[16px] font-bold text-[var(--text-primary)] leading-tight truncate font-sans">
+        
+        <div className="flex flex-col min-w-0 flex-1 mt-0.5">
+          <h3 className="text-[15px] font-bold text-[var(--text-primary)] leading-tight truncate group-hover:text-[var(--sage)] transition-colors">
             {patient.name}
           </h3>
-          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-            <span className="px-2 py-0.5 rounded-[6px] text-[9px] font-extrabold uppercase tracking-widest border bg-[var(--surface-alt)] text-[var(--text-secondary)] border-[var(--border)]">
-              {isActive ? 'Ativo' : 'Inativo'}
-            </span>
-            {daysUntilBirthday !== null && (
-              <span className={`flex items-center gap-1 px-2 py-0.5 rounded-[6px] text-[9px] font-extrabold uppercase tracking-widest border cursor-default ${isBirthdayWeek ? 'bg-amber-500 text-white border-amber-400 animate-pulse' : 'bg-[var(--surface-alt)] text-[var(--text-muted)] border-[var(--border)]'}`}>
-                <CakeSlice size={10} />
-                {typeof daysUntilBirthday === 'string' ? 'Aniversário!' : `${daysUntilBirthday} dias`}
-              </span>
-            )}
-          </div>
+          <p className="text-[11px] font-semibold text-[var(--text-muted)] truncate mt-1">
+            {patient.email || (patient.phone ? formatPhone(patient.phone) : 'Sem contato')}
+          </p>
+        </div>
+
+        <div className="shrink-0 -mt-1 -mr-1 pointer-events-auto">
+          <PatientActionMenu patient={patient} onEdit={onEdit} onDelete={onDelete} />
         </div>
       </div>
 
-      {/* Unified Dashboard: Compact Stats */}
-      <div className="px-5 py-4 grid grid-cols-2 gap-4 border-t border-[var(--border)] bg-[var(--bg)]/30">
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-widest flex items-center gap-1">
-            <Calendar size={12} className="text-[var(--sage)]" /> Sessões
+      {/* Middle: Minimal Badges */}
+      <div className="px-4 pb-4 flex flex-wrap items-center gap-1.5 relative z-10 pointer-events-none">
+        <span className={`px-2 py-0.5 rounded-[6px] text-[9px] font-extrabold uppercase tracking-widest border ${isActive ? 'bg-[var(--surface-alt)] text-[var(--text-secondary)] border-[var(--border)]' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
+          {isActive ? 'Ativo' : 'Inativo'}
+        </span>
+        {daysUntilBirthday !== null && (
+          <span className={`flex items-center gap-1 px-2 py-0.5 rounded-[6px] text-[9px] font-extrabold uppercase tracking-widest border ${isBirthdayWeek ? 'bg-amber-500 text-white border-amber-400 animate-pulse' : 'bg-[var(--surface-alt)] text-[var(--text-muted)] border-[var(--border)]'}`}>
+            <CakeSlice size={10} />
+            {typeof daysUntilBirthday === 'string' ? 'Aniversário!' : `${daysUntilBirthday} dias`}
           </span>
-          <div className="flex items-center gap-2 text-[11px] font-semibold text-[var(--text-secondary)]">
-            <span><span className="text-[var(--text-primary)] font-black text-[13px]">{attendance.presente}</span> pres.</span>
-            <span><span className="text-[var(--text-primary)] font-black text-[13px]">{attendance.falta}</span> faltas</span>
-          </div>
-        </div>
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-widest flex items-center gap-1">
-            <FileText size={12} className="text-[var(--sage)]" /> Instrum.
-          </span>
-          <div className="flex items-center gap-2 text-[11px] font-semibold text-[var(--text-secondary)]">
-            <span><span className="text-[var(--text-primary)] font-black text-[13px]">{sentCount}</span> env.</span>
-            <span><span className="text-[var(--text-primary)] font-black text-[13px]">{responseCount}</span> resp.</span>
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Footer Info & Actions */}
-      <div className="p-5 mt-auto flex flex-col gap-4 border-t border-[var(--border)]">
-        <div className="flex flex-col gap-1.5 min-w-0">
-          {patient.phone && (
-            <div className="flex items-center gap-2 text-[12px] text-[var(--text-secondary)] min-w-0">
-              <Phone size={14} className="text-[var(--text-muted)] shrink-0" />
-              <span className="font-semibold truncate">{formatPhone(patient.phone) || patient.phone}</span>
+      {/* Footer: Data Grid & Arrow */}
+      <div className="mt-auto p-4 border-t border-[var(--border)] bg-slate-50/50 rounded-b-[24px] flex items-center justify-between relative z-10 pointer-events-none">
+        
+        <div className="flex flex-col sm:flex-row flex-1 gap-3 sm:gap-6">
+          <div className="flex flex-col min-w-max">
+            <span className="text-[9px] font-extrabold text-slate-400 tracking-wider uppercase mb-1">Sessões</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold text-[var(--text-primary)]">{attendance.presente} <span className="font-normal text-slate-500">presenças</span></span>
+              {attendance.falta > 0 && (
+                <span className="text-[11px] font-bold text-amber-600 bg-amber-50 rounded-[4px] px-1">{attendance.falta} <span className="font-normal">faltas</span></span>
+              )}
             </div>
-          )}
-          {patient.email && (
-            <div className="flex items-center gap-2 text-[12px] text-[var(--text-secondary)] min-w-0">
-              <Mail size={14} className="text-[var(--text-muted)] shrink-0" />
-              <span className="font-semibold truncate">{patient.email}</span>
+          </div>
+          
+          <div className="flex flex-col sm:border-l border-slate-200 sm:pl-4 min-w-max">
+            <span className="text-[9px] font-extrabold text-slate-400 tracking-wider uppercase mb-1">Instrumentos</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold text-[var(--text-primary)]">{sentCount} <span className="font-normal text-slate-500">enviados</span></span>
+              <span className="text-[11px] font-bold text-[var(--text-primary)]">{responseCount} <span className="font-normal text-slate-500">resp.</span></span>
             </div>
-          )}
+          </div>
         </div>
         
-        <div className="flex gap-2 flex-wrap sm:flex-nowrap">
-          <Link to={`/patients/${patient.id}`} className="flex-1 min-w-[120px] py-2.5 rounded-[12px] font-bold text-[12px] flex items-center justify-center gap-2 transition-all hover:opacity-90 shadow-sm" style={{ background: "var(--sage)", color: "white" }}>
-            <FileText size={14} /> Prontuário
-          </Link>
-          <button onClick={() => onEdit(patient)} className="px-3 py-2.5 rounded-[12px] font-bold text-[12px] flex items-center justify-center gap-1.5 transition-all hover:bg-[var(--bg)] shrink-0" style={{ background: "var(--surface-alt)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
-            <Pencil size={14} /> Editar
-          </button>
-          <button onClick={() => onDelete(patient.id)} className="w-10 h-[38px] rounded-[12px] flex items-center justify-center transition-all hover:bg-red-50 hover:border-red-200 shrink-0" style={{ background: "var(--surface-alt)", color: "var(--text-muted)", border: "1px solid var(--border)" }}>
-            <Trash2 size={14} className="hover:text-red-500 transition-colors" />
-          </button>
+        <div className="w-8 h-8 shrink-0 ml-2 rounded-[12px] flex items-center justify-center bg-[var(--sage)] text-white shadow-sm opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all">
+          <ChevronRight size={16} />
         </div>
       </div>
     </div>
   );
 }
 
-function PatientListRow({ patient, onDelete, onEdit }) {
+function PatientListRow({ patient, onDelete, onEdit, isLast }) {
   const sentCount = patient._count?.shareLinks || 0;
   const responseCount = patient._count?.responses || 0;
   const isActive = patient.isActive !== false;
@@ -2109,70 +2164,77 @@ function PatientListRow({ patient, onDelete, onEdit }) {
   const { initials, color: avatarColor } = getAvatarProps(patient.name);
 
   return (
-    <div className={`bg-[var(--surface)] border border-[var(--border)] rounded-[18px] p-4 flex flex-col md:flex-row items-start md:items-center gap-5 transition-all duration-300 hover:shadow-sm ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'border-l-4 border-l-amber-400 bg-amber-50/20' : ''}`}>
-      <div className="flex items-center gap-4 flex-1 w-full">
-        <Link to={`/patients/${patient.id}`} className={`w-12 h-12 rounded-[14px] flex items-center justify-center font-extrabold text-[16px] shrink-0 transition-all ${!isActive && !isBirthdayWeek ? 'grayscale opacity-60' : ''}`} style={isBirthdayWeek ? { backgroundColor: '#F59E0B', color: 'white' } : { backgroundColor: avatarColor.bg, color: avatarColor.text }}>
-          {isBirthdayWeek ? <PartyPopper size={18} /> : initials}
-        </Link>
+    <div className={`relative px-5 py-3.5 flex items-center gap-4 transition-all duration-200 hover:bg-[var(--surface-alt)] group ${!isLast ? 'border-b border-[var(--border)]' : ''} ${!isActive ? 'opacity-70 grayscale' : ''} ${isBirthdayWeek ? 'bg-amber-50/10 hover:bg-amber-50/30' : ''}`}>
+      
+      {/* Invisible link overlay for the whole row */}
+      <Link to={`/patients/${patient.id}`} className="absolute inset-0 z-0" />
+
+      {/* Avatar Minimalista (Fim do Efeito Arco-íris) */}
+      <div className="relative z-10 pointer-events-none shrink-0">
+        <div 
+          className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-[13px] border border-[var(--border)] bg-white shadow-sm transition-transform group-hover:scale-105" 
+          style={{ color: isBirthdayWeek ? '#F59E0B' : avatarColor.bg }}
+        >
+          {isBirthdayWeek ? <PartyPopper size={14} /> : initials}
+        </div>
+      </div>
+      
+      <div className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 items-center relative z-10 pointer-events-none">
         
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2.5 mb-1 flex-wrap">
-            <Link to={`/patients/${patient.id}`} className="group/name">
-              <h4 className="font-bold text-[15px] transition-colors truncate text-[var(--text-primary)] group-hover:text-[var(--sage)]">
-                {patient.name}
-              </h4>
-            </Link>
+        {/* Name & Contact */}
+        <div className="sm:col-span-5 flex flex-col min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <h4 className="font-semibold text-[14px] truncate text-[var(--text-primary)] group-hover:text-[var(--sage)] transition-colors">
+              {patient.name}
+            </h4>
             {daysUntilBirthday !== null && (
-              <span className={`px-1.5 py-0.5 rounded-[6px] text-[9px] font-extrabold uppercase border flex items-center gap-1 cursor-default ${isBirthdayWeek ? 'bg-amber-500 text-white border-amber-400 animate-pulse' : 'bg-[var(--surface-alt)] text-[var(--text-muted)] border-[var(--border)]'}`}>
+              <span className={`shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded-[6px] text-[9px] font-extrabold uppercase border ${isBirthdayWeek ? 'bg-amber-500 text-white border-amber-400 shadow-sm animate-pulse' : 'bg-transparent text-[var(--text-muted)] border-[var(--border)]'}`}>
                 <CakeSlice size={10} />
                 {typeof daysUntilBirthday === 'string' ? (daysUntilBirthday === "Hoje! 🎂" ? 'Niver Hoje!' : daysUntilBirthday) : `Em ${daysUntilBirthday}d`}
               </span>
             )}
           </div>
-          <div className="flex items-center gap-3 text-[11px] font-semibold text-[var(--text-muted)] flex-wrap">
-            <div className="flex items-center gap-1.5">
-              <Phone size={12} className="text-[var(--text-secondary)]" />
-              <span>{patient.phone ? formatPhone(patient.phone) : '--'}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Mail size={12} className="text-[var(--text-secondary)]" />
-              <span className="truncate max-w-[140px]">{patient.email || '--'}</span>
-            </div>
+          <p className="text-[12px] text-[var(--text-muted)] truncate">
+            {patient.email || (patient.phone ? formatPhone(patient.phone) : 'Sem contato')}
+          </p>
+        </div>
+
+        {/* Stats - Premium Data Grid */}
+        <div className="hidden sm:grid grid-cols-2 md:grid-cols-4 sm:col-span-6 gap-2 text-[12px]">
+          
+          {/* Sessões */}
+          <div className="flex flex-col justify-center">
+             <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Sessões</span>
+             <span className="text-[var(--text-primary)] font-bold">{attendance.presente} <span className="text-slate-500 font-normal">concluídas</span></span>
+          </div>
+          
+          {/* Faltas */}
+          <div className="flex flex-col justify-center border-l border-slate-200 pl-3">
+             <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Faltas</span>
+             {attendance.falta > 0 ? (
+               <span className="text-amber-600 font-bold">{attendance.falta} <span className="text-amber-600/70 font-normal">registradas</span></span>
+             ) : (
+               <span className="text-slate-400 font-medium">Nenhuma</span>
+             )}
+          </div>
+
+          {/* Enviados */}
+          <div className="flex flex-col justify-center border-l border-slate-200 pl-3">
+             <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Formulários</span>
+             <span className="text-[var(--text-primary)] font-bold">{sentCount} <span className="text-slate-500 font-normal">enviados</span></span>
+          </div>
+
+          {/* Respondidos */}
+          <div className="flex flex-col justify-center border-l border-slate-200 pl-3">
+             <span className="text-[9px] text-[var(--sage)] font-bold uppercase tracking-widest mb-0.5">Retorno</span>
+             <span className="text-[var(--sage)] font-bold">{responseCount} <span className="text-[var(--sage)]/70 font-normal">respondidos</span></span>
           </div>
         </div>
       </div>
 
-      <div className="w-full md:w-auto flex items-center gap-6 md:px-6 md:border-x border-[var(--border)] mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0">
-        <div className="flex flex-col flex-1 md:flex-none">
-          <p className="text-[9px] font-extrabold text-[var(--text-muted)] uppercase tracking-widest mb-1.5 flex items-center gap-1">
-            <Calendar size={10} className="text-[var(--sage)]" /> Sessões
-          </p>
-          <div className="flex items-center gap-2 text-[11px] font-semibold text-[var(--text-secondary)]">
-            <span><span className="text-[var(--text-primary)] font-black text-[13px]">{attendance.presente}</span> pres.</span>
-            <span><span className="text-[var(--text-primary)] font-black text-[13px]">{attendance.falta}</span> faltas</span>
-          </div>
-        </div>
-        <div className="flex flex-col flex-1 md:flex-none">
-          <p className="text-[9px] font-extrabold text-[var(--text-muted)] uppercase tracking-widest mb-1.5 flex items-center gap-1">
-            <FileText size={10} className="text-[var(--sage)]" /> Instrum.
-          </p>
-          <div className="flex items-center gap-2 text-[11px] font-semibold text-[var(--text-secondary)]">
-            <span><span className="text-[var(--text-primary)] font-black text-[13px]">{sentCount}</span> env.</span>
-            <span><span className="text-[var(--text-primary)] font-black text-[13px]">{responseCount}</span> resp.</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2 mt-4 md:mt-0 w-full md:w-auto justify-end">
-        <Link to={`/patients/${patient.id}`} className="p-2.5 rounded-[12px] transition-all hover:opacity-90 shadow-sm" style={{ background: "var(--sage)", color: "white" }}>
-          <FileText size={16} />
-        </Link>
-        <button onClick={() => onEdit(patient)} className="p-2.5 rounded-[12px] transition-all hover:bg-[var(--bg)]" style={{ background: "var(--surface-alt)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
-          <Pencil size={16} />
-        </button>
-        <button onClick={() => onDelete(patient.id)} className="p-2.5 rounded-[12px] transition-all hover:bg-red-50 hover:border-red-200" style={{ background: "var(--surface-alt)", color: "var(--text-muted)", border: "1px solid var(--border)" }}>
-          <Trash2 size={16} className="hover:text-red-500 transition-colors" />
-        </button>
+      {/* Action Menu */}
+      <div className="shrink-0 flex items-center justify-end relative z-10 pointer-events-auto opacity-0 group-hover:opacity-100 transition-opacity focus-within:opacity-100 pr-1">
+        <PatientActionMenu patient={patient} onEdit={onEdit} onDelete={onDelete} />
       </div>
     </div>
   );
