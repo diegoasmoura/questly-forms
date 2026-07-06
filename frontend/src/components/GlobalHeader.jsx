@@ -79,14 +79,23 @@ export default function GlobalHeader() {
           <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] mb-1.5" style={{ color: "var(--sage)" }}>
             {content.subtitle}
           </p>
-          <h1 className="leading-tight m-0 text-[var(--text-primary)] tracking-tight flex items-baseline">
-            <span className="font-handwritten font-normal text-[30px] md:text-[38px]">{content.title}</span>{" "}
+          <h1 className="leading-tight m-0 text-[var(--text-primary)] tracking-tight flex items-baseline whitespace-nowrap overflow-hidden">
+            <span className="font-handwritten font-normal text-[26px] md:text-[38px] shrink-0">
+              {content.type === 'greeting' ? (
+                <>
+                  <span className="hidden sm:inline">{content.title}</span>
+                  <span className="sm:hidden">Olá,</span>
+                </>
+              ) : (
+                content.title
+              )}
+            </span>
             {content.titleHighlight && (
-              <span className="relative inline-block ml-2">
-                <span className="font-handwritten font-normal text-[30px] md:text-[38px] text-[var(--dark-green)] dark:text-[#5CBF9D] transition-colors duration-300">
+              <span className="relative inline-block ml-1.5 md:ml-2 min-w-0 flex-1">
+                <span className="block truncate font-handwritten font-normal text-[26px] md:text-[38px] text-[var(--dark-green)] dark:text-[#5CBF9D] transition-colors duration-300">
                   {content.titleHighlight}
                 </span>
-                <svg className="absolute left-0 -bottom-[2px] w-full h-[6px] overflow-visible text-[var(--sage)] opacity-80" viewBox="0 0 100 12" preserveAspectRatio="none">
+                <svg className="hidden md:block absolute left-0 -bottom-[2px] w-full h-[6px] overflow-visible text-[var(--sage)] opacity-80" viewBox="0 0 100 12" preserveAspectRatio="none">
                   <path d="M0,6 C15,-4 30,16 50,6 C70,-4 85,16 100,6" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
                 </svg>
               </span>

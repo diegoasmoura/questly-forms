@@ -392,16 +392,16 @@ const resetImportModal = () => {
   return (
     <div className="h-full flex flex-col overflow-hidden animate-fade-in relative">
       {/* New Sleek Toolbar */}
-      <div className="px-6 flex flex-col md:flex-row items-center justify-between gap-4 mb-6 mt-4 shrink-0 z-20">
+      <div className="px-6 py-4 flex flex-row items-center justify-between gap-2 sm:gap-4 shrink-0 sticky top-0 z-40 bg-[var(--bg)] shadow-[0_10px_20px_-10px_var(--bg)]">
         
         {/* Search */}
-        <div className="relative w-full md:max-w-md group">
+        <div className="relative flex-1 min-w-0 group">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[var(--sage)] transition-colors" size={18} />
           <input
             ref={searchInputRef}
             type="text"
             placeholder="Procurar paciente..."
-            className="w-full bg-[var(--surface-alt)] border border-transparent rounded-[16px] pl-10 pr-12 py-2.5 text-sm outline-none focus:bg-[var(--surface)] focus:border-[var(--sage)] focus:ring-4 focus:ring-[var(--sage-light)] transition-all placeholder:text-slate-400 text-slate-700"
+            className="w-full bg-[var(--surface-alt)] border border-transparent rounded-[16px] pl-10 pr-3 md:pr-12 py-2 sm:py-2.5 text-sm outline-none focus:bg-[var(--surface)] focus:border-[var(--sage)] focus:ring-4 focus:ring-[var(--sage-light)] transition-all placeholder:text-slate-400 text-slate-700"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -413,35 +413,35 @@ const resetImportModal = () => {
         </div>
 
         {/* Actions (View Toggle + Cadastrar) */}
-        <div className="flex items-center gap-3 w-full md:w-auto">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           
           {/* View Toggle */}
-          <div className="flex items-center p-1 bg-[var(--surface-alt)] rounded-[14px] border border-[var(--border)]">
+          <div className="flex items-center p-1 bg-[var(--surface-alt)] rounded-[14px] border border-[var(--border)] shrink-0">
             <button
               onClick={() => handleViewMode("grid")}
               title="Visualização em Cards"
-              className={`flex items-center justify-center w-9 h-9 rounded-[10px] transition-all ${viewMode === "grid" ? "bg-white shadow-sm text-[var(--sage)]" : "text-slate-400 hover:text-slate-600"}`}
+              className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-[10px] transition-all ${viewMode === "grid" ? "bg-white shadow-sm text-[var(--sage)]" : "text-slate-400 hover:text-slate-600"}`}
             >
-              <LayoutGrid size={18} />
+              <LayoutGrid size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
             <button
               onClick={() => handleViewMode("list")}
               title="Visualização em Lista"
-              className={`flex items-center justify-center w-9 h-9 rounded-[10px] transition-all ${viewMode === "list" ? "bg-white shadow-sm text-[var(--sage)]" : "text-slate-400 hover:text-slate-600"}`}
+              className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-[10px] transition-all ${viewMode === "list" ? "bg-white shadow-sm text-[var(--sage)]" : "text-slate-400 hover:text-slate-600"}`}
             >
-              <List size={18} />
+              <List size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
           </div>
 
           {/* Registration Dropdown */}
-          <div className="relative registration-dropdown flex-1 md:flex-none">
+          <div className="relative registration-dropdown shrink-0">
             <button 
               onClick={() => setShowRegistrationDropdown(!showRegistrationDropdown)} 
-              className="w-full md:w-auto bg-[var(--sage)] hover:opacity-90 text-white rounded-[14px] px-5 py-2.5 text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition-all"
+              className="bg-[var(--sage)] hover:opacity-90 text-white rounded-[14px] w-10 h-10 sm:w-auto sm:h-auto sm:px-5 sm:py-2.5 text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition-all"
             >
-              <Plus size={18} />
-              Cadastrar
-              <ChevronDown size={16} className={`transition-transform duration-200 ${showRegistrationDropdown ? 'rotate-180' : ''}`} />
+              <Plus size={20} className="sm:w-[18px] sm:h-[18px]" />
+              <span className="hidden sm:inline">Cadastrar</span>
+              <ChevronDown size={16} className={`hidden sm:block transition-transform duration-200 ${showRegistrationDropdown ? 'rotate-180' : ''}`} />
             </button>
             
             {showRegistrationDropdown && (
@@ -585,7 +585,7 @@ const resetImportModal = () => {
         )}
         </div>
 
-      {showImportModal && (
+      {showImportModal && createPortal(
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="card w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-slate-200 shrink-0">
@@ -732,9 +732,9 @@ const resetImportModal = () => {
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
       {/* Add Patient Modal */}
-      {showAddModal && (
+      {showAddModal && createPortal(
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="card w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
             {/* Header */}
@@ -1184,10 +1184,10 @@ const resetImportModal = () => {
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
 
       {/* Edit Patient Modal */}
-      {editPatient && (
+      {editPatient && createPortal(
         <EditPatientModal
           patient={editPatient}
           onClose={() => setEditPatient(null)}
@@ -1197,10 +1197,10 @@ const resetImportModal = () => {
           }}
           setSuccessMessage={setSuccessMessage}
         />
-        )}
+      , document.body)}
 
         {/* Success Toast */}
-        {successMessage && (
+        {successMessage && createPortal(
         <div className="fixed bottom-8 right-8 z-[100] animate-slide-up">
           <div className="bg-brand-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-brand-500/50 backdrop-blur-sm">
             <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
@@ -1209,7 +1209,7 @@ const resetImportModal = () => {
             <p className="text-sm font-bold tracking-tight">{successMessage}</p>
           </div>
         </div>
-        )}
+        , document.body)}
         </div>
         );
         }
@@ -1952,7 +1952,7 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
         </div>
 
         {/* Cleanup Selection Modal */}
-        {cleanupModal.open && (
+        {cleanupModal.open && createPortal(
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={() => setCleanupModal({ ...cleanupModal, open: false })}>
             <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
               <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-6 mx-auto">
@@ -1985,7 +1985,7 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
               </div>
             </div>
           </div>
-        )}
+        , document.body)}
       </div>
     </div>
   );
@@ -2037,6 +2037,12 @@ function PatientActionMenu({ patient, onEdit, onDelete }) {
     };
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      // Eleva o z-index do card/linha pai para evitar que o menu fique por baixo de outros elementos
+      const parentContainer = menuRef.current?.closest('.group');
+      if (parentContainer) parentContainer.style.zIndex = '999';
+    } else {
+      const parentContainer = menuRef.current?.closest('.group');
+      if (parentContainer) parentContainer.style.zIndex = '';
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
@@ -2050,7 +2056,7 @@ function PatientActionMenu({ patient, onEdit, onDelete }) {
         <MoreVertical size={18} />
       </button>
       {isOpen && (
-        <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-[12px] shadow-lg border border-[var(--border)] py-1.5 z-50 animate-scale-in">
+        <div className="absolute right-0 top-full mt-1 w-36 bg-[var(--surface)] rounded-[12px] shadow-xl border border-[var(--border)] py-1.5 z-50 animate-scale-in">
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); onEdit(patient); }}
             className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-semibold text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] hover:text-[var(--text-primary)] transition-colors text-left"
@@ -2059,7 +2065,7 @@ function PatientActionMenu({ patient, onEdit, onDelete }) {
           </button>
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); onDelete(patient.id); }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-semibold text-red-500 hover:bg-red-50 transition-colors text-left"
+            className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors text-left"
           >
             <Trash2 size={14} /> Excluir
           </button>
@@ -2089,7 +2095,7 @@ function PatientCard({ patient, onDelete, onEdit }) {
       <Link to={`/patients/${patient.id}`} className="absolute inset-0 z-0 rounded-[24px]" />
 
       {/* Top Bar: Identity */}
-      <div className="p-4 flex items-start gap-3 relative z-10 pointer-events-none">
+      <div className="p-4 flex items-start gap-3 relative z-30 pointer-events-none">
         <div 
           className={`w-12 h-12 rounded-[14px] flex items-center justify-center font-extrabold text-[16px] transition-all duration-300 shrink-0 ${!isActive && !isBirthdayWeek ? 'grayscale opacity-60' : ''}`}
           style={isBirthdayWeek ? { backgroundColor: '#F59E0B', color: 'white' } : { backgroundColor: avatarColor.bg, color: avatarColor.text }}
@@ -2164,16 +2170,16 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
   const { initials, color: avatarColor } = getAvatarProps(patient.name);
 
   return (
-    <div className={`relative px-5 py-3.5 flex items-center gap-4 transition-all duration-200 hover:bg-[var(--surface-alt)] group ${!isLast ? 'border-b border-[var(--border)]' : ''} ${!isActive ? 'opacity-70 grayscale' : ''} ${isBirthdayWeek ? 'bg-amber-50/10 hover:bg-amber-50/30' : ''}`}>
+    <div className={`relative px-5 py-3.5 flex items-center gap-4 transition-all duration-200 hover:bg-[var(--surface-alt)] group ${!isLast ? (isBirthdayWeek ? 'border-b border-amber-500/20' : 'border-b border-[var(--border)]') : ''} ${!isActive ? 'opacity-70 grayscale' : ''} ${isBirthdayWeek ? 'bg-amber-50/10 hover:bg-amber-50/30' : ''}`}>
       
       {/* Invisible link overlay for the whole row */}
       <Link to={`/patients/${patient.id}`} className="absolute inset-0 z-0" />
 
-      {/* Avatar Minimalista (Fim do Efeito Arco-íris) */}
+      {/* Avatar Padronizado */}
       <div className="relative z-10 pointer-events-none shrink-0">
         <div 
-          className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-[13px] border border-[var(--border)] bg-white shadow-sm transition-transform group-hover:scale-105" 
-          style={{ color: isBirthdayWeek ? '#F59E0B' : avatarColor.bg }}
+          className={`w-9 h-9 rounded-[10px] flex items-center justify-center font-extrabold text-[13px] transition-transform group-hover:scale-105 ${!isActive && !isBirthdayWeek ? 'grayscale opacity-60' : ''}`}
+          style={isBirthdayWeek ? { backgroundColor: '#F59E0B', color: 'white' } : { backgroundColor: avatarColor.bg, color: avatarColor.text }}
         >
           {isBirthdayWeek ? <PartyPopper size={14} /> : initials}
         </div>
@@ -2233,7 +2239,7 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
       </div>
 
       {/* Action Menu */}
-      <div className="shrink-0 flex items-center justify-end relative z-10 pointer-events-auto opacity-0 group-hover:opacity-100 transition-opacity focus-within:opacity-100 pr-1">
+      <div className="shrink-0 flex items-center justify-end relative z-10 pointer-events-auto pr-1">
         <PatientActionMenu patient={patient} onEdit={onEdit} onDelete={onDelete} />
       </div>
     </div>
