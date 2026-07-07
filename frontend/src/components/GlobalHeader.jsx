@@ -115,7 +115,7 @@ export default function GlobalHeader() {
             <span className="absolute -top-[3px] -right-[3px] w-[7px] h-[7px] rounded-full bg-[var(--peach)] border-2 border-[var(--bg)]" />
           </button>
           <div className="relative">
-            <button onClick={() => setShowProfileMenu(true)} title="Perfil" className="w-[36px] h-[36px] rounded-[10px] flex items-center justify-center text-white text-sm flex-shrink-0 cursor-pointer overflow-hidden" style={{ background: user?.avatarUrl ? "transparent" : "linear-gradient(135deg, #5CBF9D 0%, #F8A26B 100%)", boxShadow: "0 0 0 2px var(--border)" }}>
+            <button onClick={() => setShowProfileMenu(true)} title="Perfil" className="w-[36px] h-[36px] rounded-[10px] flex items-center justify-center text-white text-sm flex-shrink-0 cursor-pointer overflow-hidden" style={{ background: user?.avatarUrl ? "transparent" : "var(--sage)", boxShadow: "0 0 0 2px var(--border)" }}>
               {user?.avatarUrl ? (
                 <img src={user.avatarUrl} alt="Foto do perfil" className="w-full h-full object-cover" />
               ) : (

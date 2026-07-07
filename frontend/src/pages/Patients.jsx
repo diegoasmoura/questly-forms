@@ -70,12 +70,30 @@ export default function Patients() {
     setViewMode(mode);
     localStorage.setItem("patients-view", mode);
   };
+
+  const closeAddModal = () => {
+    setIsClosingAdd(true);
+    setTimeout(() => {
+      setShowAddModal(false);
+      setIsClosingAdd(false);
+    }, 200);
+  };
+
+  const closeEditModal = () => {
+    setIsClosingEdit(true);
+    setTimeout(() => {
+      setEditPatient(null);
+      setIsClosingEdit(false);
+    }, 200);
+  };
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isClosingAdd, setIsClosingAdd] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [importedPatients, setImportedPatients] = useState([]);
   const [showRegistrationDropdown, setShowRegistrationDropdown] = useState(false);
   const [showEmptyRegistrationDropdown, setShowEmptyRegistrationDropdown] = useState(false);
   const [editPatient, setEditPatient] = useState(null);
+  const [isClosingEdit, setIsClosingEdit] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [importStep, setImportStep] = useState('idle');
@@ -243,7 +261,6 @@ const resetImportModal = () => {
     phone: "",
     birthDate: "",
     cpf: "",
-    rg: "",
     gender: "",
     maritalStatus: "",
     profession: "",
@@ -348,10 +365,10 @@ const resetImportModal = () => {
         }
       }
       
-      setShowAddModal(false);
+      closeAddModal();
       setNewPatient({
         name: "", email: "", phone: "", birthDate: "",
-        cpf: "", rg: "", gender: "", maritalStatus: "",
+        cpf: "", gender: "", maritalStatus: "",
         profession: "", cep: "", street: "", number: "",
         complement: "", neighborhood: "", city: "", state: "",
         emergencyName: "", emergencyPhone: "", notes: "",
@@ -561,7 +578,7 @@ const resetImportModal = () => {
             )}
           </div>
         ) : viewMode === "grid" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pt-6 pb-10 overflow-visible">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pt-6 pb-10 overflow-visible">
             {filteredPatients.map((patient) => (
               <PatientCard
                 key={patient.id}
@@ -736,14 +753,14 @@ const resetImportModal = () => {
       , document.body)}
       {/* Add Patient Modal */}
       {showAddModal && createPortal(
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="card w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
+        <div className={`fixed inset-0 z-[60] flex items-start pt-[8vh] justify-center p-4 bg-black/50 backdrop-blur-[3px] transition-opacity duration-200 ${isClosingAdd ? 'opacity-0' : 'opacity-100'}`}>
+          <div className={`card w-full max-w-2xl h-[75vh] md:h-[600px] overflow-hidden flex flex-col relative shadow-xl transition-all duration-200 ${isClosingAdd ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}>
             {/* Header */}
             <div className="p-6 border-b border-slate-200 shrink-0">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-xl font-bold text-slate-800">Novo Paciente</h2>
-                  <p className="text-xs text-slate-500 mt-1">Preencha os dados para o prontuário</p>
+                  <h2 className="text-xl font-bold text-[var(--text-primary)]">Novo Paciente</h2>
+                  <p className="text-xs text-[var(--text-secondary)] mt-1">Preencha os dados para o prontuário</p>
                 </div>
                 <button onClick={() => setShowAddModal(false)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all" aria-label="Fechar">
                   <X size={20} />
@@ -751,20 +768,20 @@ const resetImportModal = () => {
               </div>
               
               {/* Tabs */}
-              <div className="flex gap-1 bg-slate-100 p-1 rounded-lg overflow-x-auto">
+              <div className="flex gap-1 bg-[var(--surface-alt)] p-1 rounded-[12px] overflow-x-auto">
                 {[
                   { id: "identity", label: "Identificação", icon: UserCheck },
                   { id: "contact", label: "Contato", icon: Contact },
-                  { id: "emergency", label: "Emergência", icon: Phone },
                   { id: "address", label: "Endereço", icon: MapPin },
                 ].map(tab => (
                   <button
                     key={tab.id}
+                    type="button"
                     onClick={() => setAddFormTab(tab.id)}
-                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
+                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-[10px] text-xs font-semibold transition-all whitespace-nowrap ${
                       addFormTab === tab.id
-                        ? "bg-white text-brand-700 shadow-sm"
-                        : "text-slate-500 hover:text-slate-700"
+                        ? "bg-[var(--surface)] text-[var(--sage)] shadow-sm"
+                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                     }`}
                   >
                     <tab.icon size={14} />
@@ -826,11 +843,11 @@ const resetImportModal = () => {
 
                     {/* Nome Completo */}
                     <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-2">Nome Completo *</label>
+                      <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Nome Completo *</label>
                       <input
                         type="text"
                         required
-                        className="input text-sm"
+                        className="input !rounded-[10px] text-sm"
                         value={newPatient.name}
                         onChange={e => setNewPatient({ ...newPatient, name: e.target.value })}
                         placeholder="Nome social ou completo"
@@ -838,13 +855,13 @@ const resetImportModal = () => {
                     </div>
 
                     {/* Linha 2: CPF | Nascimento | Gênero */}
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">CPF *</label>
+                        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">CPF *</label>
                         <input
                           type="text"
                           required
-                          className="input text-sm"
+                          className="input !rounded-[10px] text-sm"
                           value={newPatient.cpf}
                           onChange={e => setNewPatient({ ...newPatient, cpf: formatCPF(e.target.value) })}
                           placeholder="000.000.000-00"
@@ -852,19 +869,25 @@ const resetImportModal = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Nascimento *</label>
-                        <input
-                          type="date"
-                          required
-                          className="input text-sm"
-                          value={newPatient.birthDate}
-                          onChange={e => setNewPatient({ ...newPatient, birthDate: e.target.value })}
-                        />
+                        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Nascimento *</label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Calendar size={18} className="text-[var(--text-muted)]" />
+                          </div>
+                          <input
+                            type="date"
+                            required
+                            className="input !rounded-[10px] pl-10"
+                            value={newPatient.birthDate}
+                            onChange={e => setNewPatient({ ...newPatient, birthDate: e.target.value })}
+                            onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                          />
+                        </div>
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Gênero</label>
+                        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Gênero</label>
                         <select
-                          className="input text-sm"
+                          className="input !rounded-[10px] text-sm"
                           value={newPatient.gender}
                           onChange={e => setNewPatient({ ...newPatient, gender: e.target.value })}
                         >
@@ -877,11 +900,11 @@ const resetImportModal = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Estado Civil</label>
+                        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Estado Civil</label>
                         <select
-                          className="input text-sm"
+                          className="input !rounded-[10px] text-sm"
                           value={newPatient.maritalStatus}
                           onChange={e => setNewPatient({ ...newPatient, maritalStatus: e.target.value })}
                         >
@@ -894,10 +917,10 @@ const resetImportModal = () => {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Profissão</label>
+                        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Profissão</label>
                         <input
                           type="text"
-                          className="input text-sm"
+                          className="input !rounded-[10px] text-sm"
                           value={newPatient.profession}
                           onChange={e => setNewPatient({ ...newPatient, profession: e.target.value })}
                           placeholder="Cargo/área"
@@ -910,58 +933,60 @@ const resetImportModal = () => {
                 {/* TAB: Contato */}
                 {addFormTab === "contact" && (
                   <div className="space-y-5">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-2">E-mail *</label>
-                      <input
-                        type="email"
-                        required
-                        className="input text-sm"
-                        value={newPatient.email}
-                        onChange={e => setNewPatient({ ...newPatient, email: e.target.value })}
-                        placeholder="email@exemplo.com"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">E-mail *</label>
+                        <input
+                          type="email"
+                          required
+                          className="input !rounded-[10px] text-sm"
+                          value={newPatient.email}
+                          onChange={e => setNewPatient({ ...newPatient, email: e.target.value })}
+                          placeholder="email@exemplo.com"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Telefone *</label>
+                        <input
+                          type="tel"
+                          required
+                          className="input !rounded-[10px] text-sm"
+                          value={newPatient.phone}
+                          onChange={e => setNewPatient({ ...newPatient, phone: formatPhone(e.target.value) })}
+                          placeholder="(00) 00000-0000"
+                          maxLength={15}
+                        />
+                      </div>
                     </div>
                     
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone *</label>
-                      <input
-                        type="tel"
-                        required
-                        className="input text-sm"
-                        value={newPatient.phone}
-                        onChange={e => setNewPatient({ ...newPatient, phone: formatPhone(e.target.value) })}
-                        placeholder="(00) 00000-0000"
-                        maxLength={15}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* TAB: Emergência */}
-                {addFormTab === "emergency" && (
-                  <div className="space-y-5">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência *</label>
-                      <input
-                        type="tel"
-                        required
-                        className="input text-sm"
-                        value={newPatient.emergencyPhone}
-                        onChange={e => setNewPatient({ ...newPatient, emergencyPhone: formatPhone(e.target.value) })}
-                        placeholder="(00) 00000-0000"
-                        maxLength={15}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-2">Nome Emergência *</label>
-                      <input
-                        type="text"
-                        required
-                        className="input text-sm"
-                        value={newPatient.emergencyName}
-                        onChange={e => setNewPatient({ ...newPatient, emergencyName: e.target.value })}
-                        placeholder="Contato de emergência"
-                      />
+                    <div className="pt-2 border-t border-[var(--border)]">
+                      <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Contato de Emergência</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Nome Emergência *</label>
+                          <input
+                            type="text"
+                            required
+                            className="input !rounded-[10px] text-sm"
+                            value={newPatient.emergencyName}
+                            onChange={e => setNewPatient({ ...newPatient, emergencyName: e.target.value })}
+                            placeholder="Contato de emergência"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Telefone *</label>
+                          <input
+                            type="tel"
+                            required
+                            className="input !rounded-[10px] text-sm"
+                            value={newPatient.emergencyPhone}
+                            onChange={e => setNewPatient({ ...newPatient, emergencyPhone: formatPhone(e.target.value) })}
+                            placeholder="(00) 00000-0000"
+                            maxLength={15}
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -969,12 +994,12 @@ const resetImportModal = () => {
                 {/* TAB: Endereço */}
                 {addFormTab === "address" && (
                   <div className="space-y-5">
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">CEP</label>
+                        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">CEP</label>
                         <input
                           type="text"
-                          className="input text-sm"
+                          className="input !rounded-[10px] text-sm"
                           value={newPatient.cep}
                           onChange={e => {
                             const formatted = formatCEP(e.target.value);
@@ -986,10 +1011,10 @@ const resetImportModal = () => {
                         />
                       </div>
                       <div className="col-span-2">
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Endereço</label>
+                        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Endereço</label>
                         <input
                           type="text"
-                          className="input text-sm"
+                          className="input !rounded-[10px] text-sm"
                           value={newPatient.street}
                           onChange={e => setNewPatient({ ...newPatient, street: e.target.value })}
                           placeholder="Rua, Avenida..."
@@ -997,32 +1022,32 @@ const resetImportModal = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Número</label>
+                        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Número</label>
                         <input
                           type="text"
-                          className="input text-sm"
+                          className="input !rounded-[10px] text-sm"
                           value={newPatient.number}
                           onChange={e => setNewPatient({ ...newPatient, number: e.target.value })}
                           placeholder="Nº"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Complemento</label>
+                        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Complemento</label>
                         <input
                           type="text"
-                          className="input text-sm"
+                          className="input !rounded-[10px] text-sm"
                           value={newPatient.complement}
                           onChange={e => setNewPatient({ ...newPatient, complement: e.target.value })}
                           placeholder="Apto, Bloco..."
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Bairro</label>
+                        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Bairro</label>
                         <input
                           type="text"
-                          className="input text-sm"
+                          className="input !rounded-[10px] text-sm"
                           value={newPatient.neighborhood}
                           onChange={e => setNewPatient({ ...newPatient, neighborhood: e.target.value })}
                           placeholder="Bairro"
@@ -1030,22 +1055,22 @@ const resetImportModal = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">Cidade</label>
+                        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Cidade</label>
                         <input
                           type="text"
-                          className="input text-sm"
+                          className="input !rounded-[10px] text-sm"
                           value={newPatient.city}
                           onChange={e => setNewPatient({ ...newPatient, city: e.target.value })}
                           placeholder="Cidade"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-2">UF</label>
+                        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">UF</label>
                         <input
                           type="text"
-                          className="input text-sm"
+                          className="input !rounded-[10px] text-sm"
                           value={newPatient.state}
                           onChange={e => setNewPatient({ ...newPatient, state: e.target.value.toUpperCase() })}
                           placeholder="SP"
@@ -1053,122 +1078,29 @@ const resetImportModal = () => {
                         />
                       </div>
                     </div>
-                    </div>
-                    )}
-
-                    {/* TAB: Registros Clínicos */}                {addFormTab === "notes" && (
-                  <div className="space-y-5">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-2">Registros Clínicos (Prontuário)</label>
-                      <textarea
-                        className="input text-sm min-h-[150px]"
-                        value={newPatient.notes}
-                        onChange={e => setNewPatient({ ...newPatient, notes: e.target.value })}
-                        placeholder="Anotações relevantes sobre o paciente..."
-                      />
-                    </div>
-
-                    {/* Anexos */}
-                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                          <Paperclip size={16} className="text-slate-500" />
-                          <h4 className="text-sm font-semibold text-slate-700">Laudos e Anexos</h4>
-                        </div>
-                        <label className={`flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium cursor-pointer transition-all ${uploading ? 'opacity-50' : 'hover:bg-brand-50 hover:border-brand-300 hover:text-brand-700'}`}>
-                          {uploading ? (
-                            <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <Plus size={14} />
-                          )}
-                          {uploading ? 'Enviando...' : 'Anexar'}
-                          <input 
-                            type="file" 
-                            multiple 
-                            className="hidden" 
-                            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                            disabled={uploading}
-                            onChange={async (e) => {
-                              const files = Array.from(e.target.files);
-                              if (files.length === 0) return;
-                              
-                              setUploading(true);
-                              try {
-                                const newAttachments = [];
-                                for (const file of files) {
-                                  // Para novos pacientes, apenas adicionar à lista local
-                                  // O upload real será feito após criar o paciente
-                                  newAttachments.push({
-                                    id: `temp-${Date.now()}-${Math.random()}`,
-                                    filename: file.name,
-                                    mimeType: file.type,
-                                    size: file.size,
-                                    file: file,
-                                    isNew: true
-                                  });
-                                }
-                                setAttachments(prev => [...prev, ...newAttachments]);
-                              } catch (error) {
-                                console.error("Upload error:", error);
-                              } finally {
-                                setUploading(false);
-                                e.target.value = '';
-                              }
-                            }}
-                          />
-                        </label>
-                      </div>
-
-                      {attachments.length === 0 ? (
-                        <div className="text-center py-8 text-slate-400">
-                          <File size={32} className="mx-auto mb-2 opacity-50" />
-                          <p className="text-xs">Nenhum anexo adicionado</p>
-                          <p className="text-[10px] mt-1">PDF, JPG, PNG, DOC (máx. 10MB)</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-2 max-h-48 overflow-y-auto">
-                          {attachments.map((att, idx) => (
-                            <div key={att.id || idx} className="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
-                              <div className="flex items-center gap-2 min-w-0">
-                                <File size={16} className="text-slate-400 shrink-0" />
-                                <div className="min-w-0">
-                                  <p className="text-xs font-medium text-slate-700 truncate">{att.filename}</p>
-                                  <p className="text-[10px] text-slate-400">{(att.size / 1024).toFixed(1)} KB</p>
-                                </div>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => setAttachments(prev => prev.filter((_, i) => i !== idx))}
-                                className="p-1 hover:bg-red-50 rounded text-slate-400 hover:text-red-500 transition-colors shrink-0"
-                              >
-                                <Trash size={14} />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-</div>
-                    )}
+                  </div>
+                )}
               </form>
             </div>
 
+            {/* Scroll Mask Overlay */}
+            <div className="pointer-events-none absolute bottom-[72px] left-0 right-0 h-12 bg-gradient-to-t from-[var(--surface)] to-transparent z-10" />
+
             {/* Footer */}
-            <div className="p-6 border-t border-slate-200 bg-slate-50 shrink-0">
-              <div className="flex gap-3">
-                <button 
-                  type="button" 
-                  onClick={() => setShowAddModal(false)}
-                  className="btn btn-secondary flex-1"
-                >
-                  Cancelar
-                </button>
-                <button 
-                  type="submit"
-                  form="patient-form"
-                  disabled={saving}
-                  className="btn btn-primary flex-1 flex items-center justify-center gap-2"
-                >
+            <div className="p-6 border-t border-[var(--border)] bg-[var(--surface)] shrink-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 z-20">
+              <button
+                type="button"
+                onClick={closeAddModal}
+                className="btn btn-secondary !rounded-[12px] !font-sans w-full sm:w-auto"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                form="patient-form"
+                disabled={saving || uploading}
+                className="btn btn-primary !rounded-[12px] !font-sans min-w-[120px] w-full sm:w-auto"
+              >
                   {saving ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -1181,7 +1113,6 @@ const resetImportModal = () => {
                     </>
                   )}
                 </button>
-              </div>
             </div>
           </div>
         </div>
@@ -1191,12 +1122,13 @@ const resetImportModal = () => {
       {editPatient && createPortal(
         <EditPatientModal
           patient={editPatient}
-          onClose={() => setEditPatient(null)}
+          onClose={closeEditModal}
           onSave={() => {
-            setEditPatient(null);
+            closeEditModal();
             loadPatients();
           }}
           setSuccessMessage={setSuccessMessage}
+          isClosing={isClosingEdit}
         />
       , document.body)}
 
@@ -1215,14 +1147,13 @@ const resetImportModal = () => {
         );
         }
 
-function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
+function EditPatientModal({ patient, onClose, onSave, setSuccessMessage, isClosing }) {
   const [formData, setFormData] = useState({
     name: patient.name || "",
     email: patient.email || "",
     phone: formatPhone(patient.phone || ""),
     birthDate: patient.birthDate ? patient.birthDate.split('T')[0] : "",
     cpf: formatCPF(patient.cpf || ""),
-    rg: patient.rg || "",
     gender: patient.gender || "",
     maritalStatus: patient.maritalStatus || "",
     profession: patient.profession || "",
@@ -1295,7 +1226,8 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
     setErrorMessage("");
     try {
       await api.updatePatient(patient.id, formData);
-      setSuccessMessage("Cadastro atualizado com sucesso!");
+      closeEditModal();
+      setSuccessMessage("Paciente atualizado com sucesso!");
       onSave();
     } catch (error) {
       console.error("Erro ao salvar:", error);
@@ -1356,33 +1288,33 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="card w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="p-6 border-b border-slate-200 shrink-0">
+    <div className={`fixed inset-0 z-[60] flex items-start pt-[8vh] justify-center p-4 bg-black/50 backdrop-blur-[3px] transition-opacity duration-200 ${isClosing ? 'opacity-0' : 'opacity-100'}`}>
+      <div className={`card w-full max-w-2xl h-[75vh] md:h-[600px] overflow-hidden flex flex-col relative shadow-xl transition-all duration-200 ${isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}>
+        <div className="p-6 border-b border-[var(--border)] shrink-0">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-xl font-bold text-slate-800">Editar Paciente</h2>
-              <p className="text-xs text-slate-500 mt-1">Atualize os dados do prontuário</p>
+              <h2 className="text-xl font-bold text-[var(--text-primary)]">Editar Paciente</h2>
+              <p className="text-xs text-[var(--text-secondary)] mt-1">Atualize os dados do prontuário</p>
             </div>
-            <button onClick={onClose} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all" aria-label="Fechar">
+            <button onClick={onClose} className="p-2 rounded-lg hover:bg-[var(--surface-alt)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all" aria-label="Fechar">
               <X size={20} />
             </button>
           </div>
           
-          <div className="flex gap-1 bg-slate-100 p-1 rounded-lg overflow-x-auto">
+          <div className="flex gap-1 bg-[var(--surface-alt)] p-1 rounded-[12px] overflow-x-auto">
             {[
               { id: "identity", label: "Identificação", icon: UserCheck },
               { id: "contact", label: "Contato", icon: Contact },
-              { id: "emergency", label: "Emergência", icon: Phone },
               { id: "address", label: "Endereço", icon: MapPin },
             ].map(tab => (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => setEditTab(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-[10px] text-xs font-semibold transition-all whitespace-nowrap ${
                   editTab === tab.id
-                    ? "bg-white text-brand-700 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700"
+                    ? "bg-[var(--surface)] text-[var(--sage)] shadow-sm"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
                 <tab.icon size={14} />
@@ -1405,32 +1337,32 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
             {editTab === "identity" && (
               <div className="space-y-5">
                 {/* Status Toggle */}
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <div className="p-4 bg-[var(--surface-alt)] rounded-xl border border-[var(--border)]">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
                       {formData.isActive ? (
-                        <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center">
-                          <UserCheck size={20} className="text-brand-600" />
+                        <div className="w-10 h-10 rounded-full bg-[var(--sage-light)] flex items-center justify-center">
+                          <UserCheck size={20} className="text-[var(--sage)]" />
                         </div>
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
-                          <UserX size={20} className="text-slate-500" />
+                        <div className="w-10 h-10 rounded-full bg-[var(--border)] flex items-center justify-center">
+                          <UserX size={20} className="text-[var(--text-muted)]" />
                         </div>
                       )}
                       <div>
-                        <p className="text-sm font-semibold text-slate-700">Status do Paciente</p>
-                        <p className="text-xs text-slate-500">{formData.isActive ? "Ativo no acompanhamento" : "Inativo / Arquivado"}</p>
+                        <p className="text-sm font-semibold text-[var(--text-primary)]">Status do Paciente</p>
+                        <p className="text-xs text-[var(--text-secondary)]">{formData.isActive ? "Ativo no acompanhamento" : "Inativo / Arquivado"}</p>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={togglePatientStatus}
-                      className={`relative w-14 h-7 rounded-full transition-colors ${formData.isActive ? "bg-brand-500" : "bg-slate-300"}`}
+                      className={`relative w-14 h-7 rounded-full transition-colors ${formData.isActive ? "bg-[var(--sage)]" : "bg-[var(--border)]"}`}
                     >
                       <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${formData.isActive ? "left-8" : "left-1"}`} />
                     </button>
                   </div>
-                  <div className="flex items-center gap-4 text-xs text-slate-500">
+                  <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
                     <div className="flex items-center gap-1">
                       <Calendar size={12} />
                       <span>Cadastro: {patient.createdAt ? new Date(patient.createdAt).toLocaleDateString('pt-BR') : 'N/A'}</span>
@@ -1446,25 +1378,24 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
 
                 {/* Nome Completo */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-2">Nome Completo *</label>
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Nome Completo *</label>
                   <input
                     type="text"
                     required
-                    className="input text-sm"
+                    className="input !rounded-[10px] text-sm"
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Nome social ou completo"
                   />
                 </div>
 
-                {/* Linha 2: CPF | Nascimento | Gênero */}
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">CPF *</label>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">CPF *</label>
                     <input
                       type="text"
                       required
-                      className="input text-sm"
+                      className="input !rounded-[10px] text-sm"
                       value={formData.cpf}
                       onChange={e => setFormData({ ...formData, cpf: formatCPF(e.target.value) })}
                       placeholder="000.000.000-00"
@@ -1472,19 +1403,25 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">Nascimento *</label>
-                    <input
-                      type="date"
-                      required
-                      className="input text-sm"
-                      value={formData.birthDate}
-                      onChange={e => setFormData({ ...formData, birthDate: e.target.value })}
-                    />
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Nascimento *</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Calendar size={18} className="text-[var(--text-muted)]" />
+                      </div>
+                      <input
+                        type="date"
+                        required
+                        className="input !rounded-[10px] pl-10"
+                        value={formData.birthDate}
+                        onChange={e => setFormData({ ...formData, birthDate: e.target.value })}
+                        onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                      />
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">Gênero</label>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Gênero</label>
                     <select
-                      className="input text-sm"
+                      className="input !rounded-[10px] text-sm"
                       value={formData.gender}
                       onChange={e => setFormData({ ...formData, gender: e.target.value })}
                     >
@@ -1497,11 +1434,11 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">Estado Civil</label>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Estado Civil</label>
                     <select
-                      className="input text-sm"
+                      className="input !rounded-[10px] text-sm"
                       value={formData.maritalStatus}
                       onChange={e => setFormData({ ...formData, maritalStatus: e.target.value })}
                     >
@@ -1514,10 +1451,10 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">Profissão</label>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Profissão</label>
                     <input
                       type="text"
-                      className="input text-sm"
+                      className="input !rounded-[10px] text-sm"
                       value={formData.profession}
                       onChange={e => setFormData({ ...formData, profession: e.target.value })}
                       placeholder="Cargo/área"
@@ -1529,69 +1466,72 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
 
             {editTab === "contact" && (
               <div className="space-y-5">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-2">E-mail *</label>
-                  <input
-                    type="email"
-                    required
-                    className="input text-sm"
-                    value={formData.email}
-                    onChange={e => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="email@exemplo.com"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">E-mail *</label>
+                    <input
+                      type="email"
+                      required
+                      className="input !rounded-[10px] text-sm"
+                      value={formData.email}
+                      onChange={e => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="email@exemplo.com"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Telefone *</label>
+                    <input
+                      type="tel"
+                      required
+                      className="input !rounded-[10px] text-sm"
+                      value={formData.phone}
+                      onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
+                      placeholder="(00) 00000-0000"
+                      maxLength={15}
+                    />
+                  </div>
                 </div>
-                
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-2">Telefone *</label>
-                  <input
-                    type="tel"
-                    required
-                    className="input text-sm"
-                    value={formData.phone}
-                    onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
-                    placeholder="(00) 00000-0000"
-                    maxLength={15}
-                  />
-                </div>
-              </div>
-            )}
 
-            {editTab === "emergency" && (
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-2">Emergência *</label>
-                  <input
-                    type="tel"
-                    required
-                    className="input text-sm"
-                    value={formData.emergencyPhone}
-                    onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })}
-                    placeholder="(00) 00000-0000"
-                    maxLength={15}
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-2">Nome Emergência *</label>
-                  <input
-                    type="text"
-                    required
-                    className="input text-sm"
-                    value={formData.emergencyName}
-                    onChange={e => setFormData({ ...formData, emergencyName: e.target.value })}
-                    placeholder="Contato de emergência"
-                  />
+                <div className="pt-2 border-t border-[var(--border)]">
+                  <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Contato de Emergência</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Nome Emergência *</label>
+                      <input
+                        type="text"
+                        required
+                        className="input !rounded-[10px] text-sm"
+                        value={formData.emergencyName}
+                        onChange={e => setFormData({ ...formData, emergencyName: e.target.value })}
+                        placeholder="Contato de emergência"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Telefone *</label>
+                      <input
+                        type="tel"
+                        required
+                        className="input !rounded-[10px] text-sm"
+                        value={formData.emergencyPhone}
+                        onChange={e => setFormData({ ...formData, emergencyPhone: formatPhone(e.target.value) })}
+                        placeholder="(00) 00000-0000"
+                        maxLength={15}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
 
             {editTab === "address" && (
               <div className="space-y-5">
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">CEP</label>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">CEP</label>
                     <input
                       type="text"
-                      className="input text-sm"
+                      className="input !rounded-[10px] text-sm"
                       value={formData.cep}
                       onChange={e => {
                         const formatted = formatCEP(e.target.value);
@@ -1603,10 +1543,10 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                     />
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">Endereço</label>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Endereço</label>
                     <input
                       type="text"
-                      className="input text-sm"
+                      className="input !rounded-[10px] text-sm"
                       value={formData.street}
                       onChange={e => setFormData({ ...formData, street: e.target.value })}
                       placeholder="Rua, Avenida..."
@@ -1614,32 +1554,32 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">Número</label>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Número</label>
                     <input
                       type="text"
-                      className="input text-sm"
+                      className="input !rounded-[10px] text-sm"
                       value={formData.number}
                       onChange={e => setFormData({ ...formData, number: e.target.value })}
                       placeholder="Nº"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">Complemento</label>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Complemento</label>
                     <input
                       type="text"
-                      className="input text-sm"
+                      className="input !rounded-[10px] text-sm"
                       value={formData.complement}
                       onChange={e => setFormData({ ...formData, complement: e.target.value })}
                       placeholder="Apto, Bloco..."
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">Bairro</label>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Bairro</label>
                     <input
                       type="text"
-                      className="input text-sm"
+                      className="input !rounded-[10px] text-sm"
                       value={formData.neighborhood}
                       onChange={e => setFormData({ ...formData, neighborhood: e.target.value })}
                       placeholder="Bairro"
@@ -1647,22 +1587,22 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">Cidade</label>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Cidade</label>
                     <input
                       type="text"
-                      className="input text-sm"
+                      className="input !rounded-[10px] text-sm"
                       value={formData.city}
                       onChange={e => setFormData({ ...formData, city: e.target.value })}
                       placeholder="Cidade"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2">UF</label>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">UF</label>
                     <input
                       type="text"
-                      className="input text-sm"
+                      className="input !rounded-[10px] text-sm"
                       value={formData.state}
                       onChange={e => setFormData({ ...formData, state: e.target.value.toUpperCase() })}
                       placeholder="SP"
@@ -1838,9 +1778,9 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
             {editTab === "notes" && (
               <div className="space-y-5">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-2">Registros Clínicos (Prontuário)</label>
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Registros Clínicos (Prontuário)</label>
                   <textarea
-                    className="input text-sm min-h-[150px]"
+                    className="input !rounded-[10px] text-sm min-h-[150px]"
                     value={formData.notes}
                     onChange={e => setFormData({ ...formData, notes: e.target.value })}
                     placeholder="Anotações relevantes sobre o paciente..."
@@ -1922,34 +1862,35 @@ function EditPatientModal({ patient, onClose, onSave, setSuccessMessage }) {
           </form>
         </div>
 
-        <div className="p-6 border-t border-slate-200 bg-slate-50 shrink-0">
-          <div className="flex gap-3">
-            <button 
-              type="button" 
-              onClick={onClose}
-              className="btn btn-secondary flex-1"
-            >
-              Cancelar
-            </button>
-            <button 
-              type="submit"
-              form="edit-patient-form"
-              disabled={saving}
-              className="btn btn-primary flex-1 flex items-center justify-center gap-2"
-            >
-              {saving ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Salvando...
-                </>
-              ) : (
-                <>
-                  <Check size={16} />
-                  Salvar
-                </>
-              )}
-            </button>
-          </div>
+        {/* Scroll Mask Overlay */}
+        <div className="pointer-events-none absolute bottom-[72px] left-0 right-0 h-12 bg-gradient-to-t from-[var(--surface)] to-transparent z-10" />
+
+        <div className="p-6 border-t border-[var(--border)] bg-[var(--surface)] shrink-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 z-20">
+          <button 
+            type="button" 
+            onClick={onClose}
+            className="btn btn-secondary !rounded-[12px] !font-sans w-full sm:w-auto"
+          >
+            Cancelar
+          </button>
+          <button 
+            type="submit"
+            form="edit-patient-form"
+            disabled={saving}
+            className="btn btn-primary !rounded-[12px] !font-sans min-w-[120px] w-full sm:w-auto"
+          >
+            {saving ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              <>
+                <Check size={16} />
+                Salvar
+              </>
+            )}
+          </button>
         </div>
 
         {/* Cleanup Selection Modal */}
@@ -2087,7 +2028,7 @@ function PatientCard({ patient, onDelete, onEdit }) {
   return (
     <div className={`relative bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm hover:shadow-md hover:border-slate-400 transition-all duration-300 flex flex-col h-full group ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'border-amber-400/60 shadow-[0_0_15px_rgba(251,191,36,0.15)]' : ''}`}>
       {isBirthdayWeek && (
-        <div className="absolute -top-3 -right-3 w-10 h-10 bg-white rounded-[14px] shadow-xl flex items-center justify-center border border-amber-100 animate-bounce z-20 pointer-events-none">
+        <div className="absolute -top-3 -left-3 w-10 h-10 bg-white rounded-[14px] shadow-xl flex items-center justify-center border border-amber-100 animate-bounce z-40 pointer-events-none">
           <PartyPopper size={20} className="text-amber-500" />
         </div>
       )}
@@ -2154,7 +2095,7 @@ function PatientCard({ patient, onDelete, onEdit }) {
           </div>
         </div>
         
-        <div className="w-8 h-8 shrink-0 ml-2 rounded-[12px] flex items-center justify-center bg-[var(--sage)] text-white shadow-sm opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all pointer-events-auto">
+        <div className="w-8 h-8 shrink-0 ml-2 rounded-[12px] flex items-center justify-center bg-[var(--sage)] text-white shadow-sm opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all pointer-events-none">
           <ChevronRight size={16} />
         </div>
       </div>

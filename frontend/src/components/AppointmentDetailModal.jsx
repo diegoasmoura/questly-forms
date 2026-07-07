@@ -321,11 +321,11 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
     <>
       {/* ── Modal Principal ── (ocultado se o modal de justificativa estiver ativo) */}
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-start pt-[8vh] md:pt-[6vh] justify-center z-[60] ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
+        className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center p-4 sm:p-6 z-[60] transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
         onClick={triggerClose}
       >
         <div
-          className={`bg-[var(--surface)] border border-[var(--border)] rounded-[24px] w-full max-w-sm mx-4 shadow-2xl flex flex-col h-auto max-h-[72vh] md:max-h-[85vh] relative overflow-hidden ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
+          className={`relative bg-[var(--surface)] w-full max-w-sm max-h-[85vh] rounded-[24px] shadow-2xl flex flex-col border border-[var(--border)] overflow-hidden transition-all duration-300 ease-out ${isClosing ? 'opacity-0 translate-y-4 scale-[0.98]' : 'opacity-100 translate-y-0 scale-100'}`}
           onClick={e => e.stopPropagation()}
         >
           {/* ── HEADER ── */}
@@ -563,17 +563,6 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
                   </div>
                 )}
 
-                {/* Confirmar */}
-                <div className="pt-1 md:pt-2">
-                  <button
-                    onClick={saveJustificada}
-                    className="flex items-center justify-center gap-2 w-full py-2.5 md:py-3 px-4 rounded-[12px] md:rounded-[14px] text-[12px] md:text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
-                    style={{ background: "var(--sage)" }}
-                  >
-                    <Check className="w-3.5 h-3.5 md:w-4 md:h-4" strokeWidth={2} />
-                    Confirmar
-                  </button>
-                </div>
               </div>
             )}
 
@@ -629,24 +618,38 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
               </div>
             )}
 
-
-            {/* Fechar */}
-            <button
-              onClick={triggerClose}
-              className="w-full mt-3 py-2 text-[12px] font-medium text-center"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Fechar
-            </button>
           </div>
 
-          {/* Fade Overlay (Fundo Falso) - Aparece apenas quando a justificativa está aberta para indicar rolagem */}
-          {justModal.open && (
-            <div 
-              className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none rounded-b-[24px]"
-              style={{ background: "linear-gradient(to top, var(--surface) 20%, transparent)" }}
-            />
-          )}
+          {/* ── FOOTER FIXO ── */}
+          <div className="p-4 md:p-5 border-t border-[var(--border)] bg-[var(--surface)] shrink-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-2 md:gap-3 z-20">
+            {justModal.open ? (
+              <>
+                <button
+                  type="button"
+                  onClick={triggerClose}
+                  className="btn btn-secondary !rounded-[12px] !font-sans w-full sm:w-auto"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={saveJustificada}
+                  className="btn btn-primary !rounded-[12px] !font-sans min-w-[120px] w-full sm:w-auto"
+                >
+                  <Check size={16} />
+                  Confirmar
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={triggerClose}
+                className="btn btn-secondary !rounded-[12px] !font-sans w-full sm:w-auto"
+              >
+                Fechar
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

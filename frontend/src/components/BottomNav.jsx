@@ -14,7 +14,7 @@ export default function BottomNav() {
 
   return (
     <nav 
-      className="md:hidden fixed bottom-0 left-0 right-0 h-[65px] bg-[var(--surface)] border-t border-[var(--border)] flex items-center justify-around z-[10000] px-1 shadow-[0_-4px_12px_rgba(0,0,0,0.03)]"
+      className="md:hidden fixed bottom-0 left-0 right-0 h-[65px] bg-[var(--surface)] border-t border-[var(--border)] flex items-center justify-around z-[40] px-1 shadow-[0_-4px_12px_rgba(0,0,0,0.03)]"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       {menuItems.map((item) => {

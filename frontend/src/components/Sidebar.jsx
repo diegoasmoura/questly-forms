@@ -38,7 +38,7 @@ export default function Sidebar() {
 
   return (
     <div
-      className={`hidden md:flex bg-[var(--surface)] border-r border-[var(--border)] flex-col relative h-full flex-shrink-0 z-[10000] transition-[width] duration-300 ease-in-out ${
+      className={`hidden md:flex bg-[var(--surface)] border-r border-[var(--border)] flex-col relative h-full flex-shrink-0 z-[40] transition-[width] duration-300 ease-in-out ${
         collapsed ? "w-[84px]" : "w-[220px]"
       }`}
     >
@@ -63,7 +63,7 @@ export default function Sidebar() {
           style={{ width: ICON_ZONE }}
         >
           {/* Símbolo QF usando CSS e Fonte Nativa para máxima nitidez (Padrão SaaS Moderno) */}
-          <div className="w-[46px] h-[46px] rounded-xl bg-gradient-to-br from-[#5CBF9D] to-[#3D786A] shadow-sm flex items-center justify-center text-white flex-shrink-0 border border-white/10">
+          <div className="w-[46px] h-[46px] rounded-xl bg-[var(--sage)] shadow-sm flex items-center justify-center text-white flex-shrink-0 border border-white/10">
             <span className="font-brand text-[26px] leading-none tracking-tight pt-1 pr-0.5">QF</span>
           </div>
         </div>

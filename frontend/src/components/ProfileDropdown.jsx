@@ -13,7 +13,7 @@ export default function ProfileDropdown({ user, onClose, onEditProfile, onLogout
         
         {/* Cabeçalho */}
         <div className="px-4 py-3 flex items-center gap-3 border-b border-[var(--border)]">
-          <div className="w-[40px] h-[40px] rounded-[10px] flex items-center justify-center text-white text-sm flex-shrink-0 cursor-default overflow-hidden" style={{ background: user?.avatarUrl ? "transparent" : "linear-gradient(135deg, #5CBF9D 0%, #F8A26B 100%)", boxShadow: "0 0 0 1px var(--border)" }}>
+          <div className="w-[40px] h-[40px] rounded-[10px] flex items-center justify-center text-white text-sm flex-shrink-0 cursor-default overflow-hidden" style={{ background: user?.avatarUrl ? "transparent" : "var(--sage)", boxShadow: "0 0 0 1px var(--border)" }}>
             {user?.avatarUrl ? (
               <img src={user.avatarUrl} alt="Foto do perfil" className="w-full h-full object-cover" />
             ) : (
