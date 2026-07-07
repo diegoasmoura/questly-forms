@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, Minus, Clock } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Clock, ChevronRight } from "lucide-react";
 
 export function fmtCurrency(val) {
   return val.toLocaleString("pt-BR", {
@@ -87,9 +87,9 @@ export function TimelineRow({ app, onClick }) {
   return (
     <div
       onClick={onClick}
-      className="flex items-center gap-3 py-3 px-2 border-b border-[var(--border)] last:border-b-0 cursor-pointer hover:bg-[var(--surface-alt)] rounded-[12px] transition-all duration-150 ease-out"
+      className="group flex items-center gap-3 py-3 px-3 border border-[var(--border)] bg-[var(--surface)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] cursor-pointer rounded-[12px] transition-all duration-200 ease-out"
     >
-      <div className="flex items-center gap-1 bg-[var(--surface-alt)] px-2 py-0.5 rounded-[8px] text-[var(--text-primary)] flex-shrink-0">
+      <div className="flex items-center gap-1 bg-[var(--bg)] px-2 py-1 rounded-[8px] text-[var(--text-primary)] flex-shrink-0">
         <Clock size={11} className="text-[var(--text-muted)]" />
         <span className="text-[11px] font-extrabold tabular-nums">
           {app.sortTime.slice(0, 5)}
@@ -101,17 +101,20 @@ export function TimelineRow({ app, onClick }) {
       >
         {initials}
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-bold text-[var(--text-primary)] truncate m-0 leading-tight">
+      <div className="flex-1 min-w-0 flex flex-col justify-center">
+        <p className="text-[13px] font-bold text-[var(--text-primary)] truncate m-0 leading-tight transition-colors">
           {patientName}
         </p>
         <span className="text-[10px] text-[var(--text-muted)] mt-0.5 block leading-none">
           {app.duration || app.patient?.sessionDuration || 50} min
         </span>
       </div>
-      <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-[999px] flex-shrink-0 tracking-wide uppercase" style={{ background: sc.bg, color: sc.text }}>
-        {sc.label}
-      </span>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-[999px] tracking-wide uppercase" style={{ background: sc.bg, color: sc.text }}>
+          {sc.label}
+        </span>
+        <ChevronRight size={14} className="text-[var(--text-muted)] opacity-50 group-hover:opacity-100 group-hover:text-[var(--text-primary)] transition-all transform group-hover:translate-x-0.5" />
+      </div>
     </div>
   );
 }
