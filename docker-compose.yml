@@ -1,18 +1,18 @@
 services:
   db:
     image: postgres:16-alpine
-    container_name: curious-db
+    container_name: qform-db
     restart: always
     environment:
-      POSTGRES_USER: curious
-      POSTGRES_PASSWORD: curious_secret
-      POSTGRES_DB: curious_forms
+      POSTGRES_USER: qform
+      POSTGRES_PASSWORD: qform_secret
+      POSTGRES_DB: qform_forms
     ports:
       - "5436:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U curious"]
+      test: ["CMD-SHELL", "pg_isready -U qform"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -21,10 +21,10 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: curious-backend
+    container_name: qform-backend
     restart: always
     environment:
-      DATABASE_URL: postgresql://curious:curious_secret@db:5432/curious_forms
+      DATABASE_URL: postgresql://qform:qform_secret@db:5432/qform_forms
       JWT_SECRET: super_secret_jwt_key_change_in_production
       PORT: 3001
     ports:
@@ -39,7 +39,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: curious-frontend
+    container_name: qform-frontend
     restart: always
     environment:
       - VITE_API_URL=http://localhost:3001/api
