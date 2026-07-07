@@ -1,6 +1,8 @@
 import { User, Settings, Calendar, CreditCard, HelpCircle, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function ProfileDropdown({ user, onClose, onEditProfile, onLogout }) {
+  const navigate = useNavigate();
   const initials = user?.name?.split(" ")?.map((n) => n[0])?.join("")?.toUpperCase()?.slice(0, 2) || "U";
 
   return (
@@ -36,11 +38,11 @@ export default function ProfileDropdown({ user, onClose, onEditProfile, onLogout
 
         {/* Grupo 2: Gestão */}
         <div className="py-1 border-b border-[var(--border)]">
-          <button onClick={onClose} className="w-full px-4 py-2 flex items-center gap-3 text-[13px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors text-left cursor-pointer">
+          <button onClick={() => { navigate("/settings?tab=clinic"); onClose(); }} className="w-full px-4 py-2 flex items-center gap-3 text-[13px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors text-left cursor-pointer">
             <Settings size={16} strokeWidth={2} />
             Configurações da Clínica
           </button>
-          <button onClick={onClose} className="w-full px-4 py-2 flex items-center gap-3 text-[13px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors text-left cursor-pointer">
+          <button onClick={() => { navigate("/settings?tab=agenda"); onClose(); }} className="w-full px-4 py-2 flex items-center gap-3 text-[13px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors text-left cursor-pointer">
             <Calendar size={16} strokeWidth={2} />
             Preferências de Agenda
           </button>
@@ -48,11 +50,11 @@ export default function ProfileDropdown({ user, onClose, onEditProfile, onLogout
 
         {/* Grupo 3: Sistema */}
         <div className="py-1 border-b border-[var(--border)]">
-          <button onClick={onClose} className="w-full px-4 py-2 flex items-center gap-3 text-[13px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors text-left cursor-pointer">
+          <button onClick={() => { navigate("/settings?tab=billing"); onClose(); }} className="w-full px-4 py-2 flex items-center gap-3 text-[13px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors text-left cursor-pointer">
             <CreditCard size={16} strokeWidth={2} />
             Assinatura e Cobrança
           </button>
-          <button onClick={onClose} className="w-full px-4 py-2 flex items-center gap-3 text-[13px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors text-left cursor-pointer">
+          <button onClick={() => { navigate("/settings?tab=help"); onClose(); }} className="w-full px-4 py-2 flex items-center gap-3 text-[13px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors text-left cursor-pointer">
             <HelpCircle size={16} strokeWidth={2} />
             Central de Ajuda
           </button>

@@ -4,7 +4,7 @@ import { api } from "../lib/api";
 import { toast } from "../components/Toast";
 import { formatCPF, formatPhone, formatCEP } from "../lib/utils";
 import { useAuth } from "../context/AuthContext";
-import { generatePremiumSummary } from "../lib/pdf";
+import { generatePremiumSummary, exportCompletePatientRecordPdf } from "../lib/pdf";
 import { scoreTest } from "../lib/scoring";
 import { ClinicalTrendChart, transformResponsesToTrendData, AttendanceHeatmap, transformResponsesToHeatmapData } from "../components/ClinicalCharts";
 import FormResponsesView from "../components/FormResponsesView";
@@ -1122,8 +1122,7 @@ export default function PatientRecord() {
       }
     });
     
-    // Seção Detalhes Consolidados
-    let currentY = doc.lastAutoTable.finalY + 15;
+    let currentY = (doc.lastAutoTable?.finalY || 100) + 15;
     
     // Linha Divisória antes da próxima seção
     doc.setDrawColor(204, 204, 204);
@@ -1312,7 +1311,7 @@ export default function PatientRecord() {
       }
     });
     
-    let finalY = doc.lastAutoTable.finalY + 10;
+    let finalY = (doc.lastAutoTable?.finalY || 120) + 10;
     
     // Observações
     if (payment.notes) {
@@ -1372,6 +1371,30 @@ export default function PatientRecord() {
       generatePremiumSummary(patient, response);
     } catch (error) {
       alert(error.message);
+    }
+  };
+
+  const handleExportCompletePdf = async () => {
+    try {
+      toast("Gerando prontuário em PDF...", "info");
+      const record = await api.exportPatientRecord(id);
+      exportCompletePatientRecordPdf(record);
+      toast("PDF gerado com sucesso!", "success");
+    } catch (error) {
+      toast("Erro ao exportar prontuário: " + error.message, "error");
+    }
+  };
+
+  const handleSendWhatsAppReminder = async (appointment) => {
+    try {
+      toast("Enviando lembrete de WhatsApp...", "info");
+      await api.sendWhatsAppReminder({
+        patientId: id,
+        appointmentId: appointment.id
+      });
+      toast("Lembrete enviado com sucesso!", "success");
+    } catch (error) {
+      toast("Erro ao enviar lembrete: " + error.message, "error");
     }
   };
 
@@ -2113,6 +2136,16 @@ export default function PatientRecord() {
                                       {!isOtherPatient && (
                                         <button
                                           type="button"
+                                          onClick={() => handleSendWhatsAppReminder(app)}
+                                          className="p-1.5 text-slate-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all border border-slate-200 hover:border-green-200"
+                                          title="Enviar Lembrete WhatsApp"
+                                        >
+                                          <Send size={13} />
+                                        </button>
+                                      )}
+                                      {!isOtherPatient && (
+                                        <button
+                                          type="button"
                                           onClick={() => handleEditClick(app, selectedCalendarDay)}
                                           className="p-1.5 text-slate-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all border border-slate-200 hover:border-brand-200"
                                           title="Editar"
@@ -2774,6 +2807,13 @@ export default function PatientRecord() {
                 </div>
                 {/* Action Buttons */}
                 <div className="flex items-center gap-3 shrink-0 justify-end">
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary text-xs flex items-center gap-1.5" 
+                    onClick={handleExportCompletePdf}
+                  >
+                    <Download size={14} /> Exportar PDF
+                  </button>
                   <button className="btn btn-primary text-xs" onClick={handleSave}>
                     <Save size={14} /> Salvar
                   </button>

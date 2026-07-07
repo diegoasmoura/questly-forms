@@ -23,7 +23,7 @@ const checkConflictInternal = async ({
   scheduledDate,
   excludeId,
   psychologistId,
-  patientId
+  excludePatientId
 }) => {
   if (!time || !duration) return { hasConflict: false, conflicts: [] };
 
@@ -35,12 +35,12 @@ const checkConflictInternal = async ({
   const startMinutes = toMinutes(time);
   const endMinutes = startMinutes + parseInt(duration);
 
-  // Buscar todos os agendamentos do profissional, exceto o editado e os do próprio paciente
+  // Buscar todos os agendamentos do profissional, exceto o editado e (opcionalmente) os do próprio paciente
   const existing = await prisma.appointment.findMany({
     where: {
       psychologistId,
       id: excludeId ? { not: excludeId } : undefined,
-      patientId: patientId ? { not: patientId } : undefined
+      patientId: excludePatientId ? { not: excludePatientId } : undefined
     },
     include: { patient: { select: { name: true } } }
   });
@@ -234,7 +234,7 @@ router.post("/batch", async (req, res) => {
         scheduledDate: slot.scheduledDate ? slot.scheduledDate.split('T')[0] : null,
         excludeId: null,
         psychologistId: req.user.id,
-        patientId
+        excludePatientId: patientId
       });
 
       if (conflictCheck.hasConflict) {
@@ -319,7 +319,7 @@ router.post("/check-conflict", async (req, res) => {
       scheduledDate,
       excludeId: null,
       psychologistId: req.user.id,
-      patientId: excludePatientId
+      excludePatientId
     });
 
     res.json({ hasConflict: result.hasConflict, conflicts: result.conflicts });
@@ -351,6 +351,7 @@ router.post("/", async (req, res) => {
     }
 
     // 2. Validar conflitos de horários
+    // Não passa excludePatientId: qualquer conflito (incluindo mesmo paciente) deve ser bloqueado
     const conflictCheck = await checkConflictInternal({
       dayOfWeek,
       time,
@@ -358,8 +359,7 @@ router.post("/", async (req, res) => {
       startDate: startPart,
       scheduledDate: schedPart,
       excludeId: null,
-      psychologistId: req.user.id,
-      patientId
+      psychologistId: req.user.id
     });
 
     if (conflictCheck.hasConflict) {
@@ -444,6 +444,7 @@ router.put("/:id", async (req, res) => {
       const finalStartDate = startPart !== null ? startPart : (existing.startDate ? existing.startDate.toISOString().split('T')[0] : null);
       const finalScheduledDate = schedPart !== null ? schedPart : (existing.scheduledDate ? existing.scheduledDate.toISOString().split('T')[0] : null);
 
+      // Não passa excludePatientId: qualquer conflito (incluindo mesmo paciente) deve ser bloqueado
       const conflictCheck = await checkConflictInternal({
         dayOfWeek: finalDayOfWeek,
         time: finalTime,
@@ -451,8 +452,7 @@ router.put("/:id", async (req, res) => {
         startDate: finalStartDate,
         scheduledDate: finalScheduledDate,
         excludeId: id,
-        psychologistId: req.user.id,
-        patientId: existing.patientId
+        psychologistId: req.user.id
       });
 
       if (conflictCheck.hasConflict) {
