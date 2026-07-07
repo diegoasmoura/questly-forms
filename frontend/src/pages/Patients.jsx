@@ -463,20 +463,20 @@ const resetImportModal = () => {
             </button>
             
             {showRegistrationDropdown && (
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-lg border border-slate-100 py-2 z-50 animate-scale-in">
+              <div className="absolute right-0 mt-2 w-56 bg-[var(--surface)] rounded-[16px] shadow-xl border border-[var(--border)] py-2 z-50 animate-scale-in">
                 <button
                   onClick={() => {
                     openAddModal();
                     setShowRegistrationDropdown(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors text-left"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-[#5CBF9D15] text-[var(--sage)] flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-[var(--sage-light)] text-[var(--sage)] flex items-center justify-center">
                     <UserPlus size={18} />
                   </div>
                   <div>
                     <p className="font-bold">Novo paciente</p>
-                    <p className="text-[10px] text-slate-500">Manual, um por um</p>
+                    <p className="text-[10px] text-[var(--text-muted)]">Manual, um por um</p>
                   </div>
                 </button>
                 <button
@@ -484,14 +484,14 @@ const resetImportModal = () => {
                     setShowImportModal(true);
                     setShowRegistrationDropdown(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors text-left"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-[var(--blue-light)] text-[var(--blue)] flex items-center justify-center">
                     <FileSpreadsheet size={18} />
                   </div>
                   <div>
                     <p className="font-bold">Importar dados</p>
-                    <p className="text-[10px] text-slate-500">Planilha Excel</p>
+                    <p className="text-[10px] text-[var(--text-muted)]">Planilha Excel</p>
                   </div>
                 </button>
               </div>
@@ -541,20 +541,20 @@ const resetImportModal = () => {
                 </button>
                 
                 {showEmptyRegistrationDropdown && (
-<div className="absolute left-1/2 -translate-x-1/2 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-[60] animate-scale-in">
+                  <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-56 bg-[var(--surface)] rounded-[16px] shadow-xl border border-[var(--border)] py-2 z-[60] animate-scale-in">
                     <button
                       onClick={() => {
                         openAddModal();
                         setShowEmptyRegistrationDropdown(false);
                       }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors text-left"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg bg-[var(--sage-light)] text-[var(--sage)] flex items-center justify-center">
                         <UserPlus size={18} />
                       </div>
                       <div>
                         <p className="font-bold">Cadastrar paciente</p>
-                        <p className="text-[10px] text-slate-500">Manual, um por um</p>
+                        <p className="text-[10px] text-[var(--text-muted)]">Manual, um por um</p>
                       </div>
                     </button>
                     <button
@@ -562,14 +562,14 @@ const resetImportModal = () => {
                         setShowImportModal(true);
                         setShowEmptyRegistrationDropdown(false);
                       }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors text-left"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg bg-[var(--blue-light)] text-[var(--blue)] flex items-center justify-center">
                         <FileSpreadsheet size={18} />
                       </div>
                       <div>
                         <p className="font-bold">Importar pacientes</p>
-                        <p className="text-[10px] text-slate-500">Via planilha Excel</p>
+                        <p className="text-[10px] text-[var(--text-muted)]">Via planilha Excel</p>
                       </div>
                     </button>
                   </div>
@@ -604,28 +604,28 @@ const resetImportModal = () => {
         </div>
 
       {showImportModal && createPortal(
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="card w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="p-6 border-b border-slate-200 shrink-0">
-              <div className="flex items-center justify-between mb-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-[3px] animate-fade-in">
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[20px] shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col relative transition-colors duration-300">
+            <div className="p-6 border-b border-[var(--border)] shrink-0 bg-[var(--surface)]">
+              <div className="flex items-center justify-between mb-2">
                 <div>
-                  <h2 className="text-xl font-bold text-brand-600">Importar Dados</h2>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <h2 className="text-[22px] font-bold text-[var(--text-primary)] leading-tight">Importar Dados</h2>
+                  <p className="text-[13px] text-[var(--text-muted)] mt-1">
                     {importStep === 'idle' && 'Baixe o modelo, preencha e envie'}
                     {importStep === 'parsing' && 'Lendo arquivo...'}
                     {importStep === 'empty' && 'Nenhum dado encontrado'}
                     {importStep === 'preview' && importedPatients.length + ' paciente(s) encontrado(s)'}
                     {importStep === 'importing' && 'Importando... ' + importProgress + '%'}
-                    {importStep === 'done' && 'Concluido'}
+                    {importStep === 'done' && 'Concluído'}
                   </p>
                 </div>
-                <button onClick={resetImportModal} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600">
+                <button onClick={resetImportModal} className="w-[32px] h-[32px] rounded-[10px] flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-alt)] hover:text-[var(--text-primary)] transition-colors">
                   <X size={20} />
                 </button>
               </div>
               {importStep === 'importing' && (
-                <div className="mt-3 h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-brand-500 rounded-full transition-all" style={{ width: importProgress + '%' }} />
+                <div className="mt-4 h-2 bg-[var(--surface-alt)] rounded-full overflow-hidden">
+                  <div className="h-full bg-[var(--sage)] rounded-full transition-all" style={{ width: importProgress + '%' }} />
                 </div>
               )}
             </div>
@@ -633,54 +633,56 @@ const resetImportModal = () => {
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {importStep === 'idle' && (
                 <>
-                  <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200">
+                  <div className="p-5 bg-[var(--surface)] rounded-[16px] border border-[var(--border)] shadow-sm transition-colors">
                     <div className="flex items-start gap-4">
-                      <div className="w-9 h-9 rounded-xl bg-slate-900 text-brand-400 flex items-center justify-center font-bold shrink-0">1</div>
+                      <div className="w-9 h-9 rounded-[10px] bg-[var(--sage-light)] text-[var(--sage)] flex items-center justify-center font-extrabold text-[14px] shrink-0">1</div>
                       <div className="flex-1">
-                        <h3 className="text-sm font-bold text-slate-800 mb-1">Baixe o modelo</h3>
-                        <p className="text-xs text-slate-500 mb-3">Use a planilha padrao.</p>
-                        <button onClick={generateExcelTemplate} className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50">
-                          <Download size={14} className="text-brand-500" />
+                        <h3 className="text-[14px] font-bold text-[var(--text-primary)] mb-1">Baixe o modelo</h3>
+                        <p className="text-[12px] text-[var(--text-muted)] mb-3">Use a planilha padrão.</p>
+                        <button onClick={generateExcelTemplate} className="btn btn-secondary flex items-center justify-center sm:justify-start w-full sm:w-auto gap-2 text-[12px]">
+                          <Download size={14} className="text-[var(--text-primary)] opacity-70" />
                           Baixar modelo
                         </button>
                       </div>
                     </div>
                   </div>
-                  <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200">
+                  <div className="p-5 bg-[var(--surface)] rounded-[16px] border border-[var(--border)] shadow-sm transition-colors">
                     <div className="flex items-start gap-4">
-                      <div className="w-9 h-9 rounded-xl bg-slate-900 text-brand-400 flex items-center justify-center font-bold shrink-0">2</div>
+                      <div className="w-9 h-9 rounded-[10px] bg-[var(--sage-light)] text-[var(--sage)] flex items-center justify-center font-extrabold text-[14px] shrink-0">2</div>
                       <div className="flex-1">
-                        <h3 className="text-sm font-bold text-slate-800 mb-1">Envie sua planilha</h3>
-                        <p className="text-xs text-slate-500 mb-3">Faça upload para validar.</p>
-                        <label className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl text-xs font-bold hover:bg-brand-700 cursor-pointer">
+                        <h3 className="text-[14px] font-bold text-[var(--text-primary)] mb-1">Envie sua planilha</h3>
+                        <p className="text-[12px] text-[var(--text-muted)] mb-3">Faça upload para validar.</p>
+                        <label className="btn btn-primary inline-flex items-center justify-center sm:justify-start w-full sm:w-auto gap-2 cursor-pointer text-[12px]">
                           <Upload size={14} />
-                          Enviar
+                          Enviar planilha
                           <input type="file" className="hidden" accept=".xlsx,.xls,.csv" onChange={handleFileChange} />
                         </label>
                       </div>
                     </div>
                   </div>
-                  <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-start gap-2">
-                    <AlertTriangle size={14} className="text-blue-500 shrink-0 mt-0.5" />
-                    <p className="text-xs text-blue-700">Campos obrigatorios: Nome, CPF, Data (Identificação), E-mail, Telefone (Contato), Telefone e Nome Emergência (Emergência).</p>
+                  <div className="bg-[var(--blue-light)] border border-[var(--blue)]/20 rounded-[12px] p-4 flex items-start gap-3">
+                    <AlertTriangle size={16} className="text-[var(--blue)] shrink-0 mt-0.5" />
+                    <p className="text-[12px] font-medium text-[var(--blue)] leading-snug">Campos obrigatórios: Nome, CPF, Data (Identificação), E-mail, Telefone (Contato), Telefone e Nome Emergência.</p>
                   </div>
                 </>
               )}
 
               {importStep === 'parsing' && (
                 <div className="py-16 flex flex-col items-center gap-4">
-                  <div className="w-10 h-10 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
-                  <p className="text-sm text-slate-500">Lendo arquivo...</p>
+                  <div className="w-10 h-10 border-[3px] border-[var(--sage)] border-t-transparent rounded-full animate-spin" />
+                  <p className="text-[14px] font-bold text-[var(--text-secondary)]">Lendo arquivo...</p>
                 </div>
               )}
 
               {importStep === 'empty' && (
                 <div className="py-16 flex flex-col items-center gap-4 text-center">
-                  <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center">
-                    <File size={32} className="text-slate-400" />
+                  <div className="w-16 h-16 rounded-[16px] bg-[var(--surface-alt)] flex items-center justify-center">
+                    <File size={32} className="text-[var(--text-muted)]" />
                   </div>
-                  <p className="text-sm text-slate-600 font-medium">Nenhum dado encontrado na planilha</p>
-                  <p className="text-xs text-slate-500">Verifique se a aba "Pacientes" tem dados</p>
+                  <div>
+                    <p className="text-[14px] text-[var(--text-primary)] font-bold">Nenhum dado encontrado na planilha</p>
+                    <p className="text-[12px] text-[var(--text-muted)] mt-1">Verifique se a aba "Pacientes" tem dados</p>
+                  </div>
                   <button onClick={() => setImportStep('idle')} className="btn btn-secondary mt-2">Tentar novamente</button>
                 </div>
               )}
@@ -688,37 +690,37 @@ const resetImportModal = () => {
               {(importStep === 'preview' || importStep === 'done') && (
                 <>
                   {importResults.length > 0 && (
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                    <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-[12px] p-4 transition-colors">
                       <div className="flex items-center gap-2 mb-2">
-                        <AlertTriangle size={14} className="text-red-500" />
-                        <p className="text-xs font-bold text-red-700">{importResults.length} problema(s)</p>
+                        <AlertTriangle size={14} className="text-red-500 dark:text-red-400" />
+                        <p className="text-[12px] font-bold text-red-700 dark:text-red-400">{importResults.length} problema(s)</p>
                       </div>
-                      <ul className="space-y-1 max-h-24 overflow-y-auto">
+                      <ul className="space-y-1.5 max-h-32 overflow-y-auto pr-2">
                         {importResults.slice(0, 5).map((err, i) => (
-                          <li key={i} className="text-xs text-red-600">- {err}</li>
+                          <li key={i} className="text-[11px] font-medium text-red-600 dark:text-red-400/80 leading-snug">- {err}</li>
                         ))}
                       </ul>
                     </div>
                   )}
-                  <div className="rounded-xl border border-slate-200 overflow-hidden">
-                    <div className="bg-slate-50 px-4 py-2 border-b border-slate-200 flex items-center justify-between">
-                      <p className="text-xs font-bold text-slate-600">Prévia - {importedPatients.length}</p>
-                      {importErrors.length === 0 && importResults.length === 0 && <span className="text-xs font-bold text-brand-600">OK</span>}
+                  <div className="rounded-[16px] border border-[var(--border)] overflow-hidden bg-[var(--surface)] shadow-sm transition-colors">
+                    <div className="bg-[var(--surface-alt)] px-5 py-3 border-b border-[var(--border)] flex items-center justify-between">
+                      <p className="text-[12px] font-bold text-[var(--text-secondary)]">Prévia - {importedPatients.length} pacientes</p>
+                      {importErrors.length === 0 && importResults.length === 0 && <span className="text-[11px] font-bold text-[var(--sage)] bg-[var(--sage-light)] px-2.5 py-1 rounded-[999px] uppercase tracking-wider">Tudo OK</span>}
                     </div>
-                    <div className="overflow-x-auto max-h-56">
-                      <table className="w-full text-xs">
-                        <thead className="bg-slate-50 sticky top-0">
+                    <div className="overflow-x-auto max-h-64">
+                      <table className="w-full text-[12px]">
+                        <thead className="bg-[var(--surface-alt)] sticky top-0 z-10">
                           <tr>{['Nome', 'CPF', 'E-mail', 'Telefone'].map(h => (
-                            <th key={h} className="text-left px-3 py-2 text-slate-500 font-bold">{h}</th>
+                            <th key={h} className="text-left px-5 py-3 text-[var(--text-muted)] font-extrabold uppercase tracking-wider border-b border-[var(--border)]">{h}</th>
                           ))}</tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100">
+                        <tbody className="divide-y divide-[var(--border)]">
                           {importedPatients.slice(0, 10).map((p, i) => (
-                            <tr key={i} className="hover:bg-slate-50">
-                              <td className="px-3 py-2">{p.name || '-'}</td>
-                              <td className="px-3 py-2">{p.cpf || '-'}</td>
-                              <td className="px-3 py-2">{p.email || '-'}</td>
-                              <td className="px-3 py-2">{p.phone || '-'}</td>
+                            <tr key={i} className="hover:bg-[var(--surface-alt)] transition-colors">
+                              <td className="px-5 py-3.5 font-semibold text-[var(--text-primary)]">{p.name || '-'}</td>
+                              <td className="px-5 py-3.5 text-[var(--text-secondary)] tabular-nums">{p.cpf || '-'}</td>
+                              <td className="px-5 py-3.5 text-[var(--text-secondary)]">{p.email || '-'}</td>
+                              <td className="px-5 py-3.5 text-[var(--text-secondary)] tabular-nums">{p.phone || '-'}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -730,39 +732,39 @@ const resetImportModal = () => {
 
               {importStep === 'importing' && (
                 <div className="py-16 flex flex-col items-center gap-4">
-                  <div className="w-10 h-10 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
-                  <p className="text-sm text-slate-500">Cadastrando...</p>
+                  <div className="w-10 h-10 border-[3px] border-[var(--sage)] border-t-transparent rounded-full animate-spin" />
+                  <p className="text-[14px] font-bold text-[var(--text-secondary)]">Cadastrando pacientes...</p>
                 </div>
               )}
             </div>
 
-            <div className="p-6 border-t border-slate-200 bg-slate-50 shrink-0">
-              {importStep === 'idle' && <button onClick={resetImportModal} className="btn btn-secondary w-full">Fechar</button>}
+            <div className="p-5 border-t border-[var(--border)] bg-[var(--surface)] shrink-0 flex gap-3 justify-end">
+              {importStep === 'idle' && <button onClick={resetImportModal} className="btn btn-secondary flex-1 sm:flex-none px-6">Fechar</button>}
               {importStep === 'preview' && (
-                <div className="flex gap-3">
-                  <button onClick={() => { setImportStep('idle'); setImportedPatients([]); }} className="btn btn-secondary flex-1">Voltar</button>
-                  <button onClick={handleImportPatients} disabled={importErrors.length > 0} className="btn btn-primary flex-1 disabled:opacity-50">
+                <>
+                  <button onClick={() => { setImportStep('idle'); setImportedPatients([]); }} className="btn btn-secondary flex-1 sm:flex-none px-6">Voltar</button>
+                  <button onClick={handleImportPatients} disabled={importErrors.length > 0} className="btn btn-primary flex-1 sm:flex-none px-6 disabled:opacity-50 flex items-center justify-center gap-2">
                     <Check size={16} /> Confirmar ({importedPatients.length})
                   </button>
-                </div>
+                </>
               )}
-              {importStep === 'done' && <button onClick={resetImportModal} className="btn btn-secondary w-full">Fechar</button>}
+              {importStep === 'done' && <button onClick={resetImportModal} className="btn btn-secondary flex-1 sm:flex-none px-6">Fechar</button>}
             </div>
           </div>
         </div>
       , document.body)}
       {/* Add Patient Modal */}
       {showAddModal && createPortal(
-        <div className={`fixed inset-0 z-[60] flex items-start pt-[8vh] justify-center p-4 bg-black/50 backdrop-blur-[3px] transition-opacity duration-200 ${isClosingAdd ? 'opacity-0' : 'opacity-100'}`}>
-          <div className={`card w-full max-w-2xl h-[75vh] md:h-[600px] overflow-hidden flex flex-col relative shadow-xl transition-all duration-200 ${isClosingAdd ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}>
+        <div className={`fixed inset-0 z-[100] flex items-start pt-[8vh] justify-center p-4 bg-black/50 backdrop-blur-[3px] transition-opacity duration-200 ${isClosingAdd ? 'opacity-0' : 'opacity-100'}`}>
+          <div className={`bg-[var(--surface)] border border-[var(--border)] rounded-[20px] shadow-xl w-full max-w-2xl h-[75vh] md:h-[600px] overflow-hidden flex flex-col relative transition-all duration-200 ${isClosingAdd ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}>
             {/* Header */}
-            <div className="p-6 border-b border-slate-200 shrink-0">
+            <div className="p-6 border-b border-[var(--border)] shrink-0">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-xl font-bold text-[var(--text-primary)]">Novo Paciente</h2>
                   <p className="text-xs text-[var(--text-secondary)] mt-1">Preencha os dados para o prontuário</p>
                 </div>
-                <button onClick={() => setShowAddModal(false)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all" aria-label="Fechar">
+                <button onClick={() => setShowAddModal(false)} className="w-[32px] h-[32px] rounded-[10px] flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-alt)] hover:text-[var(--text-primary)] transition-colors" aria-label="Fechar">
                   <X size={20} />
                 </button>
               </div>
@@ -806,37 +808,37 @@ const resetImportModal = () => {
                 {addFormTab === "identity" && (
                   <div className="space-y-5">
                     {/* Status Toggle */}
-                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                    <div className="p-4 bg-[var(--surface-alt)] rounded-[16px] border border-[var(--border)]">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
                           {newPatient.isActive ? (
-                            <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center">
-                              <UserCheck size={20} className="text-brand-600" />
+                            <div className="w-10 h-10 rounded-[10px] bg-[var(--sage-light)] flex items-center justify-center">
+                              <UserCheck size={20} className="text-[var(--sage)]" />
                             </div>
                           ) : (
-                            <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
-                              <UserX size={20} className="text-slate-500" />
+                            <div className="w-10 h-10 rounded-[10px] bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center">
+                              <UserX size={20} className="text-[var(--text-muted)]" />
                             </div>
                           )}
                           <div>
-                            <p className="text-sm font-semibold text-slate-700">Status do Paciente</p>
-                            <p className="text-xs text-slate-500">{newPatient.isActive ? "Ativo no acompanhamento" : "Inativo / Arquivado"}</p>
+                            <p className="text-sm font-semibold text-[var(--text-primary)]">Status do Paciente</p>
+                            <p className="text-xs text-[var(--text-muted)]">{newPatient.isActive ? "Ativo no acompanhamento" : "Inativo / Arquivado"}</p>
                           </div>
                         </div>
                         <button
                           type="button"
                           onClick={() => setNewPatient({ ...newPatient, isActive: !newPatient.isActive })}
-                          className={`relative w-14 h-7 rounded-full transition-colors ${
-                            newPatient.isActive ? "bg-brand-500" : "bg-slate-300"
+                          className={`relative w-12 h-6 rounded-full transition-colors border ${
+                            newPatient.isActive ? "bg-[var(--sage)] border-[var(--sage)]" : "bg-[var(--surface)] border-[var(--border)]"
                           }`}
                         >
-                          <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${
-                            newPatient.isActive ? "left-8" : "left-1"
+                          <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${
+                            newPatient.isActive ? "left-[26px]" : "left-1 bg-[var(--text-muted)]"
                           }`} />
                         </button>
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-slate-500">
-                        <Calendar size={12} />
+                      <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-medium">
+                        <Calendar size={14} />
                         <span>Cadastro: {new Date().toLocaleDateString('pt-BR')}</span>
                       </div>
                     </div>
@@ -2112,7 +2114,7 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
   const { initials, color: avatarColor } = getAvatarProps(patient.name);
 
   return (
-    <div className={`relative px-5 py-3.5 flex items-center gap-4 transition-all duration-200 hover:bg-[var(--surface-alt)] group ${!isLast ? (isBirthdayWeek ? 'border-b border-amber-500/20' : 'border-b border-[var(--border)]') : ''} ${!isActive ? 'opacity-70 grayscale' : ''} ${isBirthdayWeek ? 'bg-amber-50/10 hover:bg-amber-50/30' : ''}`}>
+    <div className={`relative px-5 py-3.5 flex items-center gap-4 transition-all duration-200 group ${!isLast ? (isBirthdayWeek ? 'border-b border-orange-500/20' : 'border-b border-[var(--border)]') : ''} ${!isActive ? 'opacity-70 grayscale' : ''} ${isBirthdayWeek ? 'bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/30 dark:hover:bg-orange-900/50' : 'hover:bg-[var(--surface-alt)]'}`}>
       
       {/* Invisible link overlay for the whole row */}
       <Link to={`/patients/${patient.id}`} className="absolute inset-0 z-0" />
