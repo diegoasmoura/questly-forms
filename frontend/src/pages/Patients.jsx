@@ -524,14 +524,14 @@ const resetImportModal = () => {
             ))}
           </div>
         ) : filteredPatients.length === 0 ? (
-          <div className="card p-20 text-center border-dashed border-2 border-slate-200">
-            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Users size={40} className="text-slate-400" />
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm p-16 sm:p-20 text-center">
+            <div className="w-20 h-20 bg-[var(--surface-alt)] rounded-full flex items-center justify-center mx-auto mb-6">
+              <Users size={40} className="text-[var(--text-secondary)] opacity-70" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-700 mb-2">
+            <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">
               {searchQuery ? "Nenhum paciente encontrado" : "Nenhum paciente cadastrado"}
             </h3>
-            <p className="text-slate-500 mb-8 max-w-sm mx-auto">
+            <p className="text-[var(--text-secondary)] mb-8 max-w-sm mx-auto">
               {searchQuery ? "Tente um termo de busca diferente" : "Comece cadastrando seu primeiro paciente para acompanhar sua evolução clínica."}
             </p>
             {!searchQuery && (
@@ -591,7 +591,7 @@ const resetImportModal = () => {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col bg-[var(--surface)] border border-[var(--border)] rounded-[16px] overflow-hidden shadow-sm mt-2 mb-10">
+          <div className="flex flex-col bg-[var(--surface)] border border-[var(--border)] rounded-[16px] shadow-sm mt-2 mb-10">
             {filteredPatients.map((patient, index) => (
               <PatientListRow
                 key={patient.id}
@@ -933,24 +933,22 @@ const resetImportModal = () => {
                     </div>
 
                     {/* Consentimento LGPD */}
-                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 mt-4">
-                      <label className="flex items-start gap-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          required
-                          className="mt-1 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-                          checked={newPatient.lgpdConsent || false}
-                          onChange={e => setNewPatient({ ...newPatient, lgpdConsent: e.target.checked })}
-                        />
-                        <div className="text-xs text-slate-600 leading-relaxed font-medium">
-                          Declaro que obtive o <strong>consentimento expresso</strong> do paciente (ou responsável legal) para coleta e tratamento de dados pessoais e de saúde de natureza sensível, em estrita conformidade com a <strong>LGPD (Lei nº 13.709/2018)</strong> e resoluções do CFP.
-                        </div>
+                    <div className="col-span-2 mt-4 p-4 bg-[var(--surface-alt)] border border-[var(--border)] rounded-xl flex gap-3 items-start transition-colors">
+                      <input
+                        type="checkbox"
+                        id="lgpd"
+                        required
+                        className="mt-1 w-4 h-4 accent-[var(--sage)] rounded border-[var(--border)] bg-[var(--surface)] focus:ring-[var(--sage)] focus:ring-offset-[var(--surface)] cursor-pointer"
+                        checked={newPatient.lgpdConsent || false}
+                        onChange={e => setNewPatient({ ...newPatient, lgpdConsent: e.target.checked })}
+                      />
+                      <label htmlFor="lgpd" className="text-sm text-[var(--text-secondary)] leading-relaxed cursor-pointer">
+                        Declaro que obtive o <strong className="text-[var(--text-primary)]">consentimento expresso</strong> do paciente (ou responsável legal) para coleta e tratamento de dados pessoais e de saúde de natureza sensível, em estrita conformidade com a <strong className="text-[var(--text-primary)]">LGPD (Lei nº 13.709/2018)</strong> e resoluções do CFP.
                       </label>
                     </div>
                   </div>
                 )}
 
-                {/* TAB: Contato */}
                 {addFormTab === "contact" && (
                   <div className="space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -2132,7 +2130,7 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
   const { initials, color: avatarColor } = getAvatarProps(patient.name);
 
   return (
-    <div className={`relative px-5 py-3.5 flex items-center gap-4 transition-all duration-200 group ${!isLast ? 'border-b border-[var(--border)]' : ''} ${!isActive ? 'opacity-70 grayscale' : ''} hover:bg-[var(--surface-alt)]`}>
+    <div className={`relative px-5 py-3.5 flex items-center gap-4 transition-all duration-200 group first:rounded-t-[16px] last:rounded-b-[16px] ${!isLast ? 'border-b border-[var(--border)]' : ''} ${!isActive ? 'opacity-70 grayscale' : ''} hover:bg-[var(--surface-alt)]`}>
       
       {/* Invisible link overlay for the whole row */}
       <Link to={`/patients/${patient.id}`} className="absolute inset-0 z-0" />
