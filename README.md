@@ -31,7 +31,7 @@ Este projeto está otimizado para o Padrão Ouro de Performance Web:
 - **Code-Splitting Dinâmico:** Todas as rotas usam `React.lazy()` para não enviar um pacote (bundle) monolítico gigante ao usuário.
 - **PWA (Progressive Web App):** Utiliza `vite-plugin-pwa` e **Workbox** para gerar Service Workers, fazer cache de todos os arquivos estáticos na máquina do usuário e permitir a leitura offline dos dados.
 - **Background Sync:** Interações feitas sem internet (como marcar presença na agenda) são retidas pelo navegador e sincronizadas automaticamente em até 24 horas.
-- **Servidor Nginx HTTP/2:** O ambiente de produção (Dockerfile) compila o sistema e o serve através do Nginx com Gzip e cache máximo, extinguindo gargalos de conexão.
+- **Cloudflare Tunnels & Edge Caching:** O ambiente de produção delega o proxy reverso e a camada de segurança para a rede global da Cloudflare, utilizando Nginx interno apenas como servidor web estático super otimizado para Gzip e cache.
 - **Fontes Self-Hosted:** As fontes estão encapsuladas dentro da própria aplicação (em `.woff2`) cortando a latência natural de buscar de APIs do Google.
 - **Atualizações Silenciosas (Flicker-Free):** O Dashboard utiliza fluxos de Background Refresh (ex: `loadData(true)`) para se atualizar ao interagir com modais sem "piscar" a tela.
 
