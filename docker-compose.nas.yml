@@ -40,7 +40,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.prod
       args:
-        - VITE_API_URL=https://questlyforms.com.br/api
+        - VITE_API_URL=/api
     container_name: curious-frontend
     restart: always
     ports:
