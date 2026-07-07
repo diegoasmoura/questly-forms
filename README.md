@@ -34,3 +34,10 @@ Este projeto está otimizado para o Padrão Ouro de Performance Web:
 - **Servidor Nginx HTTP/2:** O ambiente de produção (Dockerfile) compila o sistema e o serve através do Nginx com Gzip e cache máximo, extinguindo gargalos de conexão.
 - **Fontes Self-Hosted:** As fontes estão encapsuladas dentro da própria aplicação (em `.woff2`) cortando a latência natural de buscar de APIs do Google.
 - **Atualizações Silenciosas (Flicker-Free):** O Dashboard utiliza fluxos de Background Refresh (ex: `loadData(true)`) para se atualizar ao interagir com modais sem "piscar" a tela.
+
+## 📝 Atualizações Recentes (UI & UX)
+Foi realizada uma ampla refatoração visual focada em padronizar a aplicação para suportar nativamente **Modo Claro** e **Modo Escuro**:
+- **Design System Aplicado:** Componentes legados que utilizavam cores estáticas do Tailwind (ex: `slate-50`, `brand-600`) foram atualizados para utilizar as variáveis semânticas do projeto (`--surface`, `--surface-alt`, `--bg`, `--text-primary`, `--sage`).
+- **Modais Padronizados:** Telas como *Importar Dados*, *Novo Paciente* e *Detalhes do Agendamento* receberam uniformidade total (fundos sólidos com base na variável Surface, bordas sutis e z-index padronizado `z-[100]` com `backdrop-blur`).
+- **Agenda Otimizada:** Componentização dos itens da agenda como cartões interativos distintos com feedbacks visuais claros e neutros ao passar o mouse, abolindo os antigos sublinhados que mesclavam com a interface.
+- **Remoção de Gradientes/Opacidades Problemáticas:** Ajuste do card de aniversariantes no modo lista para respeitar o fundo transparente nativo com badges sólidas (sem misturar transparências opacas no modo escuro).

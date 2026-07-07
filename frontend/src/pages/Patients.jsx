@@ -2132,7 +2132,7 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
   const { initials, color: avatarColor } = getAvatarProps(patient.name);
 
   return (
-    <div className={`relative px-5 py-3.5 flex items-center gap-4 transition-all duration-200 group ${!isLast ? (isBirthdayWeek ? 'border-b border-orange-500/20' : 'border-b border-[var(--border)]') : ''} ${!isActive ? 'opacity-70 grayscale' : ''} ${isBirthdayWeek ? 'bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/30 dark:hover:bg-orange-900/50' : 'hover:bg-[var(--surface-alt)]'}`}>
+    <div className={`relative px-5 py-3.5 flex items-center gap-4 transition-all duration-200 group ${!isLast ? 'border-b border-[var(--border)]' : ''} ${!isActive ? 'opacity-70 grayscale' : ''} hover:bg-[var(--surface-alt)]`}>
       
       {/* Invisible link overlay for the whole row */}
       <Link to={`/patients/${patient.id}`} className="absolute inset-0 z-0" />
