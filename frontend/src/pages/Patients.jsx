@@ -2462,35 +2462,48 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
         {/* Stats - Premium Data Grid */}
         <div className="hidden sm:grid grid-cols-2 md:grid-cols-4 sm:col-span-6 gap-2 text-[12px]">
           
-          {/* Sessões */}
+          {/* Sessões (Verde) */}
           <div className="flex flex-col justify-center">
-             <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider mb-0.5">Sessões</span>
-             <span className="text-[var(--text-primary)] font-black text-[14px]">{attendance.presente}</span>
+            <div className="flex items-center gap-1 mb-1">
+              <div className="w-4 h-4 rounded-[5px] bg-[#5CBF90]/15 flex items-center justify-center shrink-0">
+                <Check size={10} className="text-[#5CBF90]" />
+              </div>
+              <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider">Sessões</span>
+            </div>
+            <span className="text-[var(--text-primary)] font-black text-[14px]">{attendance.presente}</span>
           </div>
           
-          {/* Faltas */}
+          {/* Faltas (Vermelho) */}
           <div className="flex flex-col justify-center border-l border-[var(--border)] pl-3">
-             <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider mb-0.5">Faltas</span>
-             {attendance.falta > 0 ? (
-               <span className="text-red-500 font-black bg-red-50 dark:bg-red-950/30 px-2 py-0.5 rounded-[6px] self-start inline-flex items-center gap-1 text-[14px] leading-none">
-                 <X size={12} />
-                 {attendance.falta}
-               </span>
-             ) : (
-               <span className="text-[var(--text-muted)] font-black text-[14px]">0</span>
-             )}
+            <div className="flex items-center gap-1 mb-1">
+              <div className="w-4 h-4 rounded-[5px] bg-red-50 dark:bg-red-950/30 flex items-center justify-center shrink-0">
+                <X size={10} className="text-red-500 dark:text-red-400" />
+              </div>
+              <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider">Faltas</span>
+            </div>
+            <span className="text-[var(--text-primary)] font-black text-[14px]">{attendance.falta}</span>
           </div>
 
-          {/* Forms */}
+          {/* Forms (Azul) */}
           <div className="flex flex-col justify-center border-l border-[var(--border)] pl-3">
-             <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider mb-0.5">Forms</span>
-             <span className="text-[var(--text-primary)] font-black text-[14px]">{responseCount} <span className="text-[10px] text-[var(--text-muted)] font-bold">/ {sentCount}</span></span>
+            <div className="flex items-center gap-1 mb-1">
+              <div className="w-4 h-4 rounded-[5px] bg-[#2E7DFF]/15 flex items-center justify-center shrink-0">
+                <FileText size={10} className="text-[#2E7DFF]" />
+              </div>
+              <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider">Forms</span>
+            </div>
+            <span className="text-[var(--text-primary)] font-black text-[14px]">{responseCount} <span className="text-[10px] text-[var(--text-muted)] font-bold">/ {sentCount}</span></span>
           </div>
 
-          {/* Retorno */}
+          {/* Retorno (Roxo) */}
           <div className="flex flex-col justify-center border-l border-[var(--border)] pl-3">
-             <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider mb-0.5">Retorno</span>
-             <span className="text-[var(--text-primary)] font-black text-[14px]">{returnDateText}</span>
+            <div className="flex items-center gap-1 mb-1">
+              <div className="w-4 h-4 rounded-[5px] bg-[#7C5CFF]/15 flex items-center justify-center shrink-0">
+                <Calendar size={10} className="text-[#7C5CFF]" />
+              </div>
+              <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider">Retorno</span>
+            </div>
+            <span className="text-[var(--text-primary)] font-black text-[14px]">{returnDateText}</span>
           </div>
         </div>
       </div>

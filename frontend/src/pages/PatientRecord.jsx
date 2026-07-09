@@ -14,7 +14,7 @@ import { ptBR } from "date-fns/locale";
 import { DayPicker } from "react-day-picker";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import { getAvatarProps } from "../components/dashboard/Shared";
+import { getAvatarProps, KpiCard } from "../components/dashboard/Shared";
 
 // Retorna o primeiro dia útil de um mês (seg-sex)
 const getFirstBusinessDay = (year, month) => {
@@ -1570,42 +1570,10 @@ export default function PatientRecord() {
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Stats Summary */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--sage)]">
-                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-presente-bg)] flex items-center justify-center text-[var(--status-presente-text)]">
-                    <UserCheck size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">{filteredAttendances.filter(a => a.status === 'presente').length}</p>
-                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Presenças</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-red-500">
-                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-falta-bg)] flex items-center justify-center text-[var(--status-falta-text)]">
-                    <UserX size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">{filteredAttendances.filter(a => a.status === 'falta').length}</p>
-                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Faltas</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--peach)]">
-                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-justificada-bg)] flex items-center justify-center text-[var(--status-justificada-text)]">
-                    <AlertCircle size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">{filteredAttendances.filter(a => a.status === 'justificada').length}</p>
-                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Justificadas</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--border)]">
-                  <div className="w-10 h-10 rounded-[12px] bg-[var(--surface-alt)] flex items-center justify-center text-[var(--text-secondary)]">
-                    <Activity size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">{attendances.length}</p>
-                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Total Sessões</p>
-                  </div>
-                </div>
+                <KpiCard compact icon={<UserCheck size={14} />} iconBg="var(--status-presente-bg)" iconColor="var(--status-presente-text)" label="Presenças" value={filteredAttendances.filter(a => a.status === 'presente').length} />
+                <KpiCard compact icon={<UserX size={14} />} iconBg="var(--status-falta-bg)" iconColor="var(--status-falta-text)" label="Faltas" value={filteredAttendances.filter(a => a.status === 'falta').length} />
+                <KpiCard compact icon={<AlertCircle size={14} />} iconBg="var(--status-justificada-bg)" iconColor="var(--status-justificada-text)" label="Justificadas" value={filteredAttendances.filter(a => a.status === 'justificada').length} />
+                <KpiCard compact icon={<Activity size={14} />} iconBg="var(--surface-alt)" iconColor="var(--text-secondary)" label="Total Sessões" value={attendances.length} />
               </div>
 
               {/* Filtro de Período */}
@@ -1787,48 +1755,10 @@ export default function PatientRecord() {
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Stats Summary */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--sage)]">
-                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-presente-bg)] flex items-center justify-center text-[var(--status-presente-text)]">
-                    <Calendar size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">{agendaStats.totalActive}</p>
-                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Horários Ativos</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--blue)]">
-                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-confirmado-bg)] flex items-center justify-center text-[var(--status-confirmado-text)]">
-                    <Activity size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">{agendaStats.thisMonthCount}</p>
-                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Sessões no Mês</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--border)]">
-                  <div className="w-10 h-10 rounded-[12px] bg-[var(--surface-alt)] flex items-center justify-center text-[var(--text-secondary)]">
-                    <Clock size={18} />
-                  </div>
-                  <div>
-                    <p className="text-lg font-extrabold text-[var(--text-primary)] truncate">
-                      {agendaStats.nextSession
-                        ? format(agendaStats.nextSession.date, "dd/MM", { locale: ptBR }) + " • " + agendaStats.nextSession.time
-                        : "—"}
-                    </p>
-                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Próxima Sessão</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--peach)]">
-                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-justificada-bg)] flex items-center justify-center text-[var(--status-justificada-text)]">
-                    <RefreshCcw size={18} />
-                  </div>
-                  <div>
-                    <p className="text-lg font-extrabold text-[var(--text-primary)] truncate">
-                      {agendaStats.recurringSummary || "—"}
-                    </p>
-                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Frequência Semanal</p>
-                  </div>
-                </div>
+                <KpiCard compact icon={<Calendar size={14} />} iconBg="var(--status-presente-bg)" iconColor="var(--status-presente-text)" label="Horários Ativos" value={agendaStats.totalActive} />
+                <KpiCard compact icon={<Activity size={14} />} iconBg="var(--status-confirmado-bg)" iconColor="var(--status-confirmado-text)" label="Sessões no Mês" value={agendaStats.thisMonthCount} />
+                <KpiCard compact icon={<Clock size={14} />} iconBg="var(--surface-alt)" iconColor="var(--text-secondary)" label="Próxima Sessão" value={agendaStats.nextSession ? format(agendaStats.nextSession.date, "dd/MM", { locale: ptBR }) + " • " + agendaStats.nextSession.time : "—"} />
+                <KpiCard compact icon={<RefreshCcw size={14} />} iconBg="var(--status-justificada-bg)" iconColor="var(--status-justificada-text)" label="Frequência Semanal" value={agendaStats.recurringSummary || "—"} />
               </div>
 
               {/* Filtro de Período */}
@@ -2294,53 +2224,15 @@ export default function PatientRecord() {
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Financial Dashboard */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--sage)]">
-                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-presente-bg)] flex items-center justify-center text-[var(--status-presente-text)]">
-                    <DollarSign size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">
-                      R$ {filteredPayments.reduce((acc, p) => acc + p.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </p>
-                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Total Pago</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--peach)]">
-                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-justificada-bg)] flex items-center justify-center text-[var(--status-justificada-text)]">
-                    <Clock size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">
-                      {attendances.filter(a => !a.paymentId && (a.status === 'presente' || a.status === 'falta')).length}
-                    </p>
-                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Sessões Pendentes</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--blue)]">
-                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-confirmado-bg)] flex items-center justify-center text-[var(--status-confirmado-text)]">
-                    <Receipt size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">{filteredPayments.length}</p>
-                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Lançamentos Realizados</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--border)]">
-                  <div className="w-10 h-10 rounded-[12px] bg-[var(--surface-alt)] flex items-center justify-center text-[var(--text-secondary)]">
-                    <CreditCard size={18} />
-                  </div>
-                  <div>
-                    <p className="text-lg font-extrabold text-[var(--text-primary)] truncate">
-                      {filteredPayments.length > 0
-                        ? (() => {
-                            const last = [...filteredPayments].sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate))[0];
-                            return format(new Date(last.paymentDate), "dd/MM", { locale: ptBR }) + " • R$ " + Number(last.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                          })()
-                        : "—"}
-                    </p>
-                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Último Recebimento</p>
-                  </div>
-                </div>
+                <KpiCard compact icon={<DollarSign size={14} />} iconBg="var(--status-presente-bg)" iconColor="var(--status-presente-text)" label="Total Pago" value={`R$ ${filteredPayments.reduce((acc, p) => acc + p.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
+                <KpiCard compact icon={<Clock size={14} />} iconBg="var(--status-justificada-bg)" iconColor="var(--status-justificada-text)" label="Sessões Pendentes" value={attendances.filter(a => !a.paymentId && (a.status === 'presente' || a.status === 'falta')).length} />
+                <KpiCard compact icon={<Receipt size={14} />} iconBg="var(--status-confirmado-bg)" iconColor="var(--status-confirmado-text)" label="Lançamentos Realizados" value={filteredPayments.length} />
+                <KpiCard compact icon={<CreditCard size={14} />} iconBg="var(--surface-alt)" iconColor="var(--text-secondary)" label="Último Recebimento" value={filteredPayments.length > 0
+                  ? (() => {
+                      const last = [...filteredPayments].sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate))[0];
+                      return format(new Date(last.paymentDate), "dd/MM", { locale: ptBR }) + " • R$ " + Number(last.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                    })()
+                  : "—"} />
               </div>
 
               {/* Filtro de Período */}
@@ -2560,37 +2452,11 @@ export default function PatientRecord() {
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Stats Summary */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--peach)]">
-                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-justificada-bg)] flex items-center justify-center text-[var(--status-justificada-text)]">
-                    <Send size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">{patientShareLinks.filter(l => l.status === "PENDENTE").length}</p>
-                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Pendentes</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--sage)]">
-                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-presente-bg)] flex items-center justify-center text-[var(--status-presente-text)]">
-                    <Check size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">{patientShareLinks.filter(l => l.status === "RESPONDIDO").length}</p>
-                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Respondidos</p>
-                  </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--blue)]">
-                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-confirmado-bg)] flex items-center justify-center text-[var(--status-confirmado-text)]">
-                    <TrendingUp size={18} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">
-                      {patientShareLinks.length > 0
-                        ? Math.round((patientShareLinks.filter(l => l.status === "RESPONDIDO").length / patientShareLinks.length) * 100)
-                        : 0}%
-                    </p>
-                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Adesão</p>
-                  </div>
-                </div>
+                <KpiCard compact icon={<Send size={14} />} iconBg="var(--status-justificada-bg)" iconColor="var(--status-justificada-text)" label="Pendentes" value={patientShareLinks.filter(l => l.status === "PENDENTE").length} />
+                <KpiCard compact icon={<Check size={14} />} iconBg="var(--status-presente-bg)" iconColor="var(--status-presente-text)" label="Respondidos" value={patientShareLinks.filter(l => l.status === "RESPONDIDO").length} />
+                <KpiCard compact icon={<TrendingUp size={14} />} iconBg="var(--status-confirmado-bg)" iconColor="var(--status-confirmado-text)" label="Adesão" value={patientShareLinks.length > 0
+                  ? Math.round((patientShareLinks.filter(l => l.status === "RESPONDIDO").length / patientShareLinks.length) * 100) + "%"
+                  : "0%"} />
               </div>
 
               {/* Filtro de Período */}

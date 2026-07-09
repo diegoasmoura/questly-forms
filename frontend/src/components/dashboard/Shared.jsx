@@ -35,7 +35,7 @@ export function getAvatarProps(name) {
   return { initials, color };
 }
 
-export function KpiCard({ icon, iconBg, iconColor, label, value, sub, trend, urgent, className = "" }) {
+export function KpiCard({ icon, iconBg, iconColor, label, value, sub, trend, urgent, compact, className = "" }) {
   let trendEl = null;
   if (trend) {
     const isUp = trend.current > trend.previous;
@@ -48,20 +48,32 @@ export function KpiCard({ icon, iconBg, iconColor, label, value, sub, trend, urg
     );
   }
 
+  if (compact) {
+    return (
+      <div className={`relative bg-[var(--surface)] border border-[var(--border)] rounded-[12px] p-2 md:p-2.5 flex flex-row items-center gap-2.5 md:gap-3 transition-colors duration-300 ${className}`}>
+        <div className="w-[28px] h-[28px] rounded-[8px] flex items-center justify-center flex-shrink-0" style={{ background: iconBg, color: iconColor }}>
+          {icon}
+        </div>
+        <div className="flex-1 min-w-0 flex items-baseline gap-1.5">
+          <p className="text-[13px] md:text-[16px] font-extrabold leading-none text-[var(--text-primary)] truncate">{value}</p>
+          <p className="text-[9px] md:text-[10px] font-bold text-[var(--text-secondary)] truncate">{label}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`relative bg-[var(--surface)] border border-[var(--border)] rounded-[12px] md:rounded-[16px] p-2.5 md:p-4 flex flex-row md:flex-col items-center md:items-stretch gap-3 md:gap-2 transition-colors duration-300 ${className}`}>
       <div className="flex items-center justify-between w-auto md:w-full flex-shrink-0">
         <div className="w-[32px] h-[32px] md:w-[34px] md:h-[34px] rounded-[10px] flex items-center justify-center flex-shrink-0" style={{ background: iconBg, color: iconColor }}>
           {icon}
         </div>
-        {/* Trend on desktop goes here */}
         <div className="hidden md:block">{trendEl}</div>
       </div>
       
       <div className="flex-1 min-w-0 flex flex-col justify-center text-left">
         <div className="flex items-baseline justify-between gap-1">
           <p className="text-[15px] md:text-[22px] font-extrabold leading-none text-[var(--text-primary)] truncate">{value}</p>
-          {/* Trend on mobile goes next to value */}
           <div className="md:hidden block flex-shrink-0">{trendEl}</div>
         </div>
         <p className="text-[10px] md:text-[12px] text-[var(--text-secondary)] mt-1 md:mt-0.5 leading-tight truncate">{label}</p>
