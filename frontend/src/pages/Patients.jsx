@@ -539,9 +539,32 @@ const resetImportModal = () => {
               </div>
             ))}
           </div>
+        ) : viewMode === "grid" && filteredPatients.length > 0 ? (
+          <div className="flex flex-col mb-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pt-6 pb-6 overflow-visible">
+              {paginatedPatients.map((patient) => (
+                <PatientCard
+                  key={patient.id}
+                  patient={patient}
+                  onDelete={handleDeletePatient}
+                  onEdit={() => setEditPatient(patient)}
+                />
+              ))}
+            </div>
+            {filteredPatients.length > itemsPerPage && (
+              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[16px] shadow-sm overflow-hidden mt-2">
+                <PaginationFooter 
+                  currentPage={currentPage} 
+                  totalPages={totalPages} 
+                  totalItems={filteredPatients.length} 
+                  itemsPerPage={itemsPerPage} 
+                  onPageChange={setCurrentPage} 
+                />
+              </div>
+            )}
+          </div>
         ) : (
-          <div className="flex flex-col flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2 mb-10 overflow-hidden transition-all">
-            
+          <div className="flex flex-col flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2 mb-10">
             {filteredPatients.length === 0 ? (
               <div className="p-16 sm:p-20 text-center flex flex-col items-center justify-center flex-1">
                 <div className="w-20 h-20 bg-[var(--surface-alt)] rounded-full flex items-center justify-center mx-auto mb-6">
@@ -598,17 +621,6 @@ const resetImportModal = () => {
                   </div>
                 )}
               </div>
-            ) : viewMode === "grid" ? (
-              <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 flex-1 bg-[var(--bg)]/30 content-start">
-                {paginatedPatients.map((patient) => (
-                  <PatientCard
-                    key={patient.id}
-                    patient={patient}
-                    onDelete={handleDeletePatient}
-                    onEdit={() => setEditPatient(patient)}
-                  />
-                ))}
-              </div>
             ) : (
               <div className="flex flex-col flex-1">
                 {paginatedPatients.map((patient, index) => (
@@ -624,7 +636,7 @@ const resetImportModal = () => {
             )}
             
             {filteredPatients.length > itemsPerPage && (
-              <div className="border-t border-[var(--border)] shrink-0 mt-auto">
+              <div className="border-t border-[var(--border)] shrink-0 mt-auto rounded-b-[24px] overflow-hidden">
                 <PaginationFooter 
                   currentPage={currentPage} 
                   totalPages={totalPages} 
@@ -636,7 +648,7 @@ const resetImportModal = () => {
             )}
           </div>
         )}
-        </div>
+      </div>
 
       {showImportModal && createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-[3px] animate-fade-in">
@@ -2107,87 +2119,179 @@ function PaginationFooter({ currentPage, totalPages, totalItems, itemsPerPage, o
   );
 }
 
+const getNextAppointmentDate = (appointments) => {
+  if (!appointments || appointments.length === 0) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  let closestDate = null;
+  let minDiff = Infinity;
+  for (const app of appointments) {
+    if (app.scheduledDate) {
+      const d = new Date(app.scheduledDate);
+      d.setHours(0,0,0,0);
+      if (d >= today && d.getTime() - today.getTime() < minDiff) {
+        closestDate = d;
+        minDiff = d.getTime() - today.getTime();
+      }
+    } else if (app.dayOfWeek !== undefined && app.dayOfWeek !== null) {
+      const appStart = new Date(app.startDate);
+      appStart.setHours(0,0,0,0);
+      const appEnd = app.endDate ? new Date(app.endDate) : new Date('2099-12-31');
+      let d = new Date(today);
+      if (d < appStart) d = new Date(appStart);
+      for (let i = 0; i < 7; i++) {
+        if (d.getDay() === app.dayOfWeek) break;
+        d.setDate(d.getDate() + 1);
+      }
+      if (d <= appEnd) {
+        const dateStr = d.toISOString().split('T')[0];
+        let skips = [];
+        try {
+          skips = Array.isArray(app.skipDates) ? app.skipDates : JSON.parse(app.skipDates || '[]');
+        } catch(e) {}
+        if (!skips.includes(dateStr)) {
+          if (d.getTime() - today.getTime() < minDiff) {
+            closestDate = d;
+            minDiff = d.getTime() - today.getTime();
+          }
+        }
+      }
+    }
+  }
+  return closestDate;
+};
+
 function PatientCard({ patient, onDelete, onEdit }) {
   const sentCount = patient._count?.shareLinks || 0;
   const responseCount = patient._count?.responses || 0;
   const isActive = patient.isActive !== false;
-  const { days: daysUntilBirthday, isWeek: isBirthdayWeek } = calculateDaysUntilBirthday(patient.birthDate);
   const attendance = patient.attendanceStats || { presente: 0, falta: 0, justificada: 0 };
+  const { days: daysUntilBirthday, isWeek: isBirthdayWeek } = calculateDaysUntilBirthday(patient.birthDate);
   const { initials, color: avatarColor } = getAvatarProps(patient.name);
 
+  // Busca a data do próximo agendamento (da aba Agenda) ou a inserida manualmente no cadastro
+  const nextApptDate = getNextAppointmentDate(patient.appointments);
+  const rawDate = patient.nextSession || nextApptDate;
+  
+  const returnDateText = rawDate ? (() => {
+    try {
+      // Extrai YYYY-MM-DD para evitar recuo de 1 dia pelo fuso horário (UTC-3)
+      const parts = typeof rawDate === 'string' ? rawDate.split('T')[0].split('-') : rawDate.toISOString().split('T')[0].split('-');
+      return `${parts[2]}/${parts[1]}`;
+    } catch(e) {
+      return '-';
+    }
+  })() : '-';
+
   return (
-    <div className={`relative bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm hover:shadow-md hover:border-slate-400 transition-all duration-300 flex flex-col h-full group ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'border-amber-400/60 shadow-[0_0_15px_rgba(251,191,36,0.15)]' : ''}`}>
+    <div className={`bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full group ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'border-amber-400/60 shadow-[0_0_15px_rgba(251,191,36,0.15)]' : ''} relative`}>
       {isBirthdayWeek && (
         <div className="absolute -top-3 -left-3 w-10 h-10 bg-white rounded-[14px] shadow-xl flex items-center justify-center border border-amber-100 animate-bounce z-40 pointer-events-none">
           <PartyPopper size={20} className="text-amber-500" />
         </div>
       )}
 
-      {/* Invisible link overlay for the whole card */}
-      <Link to={`/patients/${patient.id}`} className="absolute inset-0 z-0 rounded-[24px]" />
-
-      {/* Top Bar: Identity */}
-      <div className="p-4 flex items-start gap-3 relative z-30 pointer-events-none">
-        <div 
-          className={`w-12 h-12 rounded-[14px] flex items-center justify-center font-extrabold text-[16px] transition-all duration-300 shrink-0 ${!isActive && !isBirthdayWeek ? 'grayscale opacity-60' : ''}`}
-          style={isBirthdayWeek ? { backgroundColor: '#F59E0B', color: 'white' } : { backgroundColor: avatarColor.bg, color: avatarColor.text }}
-        >
-          {initials}
-        </div>
-        
-        <div className="flex flex-col min-w-0 flex-1 mt-0.5">
-          <h3 className="text-[15px] font-bold text-[var(--text-primary)] leading-tight truncate group-hover:text-[var(--sage)] transition-colors" title={patient.name}>
-            {formatShortName(patient.name)}
-          </h3>
-          <p className="text-[11px] font-semibold text-[var(--text-muted)] truncate mt-1">
-            {patient.email || (patient.phone ? formatPhone(patient.phone) : 'Sem contato')}
-          </p>
-        </div>
-
-        <div className="shrink-0 -mt-1 -mr-1 pointer-events-auto">
-          <PatientActionMenu patient={patient} onEdit={onEdit} onDelete={onDelete} />
-        </div>
-      </div>
-
-      {/* Middle: Minimal Badges */}
-      <div className="px-4 pb-4 flex flex-wrap items-center gap-1.5 relative z-10 pointer-events-none">
-        <span className={`px-2 py-0.5 rounded-[6px] text-[9px] font-extrabold uppercase tracking-widest border ${isActive ? 'bg-[var(--surface-alt)] text-[var(--text-secondary)] border-[var(--border)]' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
-          {isActive ? 'Ativo' : 'Inativo'}
-        </span>
-        {daysUntilBirthday !== null && (
-          <span className={`flex items-center gap-1 px-2 py-0.5 rounded-[6px] text-[9px] font-extrabold uppercase tracking-widest border ${isBirthdayWeek ? 'bg-amber-500 text-white border-amber-400 animate-pulse' : 'bg-[var(--surface-alt)] text-[var(--text-muted)] border-[var(--border)]'}`}>
-            <CakeSlice size={10} />
-            {typeof daysUntilBirthday === 'string' ? 'Aniversário!' : `${daysUntilBirthday} dias`}
-          </span>
-        )}
-      </div>
-
-      {/* Footer: Data Grid & Arrow */}
-      <div className="mt-auto p-4 border-t border-[var(--border)] bg-[var(--surface-alt)]/50 rounded-b-[24px] flex items-center justify-between relative z-10 pointer-events-none">
-        
-        <div className="flex flex-col sm:flex-row flex-1 gap-3 sm:gap-6">
-          <div className="flex flex-col min-w-max">
-            <span className="text-[9px] font-extrabold text-[var(--text-muted)] tracking-wider uppercase mb-1">Sessões</span>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold text-[var(--text-primary)]">{attendance.presente} <span className="font-normal opacity-70">presenças</span></span>
-              {attendance.falta > 0 && (
-                <span className="text-[11px] font-bold text-amber-500 bg-amber-500/10 rounded-[4px] px-1.5 py-0.5">{attendance.falta} <span className="font-normal">faltas</span></span>
-              )}
+      <div className="p-5 flex-1 flex flex-col">
+        {/* Header: Identity & Actions */}
+        <div className="flex items-start justify-between mb-5 relative z-10">
+          <div className="flex items-center gap-3 min-w-0 pointer-events-none">
+            <div 
+              className={`w-12 h-12 rounded-[14px] flex items-center justify-center font-extrabold text-[16px] shrink-0 border border-[var(--border)] ${!isActive && !isBirthdayWeek ? 'grayscale opacity-60' : ''}`}
+              style={isBirthdayWeek ? { backgroundColor: '#F59E0B', color: 'white' } : { backgroundColor: avatarColor.bg, color: avatarColor.text }}
+            >
+              {initials}
+            </div>
+            
+            <div className="flex flex-col min-w-0">
+              <h3 className="text-[15px] font-bold text-[var(--text-primary)] leading-tight truncate mb-1" title={patient.name}>
+                {formatShortName(patient.name)}
+              </h3>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {patient.birthDate && (
+                  <span className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                    {new Date(patient.birthDate).toLocaleDateString('pt-BR')} ({(() => {
+                      const today = new Date();
+                      const birthDate = new Date(patient.birthDate);
+                      let age = today.getFullYear() - birthDate.getFullYear();
+                      const m = today.getMonth() - birthDate.getMonth();
+                      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                        age--;
+                      }
+                      return age;
+                    })()} anos)
+                  </span>
+                )}
+                {patient.birthDate && <span className="text-[10px] text-[var(--text-muted)]">•</span>}
+                <span className={`text-[10px] font-extrabold tracking-wider ${isActive ? "text-[var(--sage)]" : "text-slate-400"}`}>
+                  {isActive ? "ATIVO" : "INATIVO"}
+                </span>
+              </div>
             </div>
           </div>
           
-          <div className="flex flex-col sm:border-l border-[var(--border)] sm:pl-4 min-w-max">
-            <span className="text-[9px] font-extrabold text-[var(--text-muted)] tracking-wider uppercase mb-1">Instrumentos</span>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold text-[var(--text-primary)]">{sentCount} <span className="font-normal opacity-70">enviados</span></span>
-              <span className="text-[11px] font-bold text-[var(--text-primary)]">{responseCount} <span className="font-normal opacity-70">resp.</span></span>
-            </div>
+          <div className="shrink-0 -mr-2 -mt-1 pointer-events-auto">
+            <PatientActionMenu patient={patient} onEdit={onEdit} onDelete={onDelete} />
           </div>
         </div>
-        
-        <div className="w-8 h-8 shrink-0 ml-2 rounded-[12px] flex items-center justify-center bg-[var(--sage)] text-white shadow-sm opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all pointer-events-none">
-          <ChevronRight size={16} />
+
+        {/* Quick Summary Grid - Colorful Minimalist */}
+        <div className="grid grid-cols-4 gap-1 mt-auto pt-4 border-t border-[var(--border)] pointer-events-none pr-1">
+          
+          {/* Sessões (Verde) */}
+          <div className="flex flex-col items-start">
+            <div className="flex items-center gap-1 mb-1.5">
+              <div className="w-4 h-4 rounded-[5px] bg-[#5CBF90]/15 flex items-center justify-center shrink-0">
+                <Check size={10} className="text-[#5CBF90]" />
+              </div>
+              <span className="text-[9px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Sessões</span>
+            </div>
+            <span className="text-[13px] font-black text-[var(--text-primary)] leading-none pl-0.5">{attendance.presente}</span>
+          </div>
+
+          {/* Faltas (Vermelho se > 0) */}
+          <div className="flex flex-col items-start border-l border-[var(--border)] pl-1.5">
+            <div className="flex items-center gap-1 mb-1.5">
+              <div className={`w-4 h-4 rounded-[5px] ${attendance.falta > 0 ? 'bg-red-50 dark:bg-red-950/30' : 'bg-slate-100'} flex items-center justify-center shrink-0`}>
+                <X size={10} className={attendance.falta > 0 ? 'text-red-500 dark:text-red-400' : 'text-slate-400'} />
+              </div>
+              <span className="text-[9px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Faltas</span>
+            </div>
+            <span className={`text-[13px] font-black leading-none pl-0.5 ${attendance.falta > 0 ? 'text-red-500 dark:text-red-400' : 'text-[var(--text-primary)]'}`}>{attendance.falta}</span>
+          </div>
+
+          {/* Formulários (Azul) */}
+          <div className="flex flex-col items-start border-l border-[var(--border)] pl-1.5">
+            <div className="flex items-center gap-1 mb-1.5">
+              <div className="w-4 h-4 rounded-[5px] bg-[#2E7DFF]/15 flex items-center justify-center shrink-0">
+                <FileText size={10} className="text-[#2E7DFF]" />
+              </div>
+              <span className="text-[9px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Forms</span>
+            </div>
+            <span className="text-[13px] font-black text-[var(--text-primary)] leading-none pl-0.5">{responseCount} <span className="text-[9px] text-[var(--text-muted)] font-bold">/ {sentCount}</span></span>
+          </div>
+
+          {/* Retorno (Roxo) */}
+          <div className="flex flex-col items-start border-l border-[var(--border)] pl-1.5">
+            <div className="flex items-center gap-1 mb-1.5">
+              <div className="w-4 h-4 rounded-[5px] bg-[#7C5CFF]/15 flex items-center justify-center shrink-0">
+                <Calendar size={10} className="text-[#7C5CFF]" />
+              </div>
+              <span className="text-[9px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Retorno</span>
+            </div>
+            <span className="text-[11px] font-bold text-[var(--text-primary)] leading-tight pl-0.5">{returnDateText}</span>
+          </div>
+
         </div>
+      </div>
+
+      <div className="p-3 border-t border-[var(--border)] bg-[var(--surface-alt)]/30 rounded-b-[24px] relative z-20 pointer-events-auto mt-auto">
+        <Link
+          to={`/patients/${patient.id}`}
+          className="w-full flex items-center justify-between px-4 py-2.5 bg-[var(--surface)] text-[12px] font-bold text-[var(--text-secondary)] rounded-[12px] border border-[var(--border)] hover:bg-[var(--sage)] hover:text-white hover:border-[var(--sage)] transition-colors duration-200 group/btn shadow-sm"
+        >
+          Acessar Prontuário
+          <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+        </Link>
       </div>
     </div>
   );
@@ -2202,7 +2306,7 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
   const { initials, color: avatarColor } = getAvatarProps(patient.name);
 
   return (
-    <div className={`relative px-5 py-3.5 flex items-center gap-4 transition-all duration-200 group first:rounded-t-[16px] last:rounded-b-[16px] ${!isLast ? 'border-b border-[var(--border)]' : ''} ${!isActive ? 'opacity-70 grayscale' : ''} hover:bg-[var(--surface-alt)]`}>
+    <div className={`relative px-5 py-3.5 flex items-center gap-4 transition-colors duration-150 ease-out group first:rounded-t-[24px] last:rounded-b-[24px] ${!isLast ? 'border-b border-[var(--border)]' : ''} ${!isActive ? 'opacity-70 grayscale' : ''} hover:bg-[var(--surface-alt)]`}>
       
       {/* Invisible link overlay for the whole row */}
       <Link to={`/patients/${patient.id}`} className="absolute inset-0 z-0" />
@@ -2250,7 +2354,10 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
           <div className="flex flex-col justify-center border-l border-[var(--border)] pl-3">
              <span className="text-[11px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Faltas</span>
              {attendance.falta > 0 ? (
-               <span className="text-amber-500 font-bold bg-amber-500/10 px-2 py-0.5 rounded-[6px] self-start inline-flex text-[14px] leading-none">{attendance.falta}</span>
+               <span className="text-red-500 font-bold bg-red-50 dark:bg-red-950/30 px-2 py-0.5 rounded-[6px] self-start inline-flex items-center gap-1 text-[14px] leading-none">
+                 <X size={12} />
+                 {attendance.falta}
+               </span>
              ) : (
                <span className="text-[var(--text-muted)] font-medium text-[14px]">0</span>
              )}

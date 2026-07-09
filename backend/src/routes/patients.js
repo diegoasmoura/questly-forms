@@ -19,7 +19,8 @@ router.get("/", async (req, res) => {
         },
         attendances: {
           select: { status: true }
-        }
+        },
+        appointments: true
       }
     });
 
