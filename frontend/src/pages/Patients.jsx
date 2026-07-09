@@ -541,7 +541,7 @@ const resetImportModal = () => {
           </div>
         ) : viewMode === "grid" && filteredPatients.length > 0 ? (
           <div className="flex flex-col mb-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pt-6 pb-6 overflow-visible">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 pt-6 pb-6 overflow-visible">
               {paginatedPatients.map((patient) => (
                 <PatientCard
                   key={patient.id}
@@ -2203,12 +2203,12 @@ function PatientCard({ patient, onDelete, onEdit }) {
             </div>
             
             <div className="flex flex-col min-w-0">
-              <h3 className="text-[16px] font-semibold tracking-[0.015em] text-[var(--text-primary)] leading-tight truncate mb-1" title={patient.name}>
+              <h3 className="text-[15px] font-semibold tracking-[0.015em] text-[var(--text-primary)] leading-tight truncate mb-1" title={patient.name}>
                 {formatShortName(patient.name)}
               </h3>
               <div className="flex items-center gap-1.5 flex-wrap">
                 {patient.birthDate && (
-                  <span className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                  <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                     {new Date(patient.birthDate).toLocaleDateString('pt-BR')} ({(() => {
                       const today = new Date();
                       const birthDate = new Date(patient.birthDate);
@@ -2221,8 +2221,8 @@ function PatientCard({ patient, onDelete, onEdit }) {
                     })()} anos)
                   </span>
                 )}
-                {patient.birthDate && <span className="text-[10px] text-[var(--text-muted)]">•</span>}
-                <span className={`text-[10px] font-extrabold tracking-wider ${isActive ? "text-[var(--sage)]" : "text-slate-400"}`}>
+                {patient.birthDate && <span className="text-[11px] text-[var(--text-muted)]">•</span>}
+                <span className={`text-[11px] font-extrabold tracking-wider ${isActive ? "text-[var(--sage)]" : "text-slate-400"}`}>
                   {isActive ? "ATIVO" : "INATIVO"}
                 </span>
               </div>
@@ -2243,9 +2243,9 @@ function PatientCard({ patient, onDelete, onEdit }) {
               <div className="w-4 h-4 rounded-[5px] bg-[#5CBF90]/15 flex items-center justify-center shrink-0">
                 <Check size={10} className="text-[#5CBF90]" />
               </div>
-              <span className="text-[9px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Sessões</span>
+              <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Sessões</span>
             </div>
-            <span className="text-[13px] font-black text-[var(--text-primary)] leading-none pl-0.5">{attendance.presente}</span>
+            <span className="text-[14px] font-black text-[var(--text-primary)] leading-none pl-0.5">{attendance.presente}</span>
           </div>
 
           {/* Faltas (Sempre vermelho claro) */}
@@ -2254,9 +2254,9 @@ function PatientCard({ patient, onDelete, onEdit }) {
               <div className="w-4 h-4 rounded-[5px] bg-red-50 dark:bg-red-950/30 flex items-center justify-center shrink-0">
                 <X size={10} className="text-red-500 dark:text-red-400" />
               </div>
-              <span className="text-[9px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Faltas</span>
+              <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Faltas</span>
             </div>
-            <span className={`text-[13px] font-black leading-none pl-0.5 ${attendance.falta > 0 ? 'text-red-500 dark:text-red-400' : 'text-[var(--text-primary)]'}`}>{attendance.falta}</span>
+            <span className={`text-[14px] font-black leading-none pl-0.5 ${attendance.falta > 0 ? 'text-red-500 dark:text-red-400' : 'text-[var(--text-primary)]'}`}>{attendance.falta}</span>
           </div>
 
           {/* Formulários (Azul) */}
@@ -2265,9 +2265,9 @@ function PatientCard({ patient, onDelete, onEdit }) {
               <div className="w-4 h-4 rounded-[5px] bg-[#2E7DFF]/15 flex items-center justify-center shrink-0">
                 <FileText size={10} className="text-[#2E7DFF]" />
               </div>
-              <span className="text-[9px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Forms</span>
+              <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Forms</span>
             </div>
-            <span className="text-[13px] font-black text-[var(--text-primary)] leading-none pl-0.5">{responseCount} <span className="text-[9px] text-[var(--text-muted)] font-bold">/ {sentCount}</span></span>
+            <span className="text-[14px] font-black text-[var(--text-primary)] leading-none pl-0.5">{responseCount} <span className="text-[10px] text-[var(--text-muted)] font-bold">/ {sentCount}</span></span>
           </div>
 
           {/* Retorno (Roxo) */}
@@ -2276,9 +2276,9 @@ function PatientCard({ patient, onDelete, onEdit }) {
               <div className="w-4 h-4 rounded-[5px] bg-[#7C5CFF]/15 flex items-center justify-center shrink-0">
                 <Calendar size={10} className="text-[#7C5CFF]" />
               </div>
-              <span className="text-[9px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Retorno</span>
+              <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Retorno</span>
             </div>
-            <span className="text-[11px] font-bold text-[var(--text-primary)] leading-tight pl-0.5">{returnDateText}</span>
+            <span className="text-[14px] font-black text-[var(--text-primary)] leading-tight pl-0.5">{returnDateText}</span>
           </div>
 
         </div>
@@ -2348,9 +2348,9 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
               </span>
             )}
           </div>
-          <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
             {patient.birthDate && (
-              <span className="text-[11px] font-semibold text-[var(--text-muted)]">
+              <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 {new Date(patient.birthDate).toLocaleDateString('pt-BR')} ({(() => {
                   const today = new Date();
                   const birthDate = new Date(patient.birthDate);
@@ -2363,8 +2363,8 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
                 })()} anos)
               </span>
             )}
-            {patient.birthDate && <span className="text-[10px] text-[var(--text-muted)]">•</span>}
-            <span className={`text-[10px] font-extrabold tracking-wider ${isActive ? "text-[var(--sage)]" : "text-slate-400"}`}>
+            {patient.birthDate && <span className="text-[11px] text-[var(--text-muted)]">•</span>}
+            <span className={`text-[11px] font-extrabold tracking-wider ${isActive ? "text-[var(--sage)]" : "text-slate-400"}`}>
               {isActive ? "ATIVO" : "INATIVO"}
             </span>
           </div>
@@ -2375,33 +2375,33 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
           
           {/* Sessões */}
           <div className="flex flex-col justify-center">
-             <span className="text-[11px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Sessões</span>
-             <span className="text-[var(--text-primary)] font-bold text-[14px]">{attendance.presente}</span>
+             <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider mb-0.5">Sessões</span>
+             <span className="text-[var(--text-primary)] font-black text-[14px]">{attendance.presente}</span>
           </div>
           
           {/* Faltas */}
           <div className="flex flex-col justify-center border-l border-[var(--border)] pl-3">
-             <span className="text-[11px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Faltas</span>
+             <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider mb-0.5">Faltas</span>
              {attendance.falta > 0 ? (
-               <span className="text-red-500 font-bold bg-red-50 dark:bg-red-950/30 px-2 py-0.5 rounded-[6px] self-start inline-flex items-center gap-1 text-[13px] leading-none">
+               <span className="text-red-500 font-black bg-red-50 dark:bg-red-950/30 px-2 py-0.5 rounded-[6px] self-start inline-flex items-center gap-1 text-[14px] leading-none">
                  <X size={12} />
                  {attendance.falta}
                </span>
              ) : (
-               <span className="text-[var(--text-muted)] font-medium text-[14px]">0</span>
+               <span className="text-[var(--text-muted)] font-black text-[14px]">0</span>
              )}
           </div>
 
           {/* Forms */}
           <div className="flex flex-col justify-center border-l border-[var(--border)] pl-3">
-             <span className="text-[11px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Forms</span>
-             <span className="text-[var(--text-primary)] font-bold text-[14px]">{responseCount} <span className="text-[11px] text-[var(--text-muted)]">/ {sentCount}</span></span>
+             <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider mb-0.5">Forms</span>
+             <span className="text-[var(--text-primary)] font-black text-[14px]">{responseCount} <span className="text-[10px] text-[var(--text-muted)] font-bold">/ {sentCount}</span></span>
           </div>
 
           {/* Retorno */}
           <div className="flex flex-col justify-center border-l border-[var(--border)] pl-3">
-             <span className="text-[11px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Retorno</span>
-             <span className="text-[var(--text-primary)] font-bold text-[14px]">{returnDateText}</span>
+             <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider mb-0.5">Retorno</span>
+             <span className="text-[var(--text-primary)] font-black text-[14px]">{returnDateText}</span>
           </div>
         </div>
       </div>
