@@ -2050,8 +2050,8 @@ export default function PatientRecord() {
                                 const appPatientId = app.patient?.id ?? app.patientId;
                                 const isOtherPatient = appPatientId && appPatientId !== id;
                                 return (
-                                  <div key={app.id} className={`flex items-center gap-2 p-2.5 rounded-[12px] border ${
-                                    conflict ? "border-[var(--status-falta-text)]/30 bg-[var(--status-falta-bg)]/30" : isOtherPatient ? "border-[var(--status-justificada-text)]/30 bg-[var(--status-justificada-bg)]/30" : "border-[var(--border)] bg-[var(--surface)]"
+                                  <div key={app.id} className={`flex items-center gap-2 p-2.5 rounded-[12px] border border-[var(--border)] transition-all duration-200 ease-out cursor-pointer ${
+                                    conflict ? "bg-[var(--status-falta-bg)]/30" : isOtherPatient ? "bg-[var(--status-justificada-bg)]/30" : "bg-[var(--surface)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03]"
                                   }`}>
                                     <div className="flex items-center gap-2 min-w-0 flex-1">
                                       <div className={`w-7 h-7 rounded-[8px] flex items-center justify-center font-bold text-[10px] shrink-0 ${
@@ -2174,7 +2174,9 @@ export default function PatientRecord() {
                                     const displayName = (isOtherPatient ? app.patient?.name : patient?.name) || "Paciente";
                                     const { initials, color: avatarColor } = getAvatarProps(displayName);
                                     return (
-                                      <div key={app.id} className={`flex items-center gap-2 p-3 rounded-[12px] border mb-1 ${conflict ? "border-[var(--status-falta-text)]/30 bg-[var(--status-falta-bg)]/30" : isOtherPatient ? "border-[var(--status-justificada-text)]/30 bg-[var(--status-justificada-bg)]/30" : "border-[var(--border)] bg-[var(--surface)] hover:border-[var(--text-muted)]/30"} transition-all`}>
+                                      <div key={app.id} className={`flex items-center gap-2 p-3 rounded-[12px] border border-[var(--border)] mb-1 transition-all duration-200 ease-out cursor-pointer ${
+                                        conflict ? "bg-[var(--status-falta-bg)]/30" : isOtherPatient ? "bg-[var(--status-justificada-bg)]/30" : "bg-[var(--surface)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03]"
+                                      }`}>
                                         <div className={`w-7 h-7 rounded-md flex items-center justify-center font-bold text-[9px] shrink-0 ${isOtherPatient ? "bg-[var(--surface-alt)] text-[var(--text-muted)]" : ""}`} style={isOtherPatient ? {} : { backgroundColor: avatarColor.bg, color: avatarColor.text }}>
                                           {initials}
                                         </div>
