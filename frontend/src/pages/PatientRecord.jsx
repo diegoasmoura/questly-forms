@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { api } from "../lib/api";
 import { toast } from "../components/Toast";
@@ -2983,7 +2984,7 @@ export default function PatientRecord() {
     </div>
 
       {/* Agenda Modal */}
-      {showAgendaModal && agendaFormDate && (
+      {showAgendaModal && agendaFormDate && createPortal(
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[3px]" onClick={() => { setShowAgendaModal(false); setEditingAppointment(null); setEditMode(null); }}>
           <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full max-w-lg mx-4 shadow-2xl animate-scale-in border border-[var(--border)]" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
@@ -3101,10 +3102,10 @@ export default function PatientRecord() {
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
 
       {/* Edit Patient Modal */}
-      {showEditModal && formData && (
+      {showEditModal && formData && createPortal(
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[3px]">
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-2xl w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-[var(--border)] shrink-0">
@@ -3315,10 +3316,10 @@ export default function PatientRecord() {
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
 
       {/* Share Modal */}
-      {showShareModal && (
+      {showShareModal && createPortal(
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[3px]">
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-2xl w-full max-w-2xl p-6 animate-scale-in max-h-[90vh] overflow-y-auto patients-scrollbar flex flex-col">
             <div className="flex items-center justify-between mb-6">
@@ -3439,10 +3440,10 @@ export default function PatientRecord() {
             </form>
           </div>
         </div>
-      )}
+      , document.body)}
 
       {/* Payment Modal */}
-      {showPaymentModal && (
+      {showPaymentModal && createPortal(
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[3px]">
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-2xl w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-[var(--border)]">
@@ -3680,7 +3681,7 @@ export default function PatientRecord() {
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
     </>
   );
 }
