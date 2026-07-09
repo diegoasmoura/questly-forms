@@ -2199,14 +2199,14 @@ export default function PatientRecord() {
                         {appointments.length > 0 && (
                           <button 
                             onClick={() => handleClearAgenda()} 
-                            className="py-2 px-4 rounded-[12px] bg-red-500 text-white font-bold text-xs hover:opacity-95 transition-all outline-none shadow-sm"
+                            className="flex items-center gap-1.5 py-2 px-4 rounded-[12px] bg-red-500 text-white font-bold text-xs whitespace-nowrap hover:opacity-95 transition-all outline-none shadow-sm"
                           >
                             <Trash2 size={14} /> Limpar Agenda
                           </button>
                         )}
                         <button 
                           onClick={() => handleOpenNewSlotModal()} 
-                          className="py-2 px-4 rounded-[12px] bg-[var(--sage)] text-white font-bold text-xs hover:opacity-95 transition-all outline-none shadow-sm"
+                          className="flex items-center gap-1.5 py-2 px-4 rounded-[12px] bg-[var(--sage)] text-white font-bold text-xs whitespace-nowrap hover:opacity-95 transition-all outline-none shadow-sm"
                         >
                           <Plus size={14} /> Lançar
                         </button>
