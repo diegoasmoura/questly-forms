@@ -465,14 +465,14 @@ const resetImportModal = () => {
             <button
               onClick={() => handleViewMode("grid")}
               title="Visualização em Cards"
-              className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-[10px] transition-colors ${viewMode === "grid" ? "bg-[var(--surface)] shadow-sm text-[var(--sage)] border border-[var(--border)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+              className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-[10px] outline-none ${viewMode === "grid" ? "bg-[var(--surface)] shadow-sm text-[var(--sage)] border border-[var(--border)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent"}`}
             >
               <LayoutGrid size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
             <button
               onClick={() => handleViewMode("list")}
               title="Visualização em Lista"
-              className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-[10px] transition-colors ${viewMode === "list" ? "bg-[var(--surface)] shadow-sm text-[var(--sage)] border border-[var(--border)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+              className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-[10px] outline-none ${viewMode === "list" ? "bg-[var(--surface)] shadow-sm text-[var(--sage)] border border-[var(--border)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent"}`}
             >
               <List size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
