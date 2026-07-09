@@ -2008,7 +2008,7 @@ export default function PatientRecord() {
                       )}
 
                       {selectedCalendarDay ? (
-                        <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
+                        <div className="p-4 bg-[var(--surface)] rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
                           <div className="flex items-start justify-between mb-3 shrink-0">
                             <div>
                               <h4 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-tight">
@@ -2138,7 +2138,7 @@ export default function PatientRecord() {
                           </div>
                         </div>
                       ) : (
-                        <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
+                        <div className="p-4 bg-[var(--surface)] rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
                           <div className="flex items-start justify-between mb-3 shrink-0">
                             <div>
                               <h4 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-tight">Visão do Mês</h4>
