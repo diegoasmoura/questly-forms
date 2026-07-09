@@ -2248,11 +2248,11 @@ function PatientCard({ patient, onDelete, onEdit }) {
             <span className="text-[13px] font-black text-[var(--text-primary)] leading-none pl-0.5">{attendance.presente}</span>
           </div>
 
-          {/* Faltas (Vermelho se > 0) */}
+          {/* Faltas (Sempre vermelho claro) */}
           <div className="flex flex-col items-start border-l border-[var(--border)] pl-1.5">
             <div className="flex items-center gap-1 mb-1.5">
-              <div className={`w-4 h-4 rounded-[5px] ${attendance.falta > 0 ? 'bg-red-50 dark:bg-red-950/30' : 'bg-slate-100'} flex items-center justify-center shrink-0`}>
-                <X size={10} className={attendance.falta > 0 ? 'text-red-500 dark:text-red-400' : 'text-slate-400'} />
+              <div className="w-4 h-4 rounded-[5px] bg-red-50 dark:bg-red-950/30 flex items-center justify-center shrink-0">
+                <X size={10} className="text-red-500 dark:text-red-400" />
               </div>
               <span className="text-[9px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Faltas</span>
             </div>
