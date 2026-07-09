@@ -552,13 +552,14 @@ const resetImportModal = () => {
               ))}
             </div>
             {filteredPatients.length > itemsPerPage && (
-              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[16px] shadow-sm overflow-hidden mt-2">
+              <div className="mt-2 mb-4">
                 <PaginationFooter 
                   currentPage={currentPage} 
                   totalPages={totalPages} 
                   totalItems={filteredPatients.length} 
                   itemsPerPage={itemsPerPage} 
                   onPageChange={setCurrentPage} 
+                  transparent={true}
                 />
               </div>
             )}
@@ -2087,12 +2088,12 @@ const formatShortName = (name) => {
   return `${parts[0]} ${parts[parts.length - 1]}`;
 };
 
-function PaginationFooter({ currentPage, totalPages, totalItems, itemsPerPage, onPageChange }) {
+function PaginationFooter({ currentPage, totalPages, totalItems, itemsPerPage, onPageChange, transparent = false }) {
   const startItem = Math.min((currentPage - 1) * itemsPerPage + 1, totalItems);
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   return (
-    <div className="px-6 py-4 flex items-center justify-between bg-[var(--surface)]">
+    <div className={`px-6 py-4 flex items-center justify-between ${transparent ? 'bg-transparent border-none' : 'bg-[var(--surface)]'}`}>
       <div className="text-[13px] text-[var(--text-muted)]">
         Mostrando <span className="font-semibold text-[var(--text-primary)]">{totalItems === 0 ? 0 : startItem}</span> a <span className="font-semibold text-[var(--text-primary)]">{endItem}</span> de <span className="font-semibold text-[var(--text-primary)]">{totalItems}</span> pacientes
       </div>
