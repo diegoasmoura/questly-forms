@@ -437,7 +437,7 @@ const resetImportModal = () => {
             ref={searchInputRef}
             type="text"
             placeholder="Procurar paciente..."
-            className="w-full bg-[var(--surface-alt)] border border-transparent rounded-[16px] pl-10 pr-3 md:pr-12 py-2 sm:py-2.5 text-sm outline-none focus:bg-[var(--surface)] focus:border-[var(--sage)]/50 focus:ring-4 focus:ring-[var(--sage)]/10 transition-all placeholder:text-[var(--text-muted)] text-[var(--text-primary)]"
+            className="w-full bg-[var(--surface-alt)] border border-transparent rounded-[16px] pl-10 pr-3 md:pr-12 py-2 sm:py-2.5 text-sm outline-none focus:bg-[var(--surface)] focus:border-[var(--sage)] focus:ring-1 focus:ring-[var(--sage)] transition-all placeholder:text-[var(--text-muted)] text-[var(--text-primary)]"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -2305,6 +2305,18 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
   const attendance = patient.attendanceStats || { presente: 0, falta: 0, justificada: 0 };
   const { initials, color: avatarColor } = getAvatarProps(patient.name);
 
+  // Calcula retorno igual ao card
+  const nextApptDate = getNextAppointmentDate(patient.appointments);
+  const rawDate = patient.nextSession || nextApptDate;
+  const returnDateText = rawDate ? (() => {
+    try {
+      const parts = typeof rawDate === 'string' ? rawDate.split('T')[0].split('-') : rawDate.toISOString().split('T')[0].split('-');
+      return `${parts[2]}/${parts[1]}`;
+    } catch(e) {
+      return '-';
+    }
+  })() : '-';
+
   return (
     <div className={`relative px-5 py-3.5 flex items-center gap-4 transition-colors duration-150 ease-out group first:rounded-t-[24px] last:rounded-b-[24px] ${!isLast ? 'border-b border-[var(--border)]' : ''} ${!isActive ? 'opacity-70 grayscale' : ''} hover:bg-[var(--surface-alt)]`}>
       
@@ -2323,8 +2335,8 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
       
       <div className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 items-center relative z-10 pointer-events-none">
         
-        {/* Name & Contact */}
-        <div className="sm:col-span-5 flex flex-col min-w-0">
+        {/* Name & Identity */}
+        <div className="sm:col-span-5 flex flex-col min-w-0 justify-center">
           <div className="flex items-center gap-2 mb-0.5">
             <h4 className="font-semibold text-[14px] truncate text-[var(--text-primary)] group-hover:text-[var(--sage)] transition-colors">
               {patient.name}
@@ -2336,9 +2348,26 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
               </span>
             )}
           </div>
-          <p className="text-[12px] text-[var(--text-muted)] truncate">
-            {patient.email || (patient.phone ? formatPhone(patient.phone) : 'Sem contato')}
-          </p>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {patient.birthDate && (
+              <span className="text-[11px] font-semibold text-[var(--text-muted)]">
+                {new Date(patient.birthDate).toLocaleDateString('pt-BR')} ({(() => {
+                  const today = new Date();
+                  const birthDate = new Date(patient.birthDate);
+                  let age = today.getFullYear() - birthDate.getFullYear();
+                  const m = today.getMonth() - birthDate.getMonth();
+                  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                  }
+                  return age;
+                })()} anos)
+              </span>
+            )}
+            {patient.birthDate && <span className="text-[10px] text-[var(--text-muted)]">•</span>}
+            <span className={`text-[10px] font-extrabold tracking-wider ${isActive ? "text-[var(--sage)]" : "text-slate-400"}`}>
+              {isActive ? "ATIVO" : "INATIVO"}
+            </span>
+          </div>
         </div>
 
         {/* Stats - Premium Data Grid */}
@@ -2354,7 +2383,7 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
           <div className="flex flex-col justify-center border-l border-[var(--border)] pl-3">
              <span className="text-[11px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Faltas</span>
              {attendance.falta > 0 ? (
-               <span className="text-red-500 font-bold bg-red-50 dark:bg-red-950/30 px-2 py-0.5 rounded-[6px] self-start inline-flex items-center gap-1 text-[14px] leading-none">
+               <span className="text-red-500 font-bold bg-red-50 dark:bg-red-950/30 px-2 py-0.5 rounded-[6px] self-start inline-flex items-center gap-1 text-[13px] leading-none">
                  <X size={12} />
                  {attendance.falta}
                </span>
@@ -2363,22 +2392,22 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
              )}
           </div>
 
-          {/* Enviados */}
+          {/* Forms */}
           <div className="flex flex-col justify-center border-l border-[var(--border)] pl-3">
-             <span className="text-[11px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Formulários</span>
-             <span className="text-[var(--text-primary)] font-bold text-[14px]">{sentCount}</span>
+             <span className="text-[11px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Forms</span>
+             <span className="text-[var(--text-primary)] font-bold text-[14px]">{responseCount} <span className="text-[11px] text-[var(--text-muted)]">/ {sentCount}</span></span>
           </div>
 
-          {/* Respondidos */}
+          {/* Retorno */}
           <div className="flex flex-col justify-center border-l border-[var(--border)] pl-3">
-             <span className="text-[11px] text-[var(--sage)] font-bold uppercase tracking-widest mb-0.5">Retorno</span>
-             <span className="text-[var(--sage)] font-bold text-[14px]">{responseCount}</span>
+             <span className="text-[11px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Retorno</span>
+             <span className="text-[var(--text-primary)] font-bold text-[14px]">{returnDateText}</span>
           </div>
         </div>
       </div>
 
       {/* Action Menu */}
-      <div className="shrink-0 flex items-center justify-end relative z-10 pointer-events-auto pr-1">
+      <div className="shrink-0 flex items-center justify-end relative z-10 pointer-events-auto pr-1 sm:pl-4">
         <PatientActionMenu patient={patient} onEdit={onEdit} onDelete={onDelete} />
       </div>
     </div>
