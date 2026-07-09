@@ -539,34 +539,11 @@ const resetImportModal = () => {
               </div>
             ))}
           </div>
-        ) : viewMode === "grid" ? (
-          <div className="flex flex-col mb-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pt-6 pb-6 overflow-visible">
-              {paginatedPatients.map((patient) => (
-                <PatientCard
-                  key={patient.id}
-                  patient={patient}
-                  onDelete={handleDeletePatient}
-                  onEdit={() => setEditPatient(patient)}
-                />
-              ))}
-            </div>
-            {filteredPatients.length > itemsPerPage && (
-              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[16px] shadow-sm overflow-hidden mt-2">
-                <PaginationFooter 
-                  currentPage={currentPage} 
-                  totalPages={totalPages} 
-                  totalItems={filteredPatients.length} 
-                  itemsPerPage={itemsPerPage} 
-                  onPageChange={setCurrentPage} 
-                />
-              </div>
-            )}
-          </div>
         ) : (
-          <div className="flex flex-col bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2 mb-10 overflow-hidden transition-all">
+          <div className="flex flex-col bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2 mb-10 overflow-hidden transition-all min-h-[60vh]">
+            
             {filteredPatients.length === 0 ? (
-              <div className="p-16 sm:p-20 text-center">
+              <div className="p-16 sm:p-20 text-center flex flex-col items-center justify-center flex-1">
                 <div className="w-20 h-20 bg-[var(--surface-alt)] rounded-full flex items-center justify-center mx-auto mb-6">
                   <Users size={40} className="text-[var(--text-secondary)] opacity-70" />
                 </div>
@@ -621,8 +598,19 @@ const resetImportModal = () => {
                   </div>
                 )}
               </div>
+            ) : viewMode === "grid" ? (
+              <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 flex-1 bg-[var(--bg)]/30">
+                {paginatedPatients.map((patient) => (
+                  <PatientCard
+                    key={patient.id}
+                    patient={patient}
+                    onDelete={handleDeletePatient}
+                    onEdit={() => setEditPatient(patient)}
+                  />
+                ))}
+              </div>
             ) : (
-              <div className="flex flex-col">
+              <div className="flex flex-col flex-1">
                 {paginatedPatients.map((patient, index) => (
                   <PatientListRow
                     key={patient.id}
@@ -636,7 +624,7 @@ const resetImportModal = () => {
             )}
             
             {filteredPatients.length > itemsPerPage && (
-              <div className="border-t border-[var(--border)]">
+              <div className="border-t border-[var(--border)] shrink-0 mt-auto">
                 <PaginationFooter 
                   currentPage={currentPage} 
                   totalPages={totalPages} 
