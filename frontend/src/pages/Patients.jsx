@@ -549,7 +549,7 @@ const resetImportModal = () => {
             ))}
           </div>
         ) : viewMode === "grid" && filteredPatients.length > 0 ? (
-          <div className="flex flex-col flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2 min-h-0">
+          <div className="flex flex-col flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2 min-h-0 overflow-hidden">
             <div className="flex-1 overflow-y-auto patients-scrollbar p-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4" style={{gridAutoRows: '1fr'}}>
                 {paginatedPatients.map((patient) => (
@@ -588,7 +588,7 @@ const resetImportModal = () => {
             )}
           </div>
         ) : (
-          <div className="flex flex-col flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2">
+          <div className="flex flex-col flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2 min-h-0 overflow-hidden">
             {filteredPatients.length === 0 ? (
               <div className="p-16 sm:p-20 text-center flex flex-col items-center justify-center flex-1">
                 <div className="w-20 h-20 bg-[var(--surface-alt)] rounded-full flex items-center justify-center mx-auto mb-6">
@@ -646,7 +646,7 @@ const resetImportModal = () => {
                 )}
               </div>
             ) : (
-              <div className="flex flex-col flex-1">
+              <div className="flex flex-col flex-1 overflow-y-auto patients-scrollbar min-h-0">
                 {paginatedPatients.map((patient, index) => (
                   <PatientListRow
                     key={patient.id}
