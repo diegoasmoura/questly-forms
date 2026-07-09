@@ -143,6 +143,7 @@ export default function PatientRecord() {
   const [activeTab, setActiveTab] = useState("sessions"); // 'sessions', 'share', 'financial', 'settings'
   const [attendances, setAttendances] = useState([]);
   const [loadingAttendances, setLoadingAttendances] = useState(false);
+  const [mobileProfileExpanded, setMobileProfileExpanded] = useState(false);
   
   // Financeiro
   const [payments, setPayments] = useState([]);
@@ -1434,17 +1435,93 @@ export default function PatientRecord() {
 
   return (
     <>
-    <div className="p-6 h-full flex flex-col overflow-hidden animate-fade-in">
-      <Link to="/patients" className="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] mb-4 group transition-colors shrink-0">
+    <div className="px-4 pt-4 pb-20 md:p-6 h-auto md:h-full flex flex-col md:overflow-hidden animate-fade-in">
+      <Link to="/patients" className="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] mb-3 md:mb-4 group transition-colors shrink-0">
         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-        Voltar para Lista de Pacientes
+        <span className="hidden md:inline">Voltar para Lista de Pacientes</span>
+        <span className="md:hidden">Voltar</span>
       </Link>
 
-      <div className="flex-1 overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full min-h-0">
+      {/* Mobile Compact Profile Card */}
+      <div className="md:hidden shrink-0 mb-4">
+        <div className="card p-4">
+          <div className="flex items-center gap-3">
+            <div 
+              className="w-12 h-12 rounded-[14px] flex items-center justify-center font-extrabold text-base border border-[var(--border)] shadow-sm shrink-0"
+              style={{ backgroundColor: avatarColor.bg, color: avatarColor.text }}
+            >
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-base font-bold text-[var(--text-primary)] truncate">{patient.name}</h1>
+              <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Prontuário #{patient.id.slice(0, 8).toUpperCase()}</p>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                onClick={() => { setEditTab("identity"); loadAttachments(); setShowEditModal(true); }}
+                className="w-9 h-9 rounded-[10px] bg-[var(--sage)] hover:opacity-95 text-white flex items-center justify-center transition-colors shadow-sm outline-none"
+                title="Ver Dados Completos"
+              >
+                <Edit size={14} />
+              </button>
+              <button
+                onClick={() => setMobileProfileExpanded(!mobileProfileExpanded)}
+                className="w-9 h-9 rounded-[10px] bg-[var(--surface-alt)] border border-[var(--border)] text-[var(--text-secondary)] flex items-center justify-center transition-all outline-none"
+              >
+                <ChevronRight size={14} className={`transition-transform duration-200 ${mobileProfileExpanded ? 'rotate-90' : ''}`} />
+              </button>
+            </div>
+          </div>
+          {mobileProfileExpanded && (
+            <div className="mt-3 pt-3 border-t border-[var(--border)] space-y-2 animate-fade-in">
+              <div className="grid grid-cols-2 gap-2">
+                {patient.email && (
+                  <div className="px-2 py-1.5 bg-[var(--surface-alt)] rounded-[10px]">
+                    <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Email</p>
+                    <p className="text-[11px] text-[var(--text-primary)] font-semibold truncate">{patient.email}</p>
+                  </div>
+                )}
+                {patient.phone && (
+                  <div className="px-2 py-1.5 bg-[var(--surface-alt)] rounded-[10px]">
+                    <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Telefone</p>
+                    <p className="text-[11px] text-[var(--text-primary)] font-semibold truncate">{patient.phone}</p>
+                  </div>
+                )}
+                <div className="px-2 py-1.5 bg-[var(--surface-alt)] rounded-[10px]">
+                  <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Nascimento</p>
+                  <p className="text-[11px] text-[var(--text-primary)] font-semibold">
+                    {patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : "—"}
+                    {patient.birthDate && (() => {
+                      const today = new Date();
+                      const birth = new Date(patient.birthDate);
+                      let age = today.getFullYear() - birth.getFullYear();
+                      const monthDiff = today.getMonth() - birth.getMonth();
+                      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+                      return <span className="ml-1 text-[var(--text-muted)] font-normal">({age}a)</span>;
+                    })()}
+                  </p>
+                </div>
+                <div className="px-2 py-1.5 bg-[var(--surface-alt)] rounded-[10px]">
+                  <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Paciente desde</p>
+                  <p className="text-[11px] text-[var(--text-primary)] font-semibold">{new Date(patient.createdAt).toLocaleDateString('pt-BR')}</p>
+                </div>
+              </div>
+              {patient.notes && (
+                <div className="p-2.5 bg-[var(--surface-alt)] rounded-[10px] border border-[var(--border)]">
+                  <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Anotações</p>
+                  <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed line-clamp-3">{patient.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
 
-          {/* Left Column: Patient Profile */}
-          <div className="lg:col-span-1 flex flex-col min-h-0">
+      <div className="md:flex-1 md:overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 md:h-full md:min-h-0">
+
+          {/* Left Column: Patient Profile (hidden on mobile — compact card above) */}
+          <div className="hidden md:flex md:col-span-1 flex-col min-h-0">
             <div className="card p-6 flex-1 flex flex-col min-h-0">
               <div className="flex flex-col items-center text-center mb-6 shrink-0">
                 <div 
@@ -1518,46 +1595,46 @@ export default function PatientRecord() {
           </div>
 
           {/* Right Column: History */}
-          <div className="lg:col-span-3 flex flex-col min-h-0 gap-6">
+          <div className="md:col-span-3 flex flex-col md:h-full md:min-h-0 gap-4 md:gap-6">
 
           {/* Tabs */}
           <div className="shrink-0">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
+              <div className="hidden md:block">
                 <h2 className="text-2xl font-bold text-[var(--text-primary)]">Histórico Clínico</h2>
                 <p className="text-sm text-[var(--text-secondary)] mt-1">
                   Evolução e respostas do paciente
                 </p>
               </div>
-              <div className="flex items-center gap-1 bg-[var(--surface-alt)] p-1 rounded-[14px] border border-[var(--border)] shadow-sm flex-wrap">
+              <div className="flex items-center justify-between w-full md:w-auto gap-1 bg-[var(--surface-alt)] p-1 rounded-[14px] border border-[var(--border)] shadow-sm flex-nowrap">
                 <TabButton
                   active={activeTab === "sessions"}
                   onClick={() => handleTabChange("sessions")}
-                  icon={<Clock size={14} />}
+                  icon={<Clock size={16} />}
                   label="Histórico"
                 />
                 <TabButton
                   active={activeTab === "settings"}
                   onClick={() => handleTabChange("settings")}
-                  icon={<Calendar size={14} />}
+                  icon={<Calendar size={16} />}
                   label="Agenda"
                 />
                 <TabButton
                   active={activeTab === "financial"}
                   onClick={() => handleTabChange("financial")}
-                  icon={<DollarSign size={14} />}
+                  icon={<DollarSign size={16} />}
                   label="Financeiro"
                 />
                 <TabButton
                   active={activeTab === "share"}
                   onClick={() => handleTabChange("share")}
-                  icon={<Share2 size={14} />}
+                  icon={<Share2 size={16} />}
                   label="Instrumentos"
                 />
                 <TabButton
                   active={activeTab === "notes"}
                   onClick={() => handleTabChange("notes")}
-                  icon={<FileText size={14} />}
+                  icon={<FileText size={16} />}
                   label="Prontuário"
                 />
               </div>
@@ -1565,12 +1642,12 @@ export default function PatientRecord() {
           </div>
 
           {/* Tab Content */}
-          <div className="flex-1 flex flex-col min-h-0">
+          <div className="md:flex-1 flex flex-col md:min-h-0">
            {/* Sessions/Frequency Tab */}
           {activeTab === "sessions" && (
-            <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
+            <div className="space-y-5 animate-fade-in flex flex-col md:flex-1 md:min-h-0">
               {/* Stats Summary */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
                 <KpiCard compact icon={<UserCheck size={14} />} iconBg="var(--status-presente-bg)" iconColor="var(--status-presente-text)" label="Presenças" value={filteredAttendances.filter(a => a.status === 'presente').length} />
                 <KpiCard compact icon={<UserX size={14} />} iconBg="var(--status-falta-bg)" iconColor="var(--status-falta-text)" label="Faltas" value={filteredAttendances.filter(a => a.status === 'falta').length} />
                 <KpiCard compact icon={<AlertCircle size={14} />} iconBg="var(--status-justificada-bg)" iconColor="var(--status-justificada-text)" label="Justificadas" value={filteredAttendances.filter(a => a.status === 'justificada').length} />
@@ -1578,40 +1655,45 @@ export default function PatientRecord() {
               </div>
 
               {/* Filtro de Período */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mr-1">Período</span>
-                {[
-                  { key: "thisMonth", label: "Este Mês" },
-                  { key: "lastMonth", label: "Mês Anterior" },
-                  { key: "last3Months", label: "Últimos 3 Meses" },
-                  { key: "all", label: "Todo Histórico" },
-                  { key: "custom", label: "Personalizado" },
-                ].map(opt => (
-                  <button
-                    key={opt.key}
-                    onClick={() => {
-                      setPeriodFilter(opt.key);
-                      const now = new Date();
-                      if (opt.key === "thisMonth") {
-                        setCustomMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
-                      } else if (opt.key === "lastMonth") {
-                        const d = subMonths(now, 1);
-                        setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-                      }
-                    }}
-                    className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
-                      periodFilter === opt.key
-                        ? "bg-[var(--sage)] text-white shadow-sm"
-                        : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--sage)] hover:text-[var(--sage)]"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+              <div className="flex flex-col md:flex-row md:items-center gap-2 pb-1">
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                  <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mr-1 hidden md:inline-block">Período</span>
+                  {[
+                    { key: "thisMonth", label: "Este Mês", mobile: true },
+                    { key: "lastMonth", label: "Mês Anterior", mobile: false },
+                    { key: "last3Months", label: "Últimos 3 Meses", mobile: false },
+                    { key: "all", label: "Todo Histórico", mobile: false },
+                    { key: "custom", label: "Personalizado", mobile: true },
+                  ].map(opt => (
+                    <button
+                      key={opt.key}
+                      onClick={() => {
+                        setPeriodFilter(opt.key);
+                        const now = new Date();
+                        if (opt.key === "thisMonth") {
+                          setCustomMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
+                        } else if (opt.key === "lastMonth") {
+                          const d = subMonths(now, 1);
+                          setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+                        }
+                      }}
+                      className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all whitespace-nowrap text-center flex-1 md:flex-initial md:shrink-0 ${
+                        opt.mobile ? "" : "hidden md:inline-block"
+                      } ${
+                        periodFilter === opt.key
+                          ? "bg-[var(--sage)] text-white shadow-sm"
+                          : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--sage)] hover:text-[var(--sage)]"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                
                 {periodFilter === "custom" && (
-                  <div className="flex items-center gap-1 bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
+                  <div className="flex items-center justify-between w-full md:w-auto gap-1 bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm p-1">
                     <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-[var(--text-muted)] hover:text-[var(--sage)] hover:bg-[var(--sage-light)] transition-all"><ChevronLeft size={16} /></button>
-                    <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-[var(--text-primary)] bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
+                    <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-[var(--text-primary)] bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 flex-1 md:flex-initial min-w-[80px]">
                       {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
                         const monthVal = i + 1;
                         const currentYear = customMonth.split("-")[0];
@@ -1627,18 +1709,18 @@ export default function PatientRecord() {
               </div>
 
               {/* Timeline List */}
-              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-3">
+              <div className="card p-6 md:flex-1 flex flex-col gap-3">
                 <div className="flex items-center justify-between shrink-0">
                   <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-wide">Histórico de Sessões</h3>
                 </div>
-                <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0 overflow-hidden">
+                <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] md:flex-1 flex flex-col">
                 {loadingAttendances ? (
                   <div className="text-center py-20 opacity-50 flex-1 flex items-center justify-center">
                     <div className="w-10 h-10 border-4 border-[var(--sage)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                     <p className="text-sm font-bold uppercase tracking-widest text-[var(--text-muted)]">Carregando histórico...</p>
                   </div>
                 ) : filteredAttendances.length === 0 ? (
-                  <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
+                  <div className="md:flex-1 flex flex-col items-center justify-center text-center px-8 py-12 md:py-20">
                     <div className="w-16 h-16 rounded-2xl bg-[var(--sage-light)] flex items-center justify-center mb-5">
                       <Calendar size={32} className="text-[var(--sage)]" />
                     </div>
@@ -1646,7 +1728,7 @@ export default function PatientRecord() {
                     <p className="text-xs text-[var(--text-muted)] mt-2 max-w-xs leading-relaxed">Registros de presença aparecerão aqui conforme você marcar as sessões na agenda do paciente.</p>
                   </div>
                 ) : (
-                  <div className="space-y-0 relative before:absolute before:left-[19px] before:top-2 before:bottom-0 before:w-0.5 before:bg-[var(--border)] overflow-y-auto patients-scrollbar flex-1 min-h-0">
+                  <div className="space-y-0 relative before:absolute before:left-[15px] md:before:left-[19px] before:top-2 before:bottom-0 before:w-0.5 before:bg-[var(--border)] md:overflow-y-auto patients-scrollbar md:flex-1 md:min-h-0">
                     {filteredAttendances.map((att, idx) => {
                       const isReagendado = att.notes?.includes('Reagendado');
                       const isFilho = !!att.parentId;
@@ -1656,20 +1738,20 @@ export default function PatientRecord() {
                       const isChainEnd = !hasFilho && isFilho;
                       
                       const statusConfig = {
-                        presente: { color: "bg-[var(--sage)]", label: "Presente", bg: "bg-[var(--status-presente-bg)]", text: "text-[var(--status-presente-text)]", icon: <Check size={12} /> },
-                        falta: { color: "bg-red-500", label: "Falta", bg: "bg-[var(--status-falta-bg)]", text: "text-[var(--status-falta-text)]", icon: <X size={12} /> },
-                        justificada: { color: "bg-[var(--peach)]", label: "Justificada", bg: "bg-[var(--status-justificada-bg)]", text: "text-[var(--status-justificada-text)]", icon: isReagendado ? <RefreshCcw size={12} /> : <AlertCircle size={12} /> },
+                        presente: { color: "bg-[var(--sage)]", label: "Presente", bg: "bg-[var(--status-presente-bg)]", text: "text-[var(--status-presente-text)]", icon: <Check size={10} className="md:w-3 md:h-3" /> },
+                        falta: { color: "bg-red-500", label: "Falta", bg: "bg-[var(--status-falta-bg)]", text: "text-[var(--status-falta-text)]", icon: <X size={10} className="md:w-3 md:h-3" /> },
+                        justificada: { color: "bg-[var(--peach)]", label: "Justificada", bg: "bg-[var(--status-justificada-bg)]", text: "text-[var(--status-justificada-text)]", icon: isReagendado ? <RefreshCcw size={10} className="md:w-3 md:h-3" /> : <AlertCircle size={10} className="md:w-3 md:h-3" /> },
                       };
 
-                      const config = statusConfig[att.status] || { color: "bg-[var(--text-muted)]", label: att.status, bg: "bg-[var(--surface-alt)]", text: "text-[var(--text-secondary)]", icon: <Clock size={12} /> };
+                      const config = statusConfig[att.status] || { color: "bg-[var(--text-muted)]", label: att.status, bg: "bg-[var(--surface-alt)]", text: "text-[var(--text-secondary)]", icon: <Clock size={10} className="md:w-3 md:h-3" /> };
 
                       return (
-                        <div key={att.id} className="relative pl-12 pb-10 group last:pb-0">
+                        <div key={att.id} className="relative pl-10 md:pl-12 pb-8 md:pb-10 group last:pb-0">
                           {hasFilho && (
-                            <div className="absolute left-[19px] top-10 bottom-0 w-0.5 bg-[var(--peach)]/30 z-0" />
+                            <div className="absolute left-[15px] md:left-[19px] top-8 md:top-10 bottom-0 w-0.5 bg-[var(--peach)]/30 z-0" />
                           )}
                           
-                          <div className={`absolute left-0 top-1 w-10 h-10 rounded-full border-4 border-[var(--surface)] shadow-sm flex items-center justify-center z-10 transition-transform group-hover:scale-105 ${config.color} text-white ${isFilho ? 'ring-2 ring-[var(--peach)] ring-offset-2 ring-offset-[var(--surface)]' : ''}`}>
+                          <div className={`absolute left-0 top-1 w-8 h-8 md:w-10 md:h-10 rounded-full border-4 border-[var(--surface)] shadow-sm flex items-center justify-center z-10 transition-transform group-hover:scale-105 ${config.color} text-white ${isFilho ? 'ring-2 ring-[var(--peach)] ring-offset-2 ring-offset-[var(--surface)]' : ''}`}>
                             {config.icon}
                           </div>
 
@@ -1753,9 +1835,9 @@ export default function PatientRecord() {
 
           {/* Agenda Tab */}
           {activeTab === "settings" && (
-            <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
+            <div className="space-y-5 animate-fade-in flex flex-col md:flex-1 md:min-h-0">
               {/* Stats Summary */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <KpiCard compact icon={<Calendar size={14} />} iconBg="var(--status-presente-bg)" iconColor="var(--status-presente-text)" label="Horários Ativos" value={agendaStats.totalActive} />
                 <KpiCard compact icon={<Activity size={14} />} iconBg="var(--status-confirmado-bg)" iconColor="var(--status-confirmado-text)" label="Sessões no Mês" value={agendaStats.thisMonthCount} />
                 <KpiCard compact icon={<Clock size={14} />} iconBg="var(--surface-alt)" iconColor="var(--text-secondary)" label="Próxima Sessão" value={agendaStats.nextSession ? format(agendaStats.nextSession.date, "dd/MM", { locale: ptBR }) + " • " + agendaStats.nextSession.time : "—"} />
@@ -1763,44 +1845,49 @@ export default function PatientRecord() {
               </div>
 
               {/* Filtro de Período */}
-              <div className="flex items-center gap-2 flex-wrap shrink-0">
-                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mr-1">Período</span>
-                {[
-                  { key: "thisMonth", label: "Este Mês" },
-                  { key: "lastMonth", label: "Mês Anterior" },
-                  { key: "custom", label: "Personalizado" },
-                ].map(opt => (
-                  <button
-                    key={opt.key}
-                    onClick={() => {
-                      setSelectedCalendarDay(null);
-                      setCalendarPeriodFilter(opt.key);
-                      const now = new Date();
-                      if (opt.key === "thisMonth") {
-                        setCalendarDate(now);
-                        setCalendarCustomMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
-                      } else if (opt.key === "lastMonth") {
-                        const d = subMonths(now, 1);
-                        setCalendarDate(d);
-                        setCalendarCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-                      } else if (opt.key === "custom") {
-                        const [y, m] = calendarCustomMonth.split("-").map(Number);
-                        setCalendarDate(new Date(y, m - 1, 1));
-                      }
-                    }}
-                    className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
-                      calendarPeriodFilter === opt.key
-                        ? "bg-[var(--sage)] text-white shadow-sm"
-                        : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--sage)] hover:text-[var(--sage)]"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+              <div className="flex flex-col md:flex-row md:items-center gap-2 pb-1 shrink-0">
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                  <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mr-1 hidden md:inline-block">Período</span>
+                  {[
+                    { key: "thisMonth", label: "Este Mês", mobile: true },
+                    { key: "lastMonth", label: "Mês Anterior", mobile: false },
+                    { key: "custom", label: "Personalizado", mobile: true },
+                  ].map(opt => (
+                    <button
+                      key={opt.key}
+                      onClick={() => {
+                        setSelectedCalendarDay(null);
+                        setCalendarPeriodFilter(opt.key);
+                        const now = new Date();
+                        if (opt.key === "thisMonth") {
+                          setCalendarDate(now);
+                          setCalendarCustomMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
+                        } else if (opt.key === "lastMonth") {
+                          const d = subMonths(now, 1);
+                          setCalendarDate(d);
+                          setCalendarCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+                        } else if (opt.key === "custom") {
+                          const [y, m] = calendarCustomMonth.split("-").map(Number);
+                          setCalendarDate(new Date(y, m - 1, 1));
+                        }
+                      }}
+                      className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all whitespace-nowrap text-center flex-1 md:flex-initial md:shrink-0 ${
+                        opt.mobile ? "" : "hidden md:inline-block"
+                      } ${
+                        calendarPeriodFilter === opt.key
+                          ? "bg-[var(--sage)] text-white shadow-sm"
+                          : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--sage)] hover:text-[var(--sage)]"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                
                 {calendarPeriodFilter === "custom" && (
-                  <div className="flex items-center gap-1 bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
+                  <div className="flex items-center justify-between w-full md:w-auto gap-1 bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm p-1">
                     <button onClick={() => { setSelectedCalendarDay(null); const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-[var(--text-muted)] hover:text-[var(--sage)] hover:bg-[var(--sage-light)] transition-all"><ChevronLeft size={16} /></button>
-                    <select value={calendarCustomMonth} onChange={e => { setSelectedCalendarDay(null); setCalendarCustomMonth(e.target.value); const [y, m] = e.target.value.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-[var(--text-primary)] bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
+                    <select value={calendarCustomMonth} onChange={e => { setSelectedCalendarDay(null); setCalendarCustomMonth(e.target.value); const [y, m] = e.target.value.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-[var(--text-primary)] bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 flex-1 md:flex-initial min-w-[80px]">
                       {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
                         const monthVal = i + 1;
                         const currentYear = calendarCustomMonth.split("-")[0];
@@ -1816,7 +1903,7 @@ export default function PatientRecord() {
               </div>
 
               {/* Calendar Card */}
-              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div className="card p-4 md:p-6 flex-1 flex flex-col min-h-0 overflow-hidden">
                 {loadingAppointments ? (
                   <div className="flex-1 flex items-center justify-center">
                     <div className="text-center">
@@ -1825,10 +1912,10 @@ export default function PatientRecord() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex-1 flex gap-6 min-h-0 overflow-hidden">
+                  <div className="flex-1 flex flex-col md:flex-row gap-4 md:gap-6 min-h-0 overflow-y-auto md:overflow-hidden">
                     {/* Left: Calendar */}
-                      <div className="w-[60%] flex flex-col min-h-0">
-                        <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-wide mb-3 shrink-0">Calendário de Sessões</h3>
+                      <div className="w-full md:w-[60%] flex flex-col min-h-0">
+                        <h3 className="text-sm md:text-base font-bold text-[var(--text-primary)] uppercase tracking-wide mb-3 shrink-0">Calendário de Sessões</h3>
                         <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] flex flex-col flex-1 min-h-0 overflow-hidden">
 
                         <DayPicker
@@ -1923,7 +2010,7 @@ export default function PatientRecord() {
                       </div>
 
                     {/* Right: Agenda */}
-                    <div className="w-[40%] flex flex-col pr-2 gap-3">
+                    <div className="w-full md:w-[40%] flex flex-col md:pr-2 gap-3">
                       <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-wide shrink-0">Agendamentos</h3>
                       <div className="flex-1 min-h-0 overflow-y-auto patients-scrollbar flex flex-col">
                       {showEditChoice && editingAppointment && (
@@ -2224,9 +2311,9 @@ export default function PatientRecord() {
 
           {/* Financial Tab */}
           {activeTab === "financial" && (
-            <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
+            <div className="space-y-5 animate-fade-in flex flex-col md:flex-1 md:min-h-0">
               {/* Financial Dashboard */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <KpiCard compact icon={<DollarSign size={14} />} iconBg="var(--status-presente-bg)" iconColor="var(--status-presente-text)" label="Total Pago" value={`R$ ${filteredPayments.reduce((acc, p) => acc + p.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
                 <KpiCard compact icon={<Clock size={14} />} iconBg="var(--status-justificada-bg)" iconColor="var(--status-justificada-text)" label="Sessões Pendentes" value={attendances.filter(a => !a.paymentId && (a.status === 'presente' || a.status === 'falta')).length} />
                 <KpiCard compact icon={<Receipt size={14} />} iconBg="var(--status-confirmado-bg)" iconColor="var(--status-confirmado-text)" label="Lançamentos Realizados" value={filteredPayments.length} />
@@ -2239,40 +2326,45 @@ export default function PatientRecord() {
               </div>
 
               {/* Filtro de Período */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mr-1">Período</span>
-                {[
-                  { key: "thisMonth", label: "Este Mês" },
-                  { key: "lastMonth", label: "Mês Anterior" },
-                  { key: "last3Months", label: "Últimos 3 Meses" },
-                  { key: "all", label: "Todo Histórico" },
-                  { key: "custom", label: "Personalizado" },
-                ].map(opt => (
-                  <button
-                    key={opt.key}
-                    onClick={() => {
-                      setPeriodFilter(opt.key);
-                      const now = new Date();
-                      if (opt.key === "thisMonth") {
-                        setCustomMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
-                      } else if (opt.key === "lastMonth") {
-                        const d = subMonths(now, 1);
-                        setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-                      }
-                    }}
-                    className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
-                      periodFilter === opt.key
-                        ? "bg-[var(--sage)] text-white shadow-sm"
-                        : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--sage)] hover:text-[var(--sage)]"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+              <div className="flex flex-col md:flex-row md:items-center gap-2 pb-1">
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                  <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mr-1 hidden md:inline-block">Período</span>
+                  {[
+                    { key: "thisMonth", label: "Este Mês", mobile: true },
+                    { key: "lastMonth", label: "Mês Anterior", mobile: false },
+                    { key: "last3Months", label: "Últimos 3 Meses", mobile: false },
+                    { key: "all", label: "Todo Histórico", mobile: false },
+                    { key: "custom", label: "Personalizado", mobile: true },
+                  ].map(opt => (
+                    <button
+                      key={opt.key}
+                      onClick={() => {
+                        setPeriodFilter(opt.key);
+                        const now = new Date();
+                        if (opt.key === "thisMonth") {
+                          setCustomMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
+                        } else if (opt.key === "lastMonth") {
+                          const d = subMonths(now, 1);
+                          setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+                        }
+                      }}
+                      className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all whitespace-nowrap text-center flex-1 md:flex-initial md:shrink-0 ${
+                        opt.mobile ? "" : "hidden md:inline-block"
+                      } ${
+                        periodFilter === opt.key
+                          ? "bg-[var(--sage)] text-white shadow-sm"
+                          : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--sage)] hover:text-[var(--sage)]"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                
                 {periodFilter === "custom" && (
-                  <div className="flex items-center gap-1 bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
+                  <div className="flex items-center justify-between w-full md:w-auto gap-1 bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm p-1">
                     <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-[var(--text-muted)] hover:text-[var(--sage)] hover:bg-[var(--sage-light)] transition-all"><ChevronLeft size={16} /></button>
-                    <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-[var(--text-primary)] bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
+                    <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-[var(--text-primary)] bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 flex-1 md:flex-initial min-w-[80px]">
                       {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
                         const monthVal = i + 1;
                         const currentYear = customMonth.split("-")[0];
@@ -2288,11 +2380,11 @@ export default function PatientRecord() {
               </div>
 
               {/* Payments History Table */}
-              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-3">
+              <div className="card p-6 md:flex-1 flex flex-col gap-3">
                 <div className="flex items-center justify-between shrink-0">
                   <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-wide">Histórico de Lançamentos</h3>
                 </div>
-                <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
+                <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] md:flex-1 flex flex-col">
                 {loadingPayments ? (
                   <div className="text-center py-20 opacity-50 flex-1 flex items-center justify-center">
                     <div className="w-10 h-10 border-4 border-[var(--sage)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
@@ -2307,7 +2399,9 @@ export default function PatientRecord() {
                     <p className="text-xs text-[var(--text-muted)] mt-2 max-w-xs leading-relaxed">Lançamentos de pagamento aparecerão aqui conforme você registrar os blocos de sessões.</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto overflow-y-auto patients-scrollbar flex-1 min-h-0">
+                  <>
+                  {/* Desktop: Table */}
+                  <div className="hidden md:block overflow-x-auto overflow-y-auto patients-scrollbar flex-1 min-h-0">
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest border-b border-[var(--border)]">
@@ -2412,10 +2506,53 @@ export default function PatientRecord() {
                       </tbody>
                     </table>
                   </div>
+
+                  {/* Mobile: Card list */}
+                  <div className="md:hidden space-y-2">
+                    {payments.map(payment => (
+                      <div key={payment.id} className="p-3 bg-[var(--surface)] rounded-[14px] border border-[var(--border)]">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-bold text-[var(--text-primary)]">
+                              R$ {payment.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            </p>
+                            <p className="text-[10px] text-[var(--text-muted)] font-medium mt-0.5">
+                              {payment.attendances.length > 0 
+                                ? `${format(new Date(payment.attendances[0].date), 'dd/MM/yy')} a ${format(new Date(payment.attendances[payment.attendances.length-1].date), 'dd/MM/yy')}`
+                                : 'Sem sessões vinculadas'}
+                              {' • '}{payment.attendances.length} sessões
+                            </p>
+                          </div>
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 ${
+                            payment.receiptIssued 
+                              ? "bg-[var(--status-presente-bg)] text-[var(--status-presente-text)]" 
+                              : "bg-[var(--status-justificada-bg)] text-[var(--status-justificada-text)]"
+                          }`}>
+                            <Receipt size={8} />
+                            {payment.receiptIssued ? "Recibo" : "Pendente"}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <p className="text-[10px] text-[var(--text-muted)] font-medium">
+                            {format(new Date(payment.paymentDate), 'dd/MM/yyyy')} • {payment.method}
+                          </p>
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => openEditPayment(payment)} className="p-1.5 text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] rounded-lg transition-all" title="Editar">
+                              <Pencil size={14} />
+                            </button>
+                            <button onClick={() => handleGenerateReceipt(payment)} className="p-1.5 text-[var(--sage)] hover:bg-[var(--sage-light)] rounded-lg transition-all" title="PDF">
+                              <Download size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  </>
                 )}  
                 </div>
                 {/* Action Buttons */}
-                <div className="flex items-center gap-3 shrink-0 justify-end">
+                <div className="flex items-center gap-2 md:gap-3 shrink-0 justify-end">
                   {payments.length > 0 && (
                     <button 
                       onClick={() => handleGenerateAllReceipts()} 
@@ -2452,9 +2589,9 @@ export default function PatientRecord() {
 
           {/* Share Tab */}
           {activeTab === "share" && (
-            <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
+            <div className="space-y-5 animate-fade-in flex flex-col md:flex-1 md:min-h-0">
               {/* Stats Summary */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 <KpiCard compact icon={<Send size={14} />} iconBg="var(--status-justificada-bg)" iconColor="var(--status-justificada-text)" label="Pendentes" value={patientShareLinks.filter(l => l.status === "PENDENTE").length} />
                 <KpiCard compact icon={<Check size={14} />} iconBg="var(--status-presente-bg)" iconColor="var(--status-presente-text)" label="Respondidos" value={patientShareLinks.filter(l => l.status === "RESPONDIDO").length} />
                 <KpiCard compact icon={<TrendingUp size={14} />} iconBg="var(--status-confirmado-bg)" iconColor="var(--status-confirmado-text)" label="Adesão" value={patientShareLinks.length > 0
@@ -2463,40 +2600,45 @@ export default function PatientRecord() {
               </div>
 
               {/* Filtro de Período */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mr-1">Período</span>
-                {[
-                  { key: "thisMonth", label: "Este Mês" },
-                  { key: "lastMonth", label: "Mês Anterior" },
-                  { key: "last3Months", label: "Últimos 3 Meses" },
-                  { key: "all", label: "Todo Histórico" },
-                  { key: "custom", label: "Personalizado" },
-                ].map(opt => (
-                  <button
-                    key={opt.key}
-                    onClick={() => {
-                      setPeriodFilter(opt.key);
-                      const now = new Date();
-                      if (opt.key === "thisMonth") {
-                        setCustomMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
-                      } else if (opt.key === "lastMonth") {
-                        const d = subMonths(now, 1);
-                        setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-                      }
-                    }}
-                    className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
-                      periodFilter === opt.key
-                        ? "bg-[var(--sage)] text-white shadow-sm"
-                        : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--sage)] hover:text-[var(--sage)]"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+              <div className="flex flex-col md:flex-row md:items-center gap-2 pb-1">
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                  <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mr-1 hidden md:inline-block">Período</span>
+                  {[
+                    { key: "thisMonth", label: "Este Mês", mobile: true },
+                    { key: "lastMonth", label: "Mês Anterior", mobile: false },
+                    { key: "last3Months", label: "Últimos 3 Meses", mobile: false },
+                    { key: "all", label: "Todo Histórico", mobile: false },
+                    { key: "custom", label: "Personalizado", mobile: true },
+                  ].map(opt => (
+                    <button
+                      key={opt.key}
+                      onClick={() => {
+                        setPeriodFilter(opt.key);
+                        const now = new Date();
+                        if (opt.key === "thisMonth") {
+                          setCustomMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
+                        } else if (opt.key === "lastMonth") {
+                          const d = subMonths(now, 1);
+                          setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+                        }
+                      }}
+                      className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all whitespace-nowrap text-center flex-1 md:flex-initial md:shrink-0 ${
+                        opt.mobile ? "" : "hidden md:inline-block"
+                      } ${
+                        periodFilter === opt.key
+                          ? "bg-[var(--sage)] text-white shadow-sm"
+                          : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--sage)] hover:text-[var(--sage)]"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                
                 {periodFilter === "custom" && (
-                  <div className="flex items-center gap-1 bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
+                  <div className="flex items-center justify-between w-full md:w-auto gap-1 bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm p-1">
                     <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-[var(--text-muted)] hover:text-[var(--sage)] hover:bg-[var(--sage-light)] transition-all"><ChevronLeft size={16} /></button>
-                    <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-[var(--text-primary)] bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
+                    <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-[var(--text-primary)] bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 flex-1 md:flex-initial min-w-[80px]">
                       {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
                         const monthVal = i + 1;
                         const currentYear = customMonth.split("-")[0];
@@ -2512,11 +2654,11 @@ export default function PatientRecord() {
               </div>
 
               {/* Instrumentos List */}
-              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-3">
+              <div className="card p-6 md:flex-1 flex flex-col gap-3">
                 <div className="flex items-center justify-between shrink-0">
                   <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-wide">Compartilhar Instrumentos</h3>
                 </div>
-                <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
+                <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] md:flex-1 flex flex-col">
                 {loadingLinks ? (
                   <div className="text-center py-20 opacity-50 flex-1 flex items-center justify-center">
                     <div className="w-10 h-10 border-4 border-[var(--sage)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
@@ -2533,7 +2675,9 @@ export default function PatientRecord() {
                     </p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto overflow-y-auto patients-scrollbar flex-1 min-h-0">
+                  <>
+                  {/* Desktop: Table */}
+                  <div className="hidden md:block overflow-x-auto overflow-y-auto patients-scrollbar flex-1 min-h-0">
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest border-b border-[var(--border)]">
@@ -2598,6 +2742,61 @@ export default function PatientRecord() {
                       </tbody>
                     </table>
                   </div>
+
+                  {/* Mobile: Card list */}
+                  <div className="md:hidden space-y-2">
+                    {filteredLinks.map(link => {
+                      const shareUrl = `${window.location.origin}/form/${link.token}`;
+                      return (
+                        <div key={link.id} className="p-3 bg-[var(--surface)] rounded-[14px] border border-[var(--border)]">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-bold text-[var(--text-primary)] truncate">{link.form?.title || "—"}</p>
+                              <p className="text-[10px] text-[var(--text-muted)] font-medium mt-0.5">
+                                Criado em {new Date(link.createdAt).toLocaleDateString('pt-BR')}
+                              </p>
+                            </div>
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 ${
+                              link.status === "RESPONDIDO" 
+                                ? "bg-[var(--status-presente-bg)] text-[var(--status-presente-text)]" 
+                                : "bg-[var(--status-justificada-bg)] text-[var(--status-justificada-text)]"
+                            }`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${
+                                link.status === "RESPONDIDO" ? "bg-[var(--sage)]" : "bg-[var(--peach)]"
+                              }`} />
+                              {link.status === "RESPONDIDO" ? "Respondido" : "Pendente"}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3 text-[10px] text-[var(--text-muted)] font-medium">
+                              <span>{link.responseCount || 0} respostas</span>
+                              {link.lastResponseAt && (
+                                <span>Última: {new Date(link.lastResponseAt).toLocaleDateString('pt-BR')}</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={async () => {
+                                  await navigator.clipboard.writeText(shareUrl);
+                                  alert("Link copiado!");
+                                }}
+                                className="text-[10px] font-bold text-[var(--sage)] hover:opacity-90 bg-[var(--sage-light)] px-2 py-1 rounded-lg transition-colors border border-[var(--sage)]/20"
+                              >
+                                Link
+                              </button>
+                              <button
+                                onClick={() => handleRevokeLink(link.id)}
+                                className="p-1.5 rounded-lg text-red-500 hover:bg-red-500/10 transition-colors"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  </>
                 )}
                 </div>
                 {/* Action Buttons */}
@@ -2615,16 +2814,16 @@ export default function PatientRecord() {
 
           {/* Prontuário Tab */}
           {activeTab === "notes" && (
-            <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
-              <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-3">
+            <div className="space-y-5 animate-fade-in flex flex-col md:flex-1 md:min-h-0">
+              <div className="card p-6 md:flex-1 flex flex-col gap-3">
                 <div className="flex items-center justify-between shrink-0">
                   <div>
                     <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-wide">Prontuário</h3>
                     <p className="text-xs text-[var(--text-muted)]">Anotações e documentos</p>
                   </div>
                 </div>
-                <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
-                  <div className="flex-1 flex flex-col min-h-0">
+                <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] md:flex-1 flex flex-col">
+                  <div className="flex-1 flex flex-col md:min-h-0">
                     <div className="shrink-0">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
@@ -2696,7 +2895,7 @@ export default function PatientRecord() {
                   </div>
                 </div>
                 {/* Action Buttons */}
-                <div className="flex items-center gap-3 shrink-0 justify-end">
+                <div className="flex items-center gap-2 md:gap-3 shrink-0 justify-end">
                   <button 
                     type="button" 
                     className="py-2 px-4 rounded-[12px] bg-[var(--surface-alt)] border border-[var(--border)] text-[var(--text-primary)] font-bold text-xs hover:opacity-95 transition-all outline-none shadow-sm flex items-center gap-1.5" 
@@ -3692,14 +3891,15 @@ function TabButton({ active, onClick, icon, label }) {
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-2 px-4 py-2 rounded-[10px] text-sm font-bold transition-all duration-150 outline-none ${
+      className={`flex-1 md:flex-initial flex items-center justify-center gap-1.5 md:gap-2 p-2.5 md:px-4 md:py-2 rounded-[10px] text-xs md:text-sm font-bold transition-all duration-150 outline-none whitespace-nowrap ${
         active 
           ? "bg-[var(--sage)] text-white shadow-sm border border-transparent" 
           : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] border border-transparent"
       }`}
+      title={label}
     >
       {icon}
-      {label}
+      <span className="hidden md:inline">{label}</span>
     </button>
   );
 }

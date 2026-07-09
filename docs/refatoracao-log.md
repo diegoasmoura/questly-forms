@@ -44,4 +44,10 @@ Este log rastreia as voltas do loop de refatoração aplicadas ao QuestlyForms.
 - **Meta**: Solucionar o erro de tipo `TypeError: Cannot read properties of undefined (reading 'finalY')` que impedia o download de prontuários. Substituímos referências de `doc.previousAutoTable` para `doc.lastAutoTable` e aplicamos encadeamento opcional (`doc.lastAutoTable?.finalY`) com valores de fallback seguros.
 - **Evidência**: Vitest 20/20 verde. Download de arquivos PDF funciona normalmente sem gerar exceções no console ou nas notificações de toast.
 
+## Turno 8: Responsividade Mobile do Prontuário (Fase 1.8)
+- **Módulo**: `patient-record-mobile`
+- **Data**: 2026-07-09
+- **Meta**: Tornar a tela de Prontuário (`PatientRecord.jsx`) responsiva e utilizável no celular. Otimizamos sidebar lateral em cabeçalho compacto sanfonável, adicionamos abas deslizantes de ícones distribuídos uniformemente, corrigimos filtros de período para autoempilhamento em colunas no mobile sem overflow/scroll horizontal, e removemos restrições de flexbox para permitir rolagem vertical livre com margem de segurança para o BottomNav.
+- **Evidência**: Build de produção compilado com sucesso sem erros. Layouts de cards mobile para tabelas de Financeiro e Instrumentos implementados e testados.
+
 

@@ -70,7 +70,7 @@ export default function GlobalHeader() {
 
   return (
     <>
-      <div className="relative flex items-start justify-between gap-5 pb-5 border-b border-[var(--border)] overflow-visible shrink-0 px-6 pt-6 bg-[var(--bg)] z-30 transition-colors duration-200">
+      <div className="relative flex items-start justify-between gap-5 pb-4 border-b border-[var(--border)] overflow-visible shrink-0 px-6 pt-3 bg-[var(--bg)] z-30 transition-colors duration-200">
         <span className="absolute w-[150px] h-[150px] rounded-full bg-[var(--peach-light)] opacity-20 blur-3xl top-0 right-24 pointer-events-none" />
         <span className="absolute w-[90px] h-[90px] rounded-full bg-[var(--sage-light)] opacity-20 blur-3xl bottom-0 right-[280px] pointer-events-none" />
         <span className="absolute w-[70px] h-[70px] rounded-full bg-[var(--purple-light)] opacity-20 blur-3xl top-2 -right-[8px] pointer-events-none" />
