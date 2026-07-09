@@ -437,7 +437,7 @@ const resetImportModal = () => {
   return (
     <div className="h-full flex flex-col overflow-hidden animate-fade-in relative">
       {/* New Sleek Toolbar */}
-      <div className="px-6 py-4 flex flex-row items-center justify-between gap-2 sm:gap-4 shrink-0 sticky top-0 z-40 bg-[var(--bg)] shadow-[0_10px_20px_-10px_var(--bg)]">
+      <div className="px-3 sm:px-6 py-4 flex flex-row items-center justify-between gap-2 sm:gap-4 shrink-0 sticky top-0 z-40 bg-[var(--bg)] shadow-[0_10px_20px_-10px_var(--bg)]">
         
         {/* Search */}
         <div className="relative flex-1 min-w-0 group">
@@ -529,7 +529,7 @@ const resetImportModal = () => {
       </div>
 
       {/* patients List */}
-      <div className="flex-1 flex flex-col px-6 pb-6 min-h-0">
+      <div className="flex-1 flex flex-col px-3 sm:px-6 pb-3 sm:pb-6 min-h-0">
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map(i => (
@@ -2130,20 +2130,48 @@ function PaginationFooter({ currentPage, totalPages, totalItems, itemsPerPage, o
   const perPageOptions = [8, 12, 24, 48];
 
   return (
-    <div className={`px-4 py-3 flex items-center justify-between gap-4 ${transparent ? 'bg-transparent border-none' : 'bg-[var(--surface)]'}`}>
-      <div className="flex items-center gap-3">
-        <span className="text-[13px] text-[var(--text-muted)] whitespace-nowrap">
-          Mostrando <span className="font-semibold text-[var(--text-primary)]">{totalItems === 0 ? 0 : startItem}</span> a <span className="font-semibold text-[var(--text-primary)]">{totalItems === 0 ? 0 : endItem}</span> de <span className="font-semibold text-[var(--text-primary)]">{totalItems}</span> pacientes
+    <div className={`px-3 sm:px-4 py-2.5 sm:py-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4 ${transparent ? 'bg-transparent border-none' : 'bg-[var(--surface)]'}`}>
+      {/* Linha 1 no mobile / Esquerda no desktop */}
+      <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3">
+        <span className="text-[12px] sm:text-[13px] text-[var(--text-muted)] whitespace-nowrap">
+          <span className="hidden sm:inline">Mostrando </span>
+          <span className="font-semibold text-[var(--text-primary)]">{totalItems === 0 ? 0 : startItem}</span>
+          <span className="sm:hidden">–</span>
+          <span className="hidden sm:inline"> a </span>
+          <span className="font-semibold text-[var(--text-primary)]">{totalItems === 0 ? 0 : endItem}</span> de <span className="font-semibold text-[var(--text-primary)]">{totalItems}</span>
         </span>
+        {/* Setas de navegação — aparecem aqui no mobile */}
+        <div className="flex sm:hidden items-center gap-0.5 shrink-0">
+          <button 
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1 || totalItems === 0 || totalPages <= 1}
+            className="p-1 rounded-lg border border-transparent text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <span className="text-[12px] font-medium text-[var(--text-primary)] px-1 whitespace-nowrap">
+            {totalItems === 0 ? 0 : currentPage}/{totalItems === 0 ? 0 : totalPages}
+          </span>
+          <button 
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages || totalItems === 0 || totalPages <= 1}
+            className="p-1 rounded-lg border border-transparent text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      </div>
+      {/* Linha 2 no mobile / Centro-direita no desktop */}
+      <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
         {onItemsPerPageChange && (
           <div className="flex items-center gap-1.5">
-            <span className="text-[12px] text-[var(--text-muted)] hidden sm:block">Exibir:</span>
+            <span className="text-[11px] sm:text-[12px] text-[var(--text-muted)]">Exibir:</span>
             <div className="flex items-center gap-0.5 p-0.5 bg-[var(--surface-alt)] rounded-[8px] border border-[var(--border)]">
               {perPageOptions.map(opt => (
                 <button
                   key={opt}
                   onClick={() => onItemsPerPageChange(opt)}
-                  className={`px-2.5 py-1 rounded-[6px] text-[12px] font-semibold transition-colors ${
+                  className={`px-2 sm:px-2.5 py-1 rounded-[6px] text-[11px] sm:text-[12px] font-semibold transition-colors ${
                     itemsPerPage === opt
                       ? 'bg-[var(--surface)] text-[var(--sage)] shadow-sm border border-[var(--border)]'
                       : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
@@ -2155,25 +2183,26 @@ function PaginationFooter({ currentPage, totalPages, totalItems, itemsPerPage, o
             </div>
           </div>
         )}
-      </div>
-      <div className="flex items-center gap-1 shrink-0">
-        <button 
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1 || totalItems === 0 || totalPages <= 1}
-          className="p-1.5 rounded-lg border border-transparent text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] hover:border-[var(--border)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-transparent transition-all"
-        >
-          <ChevronLeft size={18} />
-        </button>
-        <span className="text-[13px] font-medium text-[var(--text-primary)] px-2 whitespace-nowrap">
-          {totalItems === 0 ? 0 : currentPage} / {totalItems === 0 ? 0 : totalPages}
-        </span>
-        <button 
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages || totalItems === 0 || totalPages <= 1}
-          className="p-1.5 rounded-lg border border-transparent text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] hover:border-[var(--border)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-transparent transition-all"
-        >
-          <ChevronRight size={18} />
-        </button>
+        {/* Setas de navegação — desktop only */}
+        <div className="hidden sm:flex items-center gap-1 shrink-0">
+          <button 
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1 || totalItems === 0 || totalPages <= 1}
+            className="p-1.5 rounded-lg border border-transparent text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] hover:border-[var(--border)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-transparent transition-all"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <span className="text-[13px] font-medium text-[var(--text-primary)] px-2 whitespace-nowrap">
+            {totalItems === 0 ? 0 : currentPage} / {totalItems === 0 ? 0 : totalPages}
+          </span>
+          <button 
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages || totalItems === 0 || totalPages <= 1}
+            className="p-1.5 rounded-lg border border-transparent text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] hover:border-[var(--border)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-transparent transition-all"
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
       </div>
     </div>
   );
