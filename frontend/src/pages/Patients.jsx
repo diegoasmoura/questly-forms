@@ -432,17 +432,17 @@ const resetImportModal = () => {
         
         {/* Search */}
         <div className="relative flex-1 min-w-0 group">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[var(--sage)] transition-colors" size={18} />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--sage)] transition-colors" size={18} />
           <input
             ref={searchInputRef}
             type="text"
             placeholder="Procurar paciente..."
-            className="w-full bg-[var(--surface-alt)] border border-transparent rounded-[16px] pl-10 pr-3 md:pr-12 py-2 sm:py-2.5 text-sm outline-none focus:bg-[var(--surface)] focus:border-[var(--sage)] focus:ring-4 focus:ring-[var(--sage-light)] transition-all placeholder:text-slate-400 text-slate-700"
+            className="w-full bg-[var(--surface-alt)] border border-transparent rounded-[16px] pl-10 pr-3 md:pr-12 py-2 sm:py-2.5 text-sm outline-none focus:bg-[var(--surface)] focus:border-[var(--sage)]/50 focus:ring-4 focus:ring-[var(--sage)]/10 transition-all placeholder:text-[var(--text-muted)] text-[var(--text-primary)]"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-            <span className="hidden md:flex items-center justify-center px-1.5 py-0.5 rounded-[6px] bg-slate-200/50 text-[10px] font-bold text-slate-500 border border-slate-300 tracking-widest font-sans">
+            <span className="hidden md:flex items-center justify-center px-1.5 py-0.5 rounded-[6px] bg-[var(--surface)] text-[10px] font-bold text-[var(--text-muted)] border border-[var(--border)] tracking-widest font-sans">
               ⌘K
             </span>
           </div>
