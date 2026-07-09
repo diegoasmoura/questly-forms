@@ -21,6 +21,7 @@ import {
   UserCheck,
   UserX
 } from "lucide-react";
+import { getAvatarProps } from "../components/dashboard/Shared";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -113,7 +114,7 @@ function SessionCard({ session, date, onClick }) {
     default: "border-slate-200 bg-white hover:border-slate-300"
   };
 
-  const initials = patientName.split(" ")[0].slice(0, 2).toUpperCase();
+  const { initials, color: avatarColor } = getAvatarProps(patientName);
   const firstName = patientName.split(" ")[0] || "?";
 
   return (
@@ -121,12 +122,7 @@ function SessionCard({ session, date, onClick }) {
       onClick={() => onClick(session, date)}
       className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all shadow-sm ${statusStyles[attendanceStatus] || statusStyles.default}`}
     >
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 ${
-        attendanceStatus === "presente" ? "bg-brand-100 text-brand-600" :
-        attendanceStatus === "falta" ? "bg-red-100 text-red-600" :
-        attendanceStatus === "justificada" ? "bg-amber-100 text-amber-600" :
-        "bg-slate-100 text-slate-500"
-      }`}>
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0" style={{ backgroundColor: avatarColor.bg, color: avatarColor.text }}>
         {initials}
       </div>
       <div className="min-w-0 flex-1">
@@ -966,14 +962,14 @@ export default function Agenda() {
                             {sessions.map((session, idx) => {
                               const app = session.app;
                               const name = app.patient?.name || "Paciente";
-                              const initials = name.split(" ")[0].slice(0, 2).toUpperCase();
+                              const { initials, color: avatarColor } = getAvatarProps(name);
                               return (
                                 <div
                                   key={app.id + idx}
                                   onClick={() => openDetailModal(session, date)}
                                   className="flex items-center gap-2 p-3 rounded-lg border border-slate-200 bg-white hover:border-slate-300 transition-all group cursor-pointer mb-1"
                                 >
-                                  <div className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-500 font-black text-[9px] shrink-0">
+                                  <div className="w-7 h-7 rounded-md flex items-center justify-center font-black text-[9px] shrink-0" style={{ backgroundColor: avatarColor.bg, color: avatarColor.text }}>
                                     {initials}
                                   </div>
                                   <p className="text-xs font-bold text-slate-800 truncate flex-1 min-w-0 group-hover:text-slate-900 transition-colors">

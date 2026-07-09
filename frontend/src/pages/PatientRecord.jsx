@@ -1630,7 +1630,7 @@ export default function PatientRecord() {
                 <div className="flex items-center justify-between shrink-0">
                   <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-wide">Histórico de Sessões</h3>
                 </div>
-                <div className="p-4 bg-[var(--surface-alt)]/50 rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
+                <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0 overflow-hidden">
                 {loadingAttendances ? (
                   <div className="text-center py-20 opacity-50 flex-1 flex items-center justify-center">
                     <div className="w-10 h-10 border-4 border-[var(--sage)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
@@ -1828,7 +1828,7 @@ export default function PatientRecord() {
                     {/* Left: Calendar */}
                       <div className="w-[60%] flex flex-col min-h-0">
                         <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-wide mb-3 shrink-0">Calendário de Sessões</h3>
-                        <div className="p-4 bg-[var(--surface-alt)]/50 rounded-[20px] border border-[var(--border)] flex flex-col flex-1 min-h-0 overflow-hidden">
+                        <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] flex flex-col flex-1 min-h-0 overflow-hidden">
 
                         <DayPicker
                           month={calendarDate}
@@ -2007,7 +2007,7 @@ export default function PatientRecord() {
                       )}
 
                       {selectedCalendarDay ? (
-                        <div className="p-4 bg-[var(--surface-alt)]/50 rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
+                        <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
                           <div className="flex items-start justify-between mb-3 shrink-0">
                             <div>
                               <h4 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-tight">
@@ -2137,7 +2137,7 @@ export default function PatientRecord() {
                           </div>
                         </div>
                       ) : (
-                        <div className="p-4 bg-[var(--surface-alt)]/50 rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
+                        <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
                           <div className="flex items-start justify-between mb-3 shrink-0">
                             <div>
                               <h4 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-tight">Visão do Mês</h4>
@@ -2171,10 +2171,10 @@ export default function PatientRecord() {
                                     const appPatientId = app.patient?.id ?? app.patientId;
                                     const isOtherPatient = appPatientId && appPatientId !== id;
                                     const displayName = (isOtherPatient ? app.patient?.name : patient?.name) || "Paciente";
-                                    const initials = displayName.split(" ")[0].slice(0, 2).toUpperCase();
+                                    const { initials, color: avatarColor } = getAvatarProps(displayName);
                                     return (
                                       <div key={app.id} className={`flex items-center gap-2 p-3 rounded-[12px] border mb-1 ${conflict ? "border-[var(--status-falta-text)]/30 bg-[var(--status-falta-bg)]/30" : isOtherPatient ? "border-[var(--status-justificada-text)]/30 bg-[var(--status-justificada-bg)]/30" : "border-[var(--border)] bg-[var(--surface)] hover:border-[var(--text-muted)]/30"} transition-all`}>
-                                        <div className="w-7 h-7 rounded-md bg-[var(--surface-alt)] flex items-center justify-center text-[var(--text-muted)] font-bold text-[9px] shrink-0">
+                                        <div className={`w-7 h-7 rounded-md flex items-center justify-center font-bold text-[9px] shrink-0 ${isOtherPatient ? "bg-[var(--surface-alt)] text-[var(--text-muted)]" : ""}`} style={isOtherPatient ? {} : { backgroundColor: avatarColor.bg, color: avatarColor.text }}>
                                           {initials}
                                         </div>
                                         <p className={`text-xs font-bold truncate flex-1 min-w-0 ${isOtherPatient ? "text-[var(--status-justificada-text)]" : "text-[var(--text-primary)]"}`}>{displayName}</p>
@@ -2289,7 +2289,7 @@ export default function PatientRecord() {
                 <div className="flex items-center justify-between shrink-0">
                   <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-wide">Histórico de Lançamentos</h3>
                 </div>
-                <div className="p-4 bg-[var(--surface-alt)]/50 rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
+                <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
                 {loadingPayments ? (
                   <div className="text-center py-20 opacity-50 flex-1 flex items-center justify-center">
                     <div className="w-10 h-10 border-4 border-[var(--sage)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
@@ -2513,7 +2513,7 @@ export default function PatientRecord() {
                 <div className="flex items-center justify-between shrink-0">
                   <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-wide">Compartilhar Instrumentos</h3>
                 </div>
-                <div className="p-4 bg-[var(--surface-alt)]/50 rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
+                <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
                 {loadingLinks ? (
                   <div className="text-center py-20 opacity-50 flex-1 flex items-center justify-center">
                     <div className="w-10 h-10 border-4 border-[var(--sage)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
@@ -2620,7 +2620,7 @@ export default function PatientRecord() {
                     <p className="text-xs text-[var(--text-muted)]">Anotações e documentos</p>
                   </div>
                 </div>
-                <div className="p-4 bg-[var(--surface-alt)]/50 rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
+                <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
                   <div className="flex-1 flex flex-col min-h-0">
                     <div className="shrink-0">
                       <div className="flex items-center justify-between mb-3">
@@ -3043,7 +3043,7 @@ export default function PatientRecord() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-[var(--surface-alt)]/50 rounded-[20px] border border-[var(--border)]">
+              <div className="flex items-center justify-between p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)]">
                 <label className="flex items-center gap-3 cursor-pointer select-none">
                   <input
                     type="checkbox"
@@ -3152,7 +3152,7 @@ export default function PatientRecord() {
                 
                 {editTab === "identity" && (
                   <div className="space-y-5">
-                    <div className="flex items-center justify-between p-4 bg-[var(--surface-alt)]/50 rounded-[20px] border border-[var(--border)]">
+                    <div className="flex items-center justify-between p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)]">
                       <div className="flex items-center gap-3">
                         {formData.isActive ? (
                           <div className="w-10 h-10 rounded-[12px] bg-[var(--status-presente-bg)] flex items-center justify-center text-[var(--status-presente-text)]">

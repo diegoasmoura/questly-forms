@@ -55,8 +55,8 @@ export function KpiCard({ icon, iconBg, iconColor, label, value, sub, trend, urg
           {icon}
         </div>
         <div className="flex-1 min-w-0 flex items-baseline gap-1.5">
-          <p className="text-[13px] md:text-[16px] font-extrabold leading-none text-[var(--text-primary)] truncate">{value}</p>
-          <p className="text-[9px] md:text-[10px] font-bold text-[var(--text-secondary)] truncate">{label}</p>
+          <p className="text-[15px] md:text-[20px] font-extrabold leading-none text-[var(--text-primary)] truncate">{value}</p>
+          <p className="text-[11px] md:text-[12px] font-bold text-[var(--text-secondary)] truncate">{label}</p>
         </div>
       </div>
     );
