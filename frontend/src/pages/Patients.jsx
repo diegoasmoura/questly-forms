@@ -2326,7 +2326,7 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
       {/* Avatar Padronizado */}
       <div className="relative z-10 pointer-events-none shrink-0">
         <div 
-          className={`w-9 h-9 rounded-[10px] flex items-center justify-center font-extrabold text-[13px] transition-transform group-hover:scale-105 ${!isActive && !isBirthdayWeek ? 'grayscale opacity-60' : ''}`}
+          className={`w-9 h-9 rounded-[10px] flex items-center justify-center font-extrabold text-[13px] transition-transform group-hover:scale-105 border border-[var(--border)] ${!isActive && !isBirthdayWeek ? 'grayscale opacity-60' : ''}`}
           style={isBirthdayWeek ? { backgroundColor: '#F59E0B', color: 'white' } : { backgroundColor: avatarColor.bg, color: avatarColor.text }}
         >
           {isBirthdayWeek ? <PartyPopper size={14} /> : initials}
