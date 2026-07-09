@@ -540,7 +540,7 @@ const resetImportModal = () => {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2 mb-10 overflow-hidden transition-all min-h-[60vh]">
+          <div className="flex flex-col flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2 mb-10 overflow-hidden transition-all">
             
             {filteredPatients.length === 0 ? (
               <div className="p-16 sm:p-20 text-center flex flex-col items-center justify-center flex-1">
@@ -599,7 +599,7 @@ const resetImportModal = () => {
                 )}
               </div>
             ) : viewMode === "grid" ? (
-              <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 flex-1 bg-[var(--bg)]/30">
+              <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 flex-1 bg-[var(--bg)]/30 content-start">
                 {paginatedPatients.map((patient) => (
                   <PatientCard
                     key={patient.id}
