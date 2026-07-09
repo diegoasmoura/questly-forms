@@ -456,14 +456,14 @@ const resetImportModal = () => {
             <button
               onClick={() => handleViewMode("grid")}
               title="Visualização em Cards"
-              className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-[10px] transition-all ${viewMode === "grid" ? "bg-white shadow-sm text-[var(--sage)]" : "text-slate-400 hover:text-slate-600"}`}
+              className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-[10px] ${viewMode === "grid" ? "bg-white shadow-sm text-[var(--sage)]" : "text-slate-400 hover:text-slate-600"}`}
             >
               <LayoutGrid size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
             <button
               onClick={() => handleViewMode("list")}
               title="Visualização em Lista"
-              className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-[10px] transition-all ${viewMode === "list" ? "bg-white shadow-sm text-[var(--sage)]" : "text-slate-400 hover:text-slate-600"}`}
+              className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-[10px] ${viewMode === "list" ? "bg-white shadow-sm text-[var(--sage)]" : "text-slate-400 hover:text-slate-600"}`}
             >
               <List size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
@@ -540,8 +540,8 @@ const resetImportModal = () => {
             ))}
           </div>
         ) : viewMode === "grid" && filteredPatients.length > 0 ? (
-          <div className="flex flex-col mb-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 pt-6 pb-6 overflow-visible">
+          <div className="flex flex-col bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2 mb-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5 p-5 overflow-visible">
               {paginatedPatients.map((patient) => (
                 <PatientCard
                   key={patient.id}
@@ -552,14 +552,13 @@ const resetImportModal = () => {
               ))}
             </div>
             {filteredPatients.length > itemsPerPage && (
-              <div className="mt-2 mb-4">
+              <div className="border-t border-[var(--border)] shrink-0 mt-auto rounded-b-[24px] overflow-hidden">
                 <PaginationFooter 
                   currentPage={currentPage} 
                   totalPages={totalPages} 
                   totalItems={filteredPatients.length} 
                   itemsPerPage={itemsPerPage} 
                   onPageChange={setCurrentPage} 
-                  transparent={true}
                 />
               </div>
             )}
