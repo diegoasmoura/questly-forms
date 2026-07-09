@@ -541,7 +541,7 @@ const resetImportModal = () => {
           </div>
         ) : viewMode === "grid" && filteredPatients.length > 0 ? (
           <div className="flex flex-col flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 p-4 overflow-visible">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 p-4 flex-1 [&>*]:h-full" style={{gridAutoRows: '1fr'}}>
               {paginatedPatients.map((patient) => (
                 <PatientCard
                   key={patient.id}
@@ -551,9 +551,8 @@ const resetImportModal = () => {
                 />
               ))}
             </div>
-            <div className="flex-1" />
             {filteredPatients.length > itemsPerPage && (
-              <div className="border-t border-[var(--border)] shrink-0 mt-auto rounded-b-[24px] overflow-hidden">
+              <div className="border-t border-[var(--border)] shrink-0 rounded-b-[24px] overflow-hidden">
                 <PaginationFooter 
                   currentPage={currentPage} 
                   totalPages={totalPages} 
@@ -2093,7 +2092,7 @@ function PaginationFooter({ currentPage, totalPages, totalItems, itemsPerPage, o
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   return (
-    <div className={`px-6 py-4 flex items-center justify-between ${transparent ? 'bg-transparent border-none' : 'bg-[var(--surface)]'}`}>
+    <div className={`px-4 py-3 flex items-center justify-between ${transparent ? 'bg-transparent border-none' : 'bg-[var(--surface)]'}`}>
       <div className="text-[13px] text-[var(--text-muted)]">
         Mostrando <span className="font-semibold text-[var(--text-primary)]">{totalItems === 0 ? 0 : startItem}</span> a <span className="font-semibold text-[var(--text-primary)]">{endItem}</span> de <span className="font-semibold text-[var(--text-primary)]">{totalItems}</span> pacientes
       </div>
