@@ -520,7 +520,7 @@ const resetImportModal = () => {
       </div>
 
       {/* patients List */}
-      <div className="flex-1 overflow-y-auto px-6">
+      <div className="flex-1 flex flex-col px-6 pb-6 min-h-0">
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map(i => (
@@ -540,8 +540,8 @@ const resetImportModal = () => {
             ))}
           </div>
         ) : viewMode === "grid" && filteredPatients.length > 0 ? (
-          <div className="flex flex-col bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2 mb-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5 p-5 overflow-visible">
+          <div className="flex flex-col flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 p-4 overflow-visible">
               {paginatedPatients.map((patient) => (
                 <PatientCard
                   key={patient.id}
@@ -551,6 +551,7 @@ const resetImportModal = () => {
                 />
               ))}
             </div>
+            <div className="flex-1" />
             {filteredPatients.length > itemsPerPage && (
               <div className="border-t border-[var(--border)] shrink-0 mt-auto rounded-b-[24px] overflow-hidden">
                 <PaginationFooter 
@@ -564,7 +565,7 @@ const resetImportModal = () => {
             )}
           </div>
         ) : (
-          <div className="flex flex-col flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2 mb-10">
+          <div className="flex flex-col flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2">
             {filteredPatients.length === 0 ? (
               <div className="p-16 sm:p-20 text-center flex flex-col items-center justify-center flex-1">
                 <div className="w-20 h-20 bg-[var(--surface-alt)] rounded-full flex items-center justify-center mx-auto mb-6">
@@ -2184,7 +2185,7 @@ function PatientCard({ patient, onDelete, onEdit }) {
   })() : '-';
 
   return (
-    <div className={`bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full group ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'border-amber-400/60 shadow-[0_0_15px_rgba(251,191,36,0.15)]' : ''} relative`}>
+    <div className={`bg-[var(--bg)] border border-[var(--border)] rounded-[20px] shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full group ${!isActive ? 'opacity-70' : ''} ${isBirthdayWeek ? 'border-amber-400/60 shadow-[0_0_15px_rgba(251,191,36,0.15)]' : ''} relative`}>
       {isBirthdayWeek && (
         <div className="absolute -top-3 -left-3 w-10 h-10 bg-white rounded-[14px] shadow-xl flex items-center justify-center border border-amber-100 animate-bounce z-40 pointer-events-none">
           <PartyPopper size={20} className="text-amber-500" />
