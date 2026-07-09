@@ -14,6 +14,7 @@ import { ptBR } from "date-fns/locale";
 import { DayPicker } from "react-day-picker";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import { getAvatarProps } from "../components/dashboard/Shared";
 
 // Retorna o primeiro dia útil de um mês (seg-sex)
 const getFirstBusinessDay = (year, month) => {
@@ -1428,10 +1429,12 @@ export default function PatientRecord() {
     );
   }
 
+  const { initials, color: avatarColor } = getAvatarProps(patient.name);
+
   return (
     <>
     <div className="p-6 h-full flex flex-col overflow-hidden animate-fade-in">
-      <Link to="/patients" className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-4 group transition-colors shrink-0">
+      <Link to="/patients" className="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] mb-4 group transition-colors shrink-0">
         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
         Voltar para Lista de Pacientes
       </Link>
@@ -1443,33 +1446,36 @@ export default function PatientRecord() {
           <div className="lg:col-span-1 flex flex-col min-h-0">
             <div className="card p-6 flex-1 flex flex-col min-h-0">
               <div className="flex flex-col items-center text-center mb-6 shrink-0">
-                <div className="w-20 h-20 rounded-2xl bg-brand-900 flex items-center justify-center text-white font-black text-2xl mb-3 shadow-xl shadow-brand-900/20">
-                  {patient.name.split(" ")[0].slice(0, 2).toUpperCase()}
+                <div 
+                  className="w-20 h-20 rounded-[18px] flex items-center justify-center font-extrabold text-2xl mb-3 border border-[var(--border)] shadow-sm shrink-0"
+                  style={{ backgroundColor: avatarColor.bg, color: avatarColor.text }}
+                >
+                  {initials}
                 </div>
-                <h1 className="text-xl font-bold text-slate-900">{patient.name}</h1>
-                <p className="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-widest">Prontuário #{patient.id.slice(0, 8).toUpperCase()}</p>
+                <h1 className="text-xl font-bold text-[var(--text-primary)]">{patient.name}</h1>
+                <p className="text-[10px] font-bold text-[var(--text-muted)] mt-1 uppercase tracking-widest">Prontuário #{patient.id.slice(0, 8).toUpperCase()}</p>
               </div>
 
               <div className="shrink-0 space-y-3">
                 {patient.email && (
                   <div className="flex items-center justify-between px-2 py-1.5">
                     <div className="min-w-0 flex-1">
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Email</p>
-                      <p className="text-xs text-brand-700 font-medium truncate">{patient.email}</p>
+                      <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Email</p>
+                      <p className="text-xs text-[var(--text-primary)] font-semibold truncate">{patient.email}</p>
                     </div>
                   </div>
                 )}
                 {patient.phone && (
                   <div className="flex items-center justify-between px-2 py-1.5">
                     <div className="min-w-0 flex-1">
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Telefone</p>
-                      <p className="text-xs text-brand-700 font-medium truncate">{patient.phone}</p>
+                      <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Telefone</p>
+                      <p className="text-xs text-[var(--text-primary)] font-semibold truncate">{patient.phone}</p>
                     </div>
                   </div>
                 )}
                 <div className="px-2 py-1.5">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nascimento</p>
-                  <p className="text-xs text-brand-700 font-medium">
+                  <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Nascimento</p>
+                  <p className="text-xs text-[var(--text-primary)] font-semibold">
                     {patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : "Não informado"}
                     {patient.birthDate && (() => {
                       const today = new Date();
@@ -1477,21 +1483,21 @@ export default function PatientRecord() {
                       let age = today.getFullYear() - birth.getFullYear();
                       const monthDiff = today.getMonth() - birth.getMonth();
                       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
-                      return <span className="ml-1 text-slate-500">({age} anos)</span>;
+                      return <span className="ml-1 text-[var(--text-muted)] font-normal">({age} anos)</span>;
                     })()}
                   </p>
                 </div>
                 <div className="px-2 py-1.5">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Paciente desde</p>
-                  <p className="text-xs text-brand-700 font-medium">{new Date(patient.createdAt).toLocaleDateString('pt-BR')}</p>
+                  <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Paciente desde</p>
+                  <p className="text-xs text-[var(--text-primary)] font-semibold">{new Date(patient.createdAt).toLocaleDateString('pt-BR')}</p>
                 </div>
               </div>
 
               {/* Anotações Rápidas */}
               <div className="flex flex-col min-h-0 flex-1 pt-3">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 px-2 shrink-0">Anotações (Prontuário)</p>
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex-1 overflow-y-auto">
-                  <p className="text-xs text-slate-700 leading-relaxed">
+                <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1.5 px-2 shrink-0">Anotações (Prontuário)</p>
+                <div className="p-3 bg-[var(--surface-alt)] rounded-[14px] border border-[var(--border)] flex-1 overflow-y-auto patients-scrollbar">
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                     {patient.notes || "Nenhuma anotação registrada."}
                   </p>
                 </div>
@@ -1499,7 +1505,10 @@ export default function PatientRecord() {
 
               {/* Footer */}
               <div className="mt-4 shrink-0">
-                <button onClick={() => { setEditTab("identity"); loadAttachments(); setShowEditModal(true); }} className="w-full btn btn-primary text-xs py-3">
+                <button 
+                  onClick={() => { setEditTab("identity"); loadAttachments(); setShowEditModal(true); }} 
+                  className="w-full py-2.5 rounded-[12px] bg-[var(--sage)] hover:opacity-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-sm outline-none"
+                >
                   <Edit size={14} />
                   Ver Dados Completos
                 </button>
@@ -1508,18 +1517,18 @@ export default function PatientRecord() {
           </div>
 
           {/* Right Column: History */}
-          <div className="lg:col-span-3 flex flex-col min-h-0 gap-8">
+          <div className="lg:col-span-3 flex flex-col min-h-0 gap-6">
 
           {/* Tabs */}
           <div className="shrink-0">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-slate-900">Histórico Clínico</h2>
-                <p className="text-sm text-slate-600 mt-1">
+                <h2 className="text-2xl font-bold text-[var(--text-primary)]">Histórico Clínico</h2>
+                <p className="text-sm text-[var(--text-secondary)] mt-1">
                   Evolução e respostas do paciente
                 </p>
               </div>
-              <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-brand-100 shadow-sm">
+              <div className="flex items-center gap-1 bg-[var(--surface-alt)] p-1 rounded-[14px] border border-[var(--border)] shadow-sm flex-wrap">
                 <TabButton
                   active={activeTab === "sessions"}
                   onClick={() => handleTabChange("sessions")}
@@ -1561,47 +1570,47 @@ export default function PatientRecord() {
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Stats Summary */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-brand-400">
-                  <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--sage)]">
+                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-presente-bg)] flex items-center justify-center text-[var(--status-presente-text)]">
                     <UserCheck size={18} />
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-slate-800">{filteredAttendances.filter(a => a.status === 'presente').length}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Presenças</p>
+                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">{filteredAttendances.filter(a => a.status === 'presente').length}</p>
+                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Presenças</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-red-400">
-                  <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-red-500">
+                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-falta-bg)] flex items-center justify-center text-[var(--status-falta-text)]">
                     <UserX size={18} />
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-slate-800">{filteredAttendances.filter(a => a.status === 'falta').length}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Faltas</p>
+                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">{filteredAttendances.filter(a => a.status === 'falta').length}</p>
+                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Faltas</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-400">
-                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--peach)]">
+                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-justificada-bg)] flex items-center justify-center text-[var(--status-justificada-text)]">
                     <AlertCircle size={18} />
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-slate-800">{filteredAttendances.filter(a => a.status === 'justificada').length}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Justificadas</p>
+                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">{filteredAttendances.filter(a => a.status === 'justificada').length}</p>
+                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Justificadas</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-400">
-                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--border)]">
+                  <div className="w-10 h-10 rounded-[12px] bg-[var(--surface-alt)] flex items-center justify-center text-[var(--text-secondary)]">
                     <Activity size={18} />
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-slate-800">{attendances.length}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Sessões</p>
+                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">{attendances.length}</p>
+                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Total Sessões</p>
                   </div>
                 </div>
               </div>
 
               {/* Filtro de Período */}
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Período</span>
+                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mr-1">Período</span>
                 {[
                   { key: "thisMonth", label: "Este Mês" },
                   { key: "lastMonth", label: "Mês Anterior" },
@@ -1623,27 +1632,27 @@ export default function PatientRecord() {
                     }}
                     className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
                       periodFilter === opt.key
-                        ? "bg-brand-600 text-white shadow-md"
-                        : "bg-white text-slate-500 border border-slate-200 hover:border-brand-200 hover:text-brand-600"
+                        ? "bg-[var(--sage)] text-white shadow-sm"
+                        : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--sage)] hover:text-[var(--sage)]"
                     }`}
                   >
                     {opt.label}
                   </button>
                 ))}
                 {periodFilter === "custom" && (
-                  <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"><ChevronLeft size={16} /></button>
-                    <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
+                  <div className="flex items-center gap-1 bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-[var(--text-muted)] hover:text-[var(--sage)] hover:bg-[var(--sage-light)] transition-all"><ChevronLeft size={16} /></button>
+                    <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-[var(--text-primary)] bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
                       {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
                         const monthVal = i + 1;
                         const currentYear = customMonth.split("-")[0];
-                        return <option key={`${currentYear}-${String(monthVal).padStart(2, "0")}`} value={`${currentYear}-${String(monthVal).padStart(2, "0")}`}>{name}</option>;
+                        return <option key={`${currentYear}-${String(monthVal).padStart(2, "0")}`} value={`${currentYear}-${String(monthVal).padStart(2, "0")}`} className="bg-[var(--surface)] text-[var(--text-primary)]">{name}</option>;
                       })}
                     </select>
-                    <select value={customMonth.split("-")[0]} onChange={e => { const month = customMonth.split("-")[1]; setCustomMonth(`${e.target.value}-${month}`); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
-                      {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year}>{year}</option>; })}
+                    <select value={customMonth.split("-")[0]} onChange={e => { const month = customMonth.split("-")[1]; setCustomMonth(`${e.target.value}-${month}`); }} className="text-xs font-bold text-[var(--text-primary)] bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
+                      {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year} className="bg-[var(--surface)] text-[var(--text-primary)]">{year}</option>; })}
                     </select>
-                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"><ChevronRight size={16} /></button>
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-[var(--text-muted)] hover:text-[var(--sage)] hover:bg-[var(--sage-light)] transition-all"><ChevronRight size={16} /></button>
                   </div>
                 )}
               </div>
@@ -1651,24 +1660,24 @@ export default function PatientRecord() {
               {/* Timeline List */}
               <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-3">
                 <div className="flex items-center justify-between shrink-0">
-                  <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Histórico de Sessões</h3>
+                  <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-wide">Histórico de Sessões</h3>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
+                <div className="p-4 bg-[var(--surface-alt)]/50 rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
                 {loadingAttendances ? (
                   <div className="text-center py-20 opacity-50 flex-1 flex items-center justify-center">
-                    <div className="w-10 h-10 border-4 border-brand-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                    <p className="text-sm font-bold uppercase tracking-widest">Carregando histórico...</p>
+                    <div className="w-10 h-10 border-4 border-[var(--sage)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-sm font-bold uppercase tracking-widest text-[var(--text-muted)]">Carregando histórico...</p>
                   </div>
                 ) : filteredAttendances.length === 0 ? (
                   <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
-                    <div className="w-16 h-16 rounded-2xl bg-brand-50 flex items-center justify-center mb-5">
-                      <Calendar size={32} className="text-brand-300" />
+                    <div className="w-16 h-16 rounded-2xl bg-[var(--sage-light)] flex items-center justify-center mb-5">
+                      <Calendar size={32} className="text-[var(--sage)]" />
                     </div>
-                    <p className="text-sm font-bold text-slate-700 uppercase tracking-widest">Nenhum registro no período</p>
-                    <p className="text-xs text-slate-400 mt-2 max-w-xs leading-relaxed">Registros de presença aparecerão aqui conforme você marcar as sessões na agenda do paciente.</p>
+                    <p className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-widest">Nenhum registro no período</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-2 max-w-xs leading-relaxed">Registros de presença aparecerão aqui conforme você marcar as sessões na agenda do paciente.</p>
                   </div>
                 ) : (
-                  <div className="space-y-0 relative before:absolute before:left-[19px] before:top-2 before:bottom-0 before:w-0.5 before:bg-slate-100 overflow-y-auto flex-1 min-h-0">
+                  <div className="space-y-0 relative before:absolute before:left-[19px] before:top-2 before:bottom-0 before:w-0.5 before:bg-[var(--border)] overflow-y-auto patients-scrollbar flex-1 min-h-0">
                     {filteredAttendances.map((att, idx) => {
                       const isReagendado = att.notes?.includes('Reagendado');
                       const isFilho = !!att.parentId;
@@ -1678,66 +1687,66 @@ export default function PatientRecord() {
                       const isChainEnd = !hasFilho && isFilho;
                       
                       const statusConfig = {
-                        presente: { color: "bg-brand-500", label: "Presente", bg: "bg-brand-50", text: "text-brand-700", icon: <Check size={12} /> },
-                        falta: { color: "bg-red-500", label: "Falta", bg: "bg-red-50", text: "text-red-700", icon: <X size={12} /> },
-                        justificada: { color: "bg-amber-500", label: "Justificada", bg: "bg-amber-50", text: "text-amber-700", icon: isReagendado ? <RefreshCcw size={12} /> : <AlertCircle size={12} /> },
+                        presente: { color: "bg-[var(--sage)]", label: "Presente", bg: "bg-[var(--status-presente-bg)]", text: "text-[var(--status-presente-text)]", icon: <Check size={12} /> },
+                        falta: { color: "bg-red-500", label: "Falta", bg: "bg-[var(--status-falta-bg)]", text: "text-[var(--status-falta-text)]", icon: <X size={12} /> },
+                        justificada: { color: "bg-[var(--peach)]", label: "Justificada", bg: "bg-[var(--status-justificada-bg)]", text: "text-[var(--status-justificada-text)]", icon: isReagendado ? <RefreshCcw size={12} /> : <AlertCircle size={12} /> },
                       };
 
-                      const config = statusConfig[att.status] || { color: "bg-slate-400", label: att.status, bg: "bg-slate-50", text: "text-slate-600", icon: <Clock size={12} /> };
+                      const config = statusConfig[att.status] || { color: "bg-[var(--text-muted)]", label: att.status, bg: "bg-[var(--surface-alt)]", text: "text-[var(--text-secondary)]", icon: <Clock size={12} /> };
 
                       return (
                         <div key={att.id} className="relative pl-12 pb-10 group last:pb-0">
                           {hasFilho && (
-                            <div className="absolute left-[19px] top-10 bottom-0 w-0.5 bg-amber-400/40 z-0" />
+                            <div className="absolute left-[19px] top-10 bottom-0 w-0.5 bg-[var(--peach)]/30 z-0" />
                           )}
                           
-                          <div className={`absolute left-0 top-1 w-10 h-10 rounded-full border-4 border-white shadow-sm flex items-center justify-center z-10 transition-transform group-hover:scale-110 ${config.color} text-white ${isFilho ? 'ring-2 ring-amber-400 ring-offset-2' : ''}`}>
+                          <div className={`absolute left-0 top-1 w-10 h-10 rounded-full border-4 border-[var(--surface)] shadow-sm flex items-center justify-center z-10 transition-transform group-hover:scale-105 ${config.color} text-white ${isFilho ? 'ring-2 ring-[var(--peach)] ring-offset-2 ring-offset-[var(--surface)]' : ''}`}>
                             {config.icon}
                           </div>
 
                           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                             <div className="flex-1">
                               <div className="flex items-center gap-3 mb-1 flex-wrap">
-                                <span className="text-sm font-black text-slate-800 uppercase tracking-tight">
+                                <span className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-tight">
                                   {format(new Date(att.date), "EEEE, d 'de' MMMM", { locale: ptBR })}
                                 </span>
                                 <div className="flex gap-1">
-                                  <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${config.bg} ${config.text} border shadow-sm`}>
+                                  <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${config.bg} ${config.text} border border-[var(--border)] shadow-sm`}>
                                     {isReagendado ? 'Reagendada' : config.label}
                                   </span>
                                   {att.paymentId ? (
                                     <>
-                                      <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-brand-100 text-brand-700 border border-brand-200 flex items-center gap-1 shadow-sm">
+                                      <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-[var(--status-presente-bg)] text-[var(--status-presente-text)] border border-[var(--status-presente-text)]/20 flex items-center gap-1 shadow-sm">
                                         <DollarSign size={8} />
                                         Pago
                                       </span>
-                                      <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border shadow-sm flex items-center gap-1 ${
-                                        att.payment?.receiptIssued ? 'bg-brand-50 text-brand-600 border-brand-200' : 'bg-amber-50 text-amber-600 border-amber-200'
+                                      <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full border shadow-sm flex items-center gap-1 ${
+                                        att.payment?.receiptIssued ? 'bg-[var(--status-presente-bg)] text-[var(--status-presente-text)] border-[var(--status-presente-text)]/20' : 'bg-[var(--status-justificada-bg)] text-[var(--status-justificada-text)] border-[var(--status-justificada-text)]/20'
                                       }`}>
                                         <Receipt size={8} />
                                         {att.payment?.receiptIssued ? 'Recibo Emitido' : 'Recibo Pendente'}
                                       </span>
                                     </>
                                   ) : (
-                                    <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-1 shadow-sm">
+                                    <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-[var(--surface-alt)] text-[var(--text-muted)] border border-[var(--border)] flex items-center gap-1 shadow-sm">
                                       <Clock size={8} />
                                       Pagamento Pendente
                                     </span>
                                   )}
-                                  {isChainStart && <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">Início de Cadeia</span>}
-                                  {isChainMiddle && <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">Reagendamento</span>}
-                                  {isChainEnd && <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">Reagendamento Final</span>}
+                                  {isChainStart && <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-[var(--status-justificada-bg)] text-[var(--status-justificada-text)] border border-[var(--status-justificada-text)]/20">Início de Cadeia</span>}
+                                  {isChainMiddle && <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-[var(--status-justificada-bg)] text-[var(--status-justificada-text)] border border-[var(--status-justificada-text)]/20">Reagendamento</span>}
+                                  {isChainEnd && <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-[var(--surface-alt)] text-[var(--text-secondary)] border border-[var(--border)]">Reagendamento Final</span>}
                                 </div>
                               </div>
-                              <p className="text-xs font-bold text-slate-500 flex items-center gap-1 mb-2">
+                              <p className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-1 mb-2">
                                 <Clock size={12} />
                                 {att.sessionTime || 'Horário não informado'}
                               </p>
 
                               {att.notes && (
-                                <div className={`max-w-md p-3 rounded-xl border flex-1 ${isFilho ? 'bg-amber-50/50 border-amber-100' : 'bg-slate-50 border-slate-100'}`}>
-                                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Observação</p>
-                                  <p className="text-xs text-slate-600 leading-relaxed font-medium italic">"{att.notes}"</p>
+                                <div className={`max-w-md p-3 rounded-[12px] border flex-1 ${isFilho ? 'bg-[var(--status-justificada-bg)]/30 border-[var(--status-justificada-text)]/20' : 'bg-[var(--surface)] border-[var(--border)]'}`}>
+                                  <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Observação</p>
+                                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-medium italic">"{att.notes}"</p>
                                 </div>
                               )}
                             </div>
@@ -1746,7 +1755,7 @@ export default function PatientRecord() {
                               {hasFilho && (
                                 <Link 
                                   to={`/agenda?date=${extractUTCDate(attendances.find(a => a.parentId === att.id).date)}`}
-                                  className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-amber-600 hover:text-amber-700 bg-amber-50 px-3 py-2 rounded-lg border border-amber-100 transition-all"
+                                  className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--peach)] hover:opacity-95 bg-[var(--peach-light)] px-3 py-2 rounded-lg border border-[var(--peach)]/20 transition-all"
                                 >
                                   <ChevronRight size={12} />
                                   Ver Reagendamento
@@ -1755,7 +1764,7 @@ export default function PatientRecord() {
                               {isFilho && (
                                 <Link 
                                   to={`/agenda?date=${extractUTCDate(attendances.find(a => a.id === att.parentId)?.date || att.date)}`}
-                                  className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-700 bg-slate-50 px-3 py-2 rounded-lg border border-slate-100 transition-all"
+                                  className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-alt)] px-3 py-2 rounded-lg border border-[var(--border)] transition-all"
                                 >
                                   <ArrowLeft size={12} />
                                   Ver Origem
@@ -1778,53 +1787,53 @@ export default function PatientRecord() {
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Stats Summary */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-brand-400">
-                  <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--sage)]">
+                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-presente-bg)] flex items-center justify-center text-[var(--status-presente-text)]">
                     <Calendar size={18} />
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-slate-800">{agendaStats.totalActive}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Horários Ativos</p>
+                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">{agendaStats.totalActive}</p>
+                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Horários Ativos</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-blue-400">
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--blue)]">
+                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-confirmado-bg)] flex items-center justify-center text-[var(--status-confirmado-text)]">
                     <Activity size={18} />
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-slate-800">{agendaStats.thisMonthCount}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sessões no Mês</p>
+                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">{agendaStats.thisMonthCount}</p>
+                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Sessões no Mês</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-400">
-                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--border)]">
+                  <div className="w-10 h-10 rounded-[12px] bg-[var(--surface-alt)] flex items-center justify-center text-[var(--text-secondary)]">
                     <Clock size={18} />
                   </div>
                   <div>
-                    <p className="text-lg font-black text-slate-800 truncate">
+                    <p className="text-lg font-extrabold text-[var(--text-primary)] truncate">
                       {agendaStats.nextSession
                         ? format(agendaStats.nextSession.date, "dd/MM", { locale: ptBR }) + " • " + agendaStats.nextSession.time
                         : "—"}
                     </p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Próxima Sessão</p>
+                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Próxima Sessão</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-400">
-                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--peach)]">
+                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-justificada-bg)] flex items-center justify-center text-[var(--status-justificada-text)]">
                     <RefreshCcw size={18} />
                   </div>
                   <div>
-                    <p className="text-lg font-black text-slate-800 truncate">
+                    <p className="text-lg font-extrabold text-[var(--text-primary)] truncate">
                       {agendaStats.recurringSummary || "—"}
                     </p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Frequência Semanal</p>
+                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Frequência Semanal</p>
                   </div>
                 </div>
               </div>
 
               {/* Filtro de Período */}
               <div className="flex items-center gap-2 flex-wrap shrink-0">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Período</span>
+                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mr-1">Período</span>
                 {[
                   { key: "thisMonth", label: "Este Mês" },
                   { key: "lastMonth", label: "Mês Anterior" },
@@ -1850,27 +1859,27 @@ export default function PatientRecord() {
                     }}
                     className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
                       calendarPeriodFilter === opt.key
-                        ? "bg-brand-600 text-white shadow-md"
-                        : "bg-white text-slate-500 border border-slate-200 hover:border-brand-200 hover:text-brand-600"
+                        ? "bg-[var(--sage)] text-white shadow-sm"
+                        : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--sage)] hover:text-[var(--sage)]"
                     }`}
                   >
                     {opt.label}
                   </button>
                 ))}
                 {calendarPeriodFilter === "custom" && (
-                  <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                    <button onClick={() => { setSelectedCalendarDay(null); const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"><ChevronLeft size={16} /></button>
-                    <select value={calendarCustomMonth} onChange={e => { setSelectedCalendarDay(null); setCalendarCustomMonth(e.target.value); const [y, m] = e.target.value.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
+                  <div className="flex items-center gap-1 bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
+                    <button onClick={() => { setSelectedCalendarDay(null); const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-[var(--text-muted)] hover:text-[var(--sage)] hover:bg-[var(--sage-light)] transition-all"><ChevronLeft size={16} /></button>
+                    <select value={calendarCustomMonth} onChange={e => { setSelectedCalendarDay(null); setCalendarCustomMonth(e.target.value); const [y, m] = e.target.value.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-[var(--text-primary)] bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
                       {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
                         const monthVal = i + 1;
                         const currentYear = calendarCustomMonth.split("-")[0];
-                        return <option key={`${currentYear}-${String(monthVal).padStart(2, "0")}`} value={`${currentYear}-${String(monthVal).padStart(2, "0")}`}>{name}</option>;
+                        return <option key={`${currentYear}-${String(monthVal).padStart(2, "0")}`} value={`${currentYear}-${String(monthVal).padStart(2, "0")}`} className="bg-[var(--surface)] text-[var(--text-primary)]">{name}</option>;
                       })}
                     </select>
-                    <select value={calendarCustomMonth.split("-")[0]} onChange={e => { setSelectedCalendarDay(null); const month = calendarCustomMonth.split("-")[1]; const val = `${e.target.value}-${month}`; setCalendarCustomMonth(val); const [y, m] = val.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
-                      {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year}>{year}</option>; })}
+                    <select value={calendarCustomMonth.split("-")[0]} onChange={e => { setSelectedCalendarDay(null); const month = calendarCustomMonth.split("-")[1]; const val = `${e.target.value}-${month}`; setCalendarCustomMonth(val); const [y, m] = val.split("-").map(Number); setCalendarDate(new Date(y, m - 1, 1)); }} className="text-xs font-bold text-[var(--text-primary)] bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
+                      {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year} className="bg-[var(--surface)] text-[var(--text-primary)]">{year}</option>; })}
                     </select>
-                    <button onClick={() => { setSelectedCalendarDay(null); const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"><ChevronRight size={16} /></button>
+                    <button onClick={() => { setSelectedCalendarDay(null); const [y, m] = calendarCustomMonth.split("-").map(Number); const d = new Date(y, m, 1); const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; setCalendarCustomMonth(val); setCalendarDate(d); }} className="p-1.5 text-[var(--text-muted)] hover:text-[var(--sage)] hover:bg-[var(--sage-light)] transition-all"><ChevronRight size={16} /></button>
                   </div>
                 )}
               </div>
@@ -1880,16 +1889,16 @@ export default function PatientRecord() {
                 {loadingAppointments ? (
                   <div className="flex-1 flex items-center justify-center">
                     <div className="text-center">
-                      <div className="w-10 h-10 border-4 border-brand-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                      <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Carregando agenda...</p>
+                      <div className="w-10 h-10 border-4 border-[var(--sage)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                      <p className="text-sm font-bold uppercase tracking-widest text-[var(--text-muted)]">Carregando agenda...</p>
                     </div>
                   </div>
                 ) : (
                   <div className="flex-1 flex gap-6 min-h-0 overflow-hidden">
                     {/* Left: Calendar */}
                       <div className="w-[60%] flex flex-col min-h-0">
-                        <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight mb-3 shrink-0">Calendário de Sessões</h3>
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col flex-1 min-h-0 overflow-hidden">
+                        <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-wide mb-3 shrink-0">Calendário de Sessões</h3>
+                        <div className="p-4 bg-[var(--surface-alt)]/50 rounded-[20px] border border-[var(--border)] flex flex-col flex-1 min-h-0 overflow-hidden">
 
                         <DayPicker
                           month={calendarDate}
@@ -1905,14 +1914,14 @@ export default function PatientRecord() {
                         classNames={{
                           months: "flex flex-col flex-1 min-h-0",
                           month: "w-full flex flex-col flex-1 min-h-0",
-                          month_grid: "w-full flex-1 table-fixed border border-slate-300 rounded-xl overflow-hidden",
-                          weekdays: "bg-slate-100",
-                          weekday: "py-3 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-b border-slate-200 last:border-r-0",
+                          month_grid: "w-full flex-1 table-fixed border border-[var(--border)] rounded-xl overflow-hidden",
+                          weekdays: "bg-[var(--surface-alt)]",
+                          weekday: "py-3 text-center text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest border-r border-b border-[var(--border)] last:border-r-0",
                           week: "h-0",
-                          day: "text-center border-r border-b border-slate-200 last:border-r-0 p-0 h-0",
-                          day_button: "relative w-full h-full flex items-center justify-center text-sm font-bold text-slate-700 cursor-pointer transition-colors",
+                          day: "text-center border-r border-b border-[var(--border)] last:border-r-0 p-0 h-0",
+                          day_button: "relative w-full h-full flex items-center justify-center text-sm font-bold text-[var(--text-secondary)] cursor-pointer transition-colors",
                           today: "font-black",
-                          outside: "text-slate-300",
+                          outside: "text-[var(--text-muted)]/40",
                           disabled: "cursor-default opacity-40",
                         }}
                         components={{
@@ -1923,17 +1932,17 @@ export default function PatientRecord() {
                             const selectedStr = selectedCalendarDay ? format(selectedCalendarDay, "yyyy-MM-dd") : null;
 
                             let bgClass = "";
-                            if (modifiers?.conflict) bgClass = "bg-red-50";
-                            else if (modifiers?.others) bgClass = "bg-amber-50";
-                            else if (modifiers?.mine) bgClass = "bg-brand-50";
+                            if (modifiers?.conflict) bgClass = "bg-[var(--status-falta-bg)]";
+                            else if (modifiers?.others) bgClass = "bg-[var(--status-justificada-bg)]";
+                            else if (modifiers?.mine) bgClass = "bg-[var(--status-presente-bg)]";
 
                             return (
-                              <button {...props} className={`relative w-full h-full flex items-center justify-center text-sm font-bold cursor-pointer transition-colors ${isToday ? "" : "hover:bg-slate-100"} ${bgClass}`}>
+                              <button {...props} className={`relative w-full h-full flex items-center justify-center text-sm font-bold cursor-pointer transition-colors ${isToday ? "" : "hover:bg-[var(--surface-alt)]"} ${bgClass}`}>
                                 {modifiers?.mine && showAllAppointments && (
-                                  <div className="absolute bottom-1 left-1.5 right-1.5 h-[3px] rounded-full bg-brand-500" />
+                                  <div className="absolute bottom-1 left-1.5 right-1.5 h-[3px] rounded-full bg-[var(--sage)]" />
                                 )}
                                 <span className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-black ${
-                                  isToday ? "bg-slate-800 text-white" : dayStr === selectedStr ? "ring-2 ring-slate-400" : "text-slate-700"
+                                  isToday ? "bg-[var(--text-primary)] text-[var(--surface)]" : dayStr === selectedStr ? "ring-2 ring-[var(--sage)]" : "text-[var(--text-primary)]"
                                 }`}>
                                   {date.getDate()}
                                 </span>
@@ -1943,7 +1952,7 @@ export default function PatientRecord() {
                           MonthCaption: ({ calendarMonth }) => (
                             <div className="shrink-0 mb-3">
                               <p
-                                className="text-sm font-bold text-slate-600 capitalize cursor-pointer hover:text-brand-600 transition-colors"
+                                className="text-sm font-bold text-[var(--text-secondary)] capitalize cursor-pointer hover:text-[var(--sage)] transition-colors"
                                 onClick={() => {
                                   setCalendarDate(calendarMonth.date);
                                   setSelectedCalendarDay(null);
@@ -1963,20 +1972,20 @@ export default function PatientRecord() {
                       />
 
                       {/* Legend */}
-                      <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-slate-100 shrink-0">
+                      <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-[var(--border)] shrink-0">
                         <div className="flex items-center gap-1.5">
-                          <div className="w-3 h-3 rounded bg-brand-50 border border-brand-300" />
-                          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{patient?.name?.split(" ")[0] || "Paciente"}</span>
+                          <div className="w-3 h-3 rounded bg-[var(--status-presente-bg)] border border-[var(--status-presente-text)]/30" />
+                          <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">{patient?.name?.split(" ")[0] || "Paciente"}</span>
                         </div>
                         {showAllAppointments && (
                           <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-3 rounded bg-amber-50 border border-amber-300" />
-                            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Outros</span>
+                            <div className="w-3 h-3 rounded bg-[var(--status-justificada-bg)] border border-[var(--status-justificada-text)]/30" />
+                            <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Outros</span>
                           </div>
                         )}
                         <div className="flex items-center gap-1.5">
-                          <div className="w-3 h-3 rounded bg-red-50 border border-red-300" />
-                          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Conflito</span>
+                          <div className="w-3 h-3 rounded bg-[var(--status-falta-bg)] border border-[var(--status-falta-text)]/30" />
+                          <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Conflito</span>
                         </div>
                         </div>
                       </div>
@@ -1984,40 +1993,40 @@ export default function PatientRecord() {
 
                     {/* Right: Agenda */}
                     <div className="w-[40%] flex flex-col pr-2 gap-3">
-                      <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight shrink-0">Agendamentos</h3>
-                      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
+                      <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-wide shrink-0">Agendamentos</h3>
+                      <div className="flex-1 min-h-0 overflow-y-auto patients-scrollbar flex flex-col">
                       {showEditChoice && editingAppointment && (
-                        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => { setShowEditChoice(false); setEditingAppointment(null); }}>
-                          <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
+                        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[3px]" onClick={() => { setShowEditChoice(false); setEditingAppointment(null); }}>
+                          <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-[var(--border)]" onClick={e => e.stopPropagation()}>
                             <div className="text-center mb-6">
-                              <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                                <Pencil size={22} className="text-slate-700" />
+                              <div className="w-12 h-12 rounded-[14px] bg-[var(--surface-alt)] flex items-center justify-center mx-auto mb-4 text-[var(--text-secondary)]">
+                                <Pencil size={22} />
                               </div>
-                              <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Editar horário</h3>
-                              <p className="text-sm text-slate-500 font-bold mt-1">
+                              <h3 className="text-lg font-bold text-[var(--text-primary)] uppercase tracking-tight">Editar horário</h3>
+                              <p className="text-sm text-[var(--text-secondary)] font-bold mt-1">
                                 {format(editChoiceDate, "EEEE, d 'de' MMMM", { locale: ptBR })} às {editingAppointment.time}
                               </p>
-                              <p className="text-xs text-slate-400 mt-2">
+                              <p className="text-xs text-[var(--text-muted)] mt-2 font-medium">
                                 Este horário se repete semanalmente. Como deseja editar?
                               </p>
                             </div>
                             <div className="space-y-2">
                               <button
                                 onClick={handleEditSingle}
-                                className="w-full py-3 px-4 bg-slate-100 text-slate-700 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                                className="w-full py-2.5 px-4 bg-[var(--surface-alt)] text-[var(--text-primary)] rounded-[12px] text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all outline-none"
                               >
                                 Apenas esta data
                               </button>
                               <button
                                 onClick={handleEditFuture}
-                                className="w-full py-3 px-4 bg-slate-900 text-white rounded-xl text-sm font-black uppercase tracking-widest hover:bg-slate-800 transition-all"
+                                className="w-full py-2.5 px-4 bg-[var(--text-primary)] text-[var(--surface)] rounded-[12px] text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all outline-none"
                               >
                                 Esta e todas futuras
                               </button>
                             </div>
                             <button
                               onClick={() => { setShowEditChoice(false); setEditingAppointment(null); }}
-                              className="w-full mt-3 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest"
+                              className="w-full mt-3 py-2 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors uppercase tracking-wider outline-none"
                             >
                               Cancelar
                             </button>
@@ -2026,41 +2035,41 @@ export default function PatientRecord() {
                       )}
 
                       {showDeleteChoice && editingAppointment && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm" onClick={() => { setShowDeleteChoice(false); setEditingAppointment(null); }}>
-                          <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[3px]" onClick={() => { setShowDeleteChoice(false); setEditingAppointment(null); }}>
+                          <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-[var(--border)]" onClick={e => e.stopPropagation()}>
                             <div className="text-center mb-6">
-                              <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-4 text-red-500">
+                              <div className="w-12 h-12 rounded-[14px] bg-[var(--status-falta-bg)] flex items-center justify-center mx-auto mb-4 text-[var(--status-falta-text)]">
                                 <Trash2 size={22} />
                               </div>
-                              <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Excluir Agendamento</h3>
-                              <p className="text-sm font-bold text-slate-500 mt-1">
+                              <h3 className="text-lg font-bold text-[var(--text-primary)] uppercase tracking-tight">Excluir Agendamento</h3>
+                              <p className="text-sm font-bold text-[var(--text-secondary)] mt-1">
                                 {editingAppointment.time} &bull; {editingAppointment.duration}min
                               </p>
-                              <p className="text-xs text-slate-400 mt-2 font-medium">
+                              <p className="text-xs text-[var(--text-muted)] mt-2 font-medium">
                                 Este horário se repete semanalmente. Como deseja excluir?
                               </p>
                             </div>
                             <div className="space-y-2">
                               <button 
                                 onClick={handleDeleteSingleDate} 
-                                className="w-full py-3 px-4 bg-slate-100 text-slate-700 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                                className="w-full py-2.5 px-4 bg-[var(--surface-alt)] text-[var(--text-primary)] rounded-[12px] text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all outline-none"
                               >
                                 Apenas esta data
                               </button>
                               <button 
                                 onClick={handleDeleteSeries} 
-                                className="w-full py-3 px-4 bg-red-50 text-red-600 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-red-100 transition-all"
+                                className="w-full py-2.5 px-4 bg-[var(--status-falta-bg)] text-[var(--status-falta-text)] rounded-[12px] text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all outline-none"
                               >
                                 Toda a série recorrente
                               </button>
                               <button 
                                 onClick={handleDeleteAllInTime} 
-                                className="w-full py-3 px-4 bg-red-500 text-white rounded-xl text-sm font-black uppercase tracking-widest hover:bg-red-600 shadow-lg shadow-red-200 transition-all"
+                                className="w-full py-2.5 px-4 bg-red-500 text-white rounded-[12px] text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all outline-none"
                               >
                                 Todos os dias neste horário
                               </button>
                             </div>
-                            <button onClick={() => { setShowDeleteChoice(false); setEditingAppointment(null); }} className="w-full mt-4 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest">
+                            <button onClick={() => { setShowDeleteChoice(false); setEditingAppointment(null); }} className="w-full mt-4 py-2 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors uppercase tracking-wider outline-none">
                               Cancelar
                             </button>
                           </div>
@@ -2068,18 +2077,18 @@ export default function PatientRecord() {
                       )}
 
                       {selectedCalendarDay ? (
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
+                        <div className="p-4 bg-[var(--surface-alt)]/50 rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
                           <div className="flex items-start justify-between mb-3 shrink-0">
                             <div>
-                              <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">
+                              <h4 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-tight">
                                 {format(selectedCalendarDay, "EEEE", { locale: ptBR })}
                               </h4>
-                              <p className="text-xs font-bold text-slate-500 mt-0.5">
+                              <p className="text-xs font-semibold text-[var(--text-muted)] mt-0.5">
                                 {format(selectedCalendarDay, "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
                               </p>
                             </div>
                           </div>
-                          <div className="space-y-1.5 overflow-y-auto min-h-0 pr-1.5">
+                          <div className="space-y-1.5 overflow-y-auto patients-scrollbar min-h-0 pr-1.5">
                             {appointments
                               .filter(a => {
                                 const dateStr = format(selectedCalendarDay, "yyyy-MM-dd");
@@ -2110,26 +2119,26 @@ export default function PatientRecord() {
                                 const appPatientId = app.patient?.id ?? app.patientId;
                                 const isOtherPatient = appPatientId && appPatientId !== id;
                                 return (
-                                  <div key={app.id} className={`flex items-center gap-2 p-2.5 rounded-xl border ${
-                                    conflict ? "border-red-200 bg-red-50/30" : isOtherPatient ? "border-amber-200 bg-amber-50/30" : "border-slate-200 bg-white"
+                                  <div key={app.id} className={`flex items-center gap-2 p-2.5 rounded-[12px] border ${
+                                    conflict ? "border-[var(--status-falta-text)]/30 bg-[var(--status-falta-bg)]/30" : isOtherPatient ? "border-[var(--status-justificada-text)]/30 bg-[var(--status-justificada-bg)]/30" : "border-[var(--border)] bg-[var(--surface)]"
                                   }`}>
                                     <div className="flex items-center gap-2 min-w-0 flex-1">
-                                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] shrink-0 ${
-                                        conflict ? "bg-red-100 text-red-600" : isOtherPatient ? "bg-amber-50 text-amber-600" : "bg-brand-50 text-brand-600"
+                                      <div className={`w-7 h-7 rounded-[8px] flex items-center justify-center font-bold text-[10px] shrink-0 ${
+                                        conflict ? "bg-[var(--status-falta-bg)] text-[var(--status-falta-text)]" : isOtherPatient ? "bg-[var(--status-justificada-bg)] text-[var(--status-justificada-text)]" : "bg-[var(--status-presente-bg)] text-[var(--status-presente-text)]"
                                       }`}>
                                         <Clock size={14} />
                                       </div>
                                       <div className="min-w-0">
-                                        <p className={`text-xs font-bold truncate ${isOtherPatient ? "text-amber-600" : "text-brand-700"}`}>
+                                        <p className={`text-xs font-bold truncate ${isOtherPatient ? "text-[var(--status-justificada-text)]" : "text-[var(--text-primary)]"}`}>
                                           {(isOtherPatient ? app.patient?.name : patient?.name)?.split(" ")[0] || "Paciente"}
                                         </p>
-                                        <p className="text-[9px] font-bold text-slate-500">{app.maxSessions ? `${app.maxSessions} sessões` : app.startDate ? "Semanal" : app.scheduledDate ? format(new Date(app.scheduledDate), "dd/MM/yy") : "Avulso"}</p>
+                                        <p className="text-[9px] font-semibold text-[var(--text-muted)]">{app.maxSessions ? `${app.maxSessions} sessões` : app.startDate ? "Semanal" : app.scheduledDate ? format(new Date(app.scheduledDate), "dd/MM/yy") : "Avulso"}</p>
                                       </div>
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0 ml-2">
-                                      <span className="text-xs font-black text-slate-700 whitespace-nowrap">{app.time} • {app.duration}min</span>
+                                      <span className="text-xs font-semibold text-[var(--text-secondary)] whitespace-nowrap">{app.time} • {app.duration}min</span>
                                       {conflict && (
-                                        <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-200">
+                                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--status-falta-bg)] text-[var(--status-falta-text)] border border-[var(--status-falta-text)]/20">
                                           Conflito
                                         </span>
                                       )}
@@ -2137,7 +2146,7 @@ export default function PatientRecord() {
                                         <button
                                           type="button"
                                           onClick={() => handleSendWhatsAppReminder(app)}
-                                          className="p-1.5 text-slate-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all border border-slate-200 hover:border-green-200"
+                                          className="p-1.5 text-[var(--text-secondary)] hover:text-green-600 hover:bg-green-500/10 rounded-lg transition-all border border-[var(--border)] hover:border-green-500/35"
                                           title="Enviar Lembrete WhatsApp"
                                         >
                                           <Send size={13} />
@@ -2147,7 +2156,7 @@ export default function PatientRecord() {
                                         <button
                                           type="button"
                                           onClick={() => handleEditClick(app, selectedCalendarDay)}
-                                          className="p-1.5 text-slate-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all border border-slate-200 hover:border-brand-200"
+                                          className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--sage)] hover:bg-[var(--sage-light)] rounded-lg transition-all border border-[var(--border)] hover:border-[var(--sage)]/35"
                                           title="Editar"
                                         >
                                           <Pencil size={13} />
@@ -2157,7 +2166,7 @@ export default function PatientRecord() {
                                         <button
                                           type="button"
                                           onClick={() => handleRemoveSlot(app.id, selectedCalendarDay)}
-                                          className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all border border-slate-200 hover:border-red-200"
+                                          className="p-1.5 text-[var(--text-secondary)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all border border-[var(--border)] hover:border-red-500/35"
                                           title="Remover"
                                         >
                                           <Trash2 size={13} />
@@ -2192,28 +2201,28 @@ export default function PatientRecord() {
                               return true;
                             }).length === 0 && (
                               <div className="text-center py-4">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nenhum horário neste dia</p>
+                                <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Nenhum horário neste dia</p>
                               </div>
                             )}
                           </div>
                         </div>
                       ) : (
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
+                        <div className="p-4 bg-[var(--surface-alt)]/50 rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
                           <div className="flex items-start justify-between mb-3 shrink-0">
                             <div>
-                              <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Visão do Mês</h4>
-                              <p className="text-xs font-bold text-slate-500 mt-0.5">
+                              <h4 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-tight">Visão do Mês</h4>
+                              <p className="text-xs font-semibold text-[var(--text-muted)] mt-0.5">
                                 {format(calendarDate, "MMMM 'de' yyyy", { locale: ptBR })}
                               </p>
                             </div>
-                            <span className="px-2.5 py-1 bg-white border border-slate-200 text-slate-600 text-[10px] font-black rounded-full shadow-sm">
+                            <span className="px-2.5 py-1 bg-[var(--surface)] border border-[var(--border)] text-[var(--text-secondary)] text-[10px] font-bold rounded-full shadow-sm">
                               {monthSessions.reduce((acc, d) => acc + d.sessions.length, 0)} SESSÕES
                             </span>
                           </div>
-                          <div className="space-y-3 overflow-y-auto min-h-0 flex-1 pr-1.5">
+                          <div className="space-y-3 overflow-y-auto patients-scrollbar min-h-0 flex-1 pr-1.5">
                             {monthSessions.length === 0 ? (
                               <div className="text-center py-10">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nenhuma sessão neste mês</p>
+                                <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Nenhuma sessão neste mês</p>
                               </div>
                             ) : (
                               monthSessions.map(({ date, sessions }) => (
@@ -2221,11 +2230,11 @@ export default function PatientRecord() {
                                   <div className="flex items-center gap-2 mb-1.5">
                                     <button
                                       onClick={() => setSelectedCalendarDay(date)}
-                                      className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-brand-600 transition-colors"
+                                      className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest hover:text-[var(--sage)] transition-colors"
                                     >
                                       {format(date, "EEE dd/MM", { locale: ptBR })}
                                     </button>
-                                    <div className="flex-1 border-t border-slate-200" />
+                                    <div className="flex-1 border-t border-[var(--border)]" />
                                   </div>
                                   {sessions.map(app => {
                                     const conflict = conflicts[app.id];
@@ -2234,14 +2243,14 @@ export default function PatientRecord() {
                                     const displayName = (isOtherPatient ? app.patient?.name : patient?.name) || "Paciente";
                                     const initials = displayName.split(" ")[0].slice(0, 2).toUpperCase();
                                     return (
-                                      <div key={app.id} className={`flex items-center gap-2 p-3 rounded-lg border mb-1 ${conflict ? "border-red-200 bg-red-50/30" : isOtherPatient ? "border-amber-200 bg-amber-50/30" : "border-slate-200 bg-white hover:border-slate-300"} transition-all`}>
-                                        <div className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-500 font-black text-[9px] shrink-0">
+                                      <div key={app.id} className={`flex items-center gap-2 p-3 rounded-[12px] border mb-1 ${conflict ? "border-[var(--status-falta-text)]/30 bg-[var(--status-falta-bg)]/30" : isOtherPatient ? "border-[var(--status-justificada-text)]/30 bg-[var(--status-justificada-bg)]/30" : "border-[var(--border)] bg-[var(--surface)] hover:border-[var(--text-muted)]/30"} transition-all`}>
+                                        <div className="w-7 h-7 rounded-md bg-[var(--surface-alt)] flex items-center justify-center text-[var(--text-muted)] font-bold text-[9px] shrink-0">
                                           {initials}
                                         </div>
-                                        <p className={`text-xs font-bold truncate flex-1 min-w-0 ${isOtherPatient ? "text-amber-600" : "text-slate-800"}`}>{displayName}</p>
-                                        <span className="text-[10px] font-bold text-slate-500 shrink-0">{app.time} &bull; {app.duration}min</span>
+                                        <p className={`text-xs font-bold truncate flex-1 min-w-0 ${isOtherPatient ? "text-[var(--status-justificada-text)]" : "text-[var(--text-primary)]"}`}>{displayName}</p>
+                                        <span className="text-[10px] font-semibold text-[var(--text-secondary)] shrink-0">{app.time} &bull; {app.duration}min</span>
                                         {conflict && (
-                                          <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-200 shrink-0">
+                                          <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--status-falta-bg)] text-[var(--status-falta-text)] border border-[var(--status-falta-text)]/20 shrink-0">
                                             Conflito
                                           </span>
                                         )}
@@ -2258,11 +2267,17 @@ export default function PatientRecord() {
 
                       <div className="flex items-center gap-3 shrink-0 justify-end">
                         {appointments.length > 0 && (
-                          <button onClick={() => handleClearAgenda()} className="btn btn-danger text-xs">
+                          <button 
+                            onClick={() => handleClearAgenda()} 
+                            className="py-2 px-4 rounded-[12px] bg-red-500 text-white font-bold text-xs hover:opacity-95 transition-all outline-none shadow-sm"
+                          >
                             <Trash2 size={14} /> Limpar Agenda
                           </button>
                         )}
-                        <button onClick={() => handleOpenNewSlotModal()} className="btn btn-primary text-xs">
+                        <button 
+                          onClick={() => handleOpenNewSlotModal()} 
+                          className="py-2 px-4 rounded-[12px] bg-[var(--sage)] text-white font-bold text-xs hover:opacity-95 transition-all outline-none shadow-sm"
+                        >
                           <Plus size={14} /> Lançar
                         </button>
                       </div>
@@ -2279,43 +2294,43 @@ export default function PatientRecord() {
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Financial Dashboard */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-brand-400">
-                  <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--sage)]">
+                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-presente-bg)] flex items-center justify-center text-[var(--status-presente-text)]">
                     <DollarSign size={18} />
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-slate-800">
+                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">
                       R$ {filteredPayments.reduce((acc, p) => acc + p.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Pago</p>
+                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Total Pago</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-400">
-                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--peach)]">
+                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-justificada-bg)] flex items-center justify-center text-[var(--status-justificada-text)]">
                     <Clock size={18} />
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-slate-800">
+                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">
                       {attendances.filter(a => !a.paymentId && (a.status === 'presente' || a.status === 'falta')).length}
                     </p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sessões Pendentes</p>
+                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Sessões Pendentes</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-blue-400">
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--blue)]">
+                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-confirmado-bg)] flex items-center justify-center text-[var(--status-confirmado-text)]">
                     <Receipt size={18} />
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-slate-800">{filteredPayments.length}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lançamentos Realizados</p>
+                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">{filteredPayments.length}</p>
+                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Lançamentos Realizados</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-400">
-                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--border)]">
+                  <div className="w-10 h-10 rounded-[12px] bg-[var(--surface-alt)] flex items-center justify-center text-[var(--text-secondary)]">
                     <CreditCard size={18} />
                   </div>
                   <div>
-                    <p className="text-lg font-black text-slate-800 truncate">
+                    <p className="text-lg font-extrabold text-[var(--text-primary)] truncate">
                       {filteredPayments.length > 0
                         ? (() => {
                             const last = [...filteredPayments].sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate))[0];
@@ -2323,14 +2338,14 @@ export default function PatientRecord() {
                           })()
                         : "—"}
                     </p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Último Recebimento</p>
+                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Último Recebimento</p>
                   </div>
                 </div>
               </div>
 
               {/* Filtro de Período */}
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Período</span>
+                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mr-1">Período</span>
                 {[
                   { key: "thisMonth", label: "Este Mês" },
                   { key: "lastMonth", label: "Mês Anterior" },
@@ -2352,27 +2367,27 @@ export default function PatientRecord() {
                     }}
                     className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
                       periodFilter === opt.key
-                        ? "bg-brand-600 text-white shadow-md"
-                        : "bg-white text-slate-500 border border-slate-200 hover:border-brand-200 hover:text-brand-600"
+                        ? "bg-[var(--sage)] text-white shadow-sm"
+                        : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--sage)] hover:text-[var(--sage)]"
                     }`}
                   >
                     {opt.label}
                   </button>
                 ))}
                 {periodFilter === "custom" && (
-                  <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"><ChevronLeft size={16} /></button>
-                    <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
+                  <div className="flex items-center gap-1 bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-[var(--text-muted)] hover:text-[var(--sage)] hover:bg-[var(--sage-light)] transition-all"><ChevronLeft size={16} /></button>
+                    <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-[var(--text-primary)] bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
                       {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
                         const monthVal = i + 1;
                         const currentYear = customMonth.split("-")[0];
-                        return <option key={`${currentYear}-${String(monthVal).padStart(2, "0")}`} value={`${currentYear}-${String(monthVal).padStart(2, "0")}`}>{name}</option>;
+                        return <option key={`${currentYear}-${String(monthVal).padStart(2, "0")}`} value={`${currentYear}-${String(monthVal).padStart(2, "0")}`} className="bg-[var(--surface)] text-[var(--text-primary)]">{name}</option>;
                       })}
                     </select>
-                    <select value={customMonth.split("-")[0]} onChange={e => { const month = customMonth.split("-")[1]; setCustomMonth(`${e.target.value}-${month}`); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
-                      {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year}>{year}</option>; })}
+                    <select value={customMonth.split("-")[0]} onChange={e => { const month = customMonth.split("-")[1]; setCustomMonth(`${e.target.value}-${month}`); }} className="text-xs font-bold text-[var(--text-primary)] bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
+                      {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year} className="bg-[var(--surface)] text-[var(--text-primary)]">{year}</option>; })}
                     </select>
-                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"><ChevronRight size={16} /></button>
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-[var(--text-muted)] hover:text-[var(--sage)] hover:bg-[var(--sage-light)] transition-all"><ChevronRight size={16} /></button>
                   </div>
                 )}
               </div>
@@ -2380,27 +2395,27 @@ export default function PatientRecord() {
               {/* Payments History Table */}
               <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-3">
                 <div className="flex items-center justify-between shrink-0">
-                  <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Histórico de Lançamentos</h3>
+                  <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-wide">Histórico de Lançamentos</h3>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
+                <div className="p-4 bg-[var(--surface-alt)]/50 rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
                 {loadingPayments ? (
-                  <div className="text-center py-20 opacity-50">
-                    <div className="w-10 h-10 border-4 border-brand-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                    <p className="text-sm font-bold uppercase tracking-widest">Carregando financeiro...</p>
+                  <div className="text-center py-20 opacity-50 flex-1 flex items-center justify-center">
+                    <div className="w-10 h-10 border-4 border-[var(--sage)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-sm font-bold uppercase tracking-widest text-[var(--text-muted)]">Carregando financeiro...</p>
                   </div>
                 ) : filteredPayments.length === 0 ? (
                   <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
-                    <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mb-5">
-                      <CreditCard size={32} className="text-amber-300" />
+                    <div className="w-16 h-16 rounded-2xl bg-[var(--status-justificada-bg)] flex items-center justify-center mb-5 text-[var(--status-justificada-text)]">
+                      <CreditCard size={32} />
                     </div>
-                    <p className="text-sm font-bold text-slate-700 uppercase tracking-widest">Nenhum pagamento no período</p>
-                    <p className="text-xs text-slate-400 mt-2 max-w-xs leading-relaxed">Lançamentos de pagamento aparecerão aqui conforme você registrar os blocos de sessões.</p>
+                    <p className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-widest">Nenhum pagamento no período</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-2 max-w-xs leading-relaxed">Lançamentos de pagamento aparecerão aqui conforme você registrar os blocos de sessões.</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto overflow-y-auto flex-1 min-h-0">
+                  <div className="overflow-x-auto overflow-y-auto patients-scrollbar flex-1 min-h-0">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200">
+                        <tr className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest border-b border-[var(--border)]">
                           <th className="text-left px-2 py-2 min-w-[180px]">Período das Sessões</th>
                           <th className="text-left px-2 py-2 whitespace-nowrap">Valor Pago</th>
                           <th className="text-left px-2 py-2 whitespace-nowrap">Data do Pagamento</th>
@@ -2408,52 +2423,52 @@ export default function PatientRecord() {
                           <th className="text-right px-2 py-2">Ações</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y divide-[var(--border)]">
                         {payments.map(payment => (
-                          <tr key={payment.id} className="hover:bg-slate-50/50 transition-colors">
+                          <tr key={payment.id} className="hover:bg-[var(--surface-alt)]/50 transition-colors">
                             <td className="px-4 py-3">
                               <div className="flex flex-col">
-                                <span className="text-sm font-bold text-slate-700 whitespace-nowrap">
+                                <span className="text-sm font-bold text-[var(--text-primary)] whitespace-nowrap">
                                   {payment.attendances.length > 0 
                                     ? `${format(new Date(payment.attendances[0].date), 'dd/MM/yy')} a ${format(new Date(payment.attendances[payment.attendances.length-1].date), 'dd/MM/yy')}`
                                     : 'Sem sessões vinculadas'}
                                 </span>
-                                <span className="text-[10px] text-slate-400 font-medium">
+                                <span className="text-[10px] text-[var(--text-muted)] font-medium">
                                   {payment.attendances.length} sessões inclusas
                                 </span>
                               </div>
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap">
-                              <span className="text-sm font-black text-slate-800">
+                              <span className="text-sm font-bold text-[var(--text-primary)]">
                                 R$ {payment.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                               </span>
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap">
-                              <span className="text-sm text-slate-600 font-medium">
+                              <span className="text-sm text-[var(--text-secondary)] font-medium">
                                 {format(new Date(payment.paymentDate), 'dd/MM/yyyy')}
                               </span>
                             </td>
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-2 flex-wrap min-w-0">
                                 {payment.receiptIssued ? (
-                                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-brand-100 text-brand-700 text-[10px] font-bold rounded-lg border border-brand-200 whitespace-nowrap">
+                                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-[var(--status-presente-bg)] text-[var(--status-presente-text)] text-[10px] font-bold rounded-lg border border-[var(--status-presente-text)]/20 whitespace-nowrap">
                                     <Check size={10} />
                                     NOTA DE SERVIÇO
                                   </span>
                                 ) : payment.receiptAttachment ? (
-                                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg border border-amber-200 whitespace-nowrap">
+                                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-[var(--status-justificada-bg)] text-[var(--status-justificada-text)] text-[10px] font-bold rounded-lg border border-[var(--status-justificada-text)]/20 whitespace-nowrap">
                                     <Paperclip size={10} />
                                     COM ANEXO
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-lg border border-slate-200 whitespace-nowrap">
+                                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-[var(--surface-alt)] text-[var(--text-muted)] text-[10px] font-bold rounded-lg border border-[var(--border)] whitespace-nowrap">
                                     PENDENTE
                                   </span>
                                 )}
                                 {payment.receiptAttachment && (
                                   <button 
                                     onClick={() => handleDownloadReceipt(payment.receiptAttachment.id, payment.receiptAttachment.originalName || payment.receiptAttachment.filename)}
-                                    className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors whitespace-nowrap max-w-[140px]"
+                                    className="inline-flex items-center gap-1 px-2 py-1 bg-[var(--status-confirmado-bg)] text-[var(--status-confirmado-text)] text-[10px] font-bold rounded-lg border border-[var(--status-confirmado-text)]/20 hover:opacity-90 transition-colors whitespace-nowrap max-w-[140px]"
                                     title="Baixar arquivo anexado"
                                   >
                                     <Download size={10} />
@@ -2470,14 +2485,14 @@ export default function PatientRecord() {
                               <div className="flex items-center justify-end gap-1">
                                 <button 
                                   onClick={() => openEditPayment(payment)}
-                                  className="p-2 text-slate-500 hover:bg-slate-50 rounded-lg transition-all"
+                                  className="p-2 text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] rounded-lg transition-all"
                                   title="Editar Lançamento"
                                 >
                                   <Pencil size={16} />
                                 </button>
                                 <button 
                                   onClick={() => handleGenerateReceipt(payment)}
-                                  className="p-2 text-brand-600 hover:bg-brand-50 rounded-lg transition-all"
+                                  className="p-2 text-[var(--sage)] hover:bg-[var(--sage-light)] rounded-lg transition-all"
                                   title="Gerar Prestação de Contas (PDF)"
                                 >
                                   <Download size={16} />
@@ -2490,7 +2505,7 @@ export default function PatientRecord() {
                                       loadPatientAttendances();
                                     }
                                   }}
-                                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                  className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
                                   title="Excluir"
                                 >
                                   <Trash2 size={16} />
@@ -2507,7 +2522,10 @@ export default function PatientRecord() {
                 {/* Action Buttons */}
                 <div className="flex items-center gap-3 shrink-0 justify-end">
                   {payments.length > 0 && (
-                    <button onClick={() => handleGenerateAllReceipts()} className="btn btn-primary flex items-center gap-2 text-xs">
+                    <button 
+                      onClick={() => handleGenerateAllReceipts()} 
+                      className="py-2 px-4 rounded-[12px] bg-[var(--surface-alt)] border border-[var(--border)] text-[var(--text-primary)] font-bold text-xs hover:opacity-95 transition-all outline-none shadow-sm flex items-center gap-2"
+                    >
                       <File size={14} />
                       Gerar Relatório Completo
                     </button>
@@ -2527,7 +2545,7 @@ export default function PatientRecord() {
                       setSelectedAttendances([]);
                       setShowPaymentModal(true);
                     }}
-                    className="btn btn-primary flex items-center gap-2 text-xs"
+                    className="py-2 px-4 rounded-[12px] bg-[var(--sage)] text-white font-bold text-xs hover:opacity-95 transition-all outline-none shadow-sm flex items-center gap-2"
                   >
                     <Plus size={14} />
                     Lançar
@@ -2542,42 +2560,42 @@ export default function PatientRecord() {
             <div className="space-y-5 animate-fade-in flex flex-col flex-1 min-h-0">
               {/* Stats Summary */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-400">
-                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--peach)]">
+                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-justificada-bg)] flex items-center justify-center text-[var(--status-justificada-text)]">
                     <Send size={18} />
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-slate-800">{patientShareLinks.filter(l => l.status === "PENDENTE").length}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pendentes</p>
+                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">{patientShareLinks.filter(l => l.status === "PENDENTE").length}</p>
+                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Pendentes</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-brand-400">
-                  <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--sage)]">
+                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-presente-bg)] flex items-center justify-center text-[var(--status-presente-text)]">
                     <Check size={18} />
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-slate-800">{patientShareLinks.filter(l => l.status === "RESPONDIDO").length}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Respondidos</p>
+                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">{patientShareLinks.filter(l => l.status === "RESPONDIDO").length}</p>
+                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Respondidos</p>
                   </div>
                 </div>
-                <div className="card p-3 flex items-center gap-3 border-l-4 border-blue-400">
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                <div className="card p-3 flex items-center gap-3 border-l-4 border-[var(--blue)]">
+                  <div className="w-10 h-10 rounded-[12px] bg-[var(--status-confirmado-bg)] flex items-center justify-center text-[var(--status-confirmado-text)]">
                     <TrendingUp size={18} />
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-slate-800">
+                    <p className="text-2xl font-extrabold text-[var(--text-primary)]">
                       {patientShareLinks.length > 0
                         ? Math.round((patientShareLinks.filter(l => l.status === "RESPONDIDO").length / patientShareLinks.length) * 100)
                         : 0}%
                     </p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Adesão</p>
+                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Adesão</p>
                   </div>
                 </div>
               </div>
 
               {/* Filtro de Período */}
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Período</span>
+                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mr-1">Período</span>
                 {[
                   { key: "thisMonth", label: "Este Mês" },
                   { key: "lastMonth", label: "Mês Anterior" },
@@ -2599,27 +2617,27 @@ export default function PatientRecord() {
                     }}
                     className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-xl transition-all ${
                       periodFilter === opt.key
-                        ? "bg-brand-600 text-white shadow-md"
-                        : "bg-white text-slate-500 border border-slate-200 hover:border-brand-200 hover:text-brand-600"
+                        ? "bg-[var(--sage)] text-white shadow-sm"
+                        : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--sage)] hover:text-[var(--sage)]"
                     }`}
                   >
                     {opt.label}
                   </button>
                 ))}
                 {periodFilter === "custom" && (
-                  <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"><ChevronLeft size={16} /></button>
-                    <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
+                  <div className="flex items-center gap-1 bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m - 2, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-[var(--text-muted)] hover:text-[var(--sage)] hover:bg-[var(--sage-light)] transition-all"><ChevronLeft size={16} /></button>
+                    <select value={customMonth} onChange={e => setCustomMonth(e.target.value)} className="text-xs font-bold text-[var(--text-primary)] bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[80px]">
                       {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((name, i) => {
                         const monthVal = i + 1;
                         const currentYear = customMonth.split("-")[0];
-                        return <option key={`${currentYear}-${String(monthVal).padStart(2, "0")}`} value={`${currentYear}-${String(monthVal).padStart(2, "0")}`}>{name}</option>;
+                        return <option key={`${currentYear}-${String(monthVal).padStart(2, "0")}`} value={`${currentYear}-${String(monthVal).padStart(2, "0")}`} className="bg-[var(--surface)] text-[var(--text-primary)]">{name}</option>;
                       })}
                     </select>
-                    <select value={customMonth.split("-")[0]} onChange={e => { const month = customMonth.split("-")[1]; setCustomMonth(`${e.target.value}-${month}`); }} className="text-xs font-bold text-slate-700 bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
-                      {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year}>{year}</option>; })}
+                    <select value={customMonth.split("-")[0]} onChange={e => { const month = customMonth.split("-")[1]; setCustomMonth(`${e.target.value}-${month}`); }} className="text-xs font-bold text-[var(--text-primary)] bg-transparent border-none outline-none appearance-none cursor-pointer text-center px-1 min-w-[60px]">
+                      {Array.from({ length: 11 }, (_, i) => { const year = new Date().getFullYear() - 5 + i; return <option key={year} value={year} className="bg-[var(--surface)] text-[var(--text-primary)]">{year}</option>; })}
                     </select>
-                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"><ChevronRight size={16} /></button>
+                    <button onClick={() => { const [y, m] = customMonth.split("-").map(Number); const d = new Date(y, m, 1); setCustomMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`); }} className="p-1.5 text-[var(--text-muted)] hover:text-[var(--sage)] hover:bg-[var(--sage-light)] transition-all"><ChevronRight size={16} /></button>
                   </div>
                 )}
               </div>
@@ -2627,29 +2645,29 @@ export default function PatientRecord() {
               {/* Instrumentos List */}
               <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-3">
                 <div className="flex items-center justify-between shrink-0">
-                  <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Compartilhar Instrumentos</h3>
+                  <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-wide">Compartilhar Instrumentos</h3>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
+                <div className="p-4 bg-[var(--surface-alt)]/50 rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
                 {loadingLinks ? (
                   <div className="text-center py-20 opacity-50 flex-1 flex items-center justify-center">
-                    <div className="w-10 h-10 border-4 border-brand-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                    <p className="text-sm font-bold uppercase tracking-widest">Carregando instrumentos...</p>
+                    <div className="w-10 h-10 border-4 border-[var(--sage)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-sm font-bold uppercase tracking-widest text-[var(--text-muted)]">Carregando instrumentos...</p>
                   </div>
                 ) : filteredLinks.length === 0 ? (
                   <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
-                    <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-5">
-                      <Share2 size={32} className="text-slate-300" />
+                    <div className="w-16 h-16 rounded-2xl bg-[var(--surface-alt)] flex items-center justify-center mb-5 text-[var(--text-muted)]">
+                      <Share2 size={32} />
                     </div>
-                    <h4 className="text-lg font-black text-slate-800 mb-1">Nenhum registro no período</h4>
-                    <p className="text-xs font-bold text-slate-500 max-w-[240px] leading-relaxed">
+                    <h4 className="text-base font-bold text-[var(--text-primary)] mb-1">Nenhum registro no período</h4>
+                    <p className="text-xs font-semibold text-[var(--text-muted)] max-w-[240px] leading-relaxed">
                       Registros de instrumentos aparecerão aqui conforme você enviar instrumentos para este paciente.
                     </p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto overflow-y-auto flex-1 min-h-0">
+                  <div className="overflow-x-auto overflow-y-auto patients-scrollbar flex-1 min-h-0">
                     <table className="w-full text-xs">
                       <thead>
-                        <tr className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200">
+                        <tr className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest border-b border-[var(--border)]">
                           <th className="text-left px-2 py-2">Instrumento</th>
                           <th className="text-left px-2 py-2">Progresso</th>
                           <th className="text-left px-2 py-2">Status</th>
@@ -2661,27 +2679,27 @@ export default function PatientRecord() {
                       </thead>
                       <tbody>
                         {filteredLinks.map(link => (
-                          <tr key={link.id} className="border-b border-slate-100 hover:bg-white/50 transition-colors">
-                            <td className="px-2 py-3 text-slate-700 font-medium">{link.form?.title || "—"}</td>
-                            <td className="px-2 py-3 text-slate-600 whitespace-nowrap">{link.responseCount || 0}</td>
+                          <tr key={link.id} className="border-b border-[var(--border)] hover:bg-[var(--surface-alt)]/50 transition-colors">
+                            <td className="px-2 py-3 text-[var(--text-primary)] font-bold text-sm">{link.form?.title || "—"}</td>
+                            <td className="px-2 py-3 text-[var(--text-secondary)] whitespace-nowrap font-semibold">{link.responseCount || 0}</td>
                             <td className="px-2 py-3 whitespace-nowrap">
                               <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
                                 link.status === "RESPONDIDO" 
-                                  ? "bg-brand-50 text-brand-700" 
-                                  : "bg-amber-50 text-amber-700"
+                                  ? "bg-[var(--status-presente-bg)] text-[var(--status-presente-text)]" 
+                                  : "bg-[var(--status-justificada-bg)] text-[var(--status-justificada-text)]"
                               }`}>
                                 <span className={`w-1.5 h-1.5 rounded-full ${
-                                  link.status === "RESPONDIDO" ? "bg-brand-500" : "bg-amber-500"
+                                  link.status === "RESPONDIDO" ? "bg-[var(--sage)]" : "bg-[var(--peach)]"
                                 }`} />
                                 {link.status === "RESPONDIDO" ? "Respondido" : "Pendente"}
                               </span>
                             </td>
-                            <td className="px-2 py-3 text-slate-600 whitespace-nowrap">
+                            <td className="px-2 py-3 text-[var(--text-secondary)] whitespace-nowrap font-medium">
                               {link.lastResponseAt
                                 ? `${new Date(link.lastResponseAt).toLocaleDateString('pt-BR')} ${new Date(link.lastResponseAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
                                 : "—"}
                             </td>
-                            <td className="px-2 py-3 text-slate-600 whitespace-nowrap">{new Date(link.createdAt).toLocaleDateString('pt-BR')}</td>
+                            <td className="px-2 py-3 text-[var(--text-secondary)] whitespace-nowrap font-medium">{new Date(link.createdAt).toLocaleDateString('pt-BR')}</td>
                             <td className="px-2 py-3 text-center">
                               {(() => {
                                 const shareUrl = `${window.location.origin}/form/${link.token}`;
@@ -2691,7 +2709,7 @@ export default function PatientRecord() {
                                       await navigator.clipboard.writeText(shareUrl);
                                       alert("Link copiado!");
                                     }}
-                                    className="text-[10px] font-bold text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100 px-2 py-1 rounded-lg transition-colors"
+                                    className="text-[10px] font-bold text-[var(--sage)] hover:opacity-90 bg-[var(--sage-light)] px-2 py-1 rounded-lg transition-colors border border-[var(--sage)]/20"
                                   >
                                     Link
                                   </button>
@@ -2701,7 +2719,7 @@ export default function PatientRecord() {
                             <td className="px-2 py-3 text-center">
                               <button
                                 onClick={() => handleRevokeLink(link.id)}
-                                className="p-1 rounded text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                className="p-1 rounded text-red-500 hover:bg-red-500/10 transition-colors"
                               >
                                 <Trash2 size={14} />
                               </button>
@@ -2715,7 +2733,10 @@ export default function PatientRecord() {
                 </div>
                 {/* Action Buttons */}
                 <div className="flex items-center gap-3 shrink-0 justify-end">
-                  <button onClick={() => setShowShareModal(true)} className="btn btn-primary text-xs">
+                  <button 
+                    onClick={() => setShowShareModal(true)} 
+                    className="py-2 px-4 rounded-[12px] bg-[var(--sage)] text-white font-bold text-xs hover:opacity-95 transition-all outline-none shadow-sm flex items-center gap-2"
+                  >
                     <Plus size={14} /> Enviar
                   </button>
                 </div>
@@ -2729,24 +2750,24 @@ export default function PatientRecord() {
               <div className="card p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-3">
                 <div className="flex items-center justify-between shrink-0">
                   <div>
-                    <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Prontuário</h3>
-                    <p className="text-xs text-slate-500">Anotações e documentos</p>
+                    <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-wide">Prontuário</h3>
+                    <p className="text-xs text-[var(--text-muted)]">Anotações e documentos</p>
                   </div>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex-1 flex flex-col min-h-0">
+                <div className="p-4 bg-[var(--surface-alt)]/50 rounded-[20px] border border-[var(--border)] flex-1 flex flex-col min-h-0">
                   <div className="flex-1 flex flex-col min-h-0">
                     <div className="shrink-0">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
-                          <Paperclip size={14} className="text-slate-400" />
-                          <h4 className="text-xs font-bold text-slate-600 uppercase tracking-widest">Laudos e Anexos</h4>
+                          <Paperclip size={14} className="text-[var(--text-secondary)]" />
+                          <h4 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wide">Laudos e Anexos</h4>
                           {attachments.length > 0 && (
-                            <span className="px-2 py-0.5 bg-white text-slate-500 text-[10px] font-bold rounded-full">
+                            <span className="px-2 py-0.5 bg-[var(--surface)] text-[var(--text-secondary)] text-[10px] font-bold rounded-full border border-[var(--border)]">
                               {attachments.length}
                             </span>
                           )}
                         </div>
-                        <label className="text-[11px] font-bold uppercase text-brand-600 hover:text-brand-700 cursor-pointer transition-colors flex items-center gap-1">
+                        <label className="text-[11px] font-bold uppercase text-[var(--sage)] hover:opacity-90 cursor-pointer transition-colors flex items-center gap-1">
                           <Plus size={14} />
                           {uploading ? 'Enviando...' : 'Anexar'}
                           <input type="file" multiple className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" disabled={uploading} onChange={handleUploadAttachment} />
@@ -2754,50 +2775,50 @@ export default function PatientRecord() {
                       </div>
 
                       {loadingAttachments ? (
-                        <div className="text-center py-6 text-slate-400">
-                          <div className="w-5 h-5 border-2 border-slate-300 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                        <div className="text-center py-6 text-[var(--text-muted)]">
+                          <div className="w-5 h-5 border-2 border-[var(--sage)] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
                           <p className="text-[10px] font-bold uppercase tracking-widest">Carregando anexos...</p>
                         </div>
                       ) : attachments.length === 0 ? (
-                        <div className="text-center py-6 text-slate-400 bg-white/60 rounded-xl border-2 border-dashed border-slate-200">
+                        <div className="text-center py-6 text-[var(--text-muted)] bg-[var(--surface)]/60 rounded-[14px] border-2 border-dashed border-[var(--border)]">
                           <File size={24} className="mx-auto mb-2 opacity-50" />
                           <p className="text-xs font-medium">Nenhum anexo</p>
                           <p className="text-[10px] mt-0.5">PDF, JPG, PNG, DOC (máx. 10MB)</p>
                         </div>
                       ) : (
-                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                        <div className="space-y-2 max-h-40 overflow-y-auto patients-scrollbar">
                           {attachments.map((att) => (
-                            <div key={att.id} className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200">
+                            <div key={att.id} className="flex items-center justify-between p-2.5 bg-[var(--surface)] rounded-[12px] border border-[var(--border)]">
                               <div className="flex items-center gap-2.5 min-w-0">
-                                <File size={16} className="text-slate-400 shrink-0" />
+                                <File size={16} className="text-[var(--text-secondary)] shrink-0" />
                                 <div className="min-w-0">
-                                  <p className="text-xs font-medium text-slate-700 truncate">{att.filename}</p>
-                                  <p className="text-[10px] text-slate-400">{(att.size / 1024).toFixed(1)} KB</p>
+                                  <p className="text-xs font-bold text-[var(--text-primary)] truncate">{att.filename}</p>
+                                  <p className="text-[10px] text-[var(--text-muted)]">{(att.size / 1024).toFixed(1)} KB</p>
                                 </div>
                               </div>
                               <div className="flex items-center gap-0.5">
-                                <button type="button" onClick={() => handleDownloadAttachment(att)} className="p-1.5 hover:bg-brand-50 rounded text-slate-400 hover:text-brand-600 transition-colors" title="Baixar">
+                                <button type="button" onClick={() => handleDownloadAttachment(att)} className="p-1.5 hover:bg-[var(--sage-light)] rounded text-[var(--text-secondary)] hover:text-[var(--sage)] transition-colors" title="Baixar">
                                   <Download size={14} />
                                 </button>
-                                <button type="button" onClick={() => handleDeleteAttachment(att.id)} className="p-1.5 hover:bg-red-50 rounded text-slate-400 hover:text-red-500 transition-colors" title="Excluir">
+                                <button type="button" onClick={() => handleDeleteAttachment(att.id)} className="p-1.5 hover:bg-red-500/10 rounded text-[var(--text-secondary)] hover:text-red-500 transition-colors" title="Excluir">
                                   <Trash2 size={14} />
                                 </button>
                               </div>
                             </div>
                           ))}
-                          <label className="flex items-center justify-center gap-1.5 py-2.5 text-xs text-slate-500 hover:text-brand-600 cursor-pointer transition-colors rounded-lg border border-dashed border-slate-200 bg-white/60">
+                          <label className="flex items-center justify-center gap-1.5 py-2.5 text-xs text-[var(--text-secondary)] hover:text-[var(--sage)] cursor-pointer transition-colors rounded-[12px] border border-dashed border-[var(--border)] bg-[var(--surface)]/60">
                             <Plus size={14} />
-                            <span className="font-medium">Adicionar mais</span>
+                            <span className="font-semibold">Adicionar mais</span>
                             <input type="file" multiple className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" disabled={uploading} onChange={handleUploadAttachment} />
                           </label>
                         </div>
                       )}
                     </div>
 
-                    <div className="mt-4 pt-4 border-t border-slate-200/60 flex-1 flex flex-col min-h-0">
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Anotações</label>
+                    <div className="mt-4 pt-4 border-t border-[var(--border)] flex-1 flex flex-col min-h-0">
+                      <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Anotações</label>
                       <textarea 
-                        className="input text-sm flex-1 resize-none" 
+                        className="w-full p-3 rounded-[14px] border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:border-[var(--sage)] outline-none resize-none transition-colors text-sm flex-1" 
                         value={formData?.notes || ''} 
                         onChange={e => setFormData(prev => prev ? { ...prev, notes: e.target.value } : null)} 
                         placeholder="Anotações relevantes sobre o paciente..."
@@ -2809,12 +2830,15 @@ export default function PatientRecord() {
                 <div className="flex items-center gap-3 shrink-0 justify-end">
                   <button 
                     type="button" 
-                    className="btn btn-secondary text-xs flex items-center gap-1.5" 
+                    className="py-2 px-4 rounded-[12px] bg-[var(--surface-alt)] border border-[var(--border)] text-[var(--text-primary)] font-bold text-xs hover:opacity-95 transition-all outline-none shadow-sm flex items-center gap-1.5" 
                     onClick={handleExportCompletePdf}
                   >
                     <Download size={14} /> Exportar PDF
                   </button>
-                  <button className="btn btn-primary text-xs" onClick={handleSave}>
+                  <button 
+                    className="py-2 px-4 rounded-[12px] bg-[var(--sage)] text-white font-bold text-xs hover:opacity-95 transition-all outline-none shadow-sm flex items-center gap-1.5" 
+                    onClick={handleSave}
+                  >
                     <Save size={14} /> Salvar
                   </button>
                 </div>
@@ -3094,18 +3118,18 @@ export default function PatientRecord() {
 
       {/* Agenda Modal */}
       {showAgendaModal && agendaFormDate && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => { setShowAgendaModal(false); setEditingAppointment(null); setEditMode(null); }}>
-          <div className="bg-white rounded-3xl p-8 w-full max-w-lg mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[3px]" onClick={() => { setShowAgendaModal(false); setEditingAppointment(null); setEditMode(null); }}>
+          <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full max-w-lg mx-4 shadow-2xl animate-scale-in border border-[var(--border)]" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">{editingAppointment ? "Editar Agendamento" : "Novo Agendamento"}</h3>
-                <p className="text-sm text-slate-500 font-bold mt-1">
+                <h3 className="text-lg font-bold text-[var(--text-primary)] uppercase tracking-tight">{editingAppointment ? "Editar Agendamento" : "Novo Agendamento"}</h3>
+                <p className="text-xs text-[var(--text-muted)] font-semibold mt-1">
                   {format(agendaFormDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })}
                 </p>
               </div>
               <button
                 onClick={() => { setShowAgendaModal(false); setEditingAppointment(null); setEditMode(null); }}
-                className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all"
+                className="p-2 rounded-lg hover:bg-[var(--surface-alt)] text-[var(--text-secondary)] transition-all"
               >
                 <X size={20} />
               </button>
@@ -3114,69 +3138,69 @@ export default function PatientRecord() {
             <div className="space-y-4 mb-6">
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Dia</label>
+                  <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Dia</label>
                   <select
-                    className="input text-sm font-black py-2.5"
+                    className="w-full px-3 py-2.5 rounded-[12px] border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] focus:border-[var(--sage)] outline-none text-sm font-semibold"
                     value={agendaFormDayOfWeek ?? (agendaFormDate?.getDay() ?? 1)}
                     onChange={e => setAgendaFormDayOfWeek(parseInt(e.target.value))}
                   >
                     {["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"].map((d, i) => (
-                      <option key={i} value={i}>{d}</option>
+                      <option key={i} value={i} className="bg-[var(--surface)] text-[var(--text-primary)]">{d}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Horário</label>
+                  <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Horário</label>
                   <select
-                    className="input text-sm font-black py-2.5"
+                    className="w-full px-3 py-2.5 rounded-[12px] border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] focus:border-[var(--sage)] outline-none text-sm font-semibold"
                     value={agendaFormTime}
                     onChange={e => setAgendaFormTime(e.target.value)}
                   >
                     {["07:00", "07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00"].map(t => (
-                      <option key={t} value={t}>{t}</option>
+                      <option key={t} value={t} className="bg-[var(--surface)] text-[var(--text-primary)]">{t}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Duração</label>
+                  <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Duração</label>
                   <select
-                    className="input text-sm font-black py-2.5"
+                    className="w-full px-3 py-2.5 rounded-[12px] border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] focus:border-[var(--sage)] outline-none text-sm font-semibold"
                     value={agendaFormDuration}
                     onChange={e => setAgendaFormDuration(parseInt(e.target.value))}
                   >
-                    <option value={30}>30 minutos</option>
-                    <option value={45}>45 minutos</option>
-                    <option value={50}>50 minutos</option>
-                    <option value={60}>60 minutos</option>
-                    <option value={90}>90 minutos</option>
+                    <option value={30} className="bg-[var(--surface)] text-[var(--text-primary)]">30 minutos</option>
+                    <option value={45} className="bg-[var(--surface)] text-[var(--text-primary)]">45 minutos</option>
+                    <option value={50} className="bg-[var(--surface)] text-[var(--text-primary)]">50 minutos</option>
+                    <option value={60} className="bg-[var(--surface)] text-[var(--text-primary)]">60 minutos</option>
+                    <option value={90} className="bg-[var(--surface)] text-[var(--text-primary)]">90 minutos</option>
                   </select>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+              <div className="flex items-center justify-between p-4 bg-[var(--surface-alt)]/50 rounded-[20px] border border-[var(--border)]">
                 <label className="flex items-center gap-3 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={agendaFormRecurring}
                     onChange={e => setAgendaFormRecurring(e.target.checked)}
-                    className="w-5 h-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                    className="w-5 h-5 rounded border-[var(--border)] text-[var(--sage)] focus:ring-[var(--sage)] bg-[var(--surface)]"
                   />
                   <div>
-                    <span className="text-sm font-bold text-slate-700">
+                    <span className="text-sm font-bold text-[var(--text-primary)]">
                       Repetir semanalmente
                     </span>
-                    <p className="text-[10px] text-slate-500 font-medium">
+                    <p className="text-[10px] text-[var(--text-muted)] font-semibold">
                       Toda {["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"][agendaFormDate.getDay()]}
                     </p>
                   </div>
                 </label>
                 {agendaFormRecurring && (
                   <div className="w-28">
-                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nº Sessões</label>
+                    <label className="block text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Nº Sessões</label>
                     <input
                       type="number"
                       min={0}
-                      className="input text-xs font-black py-2 text-center"
+                      className="w-full px-3 py-2 rounded-[12px] border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:border-[var(--sage)] outline-none text-xs font-bold text-center"
                       value={agendaFormMaxSessions || ""}
                       onChange={e => setAgendaFormMaxSessions(Math.max(0, parseInt(e.target.value) || 0))}
                       placeholder="0 = ilimitado"
@@ -3186,17 +3210,18 @@ export default function PatientRecord() {
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--border)]">
               <button
+                type="button"
                 onClick={() => { setShowAgendaModal(false); setEditingAppointment(null); setEditMode(null); }}
-                className="px-5 py-2.5 text-xs font-black text-slate-500 hover:text-slate-700 uppercase tracking-widest transition-all"
+                className="py-2.5 px-4 rounded-[12px] bg-[var(--surface-alt)] border border-[var(--border)] text-[var(--text-primary)] font-bold text-xs hover:opacity-95 transition-all outline-none flex items-center justify-center gap-1.5"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSaveNewSlot}
                 disabled={savingAgenda}
-                className="px-6 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-brand-200"
+                className="py-2.5 px-4 rounded-[12px] bg-[var(--sage)] text-white font-bold text-xs hover:opacity-95 transition-all outline-none flex items-center justify-center gap-1.5 shadow-sm"
               >
                 {savingAgenda ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -3214,20 +3239,20 @@ export default function PatientRecord() {
 
       {/* Edit Patient Modal */}
       {showEditModal && formData && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="card w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="p-6 border-b border-slate-200 shrink-0">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[3px]">
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-2xl w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-[var(--border)] shrink-0">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-xl font-bold text-slate-800">Editar Paciente</h2>
-                  <p className="text-xs text-slate-500 mt-1">Atualize os dados do prontuário</p>
+                  <h2 className="text-lg font-bold text-[var(--text-primary)]">Editar Paciente</h2>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">Atualize os dados do prontuário</p>
                 </div>
-                <button onClick={() => setShowEditModal(false)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all" aria-label="Fechar">
+                <button onClick={() => setShowEditModal(false)} className="p-2 rounded-lg hover:bg-[var(--surface-alt)] text-[var(--text-secondary)] transition-all" aria-label="Fechar">
                   <X size={20} />
                 </button>
               </div>
               
-              <div className="flex gap-1 bg-slate-100 p-1 rounded-lg overflow-x-auto">
+              <div className="flex gap-1 bg-[var(--surface-alt)] p-1 rounded-xl overflow-x-auto">
                 {[
                   { id: "identity", label: "Identificação", icon: UserCheck },
                   { id: "contact", label: "Contato", icon: Contact },
@@ -3237,10 +3262,10 @@ export default function PatientRecord() {
                   <button
                     key={tab.id}
                     onClick={() => setEditTab(tab.id)}
-                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
+                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-[10px] text-xs font-bold transition-all whitespace-nowrap outline-none ${
                       editTab === tab.id
-                        ? "bg-white text-brand-700 shadow-sm"
-                        : "text-slate-500 hover:text-slate-700"
+                        ? "bg-[var(--surface)] text-[var(--sage)] shadow-sm"
+                        : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                     }`}
                   >
                     <tab.icon size={14} />
@@ -3250,9 +3275,9 @@ export default function PatientRecord() {
                   </div>
 
                   {errorMessage && (
-                  <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-600 animate-shake">
-                  <AlertTriangle size={18} className="shrink-0" />
-                  <p className="text-xs font-bold">{errorMessage}</p>
+                  <div className="mt-4 p-3 bg-[var(--status-falta-bg)] border border-[var(--status-falta-text)]/20 rounded-[12px] flex items-center gap-3 text-[var(--status-falta-text)] animate-shake">
+                    <AlertTriangle size={18} className="shrink-0" />
+                    <p className="text-xs font-bold">{errorMessage}</p>
                   </div>
                   )}
                   </div>
@@ -3261,28 +3286,28 @@ export default function PatientRecord() {
                 
                 {editTab === "identity" && (
                   <div className="space-y-5">
-                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+                    <div className="flex items-center justify-between p-4 bg-[var(--surface-alt)]/50 rounded-[20px] border border-[var(--border)]">
                       <div className="flex items-center gap-3">
                         {formData.isActive ? (
-                          <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center">
-                            <UserCheck size={20} className="text-brand-600" />
+                          <div className="w-10 h-10 rounded-[12px] bg-[var(--status-presente-bg)] flex items-center justify-center text-[var(--status-presente-text)]">
+                            <UserCheck size={20} />
                           </div>
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
-                            <UserX size={20} className="text-slate-500" />
+                          <div className="w-10 h-10 rounded-[12px] bg-[var(--surface-alt)] flex items-center justify-center text-[var(--text-secondary)]">
+                            <UserX size={20} />
                           </div>
                         )}
                         <div>
-                          <p className="text-sm font-semibold text-slate-700">Status do Paciente</p>
-                          <p className="text-xs text-slate-500">{formData.isActive ? "Ativo no acompanhamento" : "Inativo / Arquivado"}</p>
+                          <p className="text-sm font-bold text-[var(--text-primary)]">Status do Paciente</p>
+                          <p className="text-xs text-[var(--text-muted)]">{formData.isActive ? "Ativo no acompanhamento" : "Inativo / Arquivado"}</p>
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
-                        className={`relative w-14 h-7 rounded-full transition-colors ${formData.isActive ? "bg-brand-500" : "bg-slate-300"}`}
+                        className={`relative w-12 h-6 rounded-full transition-colors ${formData.isActive ? "bg-[var(--sage)]" : "bg-[var(--border)]"}`}
                       >
-                        <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${formData.isActive ? "left-8" : "left-1"}`} />
+                        <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${formData.isActive ? "left-[26px]" : "left-0.5"}`} />
                       </button>
                     </div>
 
@@ -3404,10 +3429,10 @@ export default function PatientRecord() {
               </form>
             </div>
 
-            <div className="p-6 border-t border-slate-200 bg-slate-50 shrink-0">
+            <div className="p-6 border-t border-[var(--border)] bg-[var(--surface-alt)]/30 shrink-0">
               <div className="flex gap-3">
-                <button type="button" onClick={() => setShowEditModal(false)} className="btn btn-secondary flex-1">Cancelar</button>
-                <button type="submit" form="edit-patient-form-record" disabled={saving} className="btn btn-primary flex-1 flex items-center justify-center gap-2">
+                <button type="button" onClick={() => setShowEditModal(false)} className="py-2.5 px-4 rounded-[12px] bg-[var(--surface-alt)] border border-[var(--border)] text-[var(--text-primary)] font-bold text-xs hover:opacity-95 transition-all outline-none flex-1">Cancelar</button>
+                <button type="submit" form="edit-patient-form-record" disabled={saving} className="py-2.5 px-4 rounded-[12px] bg-[var(--sage)] text-white font-bold text-xs hover:opacity-95 transition-all outline-none flex-1 flex items-center justify-center gap-2">
                   {saving ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -3428,14 +3453,14 @@ export default function PatientRecord() {
 
       {/* Share Modal */}
       {showShareModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="card w-full max-w-2xl p-6 animate-scale-in max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[3px]">
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-2xl w-full max-w-2xl p-6 animate-scale-in max-h-[90vh] overflow-y-auto patients-scrollbar flex flex-col">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-xl font-semibold text-slate-900">Enviar Instrumento para {patient?.name}</h2>
-                <p className="text-xs text-slate-600 mt-1">Crie um link para que o paciente preencha o instrumento</p>
+                <h2 className="text-lg font-bold text-[var(--text-primary)]">Enviar Instrumento para {patient?.name}</h2>
+                <p className="text-xs text-[var(--text-muted)] mt-1">Crie um link para que o paciente preencha o instrumento</p>
               </div>
-              <button onClick={() => setShowShareModal(false)} className="text-slate-500 hover:text-brand-600">
+              <button onClick={() => setShowShareModal(false)} className="text-[var(--text-secondary)] hover:text-[var(--sage)] transition-colors p-1.5 hover:bg-[var(--surface-alt)] rounded-lg">
                 <Plus size={24} className="rotate-45" />
               </button>
             </div>
@@ -3465,10 +3490,10 @@ export default function PatientRecord() {
               }
             }} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-brand-700 mb-2">Selecione um Instrumento *</label>
+                <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Selecione um Instrumento *</label>
                 {loadingForms ? (
-                  <div className="text-center py-4 text-slate-500">
-                    <div className="animate-spin w-4 h-4 border-2 border-brand-900 border-t-transparent rounded-full mx-auto" />
+                  <div className="text-center py-4 text-[var(--text-muted)]">
+                    <div className="animate-spin w-4 h-4 border-2 border-[var(--sage)] border-t-transparent rounded-full mx-auto" />
                   </div>
                 ) : (
                   <select
@@ -3482,18 +3507,18 @@ export default function PatientRecord() {
                     }}
                     required
                   >
-                    <option value="">Selecionar instrumento...</option>
+                    <option value="" className="bg-[var(--surface)] text-[var(--text-primary)]">Selecionar instrumento...</option>
                     {forms.map(form => (
-                      <option key={form.id} value={form.id}>{form.title}</option>
+                      <option key={form.id} value={form.id} className="bg-[var(--surface)] text-[var(--text-primary)]">{form.title}</option>
                     ))}
                   </select>
                 )}
               </div>
 
               {existingLinkForForm && !forceCreateNew && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <p className="text-sm text-amber-900 font-medium">⏱️ Link já existe para este instrumento</p>
-                  <p className="text-xs text-amber-700 mt-1">
+                <div className="p-4 bg-[var(--status-justificada-bg)] border border-[var(--status-justificada-text)]/20 rounded-[14px]">
+                  <p className="text-sm text-[var(--status-justificada-text)] font-bold">⏱️ Link já existe para este instrumento</p>
+                  <p className="text-xs text-[var(--status-justificada-text)]/80 mt-1 font-semibold">
                     Este paciente já tem um link pendente para {forms.find(f => f.id === shareData.formId)?.title}.
                     Deseja reutilizá-lo ou criar um novo?
                   </p>
@@ -3503,34 +3528,34 @@ export default function PatientRecord() {
               <div className="flex gap-2 pt-4">
                 {existingLinkForForm && !forceCreateNew ? (
                   <>
-                    <button type="submit" className="btn btn-secondary flex-1">
+                    <button type="submit" className="py-2.5 px-4 rounded-[12px] bg-[var(--surface-alt)] border border-[var(--border)] text-[var(--text-primary)] font-bold text-xs hover:opacity-95 transition-all outline-none flex-1">
                       ↻ Reutilizar Link Existente
                     </button>
                     <button
                       type="button"
                       onClick={() => setForceCreateNew(true)}
-                      className="btn btn-ghost"
+                      className="py-2.5 px-4 rounded-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors font-bold text-xs outline-none"
                     >
                       Criar Novo
                     </button>
                     <button
                       type="button"
                       onClick={() => setShowShareModal(false)}
-                      className="btn btn-ghost text-xs"
+                      className="py-2.5 px-4 rounded-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors font-bold text-xs outline-none"
                     >
                       Cancelar
                     </button>
                   </>
                 ) : (
                   <>
-                    <button type="submit" className="btn btn-primary flex-1">
+                    <button type="submit" className="py-2.5 px-4 rounded-[12px] bg-[var(--sage)] text-white font-bold text-xs hover:opacity-95 transition-all outline-none flex-1">
                       Gerar e Copiar Link
                     </button>
                     {existingLinkForForm && forceCreateNew && (
                       <button
                         type="button"
                         onClick={() => setForceCreateNew(false)}
-                        className="btn btn-ghost"
+                        className="py-2.5 px-4 rounded-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors font-bold text-xs outline-none"
                       >
                         ← Voltar
                       </button>
@@ -3538,7 +3563,7 @@ export default function PatientRecord() {
                     <button
                       type="button"
                       onClick={() => setShowShareModal(false)}
-                      className="btn btn-ghost"
+                      className="py-2.5 px-4 rounded-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors font-bold text-xs outline-none"
                     >
                       Cancelar
                     </button>
@@ -3552,28 +3577,28 @@ export default function PatientRecord() {
 
       {/* Payment Modal */}
       {showPaymentModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="card w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="p-6 border-b border-slate-200">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[3px]">
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-2xl w-full max-w-2xl animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-[var(--border)]">
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Lançar Pagamento</h2>
-                  <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Vincular sessões e registrar valor</p>
+                  <h2 className="text-lg font-bold text-[var(--text-primary)] uppercase tracking-tight">Lançar Pagamento</h2>
+                  <p className="text-xs text-[var(--text-muted)] font-semibold mt-1">Vincular sessões e registrar valor</p>
                 </div>
-                <button onClick={() => setShowPaymentModal(false)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400">
+                <button onClick={() => setShowPaymentModal(false)} className="p-2 rounded-lg hover:bg-[var(--surface-alt)] text-[var(--text-secondary)] transition-all">
                   <Plus size={24} className="rotate-45" />
                 </button>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="flex-1 overflow-y-auto patients-scrollbar p-6 space-y-6">
               <form id="payment-form" onSubmit={handleSavePayment} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Form Fields */}
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Valor Total (R$)</label>
+                    <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Valor Total (R$)</label>
                     <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">R$</div>
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] font-bold text-sm">R$</div>
                       <input 
                         type="text"
                         required
@@ -3632,19 +3657,19 @@ export default function PatientRecord() {
                           checked={paymentFormData.receiptIssued}
                           onChange={e => setPaymentFormData({...paymentFormData, receiptIssued: e.target.checked})}
                         />
-                        <div className="w-10 h-5 bg-slate-200 rounded-full peer-checked:bg-brand-500 transition-colors"></div>
+                        <div className="w-10 h-5 bg-[var(--border)] rounded-full peer-checked:bg-[var(--sage)] transition-colors"></div>
                         <div className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform peer-checked:left-6"></div>
                       </div>
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest group-hover:text-slate-800">Nota de Serviço Emitida</span>
+                      <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider group-hover:text-[var(--text-primary)]">Nota de Serviço Emitida</span>
                     </label>
                     
                     {/* Upload Recibo */}
                     <div className="mt-2 space-y-2">
                       {paymentFormData.existingReceiptAttachmentId && paymentFormData.existingReceiptFilename ? (
-                        <div className="flex items-center justify-between px-3 py-2 bg-brand-50 border border-brand-200 rounded-lg">
+                        <div className="flex items-center justify-between px-3 py-2 bg-[var(--status-presente-bg)] border border-[var(--status-presente-text)]/20 rounded-lg">
                           <div className="flex items-center gap-2 min-w-0">
-                            <Paperclip size={14} className="text-brand-600 shrink-0" />
-                            <span className="text-xs font-medium text-brand-700 truncate">
+                            <Paperclip size={14} className="text-[var(--status-presente-text)] shrink-0" />
+                            <span className="text-xs font-semibold text-[var(--status-presente-text)] truncate">
                               {paymentFormData.existingReceiptFilename}
                             </span>
                           </div>
@@ -3652,7 +3677,7 @@ export default function PatientRecord() {
                             <button
                               type="button"
                               onClick={() => handleDownloadReceipt(paymentFormData.existingReceiptAttachmentId, paymentFormData.existingReceiptFilename)}
-                              className="p-1.5 text-brand-700 hover:bg-brand-100 rounded-lg transition-colors"
+                              className="p-1.5 text-[var(--status-presente-text)] hover:bg-[var(--status-presente-text)]/10 rounded-lg transition-colors"
                               title="Baixar Recibo"
                             >
                               <Download size={14} />
@@ -3660,7 +3685,7 @@ export default function PatientRecord() {
                             <button
                               type="button"
                               onClick={() => setPaymentFormData({...paymentFormData, existingReceiptAttachmentId: null, existingReceiptFilename: null, receiptFile: null})}
-                              className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg transition-colors"
+                              className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
                               title="Remover"
                             >
                               <X size={14} />
@@ -3668,8 +3693,8 @@ export default function PatientRecord() {
                           </div>
                         </div>
                       ) : (
-                        <label className={`flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium cursor-pointer transition-all ${paymentFormData.receiptFile ? 'border-brand-200' : 'hover:border-brand-300'}`}>
-                          <Paperclip size={14} />
+                        <label className={`flex items-center gap-2 px-3 py-2 bg-[var(--surface-alt)]/50 border border-[var(--border)] rounded-[12px] text-xs font-semibold cursor-pointer transition-all text-[var(--text-secondary)] ${paymentFormData.receiptFile ? 'border-[var(--sage)]/55' : 'hover:border-[var(--sage)]/35'}`}>
+                          <Paperclip size={14} className="text-[var(--text-muted)]" />
                           {paymentFormData.receiptFile ? paymentFormData.receiptFile.name : 'Anexar Recibo (PDF/IMG)'}
                           <input 
                             type="file" 
@@ -3683,9 +3708,9 @@ export default function PatientRecord() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Observações</label>
+                    <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Observações</label>
                     <textarea 
-                      className="input text-sm min-h-[80px]"
+                      className="w-full p-3 rounded-[14px] border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:border-[var(--sage)] outline-none resize-none transition-colors text-sm min-h-[80px]"
                       placeholder="Ex: Pagamento referente ao mês de Abril..."
                       value={paymentFormData.notes}
                       onChange={e => setPaymentFormData({...paymentFormData, notes: e.target.value})}
@@ -3694,11 +3719,11 @@ export default function PatientRecord() {
                 </div>
 
                 {/* Selection of Attendances */}
-                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
+                <div className="bg-[var(--surface-alt)]/50 rounded-[20px] p-4 border border-[var(--border)]">
+                  <h4 className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-4">
                     {paymentFormData.id ? 'Sessões deste Pagamento' : 'Selecionar Sessões Pendentes'}
                   </h4>
-                  <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+                  <div className="space-y-2 max-h-[300px] overflow-y-auto patients-scrollbar pr-2">
                     {(() => {
                       const id = paymentFormData.id;
                       const available = attendances.filter(a => (a.status === 'presente' || a.status === 'falta') && (!a.paymentId || a.paymentId === id));
@@ -3706,15 +3731,15 @@ export default function PatientRecord() {
                       const pending = available.filter(a => !a.paymentId);
                       const sorted = [...linked, ...pending];
                       if (sorted.length === 0) return (
-                        <div className="py-10 text-center opacity-30 italic text-xs font-bold uppercase tracking-widest">
+                        <div className="py-10 text-center opacity-30 italic text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
                           Nenhuma sessão disponível
                         </div>
                       );
                       return sorted.map(att => (
-                        <label key={att.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
+                        <label key={att.id} className={`flex items-center justify-between p-3 rounded-[12px] border transition-all cursor-pointer ${
                           selectedAttendances.includes(att.id) 
-                            ? "bg-brand-50 border-brand-300 shadow-sm" 
-                            : "bg-white border-slate-100 hover:border-slate-300"
+                            ? "bg-[var(--status-presente-bg)] border-[var(--status-presente-text)]/30 shadow-sm" 
+                            : "bg-[var(--surface)] border-[var(--border)] hover:border-[var(--text-muted)]/30"
                         }`}>
                           <div className="flex items-center gap-3">
                             <input 
@@ -3730,21 +3755,21 @@ export default function PatientRecord() {
                               }}
                             />
                             <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${
-                              selectedAttendances.includes(att.id) ? "bg-brand-500 border-brand-500" : "border-slate-300"
+                              selectedAttendances.includes(att.id) ? "bg-[var(--sage)] border-[var(--sage)]" : "border-[var(--border)] bg-[var(--surface)]"
                             }`}>
                               {selectedAttendances.includes(att.id) && <Check size={10} className="text-white" />}
                             </div>
                             <div>
-                              <p className="text-xs font-black text-slate-800">
+                              <p className="text-xs font-bold text-[var(--text-primary)]">
                                 {format(new Date(att.date), 'dd/MM/yyyy')}
-                                {att.status === 'falta' && <span className="ml-2 text-[9px] text-red-500 uppercase font-black">Falta</span>}
+                                {att.status === 'falta' && <span className="ml-2 text-[9px] text-red-500 uppercase font-bold">Falta</span>}
                               </p>
                               <div className="flex items-center gap-2">
-                                <p className="text-[10px] font-bold text-slate-400 uppercase">{att.sessionTime}</p>
+                                <p className="text-[10px] font-semibold text-[var(--text-muted)] uppercase">{att.sessionTime}</p>
                                 {att.parentId && (() => {
                                   const parent = attendances.find(p => p.id === att.parentId);
                                   return parent ? (
-                                    <span className="text-[9px] font-black text-amber-500 uppercase flex items-center gap-0.5">
+                                    <span className="text-[9px] font-bold text-[var(--peach)] uppercase flex items-center gap-0.5">
                                       <RefreshCcw size={8} />
                                       Pai: {format(new Date(parent.date), 'dd/MM/yyyy')}
                                     </span>
@@ -3758,8 +3783,8 @@ export default function PatientRecord() {
                     })()}
                   </div>
                   {selectedAttendances.length > 0 && (
-                    <div className="mt-4 p-3 bg-brand-900 text-white rounded-xl flex items-center justify-between shadow-lg animate-fade-in">
-                      <p className="text-[10px] font-black uppercase tracking-widest">{selectedAttendances.length} selecionadas</p>
+                    <div className="mt-4 p-3 bg-[var(--sage)] text-white rounded-[12px] flex items-center justify-between shadow-sm animate-fade-in">
+                      <p className="text-[10px] font-bold uppercase tracking-wider">{selectedAttendances.length} selecionadas</p>
                       <p className="text-xs font-bold">Total: R$ {paymentFormData.amount || "0,00"}</p>
                     </div>
                   )}
@@ -3767,14 +3792,14 @@ export default function PatientRecord() {
               </form>
             </div>
 
-            <div className="p-6 border-t border-slate-200 bg-slate-50">
+            <div className="p-6 border-t border-[var(--border)] bg-[var(--surface-alt)]/30">
               <div className="flex gap-3">
-                <button onClick={() => setShowPaymentModal(false)} className="btn btn-secondary flex-1">Cancelar</button>
+                <button onClick={() => setShowPaymentModal(false)} className="py-2.5 px-4 rounded-[12px] bg-[var(--surface-alt)] border border-[var(--border)] text-[var(--text-primary)] font-bold text-xs hover:opacity-95 transition-all outline-none flex-1">Cancelar</button>
                 <button 
                   type="submit" 
                   form="payment-form" 
                   disabled={saving || selectedAttendances.length === 0}
-                  className="btn btn-primary flex-1 flex items-center justify-center gap-2"
+                  className="py-2.5 px-4 rounded-[12px] bg-[var(--sage)] text-white font-bold text-xs hover:opacity-95 transition-all outline-none flex-1 flex items-center justify-center gap-2"
                 >
                   {saving ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -3798,10 +3823,10 @@ function TabButton({ active, onClick, icon, label }) {
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
+      className={`flex items-center gap-2 px-4 py-2 rounded-[10px] text-sm font-bold transition-all duration-150 outline-none ${
         active 
-          ? "bg-brand-900 text-white shadow-md" 
-          : "text-slate-600 hover:text-slate-900 hover:bg-brand-50"
+          ? "bg-[var(--sage)] text-white shadow-sm border border-transparent" 
+          : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] border border-transparent"
       }`}
     >
       {icon}
