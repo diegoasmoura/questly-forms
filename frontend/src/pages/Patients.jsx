@@ -16,6 +16,7 @@ import {
   Phone,
   Calendar,
   FileText,
+  ChevronLeft,
   ChevronRight,
   UserPlus,
   ArrowLeft,
@@ -96,10 +97,19 @@ export default function Patients() {
   const [isClosingEdit, setIsClosingEdit] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  
   const [importStep, setImportStep] = useState('idle');
   const [importErrors, setImportErrors] = useState([]);
   const [importResults, setImportResults] = useState([]);
   const [importProgress, setImportProgress] = useState(0);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -409,6 +419,12 @@ const resetImportModal = () => {
     p.cpf?.includes(searchQuery)
   );
 
+  const totalPages = Math.ceil(filteredPatients.length / itemsPerPage);
+  const paginatedPatients = filteredPatients.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <div className="h-full flex flex-col overflow-hidden animate-fade-in relative">
       {/* New Sleek Toolbar */}
@@ -523,84 +539,113 @@ const resetImportModal = () => {
               </div>
             ))}
           </div>
-        ) : filteredPatients.length === 0 ? (
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm p-16 sm:p-20 text-center">
-            <div className="w-20 h-20 bg-[var(--surface-alt)] rounded-full flex items-center justify-center mx-auto mb-6">
-              <Users size={40} className="text-[var(--text-secondary)] opacity-70" />
+        ) : viewMode === "grid" ? (
+          <div className="flex flex-col mb-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pt-6 pb-6 overflow-visible">
+              {paginatedPatients.map((patient) => (
+                <PatientCard
+                  key={patient.id}
+                  patient={patient}
+                  onDelete={handleDeletePatient}
+                  onEdit={() => setEditPatient(patient)}
+                />
+              ))}
             </div>
-            <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">
-              {searchQuery ? "Nenhum paciente encontrado" : "Nenhum paciente cadastrado"}
-            </h3>
-            <p className="text-[var(--text-secondary)] mb-8 max-w-sm mx-auto">
-              {searchQuery ? "Tente um termo de busca diferente" : "Comece cadastrando seu primeiro paciente para acompanhar sua evolução clínica."}
-            </p>
-            {!searchQuery && (
-              <div className="relative empty-registration-dropdown">
-                <button onClick={() => setShowEmptyRegistrationDropdown(!showEmptyRegistrationDropdown)} className="btn btn-primary">
-                  <UserPlus size={18} />
-                  Cadastrar Paciente
-                  <ChevronDown size={14} className={`transition-transform duration-200 ${showEmptyRegistrationDropdown ? 'rotate-180' : ''}`} />
-                </button>
-                
-                {showEmptyRegistrationDropdown && (
-                  <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-56 bg-[var(--surface)] rounded-[16px] shadow-xl border border-[var(--border)] py-2 z-[60] animate-scale-in">
-                    <button
-                      onClick={() => {
-                        openAddModal();
-                        setShowEmptyRegistrationDropdown(false);
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors text-left"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-[var(--sage-light)] text-[var(--sage)] flex items-center justify-center">
-                        <UserPlus size={18} />
-                      </div>
-                      <div>
-                        <p className="font-bold">Cadastrar paciente</p>
-                        <p className="text-[10px] text-[var(--text-muted)]">Manual, um por um</p>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowImportModal(true);
-                        setShowEmptyRegistrationDropdown(false);
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors text-left"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-[var(--blue-light)] text-[var(--blue)] flex items-center justify-center">
-                        <FileSpreadsheet size={18} />
-                      </div>
-                      <div>
-                        <p className="font-bold">Importar pacientes</p>
-                        <p className="text-[10px] text-[var(--text-muted)]">Via planilha Excel</p>
-                      </div>
-                    </button>
-                  </div>
-                )}
+            {filteredPatients.length > itemsPerPage && (
+              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[16px] shadow-sm overflow-hidden mt-2">
+                <PaginationFooter 
+                  currentPage={currentPage} 
+                  totalPages={totalPages} 
+                  totalItems={filteredPatients.length} 
+                  itemsPerPage={itemsPerPage} 
+                  onPageChange={setCurrentPage} 
+                />
               </div>
             )}
           </div>
-        ) : viewMode === "grid" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pt-6 pb-10 overflow-visible">
-            {filteredPatients.map((patient) => (
-              <PatientCard
-                key={patient.id}
-                patient={patient}
-                onDelete={handleDeletePatient}
-                onEdit={() => setEditPatient(patient)}
-              />
-            ))}
-          </div>
         ) : (
-          <div className="flex flex-col bg-[var(--surface)] border border-[var(--border)] rounded-[16px] shadow-sm mt-2 mb-10">
-            {filteredPatients.map((patient, index) => (
-              <PatientListRow
-                key={patient.id}
-                patient={patient}
-                onDelete={handleDeletePatient}
-                onEdit={() => setEditPatient(patient)}
-                isLast={index === filteredPatients.length - 1}
-              />
-            ))}
+          <div className="flex flex-col bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2 mb-10 overflow-hidden transition-all">
+            {filteredPatients.length === 0 ? (
+              <div className="p-16 sm:p-20 text-center">
+                <div className="w-20 h-20 bg-[var(--surface-alt)] rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Users size={40} className="text-[var(--text-secondary)] opacity-70" />
+                </div>
+                <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">
+                  {searchQuery ? "Nenhum paciente encontrado" : "Nenhum paciente cadastrado"}
+                </h3>
+                <p className="text-[var(--text-secondary)] mb-8 max-w-sm mx-auto">
+                  {searchQuery ? "Tente um termo de busca diferente" : "Comece cadastrando seu primeiro paciente para acompanhar sua evolução clínica."}
+                </p>
+                {!searchQuery && (
+                  <div className="relative empty-registration-dropdown">
+                    <button onClick={() => setShowEmptyRegistrationDropdown(!showEmptyRegistrationDropdown)} className="btn btn-primary">
+                      <UserPlus size={18} />
+                      Cadastrar Paciente
+                      <ChevronDown size={14} className={`transition-transform duration-200 ${showEmptyRegistrationDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+                    
+                    {showEmptyRegistrationDropdown && (
+                      <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-56 bg-[var(--surface)] rounded-[16px] shadow-xl border border-[var(--border)] py-2 z-[60] animate-scale-in">
+                        <button
+                          onClick={() => {
+                            openAddModal();
+                            setShowEmptyRegistrationDropdown(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors text-left"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-[var(--sage-light)] text-[var(--sage)] flex items-center justify-center">
+                            <UserPlus size={18} />
+                          </div>
+                          <div>
+                            <p className="font-bold">Cadastrar paciente</p>
+                            <p className="text-[10px] text-[var(--text-muted)]">Manual, um por um</p>
+                          </div>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowImportModal(true);
+                            setShowEmptyRegistrationDropdown(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors text-left"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-[var(--blue-light)] text-[var(--blue)] flex items-center justify-center">
+                            <FileSpreadsheet size={18} />
+                          </div>
+                          <div>
+                            <p className="font-bold">Importar pacientes</p>
+                            <p className="text-[10px] text-[var(--text-muted)]">Via planilha Excel</p>
+                          </div>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col">
+                {paginatedPatients.map((patient, index) => (
+                  <PatientListRow
+                    key={patient.id}
+                    patient={patient}
+                    onDelete={handleDeletePatient}
+                    onEdit={() => setEditPatient(patient)}
+                    isLast={index === paginatedPatients.length - 1}
+                  />
+                ))}
+              </div>
+            )}
+            
+            {filteredPatients.length > itemsPerPage && (
+              <div className="border-t border-[var(--border)]">
+                <PaginationFooter 
+                  currentPage={currentPage} 
+                  totalPages={totalPages} 
+                  totalItems={filteredPatients.length} 
+                  itemsPerPage={itemsPerPage} 
+                  onPageChange={setCurrentPage} 
+                />
+              </div>
+            )}
           </div>
         )}
         </div>
@@ -2035,6 +2080,45 @@ function PatientActionMenu({ patient, onEdit, onDelete }) {
   );
 }
 
+const formatShortName = (name) => {
+  if (!name) return '';
+  const parts = name.trim().split(' ');
+  if (parts.length <= 1) return parts[0];
+  return `${parts[0]} ${parts[parts.length - 1]}`;
+};
+
+function PaginationFooter({ currentPage, totalPages, totalItems, itemsPerPage, onPageChange }) {
+  const startItem = Math.min((currentPage - 1) * itemsPerPage + 1, totalItems);
+  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+  return (
+    <div className="px-6 py-4 flex items-center justify-between bg-[var(--surface)]">
+      <div className="text-[13px] text-[var(--text-muted)]">
+        Mostrando <span className="font-semibold text-[var(--text-primary)]">{totalItems === 0 ? 0 : startItem}</span> a <span className="font-semibold text-[var(--text-primary)]">{endItem}</span> de <span className="font-semibold text-[var(--text-primary)]">{totalItems}</span> pacientes
+      </div>
+      <div className="flex items-center gap-1">
+        <button 
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1 || totalItems === 0}
+          className="p-1.5 rounded-lg border border-transparent text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] hover:border-[var(--border)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-transparent transition-all"
+        >
+          <ChevronLeft size={18} />
+        </button>
+        <span className="text-[13px] font-medium text-[var(--text-primary)] px-2">
+          {totalItems === 0 ? 0 : currentPage} / {totalItems === 0 ? 0 : totalPages}
+        </span>
+        <button 
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages || totalItems === 0}
+          className="p-1.5 rounded-lg border border-transparent text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] hover:border-[var(--border)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-transparent transition-all"
+        >
+          <ChevronRight size={18} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function PatientCard({ patient, onDelete, onEdit }) {
   const sentCount = patient._count?.shareLinks || 0;
   const responseCount = patient._count?.responses || 0;
@@ -2064,8 +2148,8 @@ function PatientCard({ patient, onDelete, onEdit }) {
         </div>
         
         <div className="flex flex-col min-w-0 flex-1 mt-0.5">
-          <h3 className="text-[15px] font-bold text-[var(--text-primary)] leading-tight truncate group-hover:text-[var(--sage)] transition-colors">
-            {patient.name}
+          <h3 className="text-[15px] font-bold text-[var(--text-primary)] leading-tight truncate group-hover:text-[var(--sage)] transition-colors" title={patient.name}>
+            {formatShortName(patient.name)}
           </h3>
           <p className="text-[11px] font-semibold text-[var(--text-muted)] truncate mt-1">
             {patient.email || (patient.phone ? formatPhone(patient.phone) : 'Sem contato')}
@@ -2170,30 +2254,30 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
           
           {/* Sessões */}
           <div className="flex flex-col justify-center">
-             <span className="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Sessões</span>
-             <span className="text-[var(--text-primary)] font-bold">{attendance.presente} <span className="opacity-70 font-normal">concluídas</span></span>
+             <span className="text-[11px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Sessões</span>
+             <span className="text-[var(--text-primary)] font-bold text-[14px]">{attendance.presente}</span>
           </div>
           
           {/* Faltas */}
           <div className="flex flex-col justify-center border-l border-[var(--border)] pl-3">
-             <span className="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Faltas</span>
+             <span className="text-[11px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Faltas</span>
              {attendance.falta > 0 ? (
-               <span className="text-amber-500 font-bold bg-amber-500/10 px-1.5 py-0.5 rounded-[4px] self-start inline-flex">{attendance.falta} <span className="opacity-80 font-normal ml-1">registradas</span></span>
+               <span className="text-amber-500 font-bold bg-amber-500/10 px-2 py-0.5 rounded-[6px] self-start inline-flex text-[14px] leading-none">{attendance.falta}</span>
              ) : (
-               <span className="text-[var(--text-muted)] font-medium">Nenhuma</span>
+               <span className="text-[var(--text-muted)] font-medium text-[14px]">0</span>
              )}
           </div>
 
           {/* Enviados */}
           <div className="flex flex-col justify-center border-l border-[var(--border)] pl-3">
-             <span className="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Formulários</span>
-             <span className="text-[var(--text-primary)] font-bold">{sentCount} <span className="opacity-70 font-normal">enviados</span></span>
+             <span className="text-[11px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Formulários</span>
+             <span className="text-[var(--text-primary)] font-bold text-[14px]">{sentCount}</span>
           </div>
 
           {/* Respondidos */}
           <div className="flex flex-col justify-center border-l border-[var(--border)] pl-3">
-             <span className="text-[9px] text-[var(--sage)] font-bold uppercase tracking-widest mb-0.5">Retorno</span>
-             <span className="text-[var(--sage)] font-bold">{responseCount} <span className="text-[var(--sage)]/70 font-normal">respondidos</span></span>
+             <span className="text-[11px] text-[var(--sage)] font-bold uppercase tracking-widest mb-0.5">Retorno</span>
+             <span className="text-[var(--sage)] font-bold text-[14px]">{responseCount}</span>
           </div>
         </div>
       </div>
