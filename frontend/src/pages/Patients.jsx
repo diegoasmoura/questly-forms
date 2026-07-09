@@ -100,7 +100,7 @@ export default function Patients() {
   
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 8;
   
   const [importStep, setImportStep] = useState('idle');
   const [importErrors, setImportErrors] = useState([]);
