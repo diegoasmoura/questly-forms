@@ -100,7 +100,16 @@ export default function Patients() {
   
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const [itemsPerPage, setItemsPerPage] = useState(() => {
+    const saved = localStorage.getItem('patients-per-page');
+    return saved ? parseInt(saved, 10) : 12;
+  });
+
+  const handleItemsPerPageChange = (value) => {
+    setItemsPerPage(value);
+    setCurrentPage(1);
+    localStorage.setItem('patients-per-page', value);
+  };
   
   const [importStep, setImportStep] = useState('idle');
   const [importErrors, setImportErrors] = useState([]);
@@ -540,16 +549,18 @@ const resetImportModal = () => {
             ))}
           </div>
         ) : viewMode === "grid" && filteredPatients.length > 0 ? (
-          <div className="flex flex-col flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 p-4 flex-1 [&>*]:h-full" style={{gridAutoRows: '1fr'}}>
-              {paginatedPatients.map((patient) => (
-                <PatientCard
-                  key={patient.id}
-                  patient={patient}
-                  onDelete={handleDeletePatient}
-                  onEdit={() => setEditPatient(patient)}
-                />
-              ))}
+          <div className="flex flex-col flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2 min-h-0">
+            <div className="flex-1 overflow-y-auto patients-scrollbar p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4" style={{gridAutoRows: '1fr'}}>
+                {paginatedPatients.map((patient) => (
+                  <PatientCard
+                    key={patient.id}
+                    patient={patient}
+                    onDelete={handleDeletePatient}
+                    onEdit={() => setEditPatient(patient)}
+                  />
+                ))}
+              </div>
             </div>
             {filteredPatients.length > itemsPerPage && (
               <div className="border-t border-[var(--border)] shrink-0 rounded-b-[24px] overflow-hidden">
@@ -558,7 +569,20 @@ const resetImportModal = () => {
                   totalPages={totalPages} 
                   totalItems={filteredPatients.length} 
                   itemsPerPage={itemsPerPage} 
-                  onPageChange={setCurrentPage} 
+                  onPageChange={setCurrentPage}
+                  onItemsPerPageChange={handleItemsPerPageChange}
+                />
+              </div>
+            )}
+            {filteredPatients.length <= itemsPerPage && (
+              <div className="border-t border-[var(--border)] shrink-0 rounded-b-[24px] overflow-hidden">
+                <PaginationFooter 
+                  currentPage={1} 
+                  totalPages={1} 
+                  totalItems={filteredPatients.length} 
+                  itemsPerPage={itemsPerPage} 
+                  onPageChange={() => {}}
+                  onItemsPerPageChange={handleItemsPerPageChange}
                 />
               </div>
             )}
@@ -642,7 +666,20 @@ const resetImportModal = () => {
                   totalPages={totalPages} 
                   totalItems={filteredPatients.length} 
                   itemsPerPage={itemsPerPage} 
-                  onPageChange={setCurrentPage} 
+                  onPageChange={setCurrentPage}
+                  onItemsPerPageChange={handleItemsPerPageChange}
+                />
+              </div>
+            )}
+            {filteredPatients.length <= itemsPerPage && (
+              <div className="border-t border-[var(--border)] shrink-0 mt-auto rounded-b-[24px] overflow-hidden">
+                <PaginationFooter 
+                  currentPage={1} 
+                  totalPages={1} 
+                  totalItems={filteredPatients.length} 
+                  itemsPerPage={itemsPerPage} 
+                  onPageChange={() => {}}
+                  onItemsPerPageChange={handleItemsPerPageChange}
                 />
               </div>
             )}
@@ -2087,29 +2124,52 @@ const formatShortName = (name) => {
   return `${parts[0]} ${parts[parts.length - 1]}`;
 };
 
-function PaginationFooter({ currentPage, totalPages, totalItems, itemsPerPage, onPageChange, transparent = false }) {
+function PaginationFooter({ currentPage, totalPages, totalItems, itemsPerPage, onPageChange, onItemsPerPageChange, transparent = false }) {
   const startItem = Math.min((currentPage - 1) * itemsPerPage + 1, totalItems);
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+  const perPageOptions = [8, 12, 24, 48];
 
   return (
-    <div className={`px-4 py-3 flex items-center justify-between ${transparent ? 'bg-transparent border-none' : 'bg-[var(--surface)]'}`}>
-      <div className="text-[13px] text-[var(--text-muted)]">
-        Mostrando <span className="font-semibold text-[var(--text-primary)]">{totalItems === 0 ? 0 : startItem}</span> a <span className="font-semibold text-[var(--text-primary)]">{endItem}</span> de <span className="font-semibold text-[var(--text-primary)]">{totalItems}</span> pacientes
+    <div className={`px-4 py-3 flex items-center justify-between gap-4 ${transparent ? 'bg-transparent border-none' : 'bg-[var(--surface)]'}`}>
+      <div className="flex items-center gap-3">
+        <span className="text-[13px] text-[var(--text-muted)] whitespace-nowrap">
+          Mostrando <span className="font-semibold text-[var(--text-primary)]">{totalItems === 0 ? 0 : startItem}</span> a <span className="font-semibold text-[var(--text-primary)]">{totalItems === 0 ? 0 : endItem}</span> de <span className="font-semibold text-[var(--text-primary)]">{totalItems}</span> pacientes
+        </span>
+        {onItemsPerPageChange && (
+          <div className="flex items-center gap-1.5">
+            <span className="text-[12px] text-[var(--text-muted)] hidden sm:block">Exibir:</span>
+            <div className="flex items-center gap-0.5 p-0.5 bg-[var(--surface-alt)] rounded-[8px] border border-[var(--border)]">
+              {perPageOptions.map(opt => (
+                <button
+                  key={opt}
+                  onClick={() => onItemsPerPageChange(opt)}
+                  className={`px-2.5 py-1 rounded-[6px] text-[12px] font-semibold transition-colors ${
+                    itemsPerPage === opt
+                      ? 'bg-[var(--surface)] text-[var(--sage)] shadow-sm border border-[var(--border)]'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                  }`}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 shrink-0">
         <button 
           onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1 || totalItems === 0}
+          disabled={currentPage === 1 || totalItems === 0 || totalPages <= 1}
           className="p-1.5 rounded-lg border border-transparent text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] hover:border-[var(--border)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-transparent transition-all"
         >
           <ChevronLeft size={18} />
         </button>
-        <span className="text-[13px] font-medium text-[var(--text-primary)] px-2">
+        <span className="text-[13px] font-medium text-[var(--text-primary)] px-2 whitespace-nowrap">
           {totalItems === 0 ? 0 : currentPage} / {totalItems === 0 ? 0 : totalPages}
         </span>
         <button 
           onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages || totalItems === 0}
+          disabled={currentPage === totalPages || totalItems === 0 || totalPages <= 1}
           className="p-1.5 rounded-lg border border-transparent text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] hover:border-[var(--border)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-transparent transition-all"
         >
           <ChevronRight size={18} />

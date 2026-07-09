@@ -543,6 +543,27 @@
   display: none;
 }
 
+/* Scrollbar estilizada para o container de pacientes */
+.patients-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.patients-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.patients-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 12px 0;
+}
+.patients-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 99px;
+}
+.patients-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
 /* Remove contorno de foco e caixa de destaque ao tocar nos gráficos (Mobile/Desktop) */
 .recharts-wrapper,
 .recharts-surface,
