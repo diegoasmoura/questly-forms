@@ -1,10 +1,14 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { api } from "../lib/api";
 import AppointmentDetailModal from "../components/AppointmentDetailModal";
 import { toast } from "../components/Toast";
-import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar";
-import "react-big-calendar/lib/css/react-big-calendar.css";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import ptBrLocale from "@fullcalendar/core/locales/pt-br";
+
 import {
   Calendar,
   ChevronLeft,
@@ -19,9 +23,10 @@ import {
   Plus,
   Pencil,
   UserCheck,
-  UserX
+  UserX,
+  Trash2
 } from "lucide-react";
-import { getAvatarProps } from "../components/dashboard/Shared";
+import { getAvatarProps, KpiCard } from "../components/dashboard/Shared";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -45,14 +50,7 @@ function parseLocalDateStr(dateStr) {
   return new Date(y, m - 1, d);
 }
 
-const locales = { "pt-BR": ptBR };
-const rbcLocalizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 0 }),
-  getDay,
-  locales,
-});
+
 
 function StatsBar({ appointments, attendances }) {
   const presentCount = attendances.filter(a => a.status === "presente").length;
@@ -61,42 +59,38 @@ function StatsBar({ appointments, attendances }) {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-      <div className="card p-3 flex items-center gap-3 border-l-4 border-slate-400">
-        <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
-          <Calendar size={18} />
-        </div>
-        <div>
-          <p className="text-2xl font-black text-slate-800">{appointments.length}</p>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Agendamentos</p>
-        </div>
-      </div>
-      <div className="card p-3 flex items-center gap-3 border-l-4 border-brand-400">
-        <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600">
-          <UserCheck size={18} />
-        </div>
-        <div>
-          <p className="text-2xl font-black text-slate-800">{presentCount}</p>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Presenças</p>
-        </div>
-      </div>
-      <div className="card p-3 flex items-center gap-3 border-l-4 border-red-400">
-        <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-600">
-          <UserX size={18} />
-        </div>
-        <div>
-          <p className="text-2xl font-black text-slate-800">{absentCount}</p>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Faltas</p>
-        </div>
-      </div>
-      <div className="card p-3 flex items-center gap-3 border-l-4 border-amber-400">
-        <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
-          <AlertCircle size={18} />
-        </div>
-        <div>
-          <p className="text-2xl font-black text-slate-800">{justifiedCount}</p>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Justificadas</p>
-        </div>
-      </div>
+      <KpiCard
+        icon={<Calendar size={16} />}
+        iconBg="var(--blue-light)"
+        iconColor="var(--blue)"
+        label="Agendamentos"
+        value={appointments.length}
+        sub="agendados no período"
+      />
+      <KpiCard
+        icon={<UserCheck size={16} />}
+        iconBg="var(--sage-light)"
+        iconColor="var(--sage)"
+        label="Presenças"
+        value={presentCount}
+        sub={appointments.length > 0 ? `${Math.round((presentCount / appointments.length) * 100)}% de presença` : "sem sessões"}
+      />
+      <KpiCard
+        icon={<UserX size={16} />}
+        iconBg="var(--peach-light)"
+        iconColor="var(--peach)"
+        label="Faltas"
+        value={absentCount}
+        sub={appointments.length > 0 ? `${Math.round((absentCount / appointments.length) * 100)}% de faltas` : "sem sessões"}
+      />
+      <KpiCard
+        icon={<AlertCircle size={16} />}
+        iconBg="var(--purple-light)"
+        iconColor="var(--purple)"
+        label="Justificadas"
+        value={justifiedCount}
+        sub={appointments.length > 0 ? `${Math.round((justifiedCount / appointments.length) * 100)}% justificadas` : "sem sessões"}
+      />
     </div>
   );
 }
@@ -108,10 +102,10 @@ function SessionCard({ session, date, onClick }) {
   const attendanceStatus = attendance?.status;
 
   const statusStyles = {
-    presente: "border-brand-500 bg-brand-50/30",
-    falta: "border-red-500 bg-red-50/30",
-    justificada: "border-amber-500 bg-amber-50/30",
-    default: "border-slate-200 bg-white hover:border-slate-300"
+    presente: "border-[var(--sage)] bg-[var(--status-presente-bg)]/20 text-[var(--status-presente-text)]",
+    falta: "border-[var(--peach)] bg-[var(--status-falta-bg)]/25 text-[var(--status-falta-text)]",
+    justificada: "border-[var(--purple)] bg-[var(--status-justificada-bg)]/20 text-[var(--status-justificada-text)]",
+    default: "border-[var(--border)] bg-[var(--surface)] hover:border-slate-300 text-[var(--text-primary)]"
   };
 
   const { initials, color: avatarColor } = getAvatarProps(patientName);
@@ -120,26 +114,26 @@ function SessionCard({ session, date, onClick }) {
   return (
     <div
       onClick={() => onClick(session, date)}
-      className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all shadow-sm ${statusStyles[attendanceStatus] || statusStyles.default}`}
+      className={`flex items-center gap-3 p-3 rounded-[14px] border cursor-pointer transition-all shadow-sm ${statusStyles[attendanceStatus] || statusStyles.default}`}
     >
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0" style={{ backgroundColor: avatarColor.bg, color: avatarColor.text }}>
+      <div className="w-10 h-10 rounded-[10px] flex items-center justify-center font-black text-sm shrink-0" style={{ backgroundColor: avatarColor.bg, color: avatarColor.text }}>
         {initials}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-bold text-slate-800 truncate">{patientName}</p>
-        <p className="text-[10px] font-bold text-slate-500">
+        <p className="text-sm font-bold truncate text-[var(--text-primary)]">{patientName}</p>
+        <p className="text-[10px] font-bold text-[var(--text-secondary)]">
           {appointment.time} &bull; {appointment.duration}min
         </p>
         {appointment.patient?.phone && (
-          <p className="text-[9px] font-medium text-slate-400 mt-0.5">{appointment.patient.phone}</p>
+          <p className="text-[9px] font-medium text-[var(--text-muted)] mt-0.5">{appointment.patient.phone}</p>
         )}
       </div>
       <div className="shrink-0 ml-2">
         <span className={`w-2 h-2 rounded-full block ${
-          attendanceStatus === "presente" ? "bg-brand-500" :
-          attendanceStatus === "falta" ? "bg-red-500" :
-          attendanceStatus === "justificada" ? "bg-amber-500" :
-          "bg-slate-300"
+          attendanceStatus === "presente" ? "bg-[var(--sage)]" :
+          attendanceStatus === "falta" ? "bg-[var(--peach)]" :
+          attendanceStatus === "justificada" ? "bg-[var(--purple)]" :
+          "bg-[var(--border)]"
         }`} />
       </div>
     </div>
@@ -149,6 +143,7 @@ function SessionCard({ session, date, onClick }) {
 export default function Agenda() {
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(null);
+  const [calendarView, setCalendarView] = useState("month");
   const [appointments, setAppointments] = useState([]);
   const [attendances, setAttendances] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -176,14 +171,16 @@ export default function Agenda() {
   const [showDeleteChoice, setShowDeleteChoice] = useState(false);
   const [detailModal, setDetailModal] = useState({ open: false, session: null, date: null });
 
-  const dateCellWrapper = useCallback(({ value, children }) => {
-    const isSelected = selectedDay && formatDateKey(value) === formatDateKey(selectedDay);
-    const isToday = formatDateKey(value) === formatDateKey(new Date());
-    if (isSelected && !isToday) {
-      return <div className="rbc-selected-day-cell" style={{ display: "contents" }}>{children}</div>;
-    }
-    return <>{children}</>;
-  }, [selectedDay]);
+  const calendarRef = useRef(null);
+  const [fcTitle, setFcTitle] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (successMessage) {
@@ -781,9 +778,93 @@ export default function Agenda() {
     return getMonthEvents(calendarDate);
   }, [calendarDate, getMonthEvents]);
 
-  return (
-    <div className="p-4 sm:p-6 h-full flex flex-col space-y-4">
+  const calendarEvents = useMemo(() => {
+    if (!appointments.length) return monthEvents;
+    const rangeStart = new Date(calendarDate);
+    rangeStart.setMonth(rangeStart.getMonth() - 3);
+    const rangeEnd = new Date(calendarDate);
+    rangeEnd.setMonth(rangeEnd.getMonth() + 4);
+    const allEvents = [];
+    const cursor = new Date(rangeStart);
+    while (cursor <= rangeEnd) {
+      const dateStr = formatDateKey(cursor);
+      const dayOfWeek = cursor.getDay();
+      appointments.forEach(app => {
+        if (app.dayOfWeek !== dayOfWeek) return;
+        if (app.startDate && dateStr < extractUTCDate(app.startDate)) return;
+        if (app.endDate && dateStr > extractUTCDate(app.endDate)) return;
+        if (app.scheduledDate && dateStr !== extractUTCDate(app.scheduledDate)) return;
+        if (app.skipDates?.includes(dateStr)) return;
+        if (app.maxSessions > 0 && app.startDate) {
+          const start = parseLocalDateStr(app.startDate);
+          let count = 0;
+          const c = new Date(start);
+          while (c <= cursor) {
+            if (c.getDay() === app.dayOfWeek) count++;
+            c.setDate(c.getDate() + 7);
+          }
+          if (count > app.maxSessions) return;
+        }
+        const [hours, minutes] = (app.time || "08:00").split(":").map(Number);
+        const start = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate(), hours, minutes);
+        const end = new Date(start.getTime() + (app.duration || 50) * 60000);
+        const att = attendances.find(a => extractUTCDate(a.date) === dateStr && a.patientId === app.patientId);
+        allEvents.push({
+          id: `${app.id}-${dateStr}`,
+          title: app.patient?.name || "Paciente",
+          start,
+          end,
+          session: { type: "fixed", app, attendance: att }
+        });
+      });
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    return allEvents;
+  }, [appointments, calendarDate, attendances, monthEvents]);
 
+  const handleDatesSet = useCallback((arg) => {
+    setFcTitle(arg.view.title);
+    const newDate = new Date(arg.view.currentStart);
+    if (newDate.getMonth() !== calendarDate.getMonth() || newDate.getFullYear() !== calendarDate.getFullYear()) {
+      setCalendarDate(newDate);
+    }
+  }, [calendarDate]);
+
+  const handleNav = (action) => {
+    if (!calendarRef.current) return;
+    const api = calendarRef.current.getApi();
+    if (action === "PREV") api.prev();
+    else if (action === "NEXT") api.next();
+    else if (action === "TODAY") api.today();
+  };
+
+  const handleViewChange = (v) => {
+    setCalendarView(v);
+    if (!calendarRef.current) return;
+    const api = calendarRef.current.getApi();
+    if (v === "month") api.changeView("dayGridMonth");
+    else if (v === "week") api.changeView("timeGridWeek");
+    else api.changeView("timeGridDay");
+  };
+
+  const renderEventContent = (eventInfo) => {
+    const { session } = eventInfo.event.extendedProps;
+    const firstName = (eventInfo.event.title || "").split(" ")[0] || "?";
+    const time = session?.app?.time || "";
+    const status = session?.attendance?.status;
+    let barColor = "bg-[var(--blue)]";
+    if (status === "presente") barColor = "bg-[var(--sage)]";
+    else if (status === "falta") barColor = "bg-[var(--peach)]";
+    else if (status === "justificada") barColor = "bg-[var(--purple)]";
+    return (
+      <div className="flex items-center gap-1.5 px-1 py-0.5 rounded-[6px] cursor-pointer transition-opacity overflow-hidden w-full">
+        <div className={`w-1.5 h-full min-h-[16px] rounded-full shrink-0 ${barColor}`} />
+        <span className="text-xs font-bold leading-tight truncate text-[var(--text-secondary)]">{firstName} {time}</span>
+      </div>
+    );
+  };
+  return (
+    <div className="p-4 pb-36 md:p-6 h-full overflow-y-auto lg:overflow-hidden flex flex-col space-y-4 relative [&::-webkit-scrollbar]:hidden">
 
       <StatsBar appointments={appointments} attendances={attendances} />
 
@@ -793,128 +874,123 @@ export default function Agenda() {
             <div className="w-10 h-10 border-4 border-slate-800 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="flex gap-6 h-full animate-fade-in">
+          <div className="flex flex-col lg:flex-row gap-6 h-auto lg:h-full animate-fade-in">
             {/* Left: Calendar */}
-            <div className="w-[75%] flex flex-col min-h-0">
-              <div className="p-4 pb-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col flex-1 min-h-0 overflow-hidden agenda-calendar">
-                <BigCalendar
-                  localizer={rbcLocalizer}
-                  events={monthEvents}
-                  date={calendarDate}
-                  onNavigate={(date) => { setCalendarDate(date); setSelectedDay(null); }}
-                  onSelectSlot={({ start }) => setSelectedDay(start)}
-                  onSelectEvent={(event) => openDetailModal(event.session, event.start)}
-                  selectable
-                  views={["month"]}
-                  defaultView="month"
-                  toolbar={true}
-                  popup={false}
-                  className="flex-1 min-h-0"
-                  formats={{
-                    weekdayFormat: (date) => format(date, "EEE", { locale: ptBR })
-                  }}
-                  dayPropGetter={(date) => {
-                    const today = new Date();
-                    const isSelected = selectedDay && formatDateKey(date) === formatDateKey(selectedDay);
-                    const isToday = formatDateKey(date) === formatDateKey(today);
-                    if (isSelected && !isToday) {
-                      return { className: "rbc-selected-day" };
-                    }
-                    return {};
-                  }}
-                  components={{
-                    dateCellWrapper: dateCellWrapper,
-                    event: ({ event }) => {
-                      const firstName = (event.title || "").split(" ")[0] || "?";
-                      const time = event.session?.app?.time || "";
-                      const status = event.session?.attendance?.status;
-                      let barColor = "bg-slate-400";
-                      if (status === "presente") barColor = "bg-brand-500";
-                      else if (status === "falta") barColor = "bg-red-500";
-                      else if (status === "justificada") barColor = "bg-amber-500";
-                      return (
-                        <div className="flex items-center gap-1 px-1 py-0.5 rounded-sm cursor-pointer hover:opacity-80 transition-opacity overflow-hidden">
-                          <div className={`w-1.5 h-full min-h-[14px] rounded-full shrink-0 ${barColor}`} />
-                          <span className="text-[11px] font-bold text-slate-800 leading-tight truncate">{firstName} {time}</span>
-                        </div>
-                      );
-                    },
-                    toolbar: (toolbarProps) => {
-                      const label = format(toolbarProps.date, "MMMM 'de' yyyy", { locale: ptBR });
-                      return (
-                        <div className="shrink-0 mb-3 flex items-center justify-between">
-                          <p onClick={() => setSelectedDay(null)} className="text-sm font-bold text-slate-600 capitalize cursor-pointer hover:text-brand-600 transition-colors">{label}</p>
-                          <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
-                            <button onClick={() => toolbarProps.onNavigate("PREV")} className="p-1 hover:bg-slate-100 rounded transition-all text-slate-500">
-                              <ChevronLeft size={16} />
-                            </button>
-                            <button onClick={() => toolbarProps.onNavigate("TODAY")} className="px-2 py-1 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-100 rounded transition-all">Hoje</button>
-                            <button onClick={() => toolbarProps.onNavigate("NEXT")} className="p-1 hover:bg-slate-100 rounded transition-all text-slate-500">
-                              <ChevronRight size={16} />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    }
-                  }}
-                />
+            <div className="w-full lg:w-[75%] flex flex-col min-h-0">
+              <div className="p-4 pb-3 bg-[var(--surface)] border border-[var(--border)] rounded-[20px] shadow-card flex flex-col flex-1 h-[420px] lg:h-full overflow-hidden agenda-calendar">
+                {/* Custom Toolbar */}
+                <div className="shrink-0 mb-3 flex flex-wrap gap-2 items-center justify-between">
+                  <div className="flex items-center gap-1 order-1 sm:order-none">
+                    {["month", "week", "day"].map(v => (
+                      <button
+                        key={v}
+                        onClick={() => handleViewChange(v)}
+                        className={`text-[10px] font-bold uppercase px-2.5 py-1.5 rounded-[10px] transition-all ${
+                          calendarView === v
+                            ? "bg-[var(--sage)] text-white shadow-sm"
+                            : "text-[var(--text-secondary)] hover:text-[var(--dark-green)] hover:bg-[var(--sage-light)]"
+                        }`}
+                      >
+                        {v === "month" ? "Mês" : v === "week" ? "Semana" : "Dia"}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="text-xs sm:text-base md:text-lg font-black text-[var(--text-primary)] uppercase tracking-wide text-center order-3 sm:order-none w-full sm:w-auto mt-2 sm:mt-0 truncate capitalize">
+                    {fcTitle}
+                  </div>
+                  <div className="flex items-center gap-1 bg-[var(--surface)] p-1 rounded-[10px] border border-[var(--border)] shadow-sm order-2 sm:order-none">
+                    <button onClick={() => handleNav("PREV")} className="p-1 hover:bg-[var(--surface-alt)] rounded-[8px] transition-all text-[var(--text-secondary)]">
+                      <ChevronLeft size={16} />
+                    </button>
+                    <button onClick={() => handleNav("TODAY")} className="px-2 py-1 text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] rounded-[8px] transition-all">Hoje</button>
+                    <button onClick={() => handleNav("NEXT")} className="p-1 hover:bg-[var(--surface-alt)] rounded-[8px] transition-all text-[var(--text-secondary)]">
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+                <div className="flex-1 min-h-0 overflow-hidden fc-custom-wrapper">
+                  <FullCalendar
+                    ref={calendarRef}
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                    initialView="dayGridMonth"
+                    locale={ptBrLocale}
+                    headerToolbar={false}
+                    events={calendarEvents}
+                    datesSet={handleDatesSet}
+                    dateClick={(info) => setSelectedDay(info.date)}
+                    eventClick={(info) => openDetailModal(info.event.extendedProps.session, info.event.start)}
+                    eventContent={renderEventContent}
+                    dayMaxEvents={true}
+                    allDaySlot={false}
+                    slotMinTime="06:00:00"
+                    slotMaxTime="23:00:00"
+                    height={isMobile ? "auto" : "100%"}
+                    dayCellClassNames={(arg) => {
+                      const dateStr = formatDateKey(arg.date);
+                      const isSelected = selectedDay && dateStr === formatDateKey(selectedDay);
+                      const isToday = dateStr === formatDateKey(new Date());
+                      if (isSelected && !isToday) return ["fc-selected-day"];
+                      return [];
+                    }}
+                  />
+                </div>
 
                 {/* Legend */}
-                <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-slate-100 shrink-0">
+                <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-[var(--border)] shrink-0">
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-brand-500" />
-                    <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Realizado</span>
+                    <div className="w-2.5 h-2.5 rounded-full bg-[var(--sage)]" />
+                    <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Realizado</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
-                    <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Falta</span>
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
+                    <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Falta</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                    <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Justificada</span>
+                    <div className="w-2.5 h-2.5 rounded-full bg-[var(--purple)]" />
+                    <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Justificada</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-slate-400" />
-                    <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Agendado</span>
+                    <div className="w-2.5 h-2.5 rounded-full bg-[var(--blue)]" />
+                    <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Agendado</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Right: Detail Panel */}
-            <div className="w-[25%] flex flex-col gap-3">
-              <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight shrink-0">Agendamentos</h3>
+            <div className="w-full lg:w-[25%] flex flex-col gap-3 mb-4 lg:mb-0">
+              <h3 className="text-[18px] font-bold font-heading text-[var(--text-primary)] shrink-0">Agendamentos</h3>
               <div className="flex-1 min-h-0">
                 {selectedDay ? (
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col h-full min-h-0">
+                  <div className="p-4 bg-[var(--surface)] border border-[var(--border)] rounded-[20px] shadow-card flex flex-col h-auto min-h-[300px] lg:h-full min-h-0">
                     <div className="flex items-start justify-between mb-4 shrink-0">
                       <div>
-                        <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">
+                        <h4 className="text-sm font-bold text-[var(--text-primary)]">
                           {format(selectedDay, "EEEE", { locale: ptBR })}
                         </h4>
-                        <p className="text-xs font-bold text-slate-500 mt-0.5">
+                        <p className="text-xs font-semibold text-[var(--text-muted)] mt-0.5">
                           {format(selectedDay, "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
                         </p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="px-2.5 py-1 bg-white border border-slate-200 text-slate-600 text-[10px] font-black rounded-full shadow-sm">
+                        <span className="px-2.5 py-1 bg-[var(--surface-alt)] border border-[var(--border)] text-[var(--text-secondary)] text-[10px] font-bold rounded-[8px] shadow-sm">
                           {daySessions.length} {daySessions.length === 1 ? "SESSÃO" : "SESSÕES"}
                         </span>
                         <button
                           disabled={selectedDay && formatDateKey(selectedDay) < formatDateKey(new Date())}
                           onClick={() => setShowAddModal(true)}
-                          className="w-8 h-8 bg-brand-600 hover:bg-brand-700 text-white rounded-lg flex items-center justify-center transition-all shadow-sm shadow-brand-200 disabled:opacity-35 disabled:cursor-not-allowed"
+                          className="w-[36px] h-[36px] bg-[var(--sage)] hover:bg-[var(--dark-green)] text-white rounded-[10px] flex items-center justify-center transition-all shadow-sm disabled:opacity-35 disabled:cursor-not-allowed"
                           title={selectedDay && formatDateKey(selectedDay) >= formatDateKey(new Date()) ? "Adicionar agendamento" : "Não é possível agendar em datas retroativas"}
                         >
                           <Plus size={16} />
                         </button>
                       </div>
                     </div>
-                    <div className="space-y-2 overflow-y-auto min-h-0 flex-1 pr-1.5">
+                    <div className="space-y-2 overflow-y-auto min-h-0 flex-1 pr-1.5 pb-20 lg:pb-2">
                       {daySessions.length === 0 ? (
                         <div className="py-10 text-center">
-                          <Users size={24} className="mx-auto text-slate-300 mb-2" />
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nenhuma sessão neste dia</p>
+                          <Users size={24} className="mx-auto text-[var(--text-muted)] mb-2" />
+                          <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Nenhuma sessão neste dia</p>
                         </div>
                       ) : (
                         daySessions.map((session, idx) => (
@@ -929,23 +1005,23 @@ export default function Agenda() {
                     </div>
                   </div>
                 ) : (
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col h-full min-h-0">
+                  <div className="p-4 bg-[var(--surface)] border border-[var(--border)] rounded-[20px] shadow-card flex flex-col h-auto min-h-[300px] lg:h-full min-h-0">
                     <div className="flex items-start justify-between mb-4 shrink-0">
                       <div>
-                        <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Visão do Mês</h4>
-                        <p className="text-xs font-bold text-slate-500 mt-0.5">
+                        <h4 className="text-sm font-bold text-[var(--text-primary)]">Visão do Mês</h4>
+                        <p className="text-xs font-semibold text-[var(--text-muted)] mt-0.5">
                           {format(calendarDate, "MMMM 'de' yyyy", { locale: ptBR })}
                         </p>
                       </div>
-                      <span className="px-2.5 py-1 bg-white border border-slate-200 text-slate-600 text-[10px] font-black rounded-full shadow-sm">
+                      <span className="px-2.5 py-1 bg-[var(--surface-alt)] border border-[var(--border)] text-[var(--text-secondary)] text-[10px] font-bold rounded-[8px] shadow-sm">
                         {monthSessions.reduce((acc, d) => acc + d.sessions.length, 0)} SESSÕES
                       </span>
                     </div>
-                    <div className="space-y-3 overflow-y-auto min-h-0 flex-1 pr-1.5">
+                    <div className="space-y-3 overflow-y-auto min-h-0 flex-1 pr-1.5 pb-20 lg:pb-2">
                       {monthSessions.length === 0 ? (
                         <div className="py-10 text-center">
-                          <Calendar size={24} className="mx-auto text-slate-300 mb-2" />
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nenhuma sessão neste mês</p>
+                          <Calendar size={24} className="mx-auto text-[var(--text-muted)] mb-2" />
+                          <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Nenhuma sessão neste mês</p>
                         </div>
                       ) : (
                         monthSessions.map(({ date, sessions }) => (
@@ -953,11 +1029,11 @@ export default function Agenda() {
                             <div className="flex items-center gap-2 mb-1.5">
                               <button
                                 onClick={() => setSelectedDay(date)}
-                                className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-brand-600 transition-colors"
+                                className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest hover:text-[var(--sage)] transition-colors"
                               >
                                 {format(date, "EEE dd/MM", { locale: ptBR })}
                               </button>
-                              <div className="flex-1 border-t border-slate-200" />
+                              <div className="flex-1 border-t border-[var(--border)]" />
                             </div>
                             {sessions.map((session, idx) => {
                               const app = session.app;
@@ -967,16 +1043,16 @@ export default function Agenda() {
                                 <div
                                   key={app.id + idx}
                                   onClick={() => openDetailModal(session, date)}
-                                  className="flex items-center gap-2 p-3 rounded-lg border border-slate-200 bg-white hover:border-slate-300 transition-all group cursor-pointer mb-1"
+                                  className="flex items-center gap-2 p-3 rounded-[14px] border border-[var(--border)] bg-[var(--surface)] hover:border-slate-300 transition-all group cursor-pointer mb-1"
                                 >
-                                  <div className="w-7 h-7 rounded-md flex items-center justify-center font-black text-[9px] shrink-0" style={{ backgroundColor: avatarColor.bg, color: avatarColor.text }}>
+                                  <div className="w-7 h-7 rounded-[8px] flex items-center justify-center font-black text-[9px] shrink-0" style={{ backgroundColor: avatarColor.bg, color: avatarColor.text }}>
                                     {initials}
                                   </div>
-                                  <p className="text-xs font-bold text-slate-800 truncate flex-1 min-w-0 group-hover:text-slate-900 transition-colors">
+                                  <p className="text-xs font-bold text-[var(--text-primary)] truncate flex-1 min-w-0 group-hover:text-[var(--dark-green)] dark:group-hover:text-[var(--sage)] transition-colors">
                                     {name}
                                   </p>
-                                  <span className="text-[10px] font-bold text-slate-500 shrink-0">{app.time} &bull; {app.duration}min</span>
-                                  <ChevronRight size={13} className="text-slate-300 group-hover:text-brand-500 group-hover:translate-x-0.5 transition-all shrink-0" />
+                                  <span className="text-[10px] font-bold text-[var(--text-secondary)] shrink-0">{app.time} &bull; {app.duration}min</span>
+                                  <ChevronRight size={13} className="text-[var(--text-muted)] group-hover:text-[var(--sage)] group-hover:translate-x-0.5 transition-all shrink-0" />
                                 </div>
                               );
                             })}
@@ -1133,15 +1209,15 @@ export default function Agenda() {
       )}
 
       {showAddModal && createPortal(
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={() => setShowAddModal(false)}>
-          <div className="bg-white rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center z-[60]" onClick={() => setShowAddModal(false)}>
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] p-8 w-full max-w-md mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-slate-100 text-slate-600 rounded-2xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-[var(--surface-alt)] text-[var(--text-secondary)] rounded-[14px] flex items-center justify-center">
                 <Plus size={24} />
               </div>
               <div>
-                <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Novo Agendamento</h2>
-                <p className="text-xs font-bold text-slate-500">
+                <h2 className="text-xl font-bold font-heading text-[var(--text-primary)]">Novo Agendamento</h2>
+                <p className="text-xs font-semibold text-[var(--text-muted)]">
                   {selectedDay ? format(selectedDay, "d 'de' MMMM", { locale: ptBR }) : ""}
                 </p>
               </div>
@@ -1149,11 +1225,11 @@ export default function Agenda() {
 
             <div className="space-y-5">
               <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Paciente</label>
+                <label className="block text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-widest mb-2">Paciente</label>
                 <select
                   value={addForm.patientId}
                   onChange={e => setAddForm({ ...addForm, patientId: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-slate-800 focus:bg-white transition-all text-sm font-medium"
+                  className="w-full px-4 py-3 bg-[var(--surface-alt)] border border-[var(--border)] rounded-[12px] focus:ring-2 focus:ring-[var(--sage)] focus:bg-[var(--surface)] text-[var(--text-primary)] transition-all text-sm font-medium"
                 >
                   <option value="">Selecione um paciente</option>
                   {patients.map(p => (
@@ -1164,11 +1240,11 @@ export default function Agenda() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Horário</label>
+                  <label className="block text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-widest mb-2">Horário</label>
                   <select
                     value={addForm.time}
                     onChange={e => setAddForm({ ...addForm, time: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-slate-800 focus:bg-white transition-all text-sm font-medium"
+                    className="w-full px-4 py-3 bg-[var(--surface-alt)] border border-[var(--border)] rounded-[12px] focus:ring-2 focus:ring-[var(--sage)] focus:bg-[var(--surface)] text-[var(--text-primary)] transition-all text-sm font-medium"
                   >
                     {["07:00","07:30","08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00"].map(t => (
                       <option key={t} value={t}>{t}</option>
@@ -1176,11 +1252,11 @@ export default function Agenda() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Duração</label>
+                  <label className="block text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-widest mb-2">Duração</label>
                   <select
                     value={addForm.duration}
                     onChange={e => setAddForm({ ...addForm, duration: Number(e.target.value) })}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-slate-800 focus:bg-white transition-all text-sm font-medium"
+                    className="w-full px-4 py-3 bg-[var(--surface-alt)] border border-[var(--border)] rounded-[12px] focus:ring-2 focus:ring-[var(--sage)] focus:bg-[var(--surface)] text-[var(--text-primary)] transition-all text-sm font-medium"
                   >
                     <option value={30}>30 min</option>
                     <option value={50}>50 min</option>
@@ -1191,30 +1267,30 @@ export default function Agenda() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+              <div className="flex items-center justify-between p-4 bg-[var(--surface-alt)] rounded-[14px] border border-[var(--border)]">
                 <label className="flex items-center gap-3 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={addForm.recurring}
                     onChange={e => setAddForm({ ...addForm, recurring: e.target.checked })}
-                    className="w-5 h-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                    className="w-5 h-5 rounded border-slate-300 text-[var(--sage)] focus:ring-[var(--sage)]"
                   />
                   <div>
-                    <span className="text-sm font-bold text-slate-700">
+                    <span className="text-sm font-bold text-[var(--text-primary)]">
                       Repetir semanalmente
                     </span>
-                    <p className="text-[10px] text-slate-500 font-medium">
+                    <p className="text-[10px] text-[var(--text-muted)] font-medium">
                       Toda {["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"][selectedDay ? selectedDay.getDay() : 0]}
                     </p>
                   </div>
                 </label>
                 {addForm.recurring && (
                   <div className="w-28">
-                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nº Sessões</label>
+                    <label className="block text-[9px] font-bold text-[var(--text-muted)] uppercase mb-1">Nº Sessões</label>
                     <input
                       type="number"
                       min={0}
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-black text-center focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all"
+                      className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-[10px] text-xs font-bold text-center focus:ring-2 focus:ring-[var(--sage)] focus:border-[var(--sage)] text-[var(--text-primary)] transition-all"
                       value={addForm.maxSessions || ""}
                       onChange={e => setAddForm({ ...addForm, maxSessions: Math.max(0, parseInt(e.target.value) || 0) })}
                       placeholder="0 = ilimitado"
@@ -1226,14 +1302,14 @@ export default function Agenda() {
               <div className="flex gap-3 mt-8">
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 py-3 text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-xl transition-all"
+                  className="flex-1 py-3 text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] hover:bg-[var(--surface-alt)] rounded-[12px] transition-all"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleAddAppointment}
                   disabled={!addForm.patientId || saving}
-                  className="flex-1 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-900 shadow-lg shadow-slate-200 transition-all text-xs font-black uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  className="flex-1 py-3 bg-[var(--sage)] text-white rounded-[12px] hover:bg-[var(--dark-green)] shadow-md transition-all text-xs font-bold uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 >
                   {saving ? <RefreshCcw size={16} className="animate-spin" /> : "Salvar"}
                 </button>
@@ -1245,29 +1321,29 @@ export default function Agenda() {
       )}
 
       {showEditChoice && editingApp && createPortal(
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={() => { setShowEditChoice(false); setEditingApp(null); }}>
-          <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center z-[60]" onClick={() => { setShowEditChoice(false); setEditingApp(null); }}>
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
             <div className="text-center mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                <Pencil size={22} className="text-slate-700" />
+              <div className="w-12 h-12 rounded-[14px] bg-[var(--surface-alt)] flex items-center justify-center mx-auto mb-4">
+                <Pencil size={22} className="text-[var(--text-secondary)]" />
               </div>
-              <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Editar horário</h3>
-              <p className="text-sm font-bold text-slate-500 mt-1">
+              <h3 className="text-lg font-bold font-heading text-[var(--text-primary)]">Editar horário</h3>
+              <p className="text-sm font-semibold text-[var(--text-secondary)] mt-1">
                 {format(editChoiceDate, "EEEE, d 'de' MMMM", { locale: ptBR })} às {editingApp.time}
               </p>
-              <p className="text-xs text-slate-400 mt-2 font-medium">
+              <p className="text-xs text-[var(--text-muted)] mt-2 font-medium">
                 Este horário se repete semanalmente. Como deseja editar?
               </p>
             </div>
             <div className="space-y-2">
-              <button onClick={handleEditSingle} className="w-full py-3 px-4 bg-slate-100 text-slate-700 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-slate-200 transition-all">
+              <button onClick={handleEditSingle} className="w-full py-3 px-4 bg-[var(--surface-alt)] text-[var(--text-primary)] border border-[var(--border)] rounded-[12px] text-xs font-bold uppercase tracking-widest hover:bg-[var(--border)] transition-all">
                 Apenas esta data
               </button>
-              <button onClick={handleEditFuture} className="w-full py-3 px-4 bg-slate-800 text-white rounded-xl text-sm font-black uppercase tracking-widest hover:bg-slate-900 transition-all">
+              <button onClick={handleEditFuture} className="w-full py-3 px-4 bg-[var(--sage)] text-white rounded-[12px] text-xs font-bold uppercase tracking-widest hover:bg-[var(--dark-green)] transition-all">
                 Esta e todas futuras
               </button>
             </div>
-            <button onClick={() => { setShowEditChoice(false); setEditingApp(null); }} className="w-full mt-3 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest">
+            <button onClick={() => { setShowEditChoice(false); setEditingApp(null); }} className="w-full mt-3 py-2 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors uppercase tracking-widest">
               Cancelar
             </button>
           </div>
@@ -1276,17 +1352,17 @@ export default function Agenda() {
       )}
 
       {showDeleteChoice && editingApp && createPortal(
-        <div className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm flex items-center justify-center z-[9999]" onClick={() => { setShowDeleteChoice(false); setEditingApp(null); }}>
-          <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center z-[60]" onClick={() => { setShowDeleteChoice(false); setEditingApp(null); }}>
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
             <div className="text-center mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-4 text-red-500">
+              <div className="w-12 h-12 rounded-[14px] bg-red-500/10 flex items-center justify-center mx-auto mb-4 text-[#EF4444]">
                 <Trash2 size={22} />
               </div>
-              <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Excluir Agendamento</h3>
-              <p className="text-sm font-bold text-slate-500 mt-1">
+              <h3 className="text-lg font-bold font-heading text-[var(--text-primary)]">Excluir Agendamento</h3>
+              <p className="text-sm font-semibold text-[var(--text-secondary)] mt-1">
                 {editingApp.patient?.name || "Paciente"} &bull; {editingApp.time}
               </p>
-              <p className="text-xs text-slate-400 mt-2 font-medium">
+              <p className="text-xs text-[var(--text-muted)] mt-2 font-medium">
                 Este horário se repete semanalmente. Como deseja excluir?
               </p>
             </div>
@@ -1294,24 +1370,24 @@ export default function Agenda() {
               <button 
                 onClick={handleDeleteSingleDate} 
                 disabled={saving}
-                className="w-full py-3 px-4 bg-slate-100 text-slate-700 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-slate-200 transition-all disabled:opacity-50"
+                className="w-full py-3 px-4 bg-[var(--surface-alt)] text-[var(--text-primary)] border border-[var(--border)] rounded-[12px] text-xs font-bold uppercase tracking-widest hover:bg-[var(--border)] transition-all disabled:opacity-50"
               >
                 Apenas esta data
               </button>
               <button 
                 onClick={handleDeleteSeries} 
-                className="w-full py-3 px-4 bg-red-50 text-red-600 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-red-100 transition-all"
+                className="w-full py-3 px-4 bg-[var(--peach-light)] text-[var(--peach)] border border-[var(--peach)]/25 rounded-[12px] text-xs font-bold uppercase tracking-widest hover:bg-[var(--peach)] hover:text-white transition-all"
               >
                 Toda a série recorrente
               </button>
               <button 
                 onClick={handleDeleteAllInTime} 
-                className="w-full py-3 px-4 bg-red-500 text-white rounded-xl text-sm font-black uppercase tracking-widest hover:bg-red-600 shadow-lg shadow-red-200 transition-all"
+                className="w-full py-3 px-4 bg-[#EF4444] text-white rounded-[12px] text-xs font-bold uppercase tracking-widest hover:bg-red-600 shadow-md transition-all"
               >
                 Todos os dias neste horário
               </button>
             </div>
-            <button onClick={() => { setShowDeleteChoice(false); setEditingApp(null); }} className="w-full mt-4 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest">
+            <button onClick={() => { setShowDeleteChoice(false); setEditingApp(null); }} className="w-full mt-4 py-2 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors uppercase tracking-widest">
               Cancelar
             </button>
           </div>
@@ -1320,25 +1396,25 @@ export default function Agenda() {
       )}
 
       {showEditModal && agendaFormDate && createPortal(
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={() => { setShowEditModal(false); setEditingApp(null); setEditMode(null); }}>
-          <div className="bg-white rounded-3xl p-8 w-full max-w-lg mx-4 shadow-2xl animate-scale-in border border-slate-100" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center z-[60]" onClick={() => { setShowEditModal(false); setEditingApp(null); setEditMode(null); }}>
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] p-8 w-full max-w-lg mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Editar Agendamento</h3>
-                <p className="text-sm font-bold text-slate-500 mt-1">
+                <h3 className="text-xl font-bold font-heading text-[var(--text-primary)]">Editar Agendamento</h3>
+                <p className="text-xs font-semibold text-[var(--text-muted)] mt-1">
                   {format(agendaFormDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })}
                 </p>
               </div>
-              <button onClick={() => { setShowEditModal(false); setEditingApp(null); setEditMode(null); }} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all">
-                <X size={20} />
+              <button onClick={() => { setShowEditModal(false); setEditingApp(null); setEditMode(null); }} className="p-1.5 rounded-[10px] bg-[var(--surface-alt)] hover:bg-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all">
+                <X size={18} />
               </button>
             </div>
 
             <div className="space-y-4 mb-6">
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Dia</label>
-                  <select className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-slate-800 focus:bg-white transition-all"
+                  <label className="block text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-widest mb-1.5">Dia</label>
+                  <select className="w-full px-3 py-2.5 bg-[var(--surface-alt)] border border-[var(--border)] rounded-[12px] text-sm font-semibold focus:ring-2 focus:ring-[var(--sage)] focus:bg-[var(--surface)] text-[var(--text-primary)] transition-all"
                     value={agendaFormDayOfWeek ?? (agendaFormDate?.getDay() ?? 1)}
                     onChange={e => setAgendaFormDayOfWeek(parseInt(e.target.value))}>
                     {["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"].map((d, i) => (
@@ -1347,8 +1423,8 @@ export default function Agenda() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Horário</label>
-                  <select className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-slate-800 focus:bg-white transition-all"
+                  <label className="block text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-widest mb-1.5">Horário</label>
+                  <select className="w-full px-3 py-2.5 bg-[var(--surface-alt)] border border-[var(--border)] rounded-[12px] text-sm font-semibold focus:ring-2 focus:ring-[var(--sage)] focus:bg-[var(--surface)] text-[var(--text-primary)] transition-all"
                     value={agendaFormTime}
                     onChange={e => setAgendaFormTime(e.target.value)}>
                     {["07:00","07:30","08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30","20:00","20:30","21:00"].map(t => (
@@ -1357,8 +1433,8 @@ export default function Agenda() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Duração</label>
-                  <select className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-slate-800 focus:bg-white transition-all"
+                  <label className="block text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-widest mb-1.5">Duração</label>
+                  <select className="w-full px-3 py-2.5 bg-[var(--surface-alt)] border border-[var(--border)] rounded-[12px] text-sm font-semibold focus:ring-2 focus:ring-[var(--sage)] focus:bg-[var(--surface)] text-[var(--text-primary)] transition-all"
                     value={agendaFormDuration}
                     onChange={e => setAgendaFormDuration(parseInt(e.target.value))}>
                     <option value={30}>30 minutos</option>
@@ -1370,22 +1446,22 @@ export default function Agenda() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200">
+              <div className="flex items-center justify-between p-4 bg-[var(--surface-alt)] rounded-[14px] border border-[var(--border)]">
                 <label className="flex items-center gap-3 cursor-pointer select-none">
                   <input type="checkbox" checked={agendaFormRecurring} onChange={e => setAgendaFormRecurring(e.target.checked)}
-                    className="w-5 h-5 rounded border-slate-300 text-slate-800 focus:ring-slate-500" />
+                    className="w-5 h-5 rounded border-slate-300 text-[var(--sage)] focus:ring-[var(--sage)]" />
                   <div>
-                    <span className="text-sm font-bold text-slate-700">Repetir semanalmente</span>
-                    <p className="text-[10px] font-medium text-slate-500">
+                    <span className="text-sm font-bold text-[var(--text-primary)]">Repetir semanalmente</span>
+                    <p className="text-[10px] font-medium text-[var(--text-muted)]">
                       Toda {["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"][agendaFormDate.getDay()]}
                     </p>
                   </div>
                 </label>
                 {agendaFormRecurring && (
                   <div className="w-28">
-                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nº Sessões</label>
+                    <label className="block text-[9px] font-bold text-[var(--text-muted)] uppercase mb-1">Nº Sessões</label>
                     <input type="number" min={0}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-center focus:ring-2 focus:ring-slate-800 focus:bg-white transition-all"
+                      className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-[10px] text-xs font-bold text-center focus:ring-2 focus:ring-[var(--sage)] focus:border-[var(--sage)] text-[var(--text-primary)] transition-all"
                       value={agendaFormMaxSessions || ""}
                       onChange={e => setAgendaFormMaxSessions(Math.max(0, parseInt(e.target.value) || 0))}
                       placeholder="0 = ilimitado" />
@@ -1394,13 +1470,13 @@ export default function Agenda() {
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--border)]">
               <button onClick={() => { setShowEditModal(false); setEditingApp(null); setEditMode(null); }}
-                className="px-5 py-2.5 text-xs font-black text-slate-500 hover:text-slate-700 uppercase tracking-widest transition-all">
+                className="px-5 py-2.5 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)] uppercase tracking-widest transition-all">
                 Cancelar
               </button>
               <button onClick={handleSaveEditedSlot} disabled={saving}
-                className="px-6 py-2.5 bg-slate-800 text-white rounded-xl hover:bg-slate-900 transition-all text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-slate-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                className="px-6 py-2.5 bg-[var(--sage)] text-white rounded-[12px] hover:bg-[var(--dark-green)] transition-all text-xs font-bold uppercase tracking-widest flex items-center gap-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
                 {saving ? <RefreshCcw size={15} className="animate-spin" /> : <Check size={15} />}
                 Salvar alterações
               </button>
@@ -1423,7 +1499,7 @@ export default function Agenda() {
 
       {successMessage && (
         <div className="fixed bottom-8 right-8 z-[100] animate-slide-up">
-          <div className="bg-brand-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-brand-500/50 backdrop-blur-sm">
+          <div className="bg-[var(--sage)] text-white px-6 py-4 rounded-[14px] shadow-2xl flex items-center gap-3 border border-[var(--sage)]/30 backdrop-blur-sm">
             <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
               <Check size={18} className="text-white" />
             </div>

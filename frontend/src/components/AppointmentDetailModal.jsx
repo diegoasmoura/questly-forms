@@ -321,11 +321,11 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
     <>
       {/* ── Modal Principal ── (ocultado se o modal de justificativa estiver ativo) */}
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center p-4 sm:p-6 z-[60] transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
+        className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-start justify-center pt-[8vh] p-4 sm:p-6 z-[60] transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
         onClick={triggerClose}
       >
         <div
-          className={`relative bg-[var(--surface)] w-full max-w-sm max-h-[85vh] rounded-[24px] shadow-2xl flex flex-col border border-[var(--border)] overflow-hidden transition-all duration-300 ease-out ${isClosing ? 'opacity-0 translate-y-4 scale-[0.98]' : 'opacity-100 translate-y-0 scale-100'}`}
+          className={`relative bg-[var(--surface)] w-full max-w-sm h-[70vh] md:h-[580px] rounded-[24px] shadow-2xl flex flex-col border border-[var(--border)] overflow-hidden transition-all duration-300 ease-out ${isClosing ? 'opacity-0 translate-y-4 scale-[0.98]' : 'opacity-100 translate-y-0 scale-100'}`}
           onClick={e => e.stopPropagation()}
         >
           {/* ── HEADER ── */}
@@ -363,7 +363,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
                 </h2>
                 {/* Badge de status atual */}
                 <span
-                  className="inline-flex items-center gap-1 px-[10px] py-[3px] rounded-[999px] text-[10px] font-extrabold uppercase tracking-widest mt-1"
+                  className="inline-flex items-center gap-1 px-[10px] py-[3px] rounded-[8px] text-[10px] font-extrabold uppercase tracking-widest mt-1"
                   style={{ backgroundColor: avatarStyle.bg, color: avatarStyle.text }}
                 >
                   {statusLabels[currentStatus] || "Agendado"}
@@ -389,7 +389,9 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
             </div>
           </div>
 
-          <div className={`px-6 overflow-y-auto hide-scrollbar flex-1 min-h-0 ${justModal.open ? 'pb-16' : 'pb-6'}`}>
+          {/* Scrollable Container Wrapper with Fade-out mask */}
+          <div className="relative flex-1 min-h-0 overflow-hidden flex flex-col">
+            <div className={`px-6 overflow-y-auto hide-scrollbar flex-1 min-h-0 ${justModal.open ? 'pb-16' : 'pb-6'}`}>
             {/* ── SEÇÃO STATUS ── */}
             <p
               className="text-[10px] font-extrabold uppercase tracking-[0.12em] mb-3"
@@ -405,13 +407,13 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
                 onClick={() => handleQuickStatus(appointment, "presente", sessionDate)}
                 className="flex flex-col items-center gap-1 md:gap-1.5 py-2 md:py-3 px-1 md:px-2 rounded-[12px] md:rounded-[14px] font-bold text-[9px] md:text-[11px] transition-all duration-200"
                 style={isActivePresente
-                  ? { background: "var(--chip-presente-bg)", color: "var(--chip-presente-text)", border: "2px solid #5CBF9D" }
+                  ? { background: "var(--chip-presente-bg)", color: "var(--chip-presente-text)", border: "2px solid var(--sage)" }
                   : { background: "var(--chip-presente-bg)", color: "var(--chip-presente-text)", border: "2px solid transparent" }
                 }
               >
                 <span
                   className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-colors"
-                  style={{ background: isActivePresente ? "#5CBF9D" : "rgba(92,191,157,0.15)" }}
+                  style={{ background: isActivePresente ? "var(--sage)" : "rgba(92,191,144,0.15)" }}
                 >
                   <Check className="w-3.5 h-3.5 md:w-4 md:h-4" color={isActivePresente ? "white" : "var(--chip-presente-text)"} strokeWidth={2} />
                 </span>
@@ -423,31 +425,31 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
                 onClick={() => handleQuickStatus(appointment, "falta", sessionDate)}
                 className="flex flex-col items-center gap-1 md:gap-1.5 py-2 md:py-3 px-1 md:px-2 rounded-[12px] md:rounded-[14px] font-bold text-[9px] md:text-[11px] transition-all duration-200"
                 style={isActiveFalta
-                  ? { background: "var(--chip-falta-bg)", color: "var(--chip-falta-text)", border: "2px solid #EF4444" }
+                  ? { background: "var(--chip-falta-bg)", color: "var(--chip-falta-text)", border: "2px solid var(--peach)" }
                   : { background: "var(--chip-falta-bg)", color: "var(--chip-falta-text)", border: "2px solid transparent" }
                 }
               >
                 <span
                   className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-colors"
-                  style={{ background: isActiveFalta ? "#EF4444" : "rgba(239,68,68,0.15)" }}
+                  style={{ background: isActiveFalta ? "var(--peach)" : "rgba(248,162,104,0.15)" }}
                 >
                   <X className="w-3.5 h-3.5 md:w-4 md:h-4" color={isActiveFalta ? "white" : "var(--chip-falta-text)"} strokeWidth={2} />
                 </span>
                 Falta
               </button>
 
-              {/* Justificado — Âmbar */}
+              {/* Justificado — Roxo */}
               <button
                 onClick={() => handleQuickStatus(appointment, "justificada", sessionDate)}
                 className="flex flex-col items-center gap-1 md:gap-1.5 py-2 md:py-3 px-1 md:px-2 rounded-[12px] md:rounded-[14px] font-bold text-[9px] md:text-[11px] transition-all duration-200"
                 style={isActiveJustificado
-                  ? { background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)", border: "2px solid #F59E0B" }
+                  ? { background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)", border: "2px solid var(--purple)" }
                   : { background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)", border: "2px solid transparent" }
                 }
               >
                 <span
                   className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-colors"
-                  style={{ background: isActiveJustificado ? "#F59E0B" : "rgba(245,158,11,0.15)" }}
+                  style={{ background: isActiveJustificado ? "var(--purple)" : "rgba(124,92,255,0.15)" }}
                 >
                   <AlertCircle className="w-3.5 h-3.5 md:w-4 md:h-4" color={isActiveJustificado ? "white" : "var(--chip-justificado-text)"} strokeWidth={2} />
                 </span>
@@ -464,18 +466,18 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
                     Tipo de Justificativa
                   </p>
                   <div className="grid grid-cols-2 gap-2">
-                    {/* Remarcar Sessão — Âmbar (Justificado) */}
+                    {/* Remarcar Sessão — Roxo (Justificado) */}
                     <button
                       onClick={() => { setJustType("reagendar"); setJustData(prev => ({ ...prev, date: "", time: "" })); }}
                       className="flex flex-col items-center gap-1 md:gap-1.5 py-2 md:py-3 px-1 md:px-2 rounded-[12px] md:rounded-[14px] font-bold text-[9px] md:text-[11px] transition-all duration-200"
                       style={justType === "reagendar"
-                        ? { background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)", border: "2px solid #F59E0B" }
+                        ? { background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)", border: "2px solid var(--purple)" }
                         : { background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)", border: "2px solid transparent" }
                       }
                     >
                       <span
                         className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-colors"
-                        style={{ background: justType === "reagendar" ? "#F59E0B" : "rgba(245,158,11,0.15)" }}
+                        style={{ background: justType === "reagendar" ? "var(--purple)" : "rgba(124,92,255,0.15)" }}
                       >
                         <CalendarClock className="w-3.5 h-3.5 md:w-4 md:h-4" color={justType === "reagendar" ? "white" : "var(--chip-justificado-text)"} strokeWidth={2} />
                       </span>
@@ -487,13 +489,13 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
                       onClick={() => setJustType("cancelar")}
                       className="flex flex-col items-center gap-1 md:gap-1.5 py-2 md:py-3 px-1 md:px-2 rounded-[12px] md:rounded-[14px] font-bold text-[9px] md:text-[11px] transition-all duration-200"
                       style={justType === "cancelar"
-                        ? { background: "var(--chip-falta-bg)", color: "var(--chip-falta-text)", border: "2px solid #EF4444" }
+                        ? { background: "var(--chip-falta-bg)", color: "var(--chip-falta-text)", border: "2px solid var(--peach)" }
                         : { background: "var(--chip-falta-bg)", color: "var(--chip-falta-text)", border: "2px solid transparent" }
                       }
                     >
                       <span
                         className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-colors"
-                        style={{ background: justType === "cancelar" ? "#EF4444" : "rgba(239,68,68,0.15)" }}
+                        style={{ background: justType === "cancelar" ? "var(--peach)" : "rgba(248,162,104,0.15)" }}
                       >
                         <X className="w-3.5 h-3.5 md:w-4 md:h-4" color={justType === "cancelar" ? "white" : "var(--chip-falta-text)"} strokeWidth={2} />
                       </span>
@@ -511,10 +513,10 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
                     value={justData.notes}
                     onChange={e => setJustData({ ...justData, notes: e.target.value })}
                     placeholder="Ex: Férias, doença, viagem..."
-                    className="w-full px-3 md:px-4 py-2.5 md:py-3 rounded-[12px] md:rounded-[14px] resize-none text-[12px] md:text-[13px] font-medium h-16 md:h-24 focus:outline-none"
+                    className="w-full px-3 md:px-4 py-2.5 md:py-3 rounded-[14px] resize-none text-[12px] md:text-[13px] font-medium h-16 md:h-24 focus:outline-none focus:ring-2 focus:ring-[var(--sage)]"
                     style={{
                       background: "var(--surface-alt)",
-                      border: "1px solid var(--btn-action-neutral-border)",
+                      border: "1px solid var(--border)",
                       color: "var(--text-primary)",
                     }}
                   />
@@ -532,10 +534,10 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
                         min={new Date().toISOString().split("T")[0]}
                         value={justData.date || ""}
                         onChange={e => setJustData({ ...justData, date: e.target.value })}
-                        className="w-full px-2 md:px-3 py-2 md:py-2.5 rounded-[10px] md:rounded-[12px] text-[12px] md:text-[13px] font-medium focus:outline-none"
+                        className="w-full px-2 md:px-3 py-2 md:py-2.5 rounded-[12px] text-[12px] md:text-[13px] font-medium focus:outline-none focus:ring-2 focus:ring-[var(--sage)]"
                         style={{
                           background: "var(--surface-alt)",
-                          border: "1px solid var(--btn-action-neutral-border)",
+                          border: "1px solid var(--border)",
                           color: "var(--text-primary)",
                         }}
                       />
@@ -547,10 +549,10 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
                       <select
                         value={justData.time || ""}
                         onChange={e => setJustData({ ...justData, time: e.target.value })}
-                        className="w-full px-2 md:px-3 py-2 md:py-2.5 rounded-[10px] md:rounded-[12px] text-[12px] md:text-[13px] font-medium focus:outline-none"
+                        className="w-full px-2 md:px-3 py-2 md:py-2.5 rounded-[12px] text-[12px] md:text-[13px] font-medium focus:outline-none focus:ring-2 focus:ring-[var(--sage)]"
                         style={{
                           background: "var(--surface-alt)",
-                          border: "1px solid var(--btn-action-neutral-border)",
+                          border: "1px solid var(--border)",
                           color: "var(--text-primary)",
                         }}
                       >
@@ -575,11 +577,11 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
                 href={`https://wa.me/55${phone}?text=${encodeURIComponent(whatsappText)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-start gap-3 w-full py-3 px-4 rounded-[14px] font-semibold text-[13px]"
+                className="flex items-center justify-start gap-3 w-full py-3 px-4 rounded-[14px] font-semibold text-[13px] hover:bg-[var(--border)] transition-all"
                 style={{
                   background: "var(--surface-alt)",
                   color: "var(--text-secondary)",
-                  border: "1px solid var(--btn-action-neutral-border)",
+                  border: "1px solid var(--border)",
                 }}
               >
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="#25D366">
@@ -591,11 +593,11 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
               {/* Prontuário */}
               <button
                 onClick={() => { triggerClose(); setTimeout(() => navigate(`/patients/${patient?.id}`), 200); }}
-                className="flex items-center justify-start gap-3 w-full py-3 px-4 rounded-[14px] font-semibold text-[13px]"
+                className="flex items-center justify-start gap-3 w-full py-3 px-4 rounded-[14px] font-semibold text-[13px] hover:bg-[var(--border)] transition-all"
                 style={{
                   background: "var(--surface-alt)",
                   color: "var(--text-secondary)",
-                  border: "1px solid var(--btn-action-neutral-border)",
+                  border: "1px solid var(--border)",
                 }}
               >
                 <ExternalLink size={18} strokeWidth={2} style={{ color: "var(--text-muted)" }} />
@@ -605,11 +607,11 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
               {/* Excluir */}
               <button
                 onClick={handleDeleteAppointment}
-                className="flex items-center justify-start gap-3 w-full py-3 px-4 rounded-[14px] font-semibold text-[13px]"
+                className="flex items-center justify-start gap-3 w-full py-3 px-4 rounded-[14px] font-semibold text-[13px] hover:bg-[var(--border)] transition-all"
                 style={{
                   background: "var(--surface-alt)",
                   color: "var(--text-secondary)",
-                  border: "1px solid var(--btn-action-neutral-border)",
+                  border: "1px solid var(--border)",
                 }}
               >
                 <Trash2 size={18} strokeWidth={2} style={{ color: "var(--text-muted)" }} />
@@ -618,6 +620,22 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
               </div>
             )}
 
+            {/* Se estamos com justificativa preenchida mas não expandido por completo, podemos dar um botão de remover justificativa */}
+            {justModal.existingAtt?.status === "justificada" && !justModal.open && (
+              <div className="pt-2">
+                <button
+                  onClick={deleteJustification}
+                  className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-[12px] bg-red-500/10 text-[#EF4444] text-[12px] font-bold uppercase tracking-wider hover:bg-[#EF4444] hover:text-white transition-all"
+                >
+                  <Trash2 size={14} />
+                  Desfazer Justificativa
+                </button>
+              </div>
+            )}
+
+            </div>
+            {/* Scroll Mask (Efeito Fade-out bottom) */}
+            <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-[var(--surface)] to-transparent pointer-events-none z-10" />
           </div>
 
           {/* ── FOOTER FIXO ── */}
@@ -626,15 +644,15 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
               <>
                 <button
                   type="button"
-                  onClick={triggerClose}
-                  className="btn btn-secondary !rounded-[12px] !font-sans w-full sm:w-auto"
+                  onClick={() => setJustModal(prev => ({ ...prev, open: false }))}
+                  className="w-full sm:w-auto px-5 py-2.5 bg-[var(--surface)] border border-[var(--border)] text-[var(--text-secondary)] rounded-[12px] text-sm font-semibold hover:bg-[var(--surface-alt)] transition-all"
                 >
                   Cancelar
                 </button>
                 <button
                   type="button"
                   onClick={saveJustificada}
-                  className="btn btn-primary !rounded-[12px] !font-sans min-w-[120px] w-full sm:w-auto"
+                  className="w-full sm:w-auto px-5 py-2.5 bg-[var(--sage)] text-white rounded-[12px] text-sm font-semibold hover:bg-[var(--dark-green)] transition-all flex items-center justify-center gap-2"
                 >
                   <Check size={16} />
                   Confirmar
@@ -644,7 +662,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
               <button
                 type="button"
                 onClick={triggerClose}
-                className="btn btn-secondary !rounded-[12px] !font-sans w-full sm:w-auto"
+                className="w-full sm:w-auto px-5 py-2.5 bg-[var(--surface)] border border-[var(--border)] text-[var(--text-secondary)] rounded-[12px] text-sm font-semibold hover:bg-[var(--surface-alt)] transition-all"
               >
                 Fechar
               </button>
@@ -655,24 +673,24 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
 
       {confirmModal.open && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center z-[80]" onClick={() => !confirmModal.loading && setConfirmModal({ ...confirmModal, open: false })}>
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
-            <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
+            <div className="w-16 h-16 bg-red-500/10 text-[#EF4444] rounded-[16px] flex items-center justify-center mb-6 mx-auto">
               <AlertTriangle size={32} />
             </div>
-            <h3 className="text-xl font-bold text-[var(--text-primary)] font-heading text-center uppercase tracking-tight mb-3">{confirmModal.title}</h3>
+            <h3 className="text-xl font-bold text-[var(--text-primary)] font-sans text-center tracking-tight mb-3">{confirmModal.title}</h3>
             <p className="text-sm text-[var(--text-secondary)] text-center leading-relaxed font-medium mb-8">{confirmModal.message}</p>
             <div className="flex gap-3">
               <button
                 disabled={confirmModal.loading}
                 onClick={() => setConfirmModal({ ...confirmModal, open: false })}
-                className="flex-1 py-4 text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] hover:bg-[var(--surface-alt)] rounded-2xl transition-all"
+                className="flex-1 py-4 text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] hover:bg-[var(--surface-alt)] rounded-[12px] transition-all"
               >
                 Cancelar
               </button>
               <button
                 disabled={confirmModal.loading}
                 onClick={confirmModal.onConfirm}
-                className="flex-1 py-4 bg-red-500 text-white rounded-2xl hover:bg-red-600 transition-all text-xs font-bold uppercase tracking-widest flex items-center justify-center"
+                className="flex-1 py-4 bg-[#EF4444] text-white rounded-[12px] hover:bg-red-600 transition-all text-xs font-bold uppercase tracking-widest flex items-center justify-center"
               >
                 {confirmModal.loading ? <RefreshCcw size={16} className="animate-spin" /> : "Confirmar"}
               </button>
