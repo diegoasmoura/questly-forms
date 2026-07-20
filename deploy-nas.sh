@@ -8,12 +8,12 @@ echo "🔄 Iniciando atualização do Questly Forms no NAS..."
 echo "============================================="
 
 # 1. Alterna para a branch correta
-echo "🌿 Garantindo branch feature/diego-improvements..."
-git checkout feature/diego-improvements
+echo "🌿 Garantindo branch main..."
+git checkout main
 
-# 2. Puxa as atualizações do GitHub
+# 2. Puxa as updates do GitHub
 echo "📥 Puxando código mais recente..."
-git pull origin feature/diego-improvements
+git pull origin main
 
 # 3. Derruba os containers limpando volumes antigos de build
 echo "🗑️ Derrubando containers e volumes temporários..."
