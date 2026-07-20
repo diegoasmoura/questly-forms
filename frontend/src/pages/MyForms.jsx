@@ -181,7 +181,7 @@ export default function MyForms() {
       <div className="flex-1 overflow-y-auto hide-scrollbar">
         {loading ? (
           viewMode === "grid" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-24">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="card p-6 animate-pulse">
                   <div className="h-12 w-12 bg-slate-200 rounded-2xl mb-6" />
@@ -196,7 +196,7 @@ export default function MyForms() {
               ))}
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 pb-24">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="card p-4 animate-pulse">
                   <div className="flex items-center gap-4">
@@ -227,7 +227,7 @@ export default function MyForms() {
           )}
         </div>
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-24">
           {filteredForms.map((form) => (
             <FormCard
               key={form.id}
@@ -240,7 +240,7 @@ export default function MyForms() {
           ))}
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 pb-24">
           {filteredForms.map((form) => (
             <FormListRow
               key={form.id}
