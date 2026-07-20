@@ -1903,7 +1903,7 @@ export default function PatientRecord() {
               </div>
 
               {/* Calendar Card */}
-              <div className="card p-4 md:p-6 flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div className="md:card md:p-6 flex flex-col md:flex-1 md:min-h-0 md:overflow-hidden">
                 {loadingAppointments ? (
                   <div className="flex-1 flex items-center justify-center">
                     <div className="text-center">
@@ -1912,11 +1912,11 @@ export default function PatientRecord() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex-1 flex flex-col md:flex-row gap-4 md:gap-6 min-h-0 overflow-y-auto md:overflow-hidden">
+                  <div className="flex flex-col md:flex-row gap-4 md:gap-6 md:flex-1 md:min-h-0 md:overflow-hidden">
                     {/* Left: Calendar */}
-                      <div className="w-full md:w-[60%] flex flex-col min-h-0">
+                      <div className="w-full md:w-[60%] flex flex-col md:min-h-0">
                         <h3 className="text-sm md:text-base font-bold text-[var(--text-primary)] uppercase tracking-wide mb-3 shrink-0">Calendário de Sessões</h3>
-                        <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] flex flex-col flex-1 min-h-0 overflow-hidden">
+                        <div className="p-4 bg-[var(--surface-alt)] rounded-[20px] border border-[var(--border)] flex flex-col md:flex-1 md:min-h-0 md:overflow-hidden">
 
                         <DayPicker
                           month={calendarDate}
@@ -2010,9 +2010,9 @@ export default function PatientRecord() {
                       </div>
 
                     {/* Right: Agenda */}
-                    <div className="w-full md:w-[40%] flex flex-col md:pr-2 gap-3">
+                    <div className="w-full md:w-[40%] flex flex-col md:pr-2 gap-3 mb-4 md:mb-0">
                       <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-wide shrink-0">Agendamentos</h3>
-                      <div className="flex-1 min-h-0 overflow-y-auto patients-scrollbar flex flex-col">
+                      <div className="md:flex-1 md:min-h-0 md:overflow-y-auto patients-scrollbar flex flex-col">
                       {showEditChoice && editingAppointment && (
                         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[3px]" onClick={() => { setShowEditChoice(false); setEditingAppointment(null); }}>
                           <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full max-w-sm mx-4 shadow-2xl animate-scale-in border border-[var(--border)]" onClick={e => e.stopPropagation()}>

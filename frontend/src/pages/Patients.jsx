@@ -435,7 +435,7 @@ const resetImportModal = () => {
   );
 
   return (
-    <div className="h-full flex flex-col overflow-hidden animate-fade-in relative">
+    <div className="h-full flex flex-col overflow-y-auto lg:overflow-hidden animate-fade-in relative pb-28 lg:pb-0 [&::-webkit-scrollbar]:hidden">
       {/* New Sleek Toolbar */}
       <div className="px-3 sm:px-6 py-4 flex flex-row items-center justify-between gap-2 sm:gap-4 shrink-0 sticky top-0 z-40 bg-[var(--bg)] shadow-[0_10px_20px_-10px_var(--bg)]">
         
@@ -549,8 +549,8 @@ const resetImportModal = () => {
             ))}
           </div>
         ) : viewMode === "grid" && filteredPatients.length > 0 ? (
-          <div className="flex flex-col flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2 min-h-0 overflow-hidden">
-            <div className="flex-1 overflow-y-auto patients-scrollbar p-4">
+          <div className="flex flex-col flex-1 md:bg-[var(--surface)] md:border md:border-[var(--border)] md:rounded-[24px] md:shadow-sm mt-2 md:min-h-0 md:overflow-hidden">
+            <div className="flex-1 md:overflow-y-auto patients-scrollbar p-1 md:p-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4" style={{gridAutoRows: '1fr'}}>
                 {paginatedPatients.map((patient) => (
                   <PatientCard
@@ -563,7 +563,7 @@ const resetImportModal = () => {
               </div>
             </div>
             {filteredPatients.length > itemsPerPage && (
-              <div className="border-t border-[var(--border)] shrink-0 rounded-b-[24px] overflow-hidden">
+              <div className="md:border-t md:border-[var(--border)] shrink-0 md:rounded-b-[24px] overflow-hidden mt-4 md:mt-0">
                 <PaginationFooter 
                   currentPage={currentPage} 
                   totalPages={totalPages} 
@@ -575,7 +575,7 @@ const resetImportModal = () => {
               </div>
             )}
             {filteredPatients.length <= itemsPerPage && (
-              <div className="border-t border-[var(--border)] shrink-0 rounded-b-[24px] overflow-hidden">
+              <div className="md:border-t md:border-[var(--border)] shrink-0 md:rounded-b-[24px] overflow-hidden mt-4 md:mt-0">
                 <PaginationFooter 
                   currentPage={1} 
                   totalPages={1} 
@@ -588,7 +588,7 @@ const resetImportModal = () => {
             )}
           </div>
         ) : (
-          <div className="flex flex-col flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-sm mt-2 min-h-0 overflow-hidden">
+          <div className="flex flex-col flex-1 md:bg-[var(--surface)] md:border md:border-[var(--border)] md:rounded-[24px] md:shadow-sm mt-2 md:min-h-0 md:overflow-hidden">
             {filteredPatients.length === 0 ? (
               <div className="p-16 sm:p-20 text-center flex flex-col items-center justify-center flex-1">
                 <div className="w-20 h-20 bg-[var(--surface-alt)] rounded-full flex items-center justify-center mx-auto mb-6">
@@ -646,7 +646,7 @@ const resetImportModal = () => {
                 )}
               </div>
             ) : (
-              <div className="flex flex-col flex-1 overflow-y-auto patients-scrollbar min-h-0">
+              <div className="flex flex-col flex-1 md:overflow-y-auto patients-scrollbar md:min-h-0">
                 {paginatedPatients.map((patient, index) => (
                   <PatientListRow
                     key={patient.id}
@@ -660,7 +660,7 @@ const resetImportModal = () => {
             )}
             
             {filteredPatients.length > itemsPerPage && (
-              <div className="border-t border-[var(--border)] shrink-0 mt-auto rounded-b-[24px] overflow-hidden">
+              <div className="md:border-t md:border-[var(--border)] shrink-0 mt-auto md:rounded-b-[24px] overflow-hidden mt-4 md:mt-0">
                 <PaginationFooter 
                   currentPage={currentPage} 
                   totalPages={totalPages} 
@@ -672,7 +672,7 @@ const resetImportModal = () => {
               </div>
             )}
             {filteredPatients.length <= itemsPerPage && (
-              <div className="border-t border-[var(--border)] shrink-0 mt-auto rounded-b-[24px] overflow-hidden">
+              <div className="md:border-t md:border-[var(--border)] shrink-0 mt-auto md:rounded-b-[24px] overflow-hidden mt-4 md:mt-0">
                 <PaginationFooter 
                   currentPage={1} 
                   totalPages={1} 
