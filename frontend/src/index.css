@@ -96,21 +96,7 @@
   }
 
   /* Elementos que usam variáveis CSS de cor diretamente e precisam de transição suave de tema */
-  .bg-\[var\(--surface\)\],
-  .bg-\[var\(--surface-alt\)\],
-  .bg-\[var\(--bg\)\],
-  .bg-\[var\(--border\)\],
-  .border-\[var\(--border\)\] {
-    transition: all 300ms ease-in-out;
-  }
-
-  /* Textos que usam vars de cor diretamente */
-  .text-\[var\(--text-primary\)\],
-  .text-\[var\(--text-secondary\)\],
-  .text-\[var\(--text-muted\)\],
-  .text-\[var\(--dark-green\)\] {
-    transition: color 300ms ease-in-out;
-  }
+  /* Removidos seletores de transição de background e texto para evitar piscada (flicker) branca nas trocas de rota em SPA */
 
   /* SVGs inline com stroke via currentColor */
   svg path, svg circle {
