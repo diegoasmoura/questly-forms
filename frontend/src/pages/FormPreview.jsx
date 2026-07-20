@@ -27,10 +27,10 @@ export default function FormPreview() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="animate-spin text-brand-500" size={32} />
-          <p className="text-sm text-brand-600">Carregando...</p>
+          <Loader2 className="animate-spin text-[var(--sage)]" size={32} />
+          <p className="text-sm text-[var(--text-secondary)]">Carregando...</p>
         </div>
       </div>
     );
@@ -38,11 +38,11 @@ export default function FormPreview() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center px-4">
         <div className="card max-w-md w-full p-8 text-center">
           <AlertCircle size={48} className="mx-auto text-red-400 mb-4" />
-          <h1 className="text-xl font-semibold text-slate-900 mb-2">Erro ao Carregar</h1>
-          <p className="text-slate-600 mb-6">{error}</p>
+          <h1 className="text-xl font-bold text-[var(--text-primary)] mb-2">Erro ao Carregar</h1>
+          <p className="text-[var(--text-secondary)] mb-6">{error}</p>
           <button onClick={() => navigate(-1)} className="btn btn-primary">
             Voltar
           </button>
@@ -54,21 +54,21 @@ export default function FormPreview() {
   if (!form || !schema) return null;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col overflow-hidden">
-      <header className="bg-white border-b border-slate-200 shrink-0">
+    <div className="min-h-screen bg-[var(--bg)] flex flex-col overflow-hidden">
+      <header className="bg-[var(--surface)] border-b border-[var(--border)] shrink-0">
         <div className="px-4 py-4">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
-              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-[var(--surface-alt)] rounded-[10px] transition-colors"
             >
-              <ArrowLeft size={20} className="text-slate-500" />
+              <ArrowLeft size={20} className="text-[var(--text-secondary)]" />
             </button>
             <div>
-              <h1 className="text-lg font-semibold text-slate-900">
+              <h1 className="text-lg font-bold text-[var(--text-primary)]">
                 {form.title}
               </h1>
-              <p className="text-xs text-slate-500">Modo de Teste</p>
+              <p className="text-xs text-[var(--text-muted)] font-medium">Modo de Teste</p>
             </div>
           </div>
         </div>

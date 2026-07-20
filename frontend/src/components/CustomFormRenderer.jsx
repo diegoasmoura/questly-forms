@@ -154,7 +154,7 @@ export default function CustomFormRenderer({
 
   if (!schema) {
     return (
-      <div className="text-center py-12 text-slate-400">
+      <div className="text-center py-12 text-[var(--text-muted)]">
         <AlertCircle size={32} className="mx-auto mb-2 opacity-50" />
         <p className="text-sm">Schema não disponível</p>
       </div>
@@ -164,11 +164,11 @@ export default function CustomFormRenderer({
   if (submitted) {
     return (
       <div className="text-center py-12 animate-fade-in">
-        <div className="w-16 h-16 rounded-full bg-secondary-100 flex items-center justify-center mx-auto mb-4">
-          <Check size={32} className="text-secondary-600" />
+        <div className="w-16 h-16 rounded-[20px] bg-[var(--sage-light)] flex items-center justify-center mx-auto mb-4">
+          <Check size={32} className="text-[var(--dark-green)] dark:text-[var(--sage)]" />
         </div>
-        <h2 className="text-xl font-semibold text-slate-900 mb-2">Muito Obrigado!</h2>
-        <p className="text-slate-600">Suas respostas foram enviadas com sucesso.</p>
+        <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">Muito Obrigado!</h2>
+        <p className="text-[var(--text-secondary)]">Suas respostas foram enviadas com sucesso.</p>
       </div>
     );
   }
@@ -180,7 +180,7 @@ export default function CustomFormRenderer({
     const isLikert = q?.type === "likert";
     if (!q) {
       return (
-        <div className="text-center py-12 text-slate-400">
+        <div className="text-center py-12 text-[var(--text-muted)]">
           <AlertCircle size={32} className="mx-auto mb-2 opacity-50" />
           <p className="text-sm">Nenhuma pergunta encontrada</p>
         </div>
@@ -191,7 +191,7 @@ export default function CustomFormRenderer({
     const page = pages[currentPage];
     if (!page) {
       return (
-        <div className="text-center py-12 text-slate-400">
+        <div className="text-center py-12 text-[var(--text-muted)]">
           <AlertCircle size={32} className="mx-auto mb-2 opacity-50" />
           <p className="text-sm">Nenhuma seção encontrada</p>
         </div>
@@ -203,11 +203,11 @@ export default function CustomFormRenderer({
     return (
       <div className="space-y-5">
         {formTitle && (
-          <h1 className="text-lg font-semibold text-slate-900 text-center">{formTitle}</h1>
+          <h1 className="text-lg font-bold text-[var(--text-primary)] text-center">{formTitle}</h1>
         )}
 
         {errors._form && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium flex items-center gap-2">
+          <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/30 rounded-xl text-sm text-red-700 dark:text-red-400 font-medium flex items-center gap-2">
             <AlertCircle size={16} />
             {errors._form}
           </div>
@@ -215,18 +215,18 @@ export default function CustomFormRenderer({
 
         <div className="card overflow-hidden">
           {page.title && (
-            <div className="flex items-center justify-between px-5 py-4 bg-slate-50 border-b border-slate-200">
-              <span className="text-sm font-bold text-slate-800 uppercase tracking-wide">
+            <div className="flex items-center justify-between px-5 py-4 bg-[var(--surface-alt)] border-b border-[var(--border)]">
+              <span className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-wide">
                 {page.title}
               </span>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-[var(--text-muted)]">
                 {page.questions.length} pergunta{page.questions.length !== 1 ? "s" : ""}
               </span>
             </div>
           )}
           <div className="px-5 py-4 space-y-5">
             {page.questions.length === 0 ? (
-              <p className="text-center text-sm text-slate-400 italic py-8">Nenhuma pergunta nesta seção</p>
+              <p className="text-center text-sm text-[var(--text-muted)] italic py-8">Nenhuma pergunta nesta seção</p>
             ) : (
               page.questions.map((q) => (
                 <QuestionField
@@ -252,12 +252,12 @@ export default function CustomFormRenderer({
             <ChevronLeft size={16} /> Anterior
           </button>
 
-          <span className="text-xs text-slate-400 tabular-nums">
+          <span className="text-xs text-[var(--text-muted)] tabular-nums">
             {startQ + 1}–{Math.min(startQ + page.questions.length, totalQuestions)} de {totalQuestions}
           </span>
 
           {readOnly ? (
-            <span className="text-xs text-slate-400 italic">Visualização</span>
+            <span className="text-xs text-[var(--text-muted)] italic">Visualização</span>
           ) : currentPage >= pages.length - 1 ? (
             <button
               type="button"
@@ -278,7 +278,7 @@ export default function CustomFormRenderer({
           )}
         </div>
 
-        <p className="text-center text-xs text-slate-400 tabular-nums">
+        <p className="text-center text-xs text-[var(--text-muted)] tabular-nums">
           {answeredCount} de {totalQuestions} respondidas
         </p>
       </div>
@@ -288,11 +288,11 @@ export default function CustomFormRenderer({
   return (
       <div className="max-w-xl mx-auto space-y-5">
         {formTitle && (
-          <h1 className="text-lg font-semibold text-slate-900 text-center">{formTitle}</h1>
+          <h1 className="text-lg font-bold text-[var(--text-primary)] text-center">{formTitle}</h1>
         )}
 
         {errors._form && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium flex items-center gap-2">
+          <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/30 rounded-xl text-sm text-red-700 dark:text-red-400 font-medium flex items-center gap-2">
             <AlertCircle size={16} />
             {errors._form}
           </div>
@@ -300,12 +300,12 @@ export default function CustomFormRenderer({
 
         <div className="card overflow-hidden">
           <div className="px-7 py-7">
-            <div className="text-xs font-semibold text-brand-600 uppercase tracking-wider mb-3">
+            <div className="text-xs font-semibold text-[var(--sage)] uppercase tracking-wider mb-3">
               Pergunta {q.id} de {allQuestions.length}
             </div>
 
             <p
-              className="text-xl font-medium text-slate-900 leading-relaxed mb-8"
+              className="text-xl font-bold text-[var(--text-primary)] leading-relaxed mb-8"
               style={{ minHeight: "5rem" }}
             >
               {q.title}
@@ -323,8 +323,8 @@ export default function CustomFormRenderer({
                         onClick={() => handleChange(q.id, opt.value)}
                         className={`aspect-square rounded-xl border-2 font-semibold transition-all duration-150 flex flex-col items-center justify-center ${
                           selected
-                            ? "bg-brand-600 text-white border-brand-600 scale-105 shadow-md"
-                            : "bg-white text-slate-700 border-slate-200 hover:border-brand-300 hover:bg-brand-50"
+                            ? "bg-[var(--sage)] text-white border-[var(--sage)] scale-105 shadow-md"
+                            : "bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border)] hover:border-[var(--sage)] hover:bg-[var(--surface-alt)]"
                         }`}
                       >
                         <span className="text-lg leading-none">{opt.value}</span>
@@ -333,7 +333,7 @@ export default function CustomFormRenderer({
                   })}
                 </div>
 
-                <div className="border-t border-slate-100 pt-4 space-y-1">
+                <div className="border-t border-[var(--border)] pt-4 space-y-1">
                   {q.options.map((opt) => {
                     const selected = String(values[q.id]) === String(opt.value);
                     return (
@@ -341,18 +341,18 @@ export default function CustomFormRenderer({
                         key={String(opt.value)}
                         className={`flex items-center gap-3 px-2.5 py-1.5 rounded-lg text-sm transition-colors ${
                           selected
-                            ? "bg-brand-50 text-brand-700 font-semibold"
-                            : "text-slate-400"
+                            ? "bg-[var(--sage-light)] text-[var(--dark-green)] dark:text-[var(--sage)] font-bold"
+                            : "text-[var(--text-muted)]"
                         }`}
                       >
                         <span className={`w-6 h-6 rounded border flex items-center justify-center font-bold text-xs shrink-0 ${
                           selected
-                            ? "bg-brand-600 text-white border-brand-600"
-                            : "border-slate-200 text-slate-400"
+                            ? "bg-[var(--sage)] text-white border-[var(--sage)]"
+                            : "border-[var(--border)] text-[var(--text-muted)] bg-[var(--surface)]"
                         }`}>
                           {opt.value}
                         </span>
-                        <span>{opt.label}</span>
+                        <span className="text-[var(--text-secondary)]">{opt.label}</span>
                       </div>
                     );
                   })}
@@ -376,7 +376,7 @@ export default function CustomFormRenderer({
             )}
           </div>
 
-          <div className="px-7 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+          <div className="px-7 py-4 bg-[var(--surface-alt)] border-t border-[var(--border)] flex items-center justify-between">
             <button
               type="button"
               onClick={goPrev}
@@ -387,7 +387,7 @@ export default function CustomFormRenderer({
             </button>
 
             {readOnly ? (
-              <span className="text-xs text-slate-400 italic">Visualização</span>
+              <span className="text-xs text-[var(--text-muted)] italic">Visualização</span>
             ) : currentIdx === allQuestions.length - 1 ? (
               <button
                 type="button"
@@ -413,7 +413,7 @@ export default function CustomFormRenderer({
           </div>
         </div>
 
-        <p className="text-center text-xs text-slate-400 tabular-nums">
+        <p className="text-center text-xs text-[var(--text-muted)] tabular-nums">
           {answeredCount} de {allQuestions.length} respondidas
         </p>
       </div>
@@ -423,11 +423,11 @@ export default function CustomFormRenderer({
   return (
     <div className="space-y-6">
       {formTitle && (
-        <h1 className="text-2xl font-semibold text-slate-900">{formTitle}</h1>
+        <h1 className="text-2xl font-bold text-[var(--text-primary)]">{formTitle}</h1>
       )}
 
       {errors._form && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium flex items-center gap-2">
+        <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/30 rounded-xl text-sm text-red-700 dark:text-red-400 font-medium flex items-center gap-2">
           <AlertCircle size={16} />
           {errors._form}
         </div>
@@ -446,7 +446,7 @@ export default function CustomFormRenderer({
       ))}
 
       {!readOnly && (
-        <div className="pt-4 border-t border-slate-200">
+        <div className="pt-4 border-t border-[var(--border)]">
           <button
             onClick={handleSubmit}
             disabled={saving}
@@ -475,13 +475,13 @@ function PageRenderer({ page, values, errors, onChange, readOnly, preview }) {
         <button
           type="button"
           onClick={() => !preview && setOpen(!open)}
-          className="w-full flex items-center justify-between px-5 py-4 bg-slate-50 border-b border-slate-200"
+          className="w-full flex items-center justify-between px-5 py-4 bg-[var(--surface-alt)] border-b border-[var(--border)]"
         >
-          <span className="text-sm font-bold text-slate-800 uppercase tracking-wide">
+          <span className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-wide">
             {page.title}
           </span>
           {!preview && (
-            open ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />
+            open ? <ChevronUp size={16} className="text-[var(--text-muted)]" /> : <ChevronDown size={16} className="text-[var(--text-muted)]" />
           )}
         </button>
       )}
@@ -527,10 +527,10 @@ function QuestionField({ question, value, error, onChange, readOnly }) {
 
   return (
     <div>
-      <label className={`block text-sm font-medium mb-1.5 ${error ? "text-red-600" : "text-slate-800"}`}>
+      <label className={`block text-sm font-bold mb-1.5 ${error ? "text-red-600" : "text-[var(--text-primary)]"}`}>
         {q.title}
         {q.required && <span className="text-red-500 ml-1">*</span>}
-        <span className="ml-2 text-[10px] text-slate-400 uppercase font-bold">
+        <span className="ml-2 text-[10px] text-[var(--text-muted)] uppercase font-bold">
           {TYPE_LABELS[q.type] || q.type}
         </span>
       </label>
@@ -542,12 +542,12 @@ function QuestionField({ question, value, error, onChange, readOnly }) {
 
 function TextField({ question, value, onChange, readOnly }) {
   if (readOnly) {
-    return <p className="text-sm text-slate-700 bg-slate-50 px-3 py-2 rounded-lg">{value || "—"}</p>;
+    return <p className="text-sm text-[var(--text-secondary)] bg-[var(--surface-alt)] px-3 py-2 rounded-lg">{value || "—"}</p>;
   }
   if (question.multiline) {
     return (
       <textarea
-        className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-sm text-slate-700 placeholder-slate-400 focus:border-brand-300 focus:ring-2 focus:ring-brand-100 outline-none transition-all resize-y min-h-[80px]"
+        className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-[var(--surface)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--sage)] focus:ring-2 focus:ring-[var(--sage)]/20 outline-none transition-all resize-y min-h-[80px]"
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         placeholder={question.placeholder || ""}
@@ -558,7 +558,7 @@ function TextField({ question, value, onChange, readOnly }) {
   return (
     <input
       type={question.inputType || "text"}
-      className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-sm text-slate-700 placeholder-slate-400 focus:border-brand-300 focus:ring-2 focus:ring-brand-100 outline-none transition-all"
+      className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-[var(--surface)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--sage)] focus:ring-2 focus:ring-[var(--sage)]/20 outline-none transition-all"
       value={value || ""}
       onChange={(e) => onChange(e.target.value)}
       placeholder={question.placeholder || ""}
@@ -568,12 +568,12 @@ function TextField({ question, value, onChange, readOnly }) {
 
 function NumberField({ question, value, onChange, readOnly }) {
   if (readOnly) {
-    return <p className="text-sm text-slate-700 bg-slate-50 px-3 py-2 rounded-lg">{value ?? "—"}</p>;
+    return <p className="text-sm text-[var(--text-secondary)] bg-[var(--surface-alt)] px-3 py-2 rounded-lg">{value ?? "—"}</p>;
   }
   return (
     <input
       type="number"
-      className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-sm text-slate-700 placeholder-slate-400 focus:border-brand-300 focus:ring-2 focus:ring-brand-100 outline-none transition-all"
+      className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-[var(--surface)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--sage)] focus:ring-2 focus:ring-[var(--sage)]/20 outline-none transition-all"
       value={value ?? ""}
       onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
       min={question.min}
@@ -588,7 +588,7 @@ function BooleanField({ question, value, onChange, readOnly }) {
   const isChecked = value === true || value === "true" || trueLabel === "Sim" && value === "Sim";
   if (readOnly) {
     return (
-      <p className="text-sm text-slate-700 bg-slate-50 px-3 py-2 rounded-lg">
+      <p className="text-sm text-[var(--text-secondary)] bg-[var(--surface-alt)] px-3 py-2 rounded-lg">
         {isChecked ? trueLabel : falseLabel}
       </p>
     );
@@ -600,8 +600,8 @@ function BooleanField({ question, value, onChange, readOnly }) {
         onClick={() => onChange(true)}
         className={`flex-1 px-5 py-3 rounded-xl text-sm font-bold transition-all ${
           isChecked
-            ? "bg-brand-600 text-white shadow-lg shadow-brand-200"
-            : "bg-white text-slate-600 border-2 border-slate-200 hover:border-brand-300 hover:text-brand-600"
+            ? "bg-[var(--sage)] text-white shadow-sm"
+            : "bg-[var(--surface)] text-[var(--text-secondary)] border-2 border-[var(--border)] hover:border-[var(--sage)] hover:text-[var(--sage)]"
         }`}
       >
         {trueLabel}
@@ -611,8 +611,8 @@ function BooleanField({ question, value, onChange, readOnly }) {
         onClick={() => onChange(false)}
         className={`flex-1 px-5 py-3 rounded-xl text-sm font-bold transition-all ${
           !isChecked
-            ? "bg-red-500 text-white shadow-lg shadow-red-200"
-            : "bg-white text-slate-600 border-2 border-slate-200 hover:border-red-300 hover:text-red-500"
+            ? "bg-[#EF4444] text-white shadow-sm"
+            : "bg-[var(--surface)] text-[var(--text-secondary)] border-2 border-[var(--border)] hover:border-red-500 hover:text-red-500"
         }`}
       >
         {falseLabel}
@@ -629,7 +629,7 @@ function ChoiceField({ question, value, onChange, readOnly }) {
     const labels = selectedValue
       .map((v) => options.find((o) => String(o.value) === String(v))?.label || v)
       .join(", ");
-    return <p className="text-sm text-slate-700 bg-slate-50 px-3 py-2 rounded-lg">{labels || "—"}</p>;
+    return <p className="text-sm text-[var(--text-secondary)] bg-[var(--surface-alt)] px-3 py-2 rounded-lg">{labels || "—"}</p>;
   }
 
   return (
@@ -652,8 +652,8 @@ function ChoiceField({ question, value, onChange, readOnly }) {
             }}
             className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
               checked
-                ? "bg-brand-600 text-white shadow-lg shadow-brand-200"
-                : "bg-white text-slate-600 border-2 border-slate-200 hover:border-brand-300 hover:text-brand-600"
+                ? "bg-[var(--sage)] text-white shadow-sm"
+                : "bg-[var(--surface)] text-[var(--text-secondary)] border-2 border-[var(--border)] hover:border-[var(--sage)] hover:text-[var(--sage)]"
             }`}
           >
             {opt.label}
@@ -669,7 +669,7 @@ function LikertField({ question, value, onChange, readOnly }) {
 
   if (readOnly) {
     const label = options.find((o) => String(o.value) === String(value))?.label || value || "—";
-    return <p className="text-sm text-slate-700 bg-slate-50 px-3 py-2 rounded-lg">{label}</p>;
+    return <p className="text-sm text-[var(--text-secondary)] bg-[var(--surface-alt)] px-3 py-2 rounded-lg">{label}</p>;
   }
 
   const cols = Math.min(options.length, 6);
@@ -689,8 +689,8 @@ function LikertField({ question, value, onChange, readOnly }) {
               onClick={() => onChange(opt.value)}
               className={`aspect-square rounded-xl border-2 font-semibold transition-all duration-150 flex flex-col items-center justify-center ${
                 selected
-                  ? "bg-brand-600 text-white border-brand-600 scale-105 shadow-md"
-                  : "bg-white text-slate-700 border-slate-200 hover:border-brand-300 hover:bg-brand-50"
+                  ? "bg-[var(--sage)] text-white border-[var(--sage)] scale-105 shadow-sm"
+                  : "bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border)] hover:border-[var(--sage)] hover:bg-[var(--surface-alt)]"
               }`}
             >
               {opt.value}
@@ -706,17 +706,17 @@ function LikertField({ question, value, onChange, readOnly }) {
               <div
                 key={String(opt.value)}
                 className={`flex items-center gap-3 text-xs rounded-lg px-2 py-1 transition-colors ${
-                  selected ? "bg-brand-50 text-brand-700 font-medium" : "text-slate-500"
+                  selected ? "bg-[var(--sage-light)] text-[var(--dark-green)] dark:text-[var(--sage)] font-medium" : "text-[var(--text-secondary)]"
                 }`}
               >
                 <span className={`w-6 h-6 rounded border flex items-center justify-center font-bold shrink-0 ${
                   selected
-                    ? "bg-brand-600 text-white border-brand-600"
-                    : "border-slate-200 text-slate-400"
+                    ? "bg-[var(--sage)] text-white border-[var(--sage)]"
+                    : "border-[var(--border)] text-[var(--text-muted)] bg-[var(--surface)]"
                 }`}>
                   {opt.value}
                 </span>
-                <span>{opt.label}</span>
+                <span className="text-[var(--text-secondary)]">{opt.label}</span>
               </div>
             );
           })}
@@ -738,9 +738,9 @@ function MatrixField({ question, value, onChange, readOnly }) {
         {rows.map((row) => {
           const col = columns.find((c) => String(c.value) === String(matrixValue[row.value]));
           return (
-            <div key={row.value} className="flex items-center gap-3 py-1.5 px-3 bg-slate-50 rounded-lg text-sm">
-              <span className="flex-1 text-slate-600">{row.label}</span>
-              <span className="font-medium text-slate-800">{col?.label || matrixValue[row.value] || "—"}</span>
+            <div key={row.value} className="flex items-center gap-3 py-1.5 px-3 bg-[var(--surface-alt)] rounded-lg text-sm">
+              <span className="flex-1 text-[var(--text-secondary)]">{row.label}</span>
+              <span className="font-medium text-[var(--text-primary)]">{col?.label || matrixValue[row.value] || "—"}</span>
             </div>
           );
         })}
@@ -753,11 +753,11 @@ function MatrixField({ question, value, onChange, readOnly }) {
       <table className="w-full text-sm">
         <thead>
           <tr>
-            <th className="text-left py-2 pr-4 text-xs font-medium text-slate-500" />
+            <th className="text-left py-2 pr-4 text-xs font-medium text-[var(--text-muted)]" />
             {columns.map((col) => (
               <th
                 key={String(col.value)}
-                className="text-center py-2 px-2 text-xs font-medium text-slate-500 min-w-[80px]"
+                className="text-center py-2 px-2 text-xs font-medium text-[var(--text-muted)] min-w-[80px]"
               >
                 {col.label}
               </th>
@@ -766,8 +766,8 @@ function MatrixField({ question, value, onChange, readOnly }) {
         </thead>
         <tbody>
           {rows.map((row, rIdx) => (
-            <tr key={row.value} className={rIdx % 2 === 0 ? "bg-white" : "bg-slate-50"}>
-              <td className="py-2 pr-4 text-xs text-slate-700">{row.label}</td>
+            <tr key={row.value} className={rIdx % 2 === 0 ? "bg-[var(--surface)]" : "bg-[var(--surface-alt)]/50"}>
+              <td className="py-2 pr-4 text-xs text-[var(--text-secondary)]">{row.label}</td>
               {columns.map((col) => {
                 const checked = String(matrixValue[row.value]) === String(col.value);
                 return (
@@ -777,7 +777,7 @@ function MatrixField({ question, value, onChange, readOnly }) {
                       name={`${question.id}_${row.value}`}
                       checked={checked}
                       onChange={() => onChange({ ...matrixValue, [row.value]: col.value })}
-                      className="w-4 h-4 border-slate-300 text-brand-600 focus:ring-brand-500"
+                      className="w-4 h-4 border-[var(--border)] text-[var(--sage)] focus:ring-[var(--sage)] bg-[var(--surface)]"
                     />
                   </td>
                 );
