@@ -425,7 +425,7 @@ function FormListRow({ form, stats, onDelete, onDuplicate }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-6 shrink-0">
+      <div className="hidden sm:flex items-center gap-6 shrink-0">
         <div className="flex flex-col items-center">
           <span className="text-lg font-black text-[var(--text-primary)]">{stats?.responseCount || 0}</span>
           <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Respostas</span>
@@ -436,14 +436,14 @@ function FormListRow({ form, stats, onDelete, onDuplicate }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <Link to={`/forms/${form.id}/preview`} className="btn btn-secondary py-2 px-3 text-xs" title="Visualizar">
+      <div className="flex items-center gap-2 shrink-0">
+        <Link to={`/forms/${form.id}/preview`} className="hidden md:flex btn btn-secondary py-2 px-3 text-xs" title="Visualizar">
           <Eye size={14} />
         </Link>
         <Link to={`/forms/${form.id}/edit`} className="btn btn-secondary py-2 px-3 text-xs" title="Editar">
           <Pencil size={14} />
         </Link>
-        <Link to={`/forms/${form.id}/responses`} className="btn btn-primary py-2 px-3 text-xs" title="Ver Resultados">
+        <Link to={`/forms/${form.id}/responses`} className="hidden md:flex btn btn-primary py-2 px-3 text-xs" title="Ver Resultados">
           <BarChart3 size={14} />
         </Link>
         <div className="relative">
@@ -458,6 +458,13 @@ function FormListRow({ form, stats, onDelete, onDuplicate }) {
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShowOptions(false)} />
               <div className="absolute right-0 mt-2 w-48 bg-[var(--surface)] border border-[var(--border)] rounded-[14px] shadow-lg z-20 py-2 animate-scale-in">
+                <Link to={`/forms/${form.id}/preview`} className="md:hidden w-full px-4 py-2 text-left text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] flex items-center gap-3 transition-colors">
+                  <Eye size={16} /> Visualizar
+                </Link>
+                <Link to={`/forms/${form.id}/responses`} className="md:hidden w-full px-4 py-2 text-left text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] flex items-center gap-3 transition-colors">
+                  <BarChart3 size={16} /> Resultados
+                </Link>
+                <div className="md:hidden my-1 border-t border-[var(--border)]" />
                 <button onClick={() => { onDuplicate(form.id); setShowOptions(false); }} className="w-full px-4 py-2 text-left text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] flex items-center gap-3">
                   <Copy size={16} /> Duplicar
                 </button>
@@ -579,24 +586,27 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
       <div className="p-4 bg-[var(--surface-alt)]/30 border-t border-[var(--border)] flex items-center justify-between gap-2">
         <Link 
           to={`/forms/${form.id}/preview`}
-          className="btn btn-secondary text-xs flex-1"
+          className="btn btn-secondary text-xs flex-1 flex items-center justify-center gap-1.5 px-2"
+          title="Visualizar"
         >
           <Eye size={14} />
-          Visualizar
+          <span className="hidden sm:inline">Visualizar</span>
         </Link>
         <Link 
           to={`/forms/${form.id}/edit`}
-          className="btn btn-secondary text-xs flex-1"
+          className="btn btn-secondary text-xs flex-1 flex items-center justify-center gap-1.5 px-2"
+          title="Editar"
         >
           <Pencil size={14} />
-          Editar
+          <span className="hidden sm:inline">Editar</span>
         </Link>
         <Link 
           to={`/forms/${form.id}/responses`}
-          className="btn btn-primary text-xs flex-1"
+          className="btn btn-primary text-xs flex-1 flex items-center justify-center gap-1.5 px-2"
+          title="Resultados"
         >
           <BarChart3 size={14} />
-          Resultados
+          <span className="hidden sm:inline">Resultados</span>
         </Link>
       </div>
     </div>
