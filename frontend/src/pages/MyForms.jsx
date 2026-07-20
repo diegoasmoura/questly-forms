@@ -140,9 +140,9 @@ export default function MyForms() {
       </div>
 
       {/* Search and Filters */}
-      <div className="flex items-center justify-between gap-4 mb-6">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+        <div className="relative flex-1 max-w-md w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
           <input
             type="text"
             placeholder="Buscar instrumentos..."
@@ -151,17 +151,25 @@ export default function MyForms() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+        <div className="flex items-center gap-1 bg-[var(--surface-alt)] p-1 rounded-[14px] border border-[var(--border)] shadow-sm">
           <button
             onClick={() => handleViewMode("grid")}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode === "grid" ? "bg-brand-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-[10px] transition-all ${
+              viewMode === "grid" 
+                ? "bg-[var(--sage)] text-white shadow-sm" 
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)]"
+            }`}
           >
             <LayoutGrid size={18} />
             <span className="text-xs font-bold">Cards</span>
           </button>
           <button
             onClick={() => handleViewMode("list")}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode === "list" ? "bg-brand-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-[10px] transition-all ${
+              viewMode === "list" 
+                ? "bg-[var(--sage)] text-white shadow-sm" 
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)]"
+            }`}
           >
             <List size={18} />
             <span className="text-xs font-bold">Lista</span>
@@ -170,7 +178,7 @@ export default function MyForms() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto hide-scrollbar">
         {loading ? (
           viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
