@@ -54,7 +54,7 @@ export default function FormPreview() {
   if (!form || !schema) return null;
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] flex flex-col overflow-hidden">
+    <div className="min-h-screen bg-[var(--bg)] flex flex-col overflow-hidden relative">
       <header className="bg-[var(--surface)] border-b border-[var(--border)] shrink-0">
         <div className="px-4 py-4">
           <div className="flex items-center gap-3">
@@ -74,7 +74,7 @@ export default function FormPreview() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-auto p-4 md:p-6 pb-32">
+      <div className="flex-1 overflow-auto p-4 md:p-6 pb-32 hide-scrollbar">
         <div className="max-w-3xl mx-auto">
           <CustomFormRenderer
             schema={schema}
@@ -83,6 +83,9 @@ export default function FormPreview() {
           />
         </div>
       </div>
+
+      {/* Gradiente de Rolagem UX (Mobile) */}
+      <div className="absolute bottom-[calc(65px+env(safe-area-inset-bottom))] left-0 right-0 h-16 bg-gradient-to-t from-[var(--bg)] via-[var(--bg)]/90 to-transparent pointer-events-none z-10 md:hidden" />
     </div>
   );
 }
