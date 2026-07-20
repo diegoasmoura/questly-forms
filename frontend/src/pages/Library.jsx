@@ -73,39 +73,39 @@ export default function Library() {
     <div className="p-6 h-full flex flex-col overflow-hidden animate-fade-in">
 
       {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex flex-row items-center justify-between gap-3 mb-6">
+        <div className="relative flex-1 max-w-md min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
           <input
             type="text"
-            placeholder="Buscar instrumentos..."
-            className="input pl-10"
+            placeholder="Buscar..."
+            className="input pl-10 pr-4"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-1 bg-[var(--surface-alt)] p-1 rounded-[14px] border border-[var(--border)] shadow-sm">
+        <div className="flex items-center p-1 bg-[var(--surface-alt)] rounded-[14px] border border-[var(--border)] shadow-sm shrink-0">
           <button
             onClick={() => handleViewMode("grid")}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-[10px] transition-all ${
+            title="Visualização em Cards"
+            className={`flex items-center justify-center w-9 h-9 rounded-[10px] transition-all outline-none ${
               viewMode === "grid" 
-                ? "bg-[var(--sage)] text-white shadow-sm" 
-                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)]"
+                ? "bg-[var(--surface)] shadow-sm text-[var(--sage)] border border-[var(--border)]" 
+                : "text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent"
             }`}
           >
             <LayoutGrid size={18} />
-            <span className="text-xs font-bold">Cards</span>
           </button>
           <button
             onClick={() => handleViewMode("list")}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-[10px] transition-all ${
+            title="Visualização em Lista"
+            className={`flex items-center justify-center w-9 h-9 rounded-[10px] transition-all outline-none ${
               viewMode === "list" 
-                ? "bg-[var(--sage)] text-white shadow-sm" 
-                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)]"
+                ? "bg-[var(--surface)] shadow-sm text-[var(--sage)] border border-[var(--border)]" 
+                : "text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent"
             }`}
           >
             <List size={18} />
-            <span className="text-xs font-bold">Lista</span>
           </button>
         </div>
       </div>
