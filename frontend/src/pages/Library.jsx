@@ -72,11 +72,10 @@ export default function Library() {
   return (
     <div className="p-6 h-full flex flex-col overflow-hidden animate-fade-in">
 
-
       {/* Search and Filters */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
           <input
             type="text"
             placeholder="Buscar instrumentos..."
@@ -85,17 +84,25 @@ export default function Library() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+        <div className="flex items-center gap-1 bg-[var(--surface-alt)] p-1 rounded-[14px] border border-[var(--border)] shadow-sm">
           <button
             onClick={() => handleViewMode("grid")}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode === "grid" ? "bg-brand-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-[10px] transition-all ${
+              viewMode === "grid" 
+                ? "bg-[var(--sage)] text-white shadow-sm" 
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)]"
+            }`}
           >
             <LayoutGrid size={18} />
             <span className="text-xs font-bold">Cards</span>
           </button>
           <button
             onClick={() => handleViewMode("list")}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode === "list" ? "bg-brand-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-[10px] transition-all ${
+              viewMode === "list" 
+                ? "bg-[var(--sage)] text-white shadow-sm" 
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)]"
+            }`}
           >
             <List size={18} />
             <span className="text-xs font-bold">Lista</span>
@@ -105,38 +112,38 @@ export default function Library() {
 
       {/* Template Grid */}
       {viewMode === "grid" ? (
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto hide-scrollbar">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredTemplates.map((template) => (
               <div 
                 key={template.id} 
-                className="card group hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col overflow-hidden"
+                className="card group hover:shadow-md hover:-translate-y-[2px] transition-all duration-200 flex flex-col overflow-hidden"
               >
                 <div className="p-6 flex-1">
                   <div className="flex items-start justify-between mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 group-hover:bg-brand-600 group-hover:text-white transition-colors duration-200">
+                    <div className="w-12 h-12 rounded-[14px] bg-[var(--sage-light)] flex items-center justify-center text-[var(--dark-green)] dark:text-[var(--sage)] group-hover:bg-[var(--sage)] group-hover:text-white transition-colors duration-200">
                       <BookTemplate size={24} />
                     </div>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-600 bg-brand-50 px-2 py-1 rounded-md">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--dark-green)] dark:text-[var(--sage)] bg-[var(--sage-light)] px-2.5 py-1 rounded-[6px]">
                       Premium
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-semibold text-slate-700 mb-2 group-hover:text-brand-600 transition-colors">
+                  <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2 group-hover:text-[var(--sage)] transition-colors">
                     {template.title}
                   </h3>
-                  <p className="text-sm text-slate-500 leading-relaxed line-clamp-3">
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed line-clamp-3">
                     {template.description}
                   </p>
 
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="text-[10px] font-medium px-2 py-1 bg-blue-50 text-blue-600 rounded-full">Avaliação</span>
-                    <span className="text-[10px] font-medium px-2 py-1 bg-brand-50 text-brand-600 rounded-full">Validado</span>
-                    <span className="text-[10px] font-medium px-2 py-1 bg-purple-50 text-purple-600 rounded-full">Adulto</span>
+                    <span className="text-[10px] font-bold px-2.5 py-1 bg-[var(--blue-light)] text-[var(--blue)] rounded-[6px]">Avaliação</span>
+                    <span className="text-[10px] font-bold px-2.5 py-1 bg-[var(--sage-light)] text-[var(--dark-green)] dark:text-[var(--sage)] rounded-[6px]">Validado</span>
+                    <span className="text-[10px] font-bold px-2.5 py-1 bg-[var(--purple-light)] text-[var(--purple)] rounded-[6px]">Adulto</span>
                   </div>
                 </div>
 
-                <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-3">
+                <div className="p-4 bg-[var(--surface-alt)]/30 border-t border-[var(--border)] flex items-center justify-between gap-3">
                   <button 
                     className="btn btn-secondary text-xs flex-1"
                     onClick={() => handlePreview(template)}
@@ -168,10 +175,10 @@ export default function Library() {
             ))}
 
             {/* Suggestion Card */}
-            <div className="card border-dashed border-2 border-slate-200 bg-slate-50 flex flex-col justify-center items-center p-8 text-center opacity-70 hover:opacity-100 transition-opacity min-h-[200px]">
-              <CheckCircle2 size={32} className="text-slate-400 mb-4" />
-              <h3 className="font-semibold text-slate-600">Precisa de outro modelo?</h3>
-              <p className="text-xs text-slate-400 mt-2">
+            <div className="card border-dashed border-2 border-[var(--border)] bg-[var(--surface-alt)]/30 flex flex-col justify-center items-center p-8 text-center opacity-70 hover:opacity-100 transition-all min-h-[200px]">
+              <CheckCircle2 size={32} className="text-[var(--text-muted)] mb-4" />
+              <h3 className="font-bold text-[var(--text-primary)]">Precisa de outro modelo?</h3>
+              <p className="text-xs text-[var(--text-muted)] mt-2">
                 Estamos sempre adicionando novos protocolos.
               </p>
               <button className="btn btn-secondary text-xs mt-4">Sugerir Protocolo</button>
@@ -179,7 +186,7 @@ export default function Library() {
           </div>
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto space-y-3">
+        <div className="flex-1 overflow-y-auto space-y-3 hide-scrollbar">
           {filteredTemplates.map((template) => (
             <LibraryListRow
               key={template.id}
@@ -190,9 +197,9 @@ export default function Library() {
               onPreview={() => handlePreview(template)}
             />
           ))}
-          <div className="card border-dashed border-2 border-slate-300 bg-transparent flex items-center justify-center p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
-            <CheckCircle2 size={20} className="text-slate-300 mr-3" />
-            <span className="text-sm text-slate-500">
+          <div className="card border-dashed border-2 border-[var(--border)] bg-transparent flex items-center justify-center p-6 text-center opacity-70 hover:opacity-100 transition-all">
+            <CheckCircle2 size={20} className="text-[var(--text-muted)] mr-3" />
+            <span className="text-sm font-bold text-[var(--text-secondary)]">
               Precisa de outro modelo? Entre em contato.
             </span>
           </div>
@@ -204,11 +211,11 @@ export default function Library() {
 
 function LibraryListRow({ template, importing, previewing, onImport, onPreview }) {
   return (
-    <div className="card p-4 flex items-center gap-4 hover:border-slate-300 transition-all">
+    <div className="card p-4 flex items-center gap-4 hover:bg-[var(--surface-alt)] transition-all">
       <button 
         onClick={onPreview}
         disabled={previewing}
-        className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-brand-50 text-brand-700 hover:bg-brand-100 transition-colors"
+        className="w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 bg-[var(--sage-light)] text-[var(--dark-green)] dark:text-[var(--sage)] hover:opacity-90 transition-all"
       >
         <BookTemplate size={20} />
       </button>
@@ -220,14 +227,14 @@ function LibraryListRow({ template, importing, previewing, onImport, onPreview }
             disabled={previewing}
             className="group/name block min-w-0 text-left"
           >
-            <h4 className="font-semibold text-slate-900 truncate group-hover:text-brand-600 transition-colors">
+            <h4 className="font-bold text-[var(--text-primary)] truncate group-hover:text-[var(--sage)] transition-colors">
               {template.title}
             </h4>
           </button>
-          <span className="text-[10px] font-semibold uppercase text-amber-600 bg-amber-50 px-2 py-0.5 rounded">Premium</span>
+          <span className="text-[10px] font-bold uppercase text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded-[6px]">Premium</span>
         </div>
         <div className="flex items-center gap-3">
-          <p className="text-xs text-slate-500 line-clamp-1">{template.description}</p>
+          <p className="text-xs text-[var(--text-secondary)] line-clamp-1">{template.description}</p>
         </div>
       </div>
 
