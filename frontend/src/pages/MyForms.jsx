@@ -387,52 +387,52 @@ function FormListRow({ form, stats, onDelete, onDuplicate }) {
   const [showOptions, setShowOptions] = useState(false);
 
   const typeColors = {
-    "Avaliação": "bg-blue-50 text-blue-600",
-    "Anamnese": "bg-purple-50 text-purple-600",
-    "Evolução": "bg-amber-50 text-amber-600",
-    "Rastreamento": "bg-cyan-50 text-cyan-600"
+    "Avaliação": "bg-[var(--blue-light)] text-[var(--blue)]",
+    "Anamnese": "bg-[var(--purple-light)] text-[var(--purple)]",
+    "Evolução": "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    "Rastreamento": "bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400"
   };
 
   const isTemplate = form.source === "template";
 
   return (
-    <div className="card p-4 flex items-center gap-4 hover:border-brand-200 transition-all">
-      <Link to={`/forms/${form.id}/edit`} className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors ${isTemplate ? "bg-amber-50 text-amber-600 hover:bg-amber-100" : "bg-brand-50 text-slate-900 hover:bg-brand-100"}`}>
+    <div className="card p-4 flex items-center gap-4 hover:bg-[var(--surface-alt)] transition-all">
+      <Link to={`/forms/${form.id}/edit`} className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 transition-all ${isTemplate ? "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:opacity-90" : "bg-[var(--sage-light)] text-[var(--dark-green)] dark:text-[var(--sage)] hover:opacity-90"}`}>
         {isTemplate ? <BookTemplate size={20} /> : <FileText size={20} />}
       </Link>
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <Link to={`/forms/${form.id}/edit`} className="group/name block min-w-0 truncate">
-            <h4 className="font-bold text-slate-900 group-hover:text-brand-600 transition-colors truncate">
+            <h4 className="font-bold text-[var(--text-primary)] group-hover:text-[var(--sage)] transition-colors truncate">
               {form.title}
             </h4>
           </Link>
-          {isTemplate && <span className="text-[10px] font-bold uppercase text-amber-500 bg-amber-50 px-2 py-0.5 rounded">Premium</span>}
+          {isTemplate && <span className="text-[10px] font-bold uppercase text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded-[6px]">Premium</span>}
         </div>
         <div className="flex items-center gap-3">
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-[var(--text-muted)]">
             Atualizado em {new Date(form.updatedAt).toLocaleDateString('pt-BR')}
           </p>
           {form.type && (
-            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${typeColors[form.type] || 'bg-gray-50 text-gray-600'}`}>
+            <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-[6px] ${typeColors[form.type] || 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-400'}`}>
               {form.type}
             </span>
           )}
           {form.validated && (
-            <span className="text-[10px] font-medium px-2 py-0.5 bg-brand-50 text-brand-600 rounded-full">Validado</span>
+            <span className="text-[10px] font-bold px-2.5 py-0.5 bg-[var(--sage-light)] text-[var(--dark-green)] dark:text-[var(--sage)] rounded-[6px]">Validado</span>
           )}
         </div>
       </div>
 
       <div className="flex items-center gap-6 shrink-0">
         <div className="flex flex-col items-center">
-          <span className="text-lg font-black text-slate-900">{stats?.responseCount || 0}</span>
-          <span className="text-[10px] font-bold text-slate-400 uppercase">Respostas</span>
+          <span className="text-lg font-black text-[var(--text-primary)]">{stats?.responseCount || 0}</span>
+          <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Respostas</span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-lg font-black text-slate-900">{stats?.shareLinkCount || 0}</span>
-          <span className="text-[10px] font-bold text-slate-400 uppercase">Links</span>
+          <span className="text-lg font-black text-[var(--text-primary)]">{stats?.shareLinkCount || 0}</span>
+          <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Links</span>
         </div>
       </div>
 
@@ -449,7 +449,7 @@ function FormListRow({ form, stats, onDelete, onDuplicate }) {
         <div className="relative">
           <button
             onClick={() => setShowOptions(!showOptions)}
-            className="p-2 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-brand-50 transition-colors"
+            className="p-2 rounded-[10px] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors"
             title="Mais opções"
           >
             <MoreVertical size={18} />
@@ -457,12 +457,12 @@ function FormListRow({ form, stats, onDelete, onDuplicate }) {
           {showOptions && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShowOptions(false)} />
-              <div className="absolute right-0 mt-2 w-48 card-bone border border-brand-100 rounded-xl shadow-lg z-20 py-2">
-                <button onClick={() => { onDuplicate(form.id); setShowOptions(false); }} className="w-full px-4 py-2 text-left text-sm font-medium text-brand-700 hover:bg-brand-50 flex items-center gap-3">
+              <div className="absolute right-0 mt-2 w-48 bg-[var(--surface)] border border-[var(--border)] rounded-[14px] shadow-lg z-20 py-2 animate-scale-in">
+                <button onClick={() => { onDuplicate(form.id); setShowOptions(false); }} className="w-full px-4 py-2 text-left text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] flex items-center gap-3">
                   <Copy size={16} /> Duplicar
                 </button>
-                <div className="my-1 border-t border-brand-50" />
-                <button onClick={() => { onDelete(form.id); setShowOptions(false); }} className="w-full px-4 py-2 text-left text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-3">
+                <div className="my-1 border-t border-[var(--border)]" />
+                <button onClick={() => { onDelete(form.id); setShowOptions(false); }} className="w-full px-4 py-2 text-left text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-3">
                   <Trash2 size={16} /> Excluir
                 </button>
               </div>
@@ -478,28 +478,28 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
   const [showOptions, setShowOptions] = useState(false);
 
   const typeColors = {
-    "Avaliação": "bg-blue-50 text-blue-600",
-    "Anamnese": "bg-purple-50 text-purple-600",
-    "Evolução": "bg-amber-50 text-amber-600",
-    "Rastreamento": "bg-cyan-50 text-cyan-600"
+    "Avaliação": "bg-[var(--blue-light)] text-[var(--blue)]",
+    "Anamnese": "bg-[var(--purple-light)] text-[var(--purple)]",
+    "Evolução": "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    "Rastreamento": "bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400"
   };
 
   const isTemplate = form.source === "template";
 
   return (
-    <div className="card group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full card-bone overflow-hidden border-brand-100/50">
+    <div className="card group hover:shadow-xl hover:-translate-y-[2px] transition-all duration-300 flex flex-col h-full overflow-hidden">
       <div className="p-6 flex-1">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors duration-300 ${
+            <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center transition-colors duration-300 ${
               isTemplate 
-                ? "bg-amber-50 text-amber-600 group-hover:bg-amber-500 group-hover:text-white" 
-                : "bg-brand-50 text-slate-900 group-hover:bg-brand-900 group-hover:text-white"
+                ? "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 group-hover:bg-amber-500 group-hover:text-white" 
+                : "bg-[var(--sage-light)] text-[var(--dark-green)] dark:text-[var(--sage)] group-hover:bg-[var(--sage)] group-hover:text-white"
             }`}>
               {isTemplate ? <BookTemplate size={24} /> : <FileText size={24} />}
             </div>
             {isTemplate && (
-              <span className="text-[10px] font-bold uppercase tracking-widest text-amber-500 bg-amber-50 px-2 py-1 rounded-md">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-2.5 py-1 rounded-[6px]">
                 Premium
               </span>
             )}
@@ -507,7 +507,7 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
           <div className="relative">
             <button 
               onClick={() => setShowOptions(!showOptions)}
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-900 hover:bg-brand-50 transition-colors"
+              className="p-2 rounded-[10px] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors"
             >
               <MoreVertical size={18} />
             </button>
@@ -518,18 +518,18 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
                   className="fixed inset-0 z-10" 
                   onClick={() => setShowOptions(false)}
                 />
-                <div className="absolute right-0 mt-2 w-48 card-bone border border-brand-100 rounded-2xl shadow-xl z-20 py-2 animate-scale-in">
+                <div className="absolute right-0 mt-2 w-48 bg-[var(--surface)] border border-[var(--border)] rounded-[14px] shadow-lg z-20 py-2 animate-scale-in">
                   <button 
                     onClick={() => { onDuplicate(form.id); setShowOptions(false); }}
-                    className="w-full px-4 py-2 text-left text-sm font-medium text-brand-700 hover:bg-brand-50 flex items-center gap-3 transition-colors"
+                    className="w-full px-4 py-2 text-left text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] flex items-center gap-3 transition-colors"
                   >
                     <Copy size={16} />
                     Duplicar
                   </button>
-                  <div className="my-1 border-t border-brand-50" />
+                  <div className="my-1 border-t border-[var(--border)]" />
                   <button 
                     onClick={() => { onDelete(form.id); setShowOptions(false); }}
-                    className="w-full px-4 py-2 text-left text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
+                    className="w-full px-4 py-2 text-left text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-3 transition-colors"
                   >
                     <Trash2 size={16} />
                     Excluir
@@ -541,25 +541,25 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
         </div>
 
         <Link to={`/forms/${form.id}/edit`} className="block mb-2 group/title" title={form.title}>
-          <h3 className="text-xl font-bold text-slate-900 group-hover:text-slate-800 transition-colors">
+          <h3 className="text-xl font-bold text-[var(--text-primary)] group-hover:text-[var(--sage)] transition-colors truncate">
             {form.title}
           </h3>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+          <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mt-1">
             Atualizado em {new Date(form.updatedAt).toLocaleDateString('pt-BR')}
           </p>
         </Link>
 
         <div className="mt-6 flex flex-wrap gap-2">
           {form.type && (
-            <span className={`text-[10px] font-medium px-2 py-1 rounded-full ${typeColors[form.type] || 'bg-gray-50 text-gray-600'}`}>
+            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-[6px] ${typeColors[form.type] || 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-400'}`}>
               {form.type}
             </span>
           )}
           {form.validated && (
-            <span className="text-[10px] font-medium px-2 py-1 bg-brand-50 text-brand-600 rounded-full">Validado</span>
+            <span className="text-[10px] font-bold px-2.5 py-1 bg-[var(--sage-light)] text-[var(--dark-green)] dark:text-[var(--sage)] rounded-[6px]">Validado</span>
           )}
           {form.audiences && form.audiences.length > 0 && (
-            <span className="text-[10px] font-medium px-2 py-1 bg-indigo-50 text-indigo-600 rounded-full">
+            <span className="text-[10px] font-bold px-2.5 py-1 bg-[var(--purple-light)] text-[var(--purple)] rounded-[6px]">
               {form.audiences.join(" · ")}
             </span>
           )}
@@ -570,13 +570,13 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
             <ResponseTrendChart data={aggregateData} title="" height={64} />
           </div>
         ) : (
-          <div className="mt-6 h-16 flex items-center justify-center border border-dashed border-blue-200 rounded-xl bg-blue-50/50">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Sem atividade recente</p>
+          <div className="mt-6 h-16 flex items-center justify-center border border-dashed border-[var(--border)] rounded-[12px] bg-[var(--surface-alt)]/50">
+            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-tight">Sem atividade recente</p>
           </div>
         )}
       </div>
 
-      <div className="p-4 bg-brand-50/50 border-t border-brand-50 flex items-center justify-between gap-2">
+      <div className="p-4 bg-[var(--surface-alt)]/30 border-t border-[var(--border)] flex items-center justify-between gap-2">
         <Link 
           to={`/forms/${form.id}/preview`}
           className="btn btn-secondary text-xs flex-1"
