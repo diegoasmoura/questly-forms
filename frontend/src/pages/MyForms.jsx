@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useNavigateWithTransition } from "../lib/useNavigateWithTransition";
 import { api } from "../lib/api";
@@ -15,7 +15,8 @@ import {
   BookTemplate,
   MoreVertical,
   LayoutGrid,
-  List
+  List,
+  X
 } from "lucide-react";
 
 export default function MyForms() {
@@ -37,6 +38,19 @@ export default function MyForms() {
   const [loadingLinks, setLoadingLinks] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [viewMode, setViewMode] = useState(() => localStorage.getItem("myforms-view") || "grid");
+
+  const searchInputRef = useRef(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleViewMode = (mode) => {
     setViewMode(mode);
@@ -124,61 +138,89 @@ export default function MyForms() {
   );
 
   return (
-    <div className="p-6 h-full flex flex-col overflow-hidden animate-fade-in">
-      {/* Toolbar */}
-      <div className="flex justify-end items-center gap-4 mb-6 shrink-0">
-        <div className="flex items-center gap-2">
-          <Link to="/library" className="btn btn-secondary text-xs">
-            <BookTemplate size={16} />
-            Biblioteca
-          </Link>
-          <button onClick={() => setShowCreateModal(true)} className="btn btn-primary text-xs">
-            <Plus size={16} />
-            Novo
-          </button>
-        </div>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="flex flex-row items-center justify-between gap-3 mb-6">
-        <div className="relative flex-1 max-w-md min-w-0">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
+    <div className="h-full flex flex-col overflow-y-auto lg:overflow-hidden animate-fade-in relative pb-28 lg:pb-0 [&::-webkit-scrollbar]:hidden">
+      
+      {/* BARRA SUPERIOR UNIFICADA (Padronizada com Pacientes e CRM Funil) */}
+      <div className="px-3 sm:px-6 py-4 flex flex-row items-center justify-between gap-2 sm:gap-4 shrink-0 sticky top-0 z-40 bg-[var(--bg)] shadow-[0_10px_20px_-10px_var(--bg)]">
+        
+        {/* Campo de Busca */}
+        <div className="relative flex-1 min-w-0 group">
+          <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--sage)] transition-colors pointer-events-none" />
           <input
+            ref={searchInputRef}
             type="text"
-            placeholder="Buscar..."
-            className="input pl-10 pr-4"
+            placeholder="Procurar instrumento por título ou descrição..."
+            className="w-full pl-10 pr-12 py-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-[14px] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--sage)] font-medium transition-all shadow-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+          {searchQuery ? (
+            <button 
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            >
+              <X size={14} />
+            </button>
+          ) : (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              <span className="hidden md:flex items-center justify-center px-1.5 py-0.5 rounded-[6px] bg-[var(--surface)] text-[10px] font-bold text-[var(--text-muted)] border border-[var(--border)] tracking-widest font-sans">
+                ⌘K
+              </span>
+            </div>
+          )}
         </div>
-        <div className="flex items-center p-1 bg-[var(--surface-alt)] rounded-[14px] border border-[var(--border)] shadow-sm shrink-0">
-          <button
-            onClick={() => handleViewMode("grid")}
-            title="Visualização em Cards"
-            className={`flex items-center justify-center w-9 h-9 rounded-[10px] transition-all outline-none ${
-              viewMode === "grid" 
-                ? "bg-[var(--surface)] shadow-sm text-[var(--sage)] border border-[var(--border)]" 
-                : "text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent"
-            }`}
+
+        {/* Grupo de Ações (Swapper Grid/List + Biblioteca + Novo) */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          
+          {/* Swapper Grid / List */}
+          <div className="flex items-center p-1 bg-[var(--surface-alt)] rounded-[14px] border border-[var(--border)] shrink-0">
+            <button
+              onClick={() => handleViewMode("grid")}
+              title="Visualização em Cards"
+              className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-[10px] outline-none cursor-pointer transition-all ${
+                viewMode === "grid" 
+                  ? "bg-[var(--surface)] shadow-sm text-[var(--sage)] border border-[var(--border)] font-bold" 
+                  : "text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent"
+              }`}
+            >
+              <LayoutGrid size={16} className="sm:w-[18px] sm:h-[18px]" />
+            </button>
+            <button
+              onClick={() => handleViewMode("list")}
+              title="Visualização em Lista"
+              className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-[10px] outline-none cursor-pointer transition-all ${
+                viewMode === "list" 
+                  ? "bg-[var(--surface)] shadow-sm text-[var(--sage)] border border-[var(--border)] font-bold" 
+                  : "text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent"
+              }`}
+            >
+              <List size={16} className="sm:w-[18px] sm:h-[18px]" />
+            </button>
+          </div>
+
+          {/* Botão Biblioteca */}
+          <Link 
+            to="/library" 
+            className="bg-[var(--surface-alt)] hover:bg-[var(--border)]/40 text-[var(--text-primary)] border border-[var(--border)] rounded-[14px] px-3.5 py-2.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer shrink-0"
           >
-            <LayoutGrid size={18} />
-          </button>
-          <button
-            onClick={() => handleViewMode("list")}
-            title="Visualização em Lista"
-            className={`flex items-center justify-center w-9 h-9 rounded-[10px] transition-all outline-none ${
-              viewMode === "list" 
-                ? "bg-[var(--surface)] shadow-sm text-[var(--sage)] border border-[var(--border)]" 
-                : "text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent"
-            }`}
+            <BookTemplate size={16} />
+            <span className="hidden sm:inline">Biblioteca</span>
+          </Link>
+
+          {/* Botão Novo */}
+          <button 
+            onClick={() => setShowCreateModal(true)} 
+            className="bg-[var(--sage)] hover:opacity-90 text-white rounded-[14px] px-4 sm:px-5 py-2.5 text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer shrink-0"
           >
-            <List size={18} />
+            <Plus size={18} className="sm:w-[18px] sm:h-[18px]" />
+            <span className="hidden sm:inline">Novo</span>
           </button>
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto hide-scrollbar">
+      <div className="flex-1 flex flex-col px-3 sm:px-6 pb-3 sm:pb-6 min-h-0">
         {loading ? (
           viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-24">
@@ -227,7 +269,7 @@ export default function MyForms() {
           )}
         </div>
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pt-3 pb-24">
           {filteredForms.map((form) => (
             <FormCard
               key={form.id}
@@ -240,7 +282,7 @@ export default function MyForms() {
           ))}
         </div>
       ) : (
-        <div className="space-y-3 pb-24">
+        <div className="space-y-3 pt-3 pb-24">
           {filteredForms.map((form) => (
             <FormListRow
               key={form.id}
@@ -494,11 +536,11 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
   const isTemplate = form.source === "template";
 
   return (
-    <div className="card group hover:shadow-xl hover:-translate-y-[2px] transition-all duration-300 flex flex-col h-full overflow-hidden">
+    <div className="card group hover:shadow-md hover:-translate-y-[2px] transition-all duration-200 flex flex-col h-full overflow-hidden">
       <div className="p-6 flex-1">
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center transition-colors duration-300 ${
+            <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center transition-colors duration-200 ${
               isTemplate 
                 ? "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 group-hover:bg-amber-500 group-hover:text-white" 
                 : "bg-[var(--sage-light)] text-[var(--dark-green)] dark:text-[var(--sage)] group-hover:bg-[var(--sage)] group-hover:text-white"
@@ -548,7 +590,7 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
         </div>
 
         <Link to={`/forms/${form.id}/edit`} className="block mb-2 group/title" title={form.title}>
-          <h3 className="text-xl font-bold text-[var(--text-primary)] group-hover:text-[var(--sage)] transition-colors truncate">
+          <h3 className="text-lg font-bold text-[var(--text-primary)] group-hover:text-[var(--sage)] transition-colors truncate">
             {form.title}
           </h3>
           <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mt-1">
@@ -556,7 +598,7 @@ function FormCard({ form, stats, onDelete, onDuplicate, aggregateData }) {
           </p>
         </Link>
 
-        <div className="mt-6 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
           {form.type && (
             <span className={`text-[10px] font-bold px-2.5 py-1 rounded-[6px] ${typeColors[form.type] || 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-400'}`}>
               {form.type}

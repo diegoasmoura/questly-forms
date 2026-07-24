@@ -27,10 +27,10 @@ A identidade visual do Questly Forms une **tecnologia** e **acolhimento humaniza
 
 | Elemento / Camada | Variável CSS | Modo Claro (Light) | Modo Escuro (Dark) | Aplicação |
 |---|---|---|---|---|
-| **Fundo da Aplicação** | `--bg` | `#FAF8F4` (Creme orgânico da marca) | `#101722` (Navy Profundo) | Tela principal, `body` |
-| **Superfície Principal** | `--surface` | `#FFFFFF` (Branco reluzente destacando os cards) | `#192231` (Card Navy) | Cards, Modais, Containers |
-| **Superfície Alternativa** | `--surface-alt` | `#F5F2EA` (Creme Linho / Colunas) | `#202B3C` (Navy Alternativo) | Quadros internos, Colunas Kanban, Inputs |
-| **Bordas e Divisores** | `--border` | `#CBD2D9` (Cinza/Areia nítido) | `#2B3650` (Navy Grafite) | Molduras, linhas de tabela |
+| **Nível 0: Fundo e Cards** | `--bg` | `#F8F6F0` (Creme Base) | `#101722` (Navy Profundo) | Tela principal (`body`), **Cards de Pacientes** (Grid e Kanban) |
+| **Nível 1: Containers e Quadros** | `--surface` | `#FCFAF4` (Creme Claro) | `#192231` (Card Navy) | Painéis principais, Fundo do Grid, Calhas do Funil Kanban |
+| **Nível 2: Cabeçalhos e Destaques** | `--surface-alt` | `#F3EFE6` (Creme Linho) | `#202B3C` (Navy Alternativo) | Cabeçalhos das Colunas, Modais, Avatares, Item Ativo Sidebar |
+| **Bordas e Divisores** | `--border` | `#E4DFD3` (Linha areia suave nítida) | `#2B3650` (Navy Grafite) | Molduras, divisores (⚠️ Evitar aplicar opacidade em Dark Mode) |
 
 ---
 

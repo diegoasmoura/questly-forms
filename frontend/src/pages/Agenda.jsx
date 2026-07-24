@@ -58,38 +58,38 @@ function StatsBar({ appointments, attendances }) {
   const justifiedCount = attendances.filter(a => a.status === "justificada").length;
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 shrink-0">
       <KpiCard
-        icon={<Calendar size={16} />}
+        compact
+        icon={<Calendar size={14} />}
         iconBg="var(--blue-light)"
         iconColor="var(--blue)"
         label="Agendamentos"
         value={appointments.length}
-        sub="agendados no período"
       />
       <KpiCard
-        icon={<UserCheck size={16} />}
-        iconBg="var(--sage-light)"
-        iconColor="var(--sage)"
+        compact
+        icon={<UserCheck size={14} />}
+        iconBg="var(--status-presente-bg)"
+        iconColor="var(--status-presente-text)"
         label="Presenças"
         value={presentCount}
-        sub={appointments.length > 0 ? `${Math.round((presentCount / appointments.length) * 100)}% de presença` : "sem sessões"}
       />
       <KpiCard
-        icon={<UserX size={16} />}
+        compact
+        icon={<UserX size={14} />}
         iconBg="var(--peach-light)"
         iconColor="var(--peach)"
         label="Faltas"
         value={absentCount}
-        sub={appointments.length > 0 ? `${Math.round((absentCount / appointments.length) * 100)}% de faltas` : "sem sessões"}
       />
       <KpiCard
-        icon={<AlertCircle size={16} />}
+        compact
+        icon={<AlertCircle size={14} />}
         iconBg="var(--purple-light)"
         iconColor="var(--purple)"
         label="Justificadas"
         value={justifiedCount}
-        sub={appointments.length > 0 ? `${Math.round((justifiedCount / appointments.length) * 100)}% justificadas` : "sem sessões"}
       />
     </div>
   );
@@ -102,10 +102,10 @@ function SessionCard({ session, date, onClick }) {
   const attendanceStatus = attendance?.status;
 
   const statusStyles = {
-    presente: "border-[var(--sage)] bg-[var(--status-presente-bg)]/20 text-[var(--status-presente-text)]",
-    falta: "border-[#EF4444] bg-[var(--status-falta-bg)] text-[var(--status-falta-text)]",
-    justificada: "border-[var(--purple)] bg-[var(--status-justificada-bg)]/20 text-[var(--status-justificada-text)]",
-    default: "border-[var(--border)] bg-[var(--surface)] hover:border-slate-300 text-[var(--text-primary)]"
+    presente: "border-[var(--sage)] bg-[var(--status-presente-bg)]/30 text-[var(--status-presente-text)] shadow-sm",
+    falta: "border-[#EF4444] bg-[var(--status-falta-bg)] text-[var(--status-falta-text)] shadow-sm",
+    justificada: "border-[var(--purple)] bg-[var(--status-justificada-bg)]/30 text-[var(--status-justificada-text)] shadow-sm",
+    default: "border-[var(--border)] bg-[var(--surface-alt)] hover:border-[var(--sage)] text-[var(--text-primary)] shadow-sm"
   };
 
   const { initials, color: avatarColor } = getAvatarProps(patientName);
@@ -1060,7 +1060,7 @@ export default function Agenda() {
                                 <div
                                   key={app.id + idx}
                                   onClick={() => openDetailModal(session, date)}
-                                  className="flex items-center gap-2 p-3 rounded-[14px] border border-[var(--border)] bg-[var(--surface)] hover:border-slate-300 transition-all group cursor-pointer mb-1"
+                                  className="flex items-center gap-2 p-3 rounded-[14px] border border-[var(--border)] bg-[var(--surface-alt)] hover:border-[var(--sage)] transition-all group cursor-pointer mb-1.5 shadow-sm"
                                 >
                                   <div className="w-7 h-7 rounded-[8px] flex items-center justify-center font-black text-[9px] shrink-0" style={{ backgroundColor: avatarColor.bg, color: avatarColor.text }}>
                                     {initials}

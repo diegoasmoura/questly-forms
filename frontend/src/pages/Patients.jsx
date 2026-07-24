@@ -445,8 +445,8 @@ const resetImportModal = () => {
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="Procurar paciente..."
-            className="w-full bg-[var(--surface-alt)] border border-transparent rounded-[16px] pl-10 pr-3 md:pr-12 py-2 sm:py-2.5 text-sm outline-none focus:bg-[var(--surface)] focus:border-[var(--sage)] focus:ring-1 focus:ring-[var(--sage)] transition-all placeholder:text-[var(--text-muted)] text-[var(--text-primary)]"
+            placeholder="Procurar paciente por nome, CPF ou telefone..."
+            className="w-full pl-10 pr-12 py-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-[14px] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--sage)] font-medium transition-all shadow-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
