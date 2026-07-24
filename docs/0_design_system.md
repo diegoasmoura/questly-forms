@@ -162,9 +162,9 @@ Slide-in (sidebar): 0.3s ease-out (opacity 0→1, translateX -10px→0)
 
 Para obter harmonia visual perfeita em dispositivos móveis, a posição de todos os modais/cards deve ser **rigorosamente centralizada no espaço útil** (o intervalo vertical compreendido entre o topo da tela e a linha superior da Bottom Navigation Bar):
 
-- **Fórmula de Centralização em Flexbox:**
-  No container backdrop fixo (`fixed inset-0 z-[60]`), utiliza-se alinhamento centralizado com padding inferior dinâmico reservado para a BottomNav:
-  `className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center p-4 pb-[calc(65px+env(safe-area-inset-bottom,0px)+16px)] sm:pb-4"`
+- **Fórmula de Centralização em Flexbox & Z-Index:**
+  No container backdrop fixo (`fixed inset-0 z-[100]`), utiliza-se alinhamento centralizado com padding inferior dinâmico reservado para a BottomNav (que opera em `z-40`), garantindo que o backdrop desfocado cubra integralmente a navegação inferior:
+  `className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center p-4 pb-[calc(65px+env(safe-area-inset-bottom,0px)+16px)] sm:pb-4 z-[100]"`
 - **Vantagem Geométrica:**
   Dessa forma, a distância entre o topo do celular e o card fica **exatamente igual** à distância entre a base do card e o topo da barra de navegação móvel.
 - **Limite de Altura Interna (`max-h`):**
@@ -177,7 +177,7 @@ import { createPortal } from "react-dom";
 
 return createPortal(
   <div
-    className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center p-4 pb-[calc(65px+env(safe-area-inset-bottom,0px)+16px)] sm:pb-4 z-[60] transition-opacity duration-300 ${
+    className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center p-4 pb-[calc(65px+env(safe-area-inset-bottom,0px)+16px)] sm:pb-4 z-[100] transition-opacity duration-300 ${
       isClosing ? 'opacity-0' : 'opacity-100'
     }`}
     onClick={triggerClose}

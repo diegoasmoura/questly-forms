@@ -329,7 +329,7 @@ export default function AppointmentDetailModal({
     <>
       {/* ── Backdrop com suporte Dual (Centralizado no espaço útil entre o Topo e o BottomNav no Mobile) ── */}
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center p-4 pb-[calc(65px+env(safe-area-inset-bottom,0px)+16px)] sm:pb-4 z-[60] transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
+        className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center p-4 pb-[calc(65px+env(safe-area-inset-bottom,0px)+16px)] sm:pb-4 z-[100] transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
         onClick={triggerClose}
       >
         <div
@@ -681,7 +681,7 @@ export default function AppointmentDetailModal({
     </div>
 
       {confirmModal.open && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center z-[80]" onClick={() => !confirmModal.loading && setConfirmModal({ ...confirmModal, open: false })}>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center z-[110]" onClick={() => !confirmModal.loading && setConfirmModal({ ...confirmModal, open: false })}>
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] p-8 w-full max-w-sm mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
             <div className="w-16 h-16 bg-red-500/10 text-[#EF4444] rounded-[16px] flex items-center justify-center mb-6 mx-auto">
               <AlertTriangle size={32} />
