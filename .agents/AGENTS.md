@@ -22,6 +22,8 @@ Nunca adivinhe padrões visuais (como border-radius, cores ou tipografia). A arq
    👉 Leia obrigatoriamente: `docs/4_agenda.md`
 6. **Alterações no Construtor de Formulários ou Acervo:**
    👉 Leia obrigatoriamente: `docs/5_instrumentos_e_acervo.md`
+7. **Consulte a Tabela Completa de Cores, Temas e Variáveis (Modo Claro / Modo Escuro):**
+   👉 Leia obrigatoriamente: `docs/6_guia_de_cores_tema.md`
 
 ## Governança de Código
 

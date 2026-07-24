@@ -13,6 +13,7 @@ Seja você um novo desenvolvedor na equipe ou uma Inteligência Artificial, **le
 - 👥 **[3_pacientes.md](docs/3_pacientes.md):** Demografia e geração de Avatares.
 - 🗓️ **[4_agenda.md](docs/4_agenda.md):** Calendário, Modais de Agendamento e Cores de Status.
 - 📝 **[5_instrumentos_e_acervo.md](docs/5_instrumentos_e_acervo.md):** Construtor de Formulários.
+- 🌗 **[6_guia_de_cores_tema.md](docs/6_guia_de_cores_tema.md):** Guia Completo de Cores (Modo Claro vs Modo Escuro).
 
 ## 🚀 Como Executar
 
