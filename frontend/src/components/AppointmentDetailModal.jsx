@@ -514,11 +514,19 @@ export default function AppointmentDetailModal({
                     </button>
                   </div>
 
-                  {/* Motivo / Observação */}
+                  {/* Motivo / Observação da Justificativa */}
                   <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-[var(--text-secondary)]">
-                      Motivo / Observação
-                    </label>
+                    <div className="flex items-center justify-between pb-1">
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--text-muted)] flex items-center gap-1.5">
+                        <Sparkles size={12} className="text-[var(--purple)]" />
+                        Observação da Justificativa / Ausência
+                      </span>
+                      {justData.notes && (
+                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-[6px] text-[var(--purple)] bg-[var(--purple-light)]">
+                          Preenchido
+                        </span>
+                      )}
+                    </div>
                     <RichTextEditor
                       value={justData.notes}
                       onChange={val => setJustData(prev => ({ ...prev, notes: val }))}
