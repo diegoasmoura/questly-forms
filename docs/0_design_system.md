@@ -68,6 +68,7 @@ A interface deve parecer cuidadosamente desenhada por pessoas — não gerada au
 |---|---|---|---|
 | **Heading** | Playfair Display | Títulos de cards, saudações, h1–h4 | `font-heading` |
 | **Interface** | Nunito Sans | Todo texto de interface, botões, labels | `font-sans` (padrão) |
+| **Nomes de Pacientes** | Inter | Nomes em cards, listas e modais do CRM | `font-inter` |
 | **Destaque** | Caveat | Apenas palavras únicas de destaque (ex: nome do usuário) | `font-handwritten` |
 | **Marca** | Caveat Brush | Exclusivo para o monograma/logo QF | `font-brand` |
 
@@ -84,6 +85,7 @@ Micro labels:        9–10px   font-sans  uppercase  tracking-wider
 
 ### 3.3 Regras de uso
 - ✅ `font-heading` — títulos de seção, saudação
+- ✅ `font-inter` — nomes de pacientes em cards, listas e modais (melhor legibilidade)
 - ✅ `font-handwritten` — nome do usuário na saudação, palavra única de acolhimento
 - ✅ `font-brand` — logo "QF" na sidebar, identidade de marca
 - ❌ Nunca usar `font-handwritten` em headings de card
@@ -196,6 +198,28 @@ return createPortal(
 
 - **Scroll Mask (Efeito Fade-out)**: Em vez de exibir barras de rolagem nativas dentro de modais, o design prevê um **esmaecimento na base** do modal (`bg-gradient-to-t from-[var(--surface)] to-transparent pointer-events-none`).
 - **Transição de Saída (Exit Animations)**: Modais **nunca devem fechar abruptamente**. Ações de fechamento disparam um estado `isClosing` (função `triggerClose`), aplicando transição de opacidade e escala por 200ms antes do desmonte.
+
+### 6.2 CRM Funil - Padrões de Design
+
+**Estágios do Funil:**
+| ID | Label | Step | Cor do Dot |
+|---|---|---|---|
+| `lead` | Contato Inicial | 1º | `bg-slate-400` |
+| `triagem` | Triagem Clínica | 2º | `bg-blue-500` |
+| `scheduled` | Primeira Sessão | 3º | `bg-amber-500` |
+| `active` | Paciente Ativo | 4º | `bg-[var(--sage)]` |
+
+**Header das Colunas Kanban:**
+- Formato: `1º Contato Inicial [ 0 ]`
+- O número do estágio (`step`) aparece em `text-[var(--text-muted)] font-extrabold` antes do label
+- O contador de leads aparece em um pill retangular (`rounded-[8px]`) com fundo sutil
+
+**Modais do CRM:**
+- **Centralizados**: Usar `justify-center` (não `justify-end`)
+- **Blob decorativo**: Canto superior direito com cor do avatar ou `var(--sage)`
+- **Avatar squircle**: `rounded-[14px]` com cores baseadas no hash do nome
+- **RichTextEditor**: Para campos de observações (CRM notes, evolução clínica)
+- **Máscara de telefone**: Usar `formatPhone()` do `lib/utils` com `type="tel"` e `maxLength={15}`
 
 ---
 

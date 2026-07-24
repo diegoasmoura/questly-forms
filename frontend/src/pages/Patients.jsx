@@ -2292,7 +2292,7 @@ function PatientCard({ patient, onDelete, onEdit }) {
             </div>
             
             <div className="flex flex-col min-w-0">
-              <h3 className="text-[15px] font-semibold tracking-[0.015em] text-[var(--text-primary)] leading-tight truncate mb-1" title={patient.name}>
+              <h3 className="font-inter text-[15px] font-semibold tracking-[0.015em] text-[var(--text-primary)] leading-tight truncate mb-1" title={patient.name}>
                 {formatShortName(patient.name)}
               </h3>
               <div className="flex items-center gap-1.5 flex-wrap">
@@ -2427,7 +2427,7 @@ function PatientListRow({ patient, onDelete, onEdit, isLast }) {
         {/* Name & Identity */}
         <div className="sm:col-span-5 flex flex-col min-w-0 justify-center">
           <div className="flex items-center gap-2 mb-0.5">
-            <h4 className="font-semibold text-[15px] tracking-[0.015em] truncate text-[var(--text-primary)] group-hover:text-[var(--sage)] transition-colors">
+            <h4 className="font-inter font-semibold text-[15px] tracking-[0.015em] truncate text-[var(--text-primary)] group-hover:text-[var(--sage)] transition-colors">
               {patient.name}
             </h4>
             {daysUntilBirthday !== null && (

@@ -39,6 +39,7 @@ export default {
       },
       fontFamily: {
         sans: ["Nunito Sans", "system-ui", "sans-serif"],
+        inter: ["Inter", "system-ui", "sans-serif"],
         heading: ["Playfair Display", "Georgia", "serif"],
         handwritten: ["Caveat", "cursive"],
         brand: ["Caveat Brush", "cursive"],

@@ -18,19 +18,19 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { api } from "../lib/api";
+import { formatPhone } from "../lib/utils";
 import { toast } from "../components/Toast";
 import { useNavigateWithTransition } from "../lib/useNavigateWithTransition";
-import { KpiCard, getAvatarProps } from "../components/dashboard/Shared";
+import { getAvatarProps } from "../components/dashboard/Shared";
+import RichTextEditor from "../components/RichTextEditor";
 import { 
   Plus, 
   Trash2, 
   Phone, 
-  ArrowRight,
   UserCheck,
   Calendar,
   AlertCircle,
   X,
-  TrendingUp,
   Tag,
   Search,
   MessageCircle,
@@ -43,14 +43,15 @@ import {
   Clock,
   Kanban,
   List,
-  Filter
+  Filter,
+  Check
 } from "lucide-react";
 
 const STAGES = [
-  { id: "lead", label: "Contato Inicial", dotBg: "bg-slate-400 dark:bg-slate-500" },
-  { id: "triagem", label: "Triagem Clínica", dotBg: "bg-blue-500" },
-  { id: "scheduled", label: "Primeira Sessão", dotBg: "bg-amber-500" },
-  { id: "active", label: "Paciente Ativo", dotBg: "bg-[var(--sage)]" }
+  { id: "lead", label: "Contato Inicial", step: "1º", dotBg: "bg-slate-400 dark:bg-slate-500" },
+  { id: "triagem", label: "Triagem Clínica", step: "2º", dotBg: "bg-blue-500" },
+  { id: "scheduled", label: "Primeira Sessão", step: "3º", dotBg: "bg-amber-500" },
+  { id: "active", label: "Paciente Ativo", step: "4º", dotBg: "bg-[var(--sage)]" }
 ];
 
 function getInitials(name = "") {
@@ -76,15 +77,18 @@ function DroppableKanbanColumn({ stage, stagePatients, onMoveStage, onReorderVer
           : "border-[var(--border)] bg-[var(--surface)]"
       }`}
     >
-      {/* Header Neutro da Coluna (Tom Creme Encorpado do Título) */}
+      {/* Header Neutro da Coluna */}
       <div className="p-3.5 bg-[var(--surface-alt)] border-b border-[var(--border)] flex justify-between items-center text-[var(--text-primary)] shrink-0">
         <div className="flex items-center gap-2">
           <span className={`w-2.5 h-2.5 rounded-full ${stage.dotBg}`} />
-          <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">{stage.label}</span>
-          <span className="px-2 py-0.5 text-[11px] font-extrabold rounded-full bg-[var(--surface)] shadow-sm border border-[var(--border)]/50 text-[var(--text-primary)]">
-            {stagePatients.length}
+          <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">
+            <span className="text-[var(--text-muted)] font-extrabold mr-1">{stage.step}</span>
+            {stage.label}
           </span>
         </div>
+        <span className="px-2 py-0.5 text-xs font-extrabold rounded-[8px] bg-[var(--surface)] text-[var(--text-muted)] border border-[var(--border)]/50">
+          {stagePatients.length}
+        </span>
         
         <button
           onClick={() => onAddLead(stage.id)}
@@ -172,7 +176,7 @@ function SortablePatientCard({ patient, stage, onMoveStage, onReorderVertical, o
           <div className="min-w-0 flex-1">
             <h4
               onClick={(e) => { e.stopPropagation(); onOpenDetail(patient); }}
-              className="text-[14px] font-bold text-[var(--text-primary)] hover:text-[var(--sage)] transition-colors cursor-pointer truncate leading-snug"
+              className="font-inter text-[14px] font-bold text-[var(--text-primary)] hover:text-[var(--sage)] transition-colors cursor-pointer truncate leading-snug"
               title={patient.name}
             >
               {patient.name}
@@ -315,6 +319,7 @@ export default function CrmDashboard() {
   const [showActivationModal, setShowActivationModal] = useState(false);
   const [activePatientData, setActivePatientData] = useState(null);
   const [selectedPatientDetail, setSelectedPatientDetail] = useState(null);
+  const [editingLead, setEditingLead] = useState(null);
 
   const searchInputRef = useRef(null);
 
@@ -577,6 +582,24 @@ export default function CrmDashboard() {
     }
   };
 
+  const handleSaveLead = async () => {
+    if (!editingLead) return;
+    try {
+      const updated = await api.updatePatient(editingLead.id, {
+        name: editingLead.name,
+        phone: editingLead.phone,
+        leadSource: editingLead.leadSource,
+        crmNotes: editingLead.crmNotes
+      });
+      setPatients(prev => prev.map(p => p.id === editingLead.id ? updated : p));
+      setSelectedPatientDetail(updated);
+      setEditingLead(null);
+      toast("Lead atualizado com sucesso!", "success", 2500);
+    } catch (error) {
+      toast(error.message || "Erro ao atualizar lead", "error");
+    }
+  };
+
   const totalLeads = patients.length;
   const activeCount = patients.filter(p => p.funnelStep === "active").length;
   const conversionRate = totalLeads > 0 ? ((activeCount / totalLeads) * 100).toFixed(0) : 0;
@@ -687,19 +710,11 @@ export default function CrmDashboard() {
         {/* CONTEÚDO PRINCIPAL (Alinhado rigorosamente com px-3 sm:px-6 pb-3 sm:pb-6) */}
         <div className="flex-1 flex flex-col px-3 sm:px-6 pb-3 sm:pb-6 min-h-0 space-y-4">
           
-          {/* Métricas Compactas */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 shrink-0">
-            <KpiCard compact icon={<Tag size={14} />} iconBg="var(--surface-alt)" iconColor="var(--text-secondary)" label="No Funil" value={totalLeads} />
-            <KpiCard compact icon={<Phone size={14} />} iconBg="var(--peach-light)" iconColor="var(--peach)" label="Contato Inicial" value={leadCount} />
-            <KpiCard compact icon={<UserCheck size={14} />} iconBg="var(--status-presente-bg)" iconColor="var(--status-presente-text)" label="Convertidos em Ativos" value={activeCount} />
-            <KpiCard compact icon={<TrendingUp size={14} />} iconBg="var(--sage-light)" iconColor="var(--sage)" label="Taxa de Conversão" value={`${conversionRate}%`} />
-          </div>
-
           {/* MODO 1: KANBAN BOARD (Cabeçalhos Neutros + Pontos de Status) */}
           {viewMode === "kanban" && (
             <>
               {/* Mobile Stage Selector */}
-              <div className="md:hidden flex overflow-x-auto gap-1.5 p-1 bg-[var(--surface-alt)] border border-[var(--border)] rounded-[14px] shrink-0 hide-scrollbar">
+              <div className="md:hidden grid grid-cols-2 gap-2 shrink-0">
                 {STAGES.map(stage => {
                   const count = filteredPatients.filter(p => p.funnelStep === stage.id).length;
                   const isActive = mobileStage === stage.id;
@@ -707,17 +722,20 @@ export default function CrmDashboard() {
                     <button
                       key={stage.id}
                       onClick={() => setMobileStage(stage.id)}
-                      className={`flex-1 min-w-[105px] flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-[10px] text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                      className={`flex items-center gap-2.5 p-3 rounded-[14px] text-left transition-all cursor-pointer ${
                         isActive
                           ? "bg-[var(--surface)] text-[var(--text-primary)] shadow-sm border border-[var(--border)]"
-                          : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                          : "bg-[var(--surface-alt)] text-[var(--text-muted)] hover:text-[var(--text-secondary)] border border-transparent"
                       }`}
                     >
-                      <span className={`w-2 h-2 rounded-full ${stage.dotBg}`} />
-                      <span>{stage.label}</span>
-                      <span className={`px-1.5 py-0.2 text-[10px] rounded-full ${
-                        isActive ? "bg-[var(--sage-light)] text-[var(--sage)] font-extrabold" : "bg-[var(--surface-alt)] text-[var(--text-muted)]"
-                      }`}>
+                      <span className={`w-3 h-3 rounded-full shrink-0 ${stage.dotBg}`} />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-xs font-bold block truncate">
+                          <span className="text-[var(--text-muted)] font-extrabold mr-1">{stage.step}</span>
+                          {stage.label}
+                        </span>
+                      </div>
+                      <span className="px-2 py-0.5 text-xs font-extrabold rounded-[8px] bg-[var(--surface)] text-[var(--text-muted)] border border-[var(--border)]/50">
                         {count}
                       </span>
                     </button>
@@ -736,9 +754,12 @@ export default function CrmDashboard() {
                       <div className="p-3.5 bg-[var(--surface-alt)] border-b border-[var(--border)] flex justify-between items-center text-[var(--text-primary)]">
                         <div className="flex items-center gap-2">
                           <span className={`w-2.5 h-2.5 rounded-full ${currentStage.dotBg}`} />
-                          <span className="text-xs font-bold uppercase tracking-wider">{currentStage.label}</span>
-                          <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-[var(--surface)] shadow-sm border border-[var(--border)]/50">
-                            {stagePatients.length} contatos
+                          <span className="text-xs font-bold uppercase tracking-wider">
+                            <span className="text-[var(--text-muted)] font-extrabold mr-1">{currentStage.step}</span>
+                            {currentStage.label}
+                          </span>
+                          <span className="px-2 py-0.5 text-xs font-extrabold rounded-[8px] bg-[var(--surface)] text-[var(--text-muted)] border border-[var(--border)]/50">
+                            {stagePatients.length}
                           </span>
                         </div>
 
@@ -856,6 +877,7 @@ export default function CrmDashboard() {
                               <div className="flex items-center gap-1.5">
                                 <span className={`w-2 h-2 rounded-full ${stageObj.dotBg}`} />
                                 <span className="font-bold text-[var(--text-primary)] text-[11px]">
+                                  <span className="text-[var(--text-muted)] font-extrabold mr-1">{stageObj.step}</span>
                                   {stageObj.label}
                                 </span>
                               </div>
@@ -920,89 +942,146 @@ export default function CrmDashboard() {
 
         {/* Modal Slide-over: Detalhes do Lead */}
         {selectedPatientDetail && createPortal(
-          <div className="fixed inset-0 z-[100] flex items-center justify-end bg-black/40 backdrop-blur-[3px] p-0 sm:p-4">
-            <div className="bg-[var(--surface)] border-l sm:border border-[var(--border)] sm:rounded-[24px] shadow-2xl w-full max-w-md h-full sm:h-auto sm:max-h-[90vh] animate-scale-in overflow-hidden flex flex-col">
-              <div className="p-5 border-b border-[var(--border)] flex justify-between items-center shrink-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[var(--surface-alt)] text-[var(--text-secondary)] font-extrabold text-sm flex items-center justify-center border border-[var(--border)]">
-                    {getInitials(selectedPatientDetail.name)}
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-[var(--text-primary)]">{selectedPatientDetail.name}</h3>
-                    <span className="text-xs text-[var(--text-muted)] font-medium">Ficha do Lead no CRM</span>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-[3px] p-4">
+            {(() => {
+              const detailAvatar = getAvatarProps(selectedPatientDetail.name);
+              const lead = editingLead || selectedPatientDetail;
+              return (
+              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-2xl w-full max-w-md max-h-[90vh] animate-scale-in overflow-hidden flex flex-col">
+                <div className="relative px-6 pt-6 pb-5 overflow-hidden flex-shrink-0">
+                  <div
+                    className="absolute -top-8 -right-8 w-[120px] h-[120px] rounded-full opacity-20 blur-2xl pointer-events-none"
+                    style={{ backgroundColor: detailAvatar.color.text }}
+                  />
+                  <div className="flex justify-between items-center relative z-10">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-11 h-11 rounded-[14px] flex items-center justify-center font-extrabold text-sm shrink-0 shadow-sm"
+                        style={{ backgroundColor: detailAvatar.color.bg, color: detailAvatar.color.text }}
+                      >
+                        {getInitials(selectedPatientDetail.name)}
+                      </div>
+                      <div>
+                        <h3 className="text-base font-bold text-[var(--text-primary)]">{selectedPatientDetail.name}</h3>
+                        <span className="text-xs text-[var(--text-muted)] font-medium">Ficha do Lead no CRM</span>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => { setSelectedPatientDetail(null); setEditingLead(null); }}
+                      className="p-1.5 rounded-lg hover:bg-[var(--surface-alt)] text-[var(--text-secondary)] transition-all cursor-pointer"
+                    >
+                      <X size={18} />
+                    </button>
                   </div>
                 </div>
-                <button 
-                  onClick={() => setSelectedPatientDetail(null)}
-                  className="p-1.5 rounded-lg hover:bg-[var(--surface-alt)] text-[var(--text-secondary)] transition-all cursor-pointer"
-                >
-                  <X size={18} />
-                </button>
-              </div>
 
               <div className="p-5 space-y-4 overflow-y-auto flex-1 hide-scrollbar">
-                <div className="p-3.5 bg-[var(--surface-alt)] rounded-[14px] border border-[var(--border)] space-y-2">
+                <div className="p-3.5 bg-[var(--surface-alt)] rounded-[14px] border border-[var(--border)] space-y-3">
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-[var(--text-muted)] font-semibold">Estágio Atual:</span>
                     <span className="font-bold text-[var(--text-primary)] uppercase text-[11px]">
                       {STAGES.find(s => s.id === selectedPatientDetail.funnelStep)?.label}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-[var(--text-muted)] font-semibold">Origem:</span>
-                    <span className="font-bold text-[var(--text-primary)] text-[11px]">
-                      {selectedPatientDetail.leadSource || "N/A"}
-                    </span>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Origem</label>
+                    <select 
+                      value={lead.leadSource || ""}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setEditingLead(prev => prev ? { ...prev, leadSource: val } : { ...selectedPatientDetail, leadSource: val });
+                      }}
+                      className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[13px] text-[var(--text-primary)] focus:outline-none focus:border-[var(--sage)] transition-all font-medium cursor-pointer"
+                    >
+                      <option value="">Selecione...</option>
+                      <option value="Instagram">Instagram</option>
+                      <option value="Google">Google / Maps</option>
+                      <option value="Indicação">Indicação de Colega/Paciente</option>
+                      <option value="Doctoralia">Doctoralia</option>
+                      <option value="Outro">Outro Canal</option>
+                    </select>
                   </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-[var(--text-muted)] font-semibold">Telefone:</span>
-                    <span className="font-bold text-[var(--text-primary)] text-[11px]">
-                      {selectedPatientDetail.phone || "Não informado"}
-                    </span>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Telefone</label>
+                    <input 
+                      type="tel"
+                      value={lead.phone || ""}
+                      onChange={e => {
+                        const val = formatPhone(e.target.value);
+                        setEditingLead(prev => prev ? { ...prev, phone: val } : { ...selectedPatientDetail, phone: val });
+                      }}
+                      className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[13px] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--sage)] transition-all font-medium"
+                      placeholder="(00) 00000-0000"
+                      maxLength={15}
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest flex items-center gap-1">
-                    <FileText size={12} />
-                    Observações de Contato
-                  </label>
-                  <div className="p-3.5 bg-[var(--surface-alt)]/50 border border-[var(--border)] rounded-[14px] text-xs text-[var(--text-primary)] min-h-[90px] whitespace-pre-wrap font-medium">
-                    {selectedPatientDetail.crmNotes || "Nenhuma observação registrada ainda."}
+                  <div className="flex items-center justify-between pb-1">
+                    <label className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--text-muted)] flex items-center gap-1.5">
+                      <FileText size={12} className="text-[var(--sage)]" />
+                      Observações de Contato
+                    </label>
+                    {lead.crmNotes && (
+                      <span className="text-[9px] font-bold px-2 py-0.5 rounded-[6px] text-[var(--dark-green)] bg-[var(--sage-light)]">
+                        Preenchido
+                      </span>
+                    )}
                   </div>
+                  <RichTextEditor
+                    value={lead.crmNotes || ""}
+                    onChange={val => {
+                      setEditingLead(prev => prev ? { ...prev, crmNotes: val } : { ...selectedPatientDetail, crmNotes: val });
+                    }}
+                    placeholder="Adicione observações sobre este contato, queixas iniciais, valores combinados..."
+                    minHeight="100px"
+                    maxHeight="180px"
+                  />
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-2 flex gap-3">
                   <button
-                    onClick={() => {
-                      const id = selectedPatientDetail.id;
-                      setSelectedPatientDetail(null);
-                      navigate(`/patients/${id}`);
-                    }}
-                    className="w-full py-3 px-4 rounded-[12px] bg-[var(--sage)] text-white font-bold text-xs hover:opacity-95 transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+                    onClick={() => { setSelectedPatientDetail(null); setEditingLead(null); }}
+                    className="flex-1 py-3 px-4 rounded-[12px] bg-[var(--surface-alt)] border border-[var(--border)] text-[var(--text-primary)] font-bold text-xs hover:opacity-95 transition-all cursor-pointer"
                   >
-                    <span>Abrir Prontuário Clínico</span>
-                    <ArrowRight size={15} />
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleSaveLead}
+                    className="flex-1 py-3 px-4 rounded-[12px] bg-[var(--sage)] text-white font-bold text-xs hover:opacity-95 transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+                  >
+                    <Check size={15} />
+                    <span>Salvar</span>
                   </button>
                 </div>
               </div>
-            </div>
+              </div>
+              );
+            })()}
           </div>
         , document.body)}
 
         {/* Modal 1: Adicionar Lead */}
         {showAddLeadModal && createPortal(
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 pb-[calc(65px+env(safe-area-inset-bottom)+16px)] sm:pb-4 bg-black/40 backdrop-blur-[3px]">
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-2xl w-full max-w-md animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
-              <div className="p-5 border-b border-[var(--border)] flex justify-between items-center shrink-0">
-                <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-tight">Adicionar Novo Lead</h3>
-                <button 
-                  onClick={() => setShowAddLeadModal(false)}
-                  className="p-1.5 rounded-lg hover:bg-[var(--surface-alt)] text-[var(--text-secondary)] transition-all cursor-pointer"
-                >
-                  <X size={18} />
-                </button>
+            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-2xl w-full max-w-md animate-scale-in max-h-[90vh] overflow-hidden flex flex-col relative">
+              <div className="relative px-6 pt-6 pb-5 shrink-0">
+                <div
+                  className="absolute -top-10 -right-10 w-[140px] h-[140px] rounded-full opacity-15 blur-3xl pointer-events-none"
+                  style={{ backgroundColor: "var(--sage)" }}
+                />
+                <div className="flex justify-between items-center relative z-10">
+                  <h3 className="text-base font-bold text-[var(--text-primary)] uppercase tracking-tight">Adicionar Novo Lead</h3>
+                  <button 
+                    onClick={() => setShowAddLeadModal(false)}
+                    className="p-1.5 rounded-lg hover:bg-[var(--surface-alt)] text-[var(--text-secondary)] transition-all cursor-pointer"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
               </div>
+              <div className="h-px bg-[var(--border)] mx-5 shrink-0" />
               
               <form onSubmit={handleCreateLead} className="p-5 space-y-4 overflow-y-auto flex-1 min-h-0 hide-scrollbar">
                 <div className="space-y-1">
@@ -1020,11 +1099,12 @@ export default function CrmDashboard() {
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">WhatsApp / Telefone</label>
                   <input 
-                    type="text" 
+                    type="tel" 
                     value={newLead.phone}
-                    onChange={e => setNewLead(prev => ({ ...prev, phone: e.target.value }))}
+                    onChange={e => setNewLead(prev => ({ ...prev, phone: formatPhone(e.target.value) }))}
                     className="w-full bg-[var(--surface-alt)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[13px] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--sage)] transition-all font-medium"
                     placeholder="(00) 00000-0000"
+                    maxLength={15}
                   />
                 </div>
 
@@ -1044,13 +1124,24 @@ export default function CrmDashboard() {
                   </select>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Notas de Contato</label>
-                  <textarea 
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between pb-1">
+                    <label className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--text-muted)] flex items-center gap-1.5">
+                      <FileText size={12} className="text-[var(--sage)]" />
+                      Notas de Contato
+                    </label>
+                    {newLead.crmNotes && (
+                      <span className="text-[9px] font-bold px-2 py-0.5 rounded-[6px] text-[var(--dark-green)] bg-[var(--sage-light)]">
+                        Preenchido
+                      </span>
+                    )}
+                  </div>
+                  <RichTextEditor
                     value={newLead.crmNotes}
-                    onChange={e => setNewLead(prev => ({ ...prev, crmNotes: e.target.value }))}
-                    className="w-full bg-[var(--surface-alt)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[13px] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--sage)] transition-all font-medium h-20 resize-none"
-                    placeholder="Queixas iniciais, valores combinados, etc."
+                    onChange={val => setNewLead(prev => ({ ...prev, crmNotes: val }))}
+                    placeholder="Queixas iniciais, valores combinados, observações sobre o contato..."
+                    minHeight="100px"
+                    maxHeight="160px"
                   />
                 </div>
 

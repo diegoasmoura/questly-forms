@@ -1453,7 +1453,7 @@ export default function PatientRecord() {
               {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-base font-bold text-[var(--text-primary)] truncate">{patient.name}</h1>
+              <h1 className="font-inter text-base font-bold text-[var(--text-primary)] truncate">{patient.name}</h1>
               <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Prontuário #{patient.id.slice(0, 8).toUpperCase()}</p>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
@@ -1530,7 +1530,7 @@ export default function PatientRecord() {
                 >
                   {initials}
                 </div>
-                <h1 className="text-xl font-bold text-[var(--text-primary)]">{patient.name}</h1>
+                <h1 className="font-inter text-xl font-bold text-[var(--text-primary)]">{patient.name}</h1>
                 <p className="text-[10px] font-bold text-[var(--text-muted)] mt-1 uppercase tracking-widest">Prontuário #{patient.id.slice(0, 8).toUpperCase()}</p>
               </div>
 
