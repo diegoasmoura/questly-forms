@@ -360,17 +360,17 @@ export default function CrmDashboard() {
           const stagePatients = patients.filter(p => p.funnelStep === mobileStage);
 
           return (
-            <div className="flex flex-col min-h-full rounded-[16px] border border-[var(--border)] bg-[var(--surface-alt)] overflow-hidden">
+            <div className="flex flex-col min-h-full rounded-[16px] border border-[var(--border)] bg-[var(--surface-alt)]/35 overflow-hidden">
               <div className={`p-3.5 border-b border-[var(--border)] flex justify-between items-center ${currentStage.bgHeader}`}>
                 <span className="text-xs font-black uppercase tracking-wider">{currentStage.label}</span>
-                <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-[var(--surface)]/80 shadow-sm border border-[var(--border)]/50">
+                <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-[var(--surface)] shadow-sm border border-[var(--border)]/50 text-[var(--text-primary)]">
                   {stagePatients.length} contatos
                 </span>
               </div>
 
               <div className="p-3 space-y-3 flex-1 overflow-y-auto">
                 {stagePatients.length === 0 ? (
-                  <div className="h-32 flex flex-col items-center justify-center border border-dashed border-[var(--border)] rounded-xl text-xs text-[var(--text-muted)] font-medium gap-1 text-center p-4">
+                  <div className="h-32 flex flex-col items-center justify-center border border-dashed border-[var(--border)] bg-[var(--surface)]/40 rounded-xl text-xs text-[var(--text-muted)] font-medium gap-1 text-center p-4">
                     <span>Nenhum contato nesta etapa</span>
                     <span className="text-[10px] opacity-75">Novos leads adicionados aparecerão aqui.</span>
                   </div>
@@ -397,13 +397,13 @@ export default function CrmDashboard() {
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, stage.id)}
                 className={`flex flex-col min-h-0 rounded-[16px] border border-[var(--border)] transition-colors duration-200 ${
-                  isOver ? "bg-[var(--surface-alt)] border-dashed border-[var(--text-muted)]" : "bg-[var(--surface-alt)]"
+                  isOver ? "bg-[var(--surface-alt)] border-dashed border-[var(--text-muted)]" : "bg-[var(--surface-alt)]/35"
                 }`}
               >
                 {/* Header da Coluna */}
                 <div className={`p-4 rounded-t-[16px] border-b border-[var(--border)] flex justify-between items-center ${stage.bgHeader}`}>
                   <span className="text-xs font-black uppercase tracking-wider">{stage.label}</span>
-                  <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-[var(--surface)]/80 shadow-sm border border-[var(--border)]/50">
+                  <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-[var(--surface)] shadow-sm border border-[var(--border)]/50 text-[var(--text-primary)]">
                     {stagePatients.length}
                   </span>
                 </div>
@@ -411,7 +411,7 @@ export default function CrmDashboard() {
                 {/* Lista de Cards */}
                 <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0 hide-scrollbar">
                   {stagePatients.length === 0 ? (
-                    <div className="h-24 flex items-center justify-center border border-dashed border-[var(--border)] rounded-xl text-xs text-[var(--text-muted)] font-medium">
+                    <div className="h-24 flex items-center justify-center border border-dashed border-[var(--border)] bg-[var(--surface)]/40 rounded-xl text-xs text-[var(--text-muted)] font-medium">
                       Sem contatos nesta etapa
                     </div>
                   ) : (
