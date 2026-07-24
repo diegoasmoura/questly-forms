@@ -85,9 +85,9 @@ export function KpiCard({ icon, iconBg, iconColor, label, value, sub, trend, urg
 
 const STATUS_CONFIG = {
   presente:   { dot: "#5CBF90", bg: "var(--status-presente-bg)",    label: "Presente",   text: "var(--status-presente-text)" },
-  falta:      { dot: "#EF4444", bg: "var(--chip-falta-bg)",         label: "Falta",      text: "var(--chip-falta-text)" },
+  falta:      { dot: "#EF4444", bg: "var(--status-falta-bg)",       label: "Falta",      text: "var(--status-falta-text)" },
   justificada:{ dot: "#7C5CFF", bg: "var(--status-justificada-bg)",  label: "Justificada",text: "var(--status-justificada-text)" },
-  confirmado: { dot: "#F8A268", bg: "var(--peach-light)",            label: "Agendado",   text: "#C97840" },
+  confirmado: { dot: "#2E7DFF", bg: "var(--status-confirmado-bg)",  label: "Agendado",   text: "var(--status-confirmado-text)" },
 };
 
 export function TimelineRow({ app, onClick }) {

@@ -81,7 +81,14 @@ export default function Home() {
       </div>
 
       {detailModal.open && detailModal.app && (
-        <AppointmentDetailModal appointment={detailModal.app} patient={detailModal.app.patient} nextDate={detailModal.app.date} onClose={() => setDetailModal({ open: false, app: null })} onUpdate={() => dashboardData.loadData(true)} />
+        <AppointmentDetailModal
+          appointment={detailModal.app}
+          patient={detailModal.app.patient}
+          attendance={detailModal.app.attendance}
+          nextDate={detailModal.app.date}
+          onClose={() => setDetailModal({ open: false, app: null })}
+          onUpdate={() => dashboardData.loadData(true)}
+        />
       )}
     </div>
   );

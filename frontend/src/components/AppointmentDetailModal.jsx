@@ -1,339 +1,349 @@
-    import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
-import { api } from "../lib/api";
-import { formatPhone } from "../lib/utils";
-import { Clock, Phone, MessageCircle, Check, X, AlertCircle, Trash2, AlertTriangle, BookOpen, RefreshCcw, ExternalLink, CalendarClock, XCircle, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useNavigate } from "react-router-dom";
+import {
+  Check,
+  X,
+  AlertCircle,
+  Clock,
+  Sparkles,
+  ExternalLink,
+  Trash2,
+  AlertTriangle
+} from "lucide-react";
+import RichTextEditor from "./RichTextEditor";
+import { getAvatarProps } from "./dashboard/Shared";
+import { api } from "../lib/api";
 
-function formatDateKey(date) {
-  if (!date) return "";
-  if (typeof date === "string") return date.split("T")[0];
-  const d = new Date(date);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+function getCleanDateStr(dateVal) {
+  if (!dateVal) return "";
+  if (typeof dateVal === "string") return dateVal.split("T")[0];
+  if (dateVal instanceof Date) {
+    const y = dateVal.getFullYear();
+    const m = String(dateVal.getMonth() + 1).padStart(2, "0");
+    const d = String(dateVal.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+  return "";
 }
 
-function extractUTCDate(dateStr) {
-  if (!dateStr) return "";
-  return dateStr.split("T")[0];
-}
-
-export default function AppointmentDetailModal({ appointment, patient, nextDate, onClose, onUpdate, sessionType = "fixed" }) {
+export default function AppointmentDetailModal({
+  appointment,
+  patient: patientProp,
+  attendance: attendanceProp,
+  attendances,
+  sessionDate,
+  nextDate,
+  onClose,
+  onSaveAttendance,
+  onSaveJustificada,
+  onDeleteJustificada,
+  onDeleteAppointment,
+  onUpdate,
+  toast
+}) {
   const navigate = useNavigate();
-  const [isClosing, setIsClosing] = useState(false);
-  const [attendances, setAttendances] = useState([]);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [justModal, setJustModal] = useState({ open: false, patient: null, appointment: null, date: null, isEdit: false, existingAtt: null });
-  const [justData, setJustData] = useState({ date: "", time: "", notes: "" });
-  const [justType, setJustType] = useState("reagendar");
-  const [descendantsInfo, setDescendantsInfo] = useState({ count: 0, list: [] });
-  const [confirmModal, setConfirmModal] = useState({ open: false, title: "", message: "", onConfirm: null, loading: false });
 
+  // Se não houver agendamento, não renderiza nada
+  if (!appointment) return null;
+
+  const patient = patientProp || appointment.patient || appointment.patients || {};
+  const effectiveDate = sessionDate || nextDate;
+  const patientName = patient?.name || "Paciente";
+  const { initials, color: avatarColor } = getAvatarProps(patientName);
+
+  const targetDateStr = getCleanDateStr(effectiveDate) || getCleanDateStr(new Date());
+  const resolvedPatientId = patient?.id || appointment?.patientId || appointment?.patient_id || appointment?.patient?.id;
+
+  const existingAtt = attendanceProp || appointment?.attendance || attendances?.find(a => {
+    if (!a) return false;
+    const attPatientId = a.patientId || a.patient_id || a.patient?.id;
+    if (resolvedPatientId && attPatientId && attPatientId !== resolvedPatientId) return false;
+    const aDateStr = getCleanDateStr(a.date);
+    return aDateStr === targetDateStr;
+  });
+
+  const currentStatus = existingAtt?.status || appointment?.status || "agendado";
+
+  // Estados locais
+  const [selectedStatus, setSelectedStatus] = useState("presente");
+  const [presenceNotes, setPresenceNotes] = useState("");
+  const [faltaNotes, setFaltaNotes] = useState("");
+  const [isClosing, setIsClosing] = useState(false);
+
+  // Modal de justificativa
+  const [justModal, setJustModal] = useState({ open: false, existingAtt: null });
+  const [justType, setJustType] = useState("reagendar");
+  const [justData, setJustData] = useState({ date: "", time: "", notes: "" });
+
+  // Modal de confirmação para exclusão
+  const [confirmModal, setConfirmModal] = useState({
+    open: false,
+    title: "",
+    message: "",
+    onConfirm: null,
+    loading: false
+  });
+
+  // Inicializa notas e justificativas existentes ao abrir
+  useEffect(() => {
+    if (existingAtt) {
+      const statusToSet = existingAtt.status || "presente";
+      setSelectedStatus(statusToSet);
+      if (statusToSet === "presente") {
+        setPresenceNotes(existingAtt.notes || "");
+      } else if (statusToSet === "falta") {
+        setFaltaNotes(existingAtt.notes || "");
+      } else if (statusToSet === "justificada") {
+        setJustModal({ open: true, existingAtt });
+        let resDate = existingAtt.rescheduledDate || existingAtt.rescheduled_date || "";
+        let resTime = existingAtt.rescheduledTime || existingAtt.rescheduled_time || "";
+        let notesText = existingAtt.notes || "";
+
+        if (!resDate && notesText.includes("Reagendado para ")) {
+          const matchDate = notesText.match(/Reagendado para (\d{4}-\d{2}-\d{2})/);
+          if (matchDate) resDate = matchDate[1];
+          const matchTime = notesText.match(/Reagendado para \d{4}-\d{2}-\d{2} às (\d{2}:\d{2})/);
+          if (matchTime) resTime = matchTime[1];
+        }
+
+        setJustType(resDate ? "reagendar" : "cancelar");
+        setJustData({
+          date: resDate,
+          time: resTime,
+          notes: notesText
+        });
+      }
+    } else {
+      setSelectedStatus("presente");
+      setPresenceNotes("");
+      setFaltaNotes("");
+      setJustModal({ open: false, existingAtt: null });
+    }
+  }, [appointment?.id, targetDateStr, existingAtt?.id, existingAtt?.status, existingAtt?.notes]);
+
+  // Animação suave ao fechar
   const triggerClose = () => {
     setIsClosing(true);
     setTimeout(() => {
       onClose();
+      setIsClosing(false);
     }, 200);
   };
 
-  const sessionDate = nextDate ? new Date(formatDateKey(nextDate) + "T12:00:00") : null;
+  // Manipulador rápido de mudança de status (Presença / Falta / Justificada)
+  const handleQuickStatus = (app, status, date) => {
+    if (status === "justificada") {
+      const targetAtt = existingAtt || attendances?.find(a => (a.appointment_id === app.id || a.appointmentId === app.id) && a.status === "justificada");
+      setJustModal({ open: true, existingAtt: targetAtt });
+      let resDate = targetAtt?.rescheduledDate || targetAtt?.rescheduled_date || "";
+      let resTime = targetAtt?.rescheduledTime || targetAtt?.rescheduled_time || "";
+      let notesText = targetAtt?.notes || "";
 
-  useEffect(() => {
-    api.getAttendances().then(setAttendances).catch(() => {});
-  }, []);
+      if (!resDate && notesText.includes("Reagendado para ")) {
+        const matchDate = notesText.match(/Reagendado para (\d{4}-\d{2}-\d{2})/);
+        if (matchDate) resDate = matchDate[1];
+        const matchTime = notesText.match(/Reagendado para \d{4}-\d{2}-\d{2} às (\d{2}:\d{2})/);
+        if (matchTime) resTime = matchTime[1];
+      }
 
-  useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => setSuccessMessage(""), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage]);
-
-  const existingAtt = attendances.find(a =>
-    a.patientId === appointment.patientId && sessionDate && extractUTCDate(a.date) === formatDateKey(sessionDate)
-  );
-
-  const fetchDescendants = async (attendanceId) => {
-    try {
-      const data = await api.getAttendanceDescendants(attendanceId);
-      setDescendantsInfo({ count: data.count, list: data.descendants });
-      return data;
-    } catch (error) {
-      console.error("Erro ao buscar descendentes:", error);
-      return { count: 0, descendants: [] };
+      setJustType(resDate ? "reagendar" : "reagendar");
+      setJustData({
+        date: resDate,
+        time: resTime,
+        notes: notesText
+      });
+      setSelectedStatus("justificada");
+    } else {
+      setJustModal({ open: false, existingAtt: null });
+      setSelectedStatus(status);
     }
   };
 
-  const handleAttendance = async (appt, status, date) => {
-    if (!date) {
-      const d = new Date();
-      d.setHours(0, 0, 0, 0);
-      const diff = (appt.dayOfWeek - d.getDay() + 7) % 7;
-      date = new Date(d.getTime() + diff * 86400000);
-    }
-
-    const dateStr = formatDateKey(date);
-    const existing = attendances.find(a => a.patientId === appt.patientId && extractUTCDate(a.date) === dateStr);
-
-    if (status === "justificada") {
-      if (existing) {
-        await fetchDescendants(existing.id);
-      } else {
-        setDescendantsInfo({ count: 0, list: [] });
-      }
-
-      setJustModal({
-        open: true,
-        patient,
-        appointment: appt,
-        date,
-        isEdit: true,
-        existingAtt: existing
-      });
-
-      let reschedDate = "";
-      let reschedTime = "";
-      if (existing?.notes?.includes("Reagendado para ")) {
-        const match = existing.notes.match(/Reagendado para (\d{4}-\d{2}-\d{2})/);
-        if (match) reschedDate = match[1];
-        const timeMatch = existing.notes.match(/Reagendado para \d{4}-\d{2}-\d{2} às (\d{2}:\d{2})/);
-        if (timeMatch) reschedTime = timeMatch[1];
-      } else if (existing?.sessionTime) {
-        reschedTime = existing.sessionTime;
-      }
-
-      setJustType(existing?.status === "justificada" ? (reschedDate ? "reagendar" : "cancelar") : "reagendar");
-      setJustData({ date: reschedDate, time: reschedTime, notes: existing?.notes || "" });
-      return;
-    }
-
+  // Salvar Presença ou Falta
+  const handleAttendance = async (app, status, date, notes) => {
     try {
-      if (existing?.status === status) {
-        if (existing.parentId) {
-          await api.saveAttendance({ ...existing, status: "", date: existing.date });
-        } else {
-          await api.deleteAttendance(existing.id);
-        }
-        const fresh = await api.getAttendances();
-        setAttendances(fresh);
-        setSuccessMessage("Status removido!");
-        setJustModal(prev => ({ ...prev, open: false }));
+      const targetDate = date ? getCleanDateStr(date) : targetDateStr;
+      const resolvedPatientId = patient.id || app.patientId || app.patient_id || app.patient?.id;
+
+      if (onSaveAttendance) {
+        await onSaveAttendance(app, status, targetDate, notes);
       } else {
         await api.saveAttendance({
-          ...(existing ? { id: existing.id } : {}),
-          patientId: appt.patientId,
-          date: date.toISOString(),
-          status,
-          sessionTime: appt.time
+          id: existingAtt?.id,
+          patientId: resolvedPatientId,
+          date: targetDate,
+          status: status,
+          notes: notes || "",
+          sessionTime: app.time
         });
-        const fresh = await api.getAttendances();
-        setAttendances(fresh);
-        setSuccessMessage(status === "presente" ? "Presença confirmada!" : "Falta registrada!");
-        setJustModal(prev => ({ ...prev, open: false }));
+
+        if (onUpdate) await onUpdate();
       }
-      onUpdate?.();
-    } catch (error) {
-      console.error("Erro ao salvar:", error);
-      setSuccessMessage("Erro ao salvar status");
+      if (toast) toast(status === "presente" ? "Presença gravada com sucesso!" : "Falta gravada com sucesso!", "success");
+      triggerClose();
+    } catch (err) {
+      console.error("Erro ao salvar presença/falta:", err);
+      if (toast) toast("Erro ao salvar atendimento", "error");
     }
   };
 
-  const handleQuickStatus = (appt, status, date) => {
-    if (status === "justificada") {
-      handleAttendance(appt, "justificada", date);
-      return;
+  // Salvar Falta Justificada
+  const saveJustificada = async () => {
+    try {
+      if (onSaveJustificada) {
+        await onSaveJustificada(appointment, justType, justData, effectiveDate);
+      } else {
+        const targetDate = effectiveDate ? getCleanDateStr(effectiveDate) : targetDateStr;
+        const resolvedPatientId = patient.id || appointment.patientId || appointment.patient_id || appointment.patient?.id;
+
+        if (justType === "reagendar" && justData.date && justData.time) {
+          const [y, m, d] = justData.date.split('-').map(Number);
+          const dayOfWeek = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+          await api.createAppointment({
+            patientId: resolvedPatientId,
+            dayOfWeek: dayOfWeek,
+            time: justData.time,
+            duration: appointment.duration || 50,
+            scheduledDate: justData.date
+          });
+        }
+
+        await api.saveAttendance({
+          id: justModal.existingAtt?.id || existingAtt?.id,
+          patientId: resolvedPatientId,
+          date: targetDate,
+          status: "justificada",
+          notes: justData.notes || "",
+          sessionTime: appointment.time,
+          rescheduledDate: justType === "reagendar" ? (justData.date || null) : null,
+          rescheduledTime: justType === "reagendar" ? (justData.time || null) : null
+        });
+
+        if (appointment.id) {
+          try {
+            await api.updateAppointment(appointment.id, { status: "justificada" });
+          } catch (e) {
+            console.warn("Nao foi possivel atualizar status no agendamento:", e);
+          }
+        }
+
+        if (onUpdate) await onUpdate();
+      }
+      if (toast) toast("Falta justificada registrada!", "success");
+      triggerClose();
+    } catch (err) {
+      console.error("Erro ao salvar justificativa:", err);
+      if (toast) toast("Erro ao salvar justificativa", "error");
     }
-    handleAttendance(appt, status, date);
   };
 
-  const deleteJustification = async () => {
-    if (!justModal.existingAtt) return;
-    const data = await fetchDescendants(justModal.existingAtt.id);
-    const count = data.count;
-    const list = data.descendants;
-
-    let title = "Remover Justificativa";
-    let message = "Deseja desfazer esta falta justificada? A sessão voltará a aparecer sem marcação.";
-
-    if (count === 1) {
-      const childDate = new Date(list[0].date);
-      message = `Deseja remover esta justificativa? O reagendamento de ${format(childDate, "dd/MM")} também será cancelado e excluído permanentemente.`;
-    } else if (count > 1) {
-      message = `Deseja remover esta justificativa? Os ${count} reagendamentos seguintes na cadeia também serão cancelados. Esta ação não pode ser desfeita.`;
-    }
-
+  // Excluir Justificativa
+  const deleteJustification = () => {
     setConfirmModal({
       open: true,
-      title,
-      message,
+      title: "Desfazer Justificativa",
+      message: "Tem certeza que deseja remover esta justificativa? O agendamento voltará ao estado original.",
       loading: false,
       onConfirm: async () => {
         setConfirmModal(prev => ({ ...prev, loading: true }));
         try {
-          await api.deleteAttendance(justModal.existingAtt.id);
-          setSuccessMessage(count > 0 ? "Cadeia de reagendamento removida!" : "Justificativa removida!");
-          const fresh = await api.getAttendances();
-          setAttendances(fresh);
-          setJustModal({ open: false, patient: null, appointment: null, date: null, isEdit: false, existingAtt: null });
-          setConfirmModal({ open: false, title: "", message: "", onConfirm: null, loading: false });
+          if (onDeleteJustificada) {
+            await onDeleteJustificada(justModal.existingAtt.id, appointment.id);
+          } else if (justModal.existingAtt?.id) {
+            await api.deleteAttendance(justModal.existingAtt.id);
+            if (appointment.id) {
+              try {
+                await api.updateAppointment(appointment.id, { status: "agendado" });
+              } catch (e) {}
+            }
+            if (onUpdate) await onUpdate();
+          }
+          if (toast) toast("Justificativa desfeita com sucesso!", "success");
           triggerClose();
-          onUpdate?.();
-        } catch (error) {
-          alert("Erro ao remover: " + error.message);
-          setConfirmModal(prev => ({ ...prev, loading: false }));
+        } catch (err) {
+          console.error("Erro ao excluir justificativa:", err);
+          if (toast) toast("Erro ao desfazer justificativa", "error");
+        } finally {
+          setConfirmModal({ open: false, title: "", message: "", onConfirm: null, loading: false });
         }
       }
     });
   };
 
-  const saveJustificada = async () => {
-    if (!justModal.appointment || !justModal.date) return;
-
-    const originalDate = justModal.date;
-    const newDateStr = justData.date;
-    const newTimeStr = justData.time;
-    const motivo = justData.notes || "Falta justificada";
-
-    try {
-      // Se estamos editando uma justificativa existente, apagamos os reagendamentos filhos antigos antes de criar os novos
-      if (justModal.existingAtt && justModal.existingAtt.status === "justificada") {
-        const data = await fetchDescendants(justModal.existingAtt.id);
-        if (data && data.descendants) {
-          for (const item of data.descendants) {
-            await api.deleteAttendance(item.id);
-          }
-        }
-      }
-
-      const notes = newDateStr
-        ? `Falta justificada. Reagendado para ${newDateStr} às ${newTimeStr || "08:00"}. Motivo: ${motivo}`
-        : motivo;
-
-      const sessionTime = newDateStr ? (newTimeStr || "08:00") : (justModal.appointment?.time || null);
-
-      const originalResult = await api.saveAttendance({
-        ...(justModal.existingAtt ? { id: justModal.existingAtt.id } : {}),
-        patientId: justModal.appointment.patientId,
-        date: originalDate.toISOString(),
-        status: "justificada",
-        notes,
-        sessionTime
-      });
-
-      const parentId = originalResult?.id || justModal.existingAtt?.id;
-
-      if (newDateStr && parentId) {
-        const dateToSave = new Date(newDateStr + "T" + (newTimeStr || "08:00") + ":00");
-        await api.saveAttendance({
-          patientId: justModal.appointment.patientId,
-          date: dateToSave.toISOString(),
-          status: "",
-          notes: `Reagendamento da sessão de ${originalDate.toLocaleDateString("pt-BR")}. ${motivo}`,
-          sessionTime: newTimeStr || "08:00",
-          parentId: parentId
-        });
-      }
-
-      setSuccessMessage(newDateStr ? `Sessão reagendada para ${newDateStr}` : "Falta justificada registrada!");
-      const fresh = await api.getAttendances();
-      setAttendances(fresh);
-      setJustModal({ open: false, patient: null, appointment: null, date: null, isEdit: false, existingAtt: null });
-      triggerClose();
-      onUpdate?.();
-    } catch (error) {
-      console.error("Erro ao salvar:", error);
-      setSuccessMessage("Erro ao salvar justificativa");
-    }
-  };
-
+  // Excluir Agendamento
   const handleDeleteAppointment = () => {
-    const patientName = patient?.name || "este paciente";
-    const isExtra = sessionType === "extra";
     setConfirmModal({
       open: true,
-      title: isExtra ? "Excluir sessão" : "Excluir agendamento",
-      message: isExtra
-        ? `Tem certeza que deseja excluir a sessão de ${patientName}? Esta ação não pode ser desfeita.`
-        : `Tem certeza que deseja excluir o horário de ${patientName}?`,
+      title: "Excluir Agendamento",
+      message: `Tem certeza que deseja excluir o agendamento de ${patient?.name || "este paciente"}? Esta ação não pode ser desfeita.`,
       loading: false,
       onConfirm: async () => {
         setConfirmModal(prev => ({ ...prev, loading: true }));
         try {
-          if (isExtra) {
-            await api.deleteAttendance(appointment.id);
-            setSuccessMessage("Sessão removida!");
-          } else if (!appointment.scheduledDate && sessionDate) {
-            const dateStr = formatDateKey(sessionDate);
-            const skipDates = [...(appointment.skipDates || []), dateStr];
-            await api.updateAppointment(appointment.id, { skipDates });
-            setSuccessMessage("Agendamento removido!");
+          if (onDeleteAppointment) {
+            await onDeleteAppointment(appointment.id);
           } else {
             await api.deleteAppointment(appointment.id);
-            setSuccessMessage("Agendamento removido!");
+            if (onUpdate) await onUpdate();
           }
-          setConfirmModal({ open: false, title: "", message: "", onConfirm: null, loading: false });
+          if (toast) toast("Agendamento excluído com sucesso!", "success");
           triggerClose();
-          onUpdate?.();
-        } catch (error) {
-          console.error("Erro ao remover:", error);
-          setSuccessMessage(error.message || "Erro ao remover agendamento");
-          setConfirmModal(prev => ({ ...prev, loading: false }));
+        } catch (err) {
+          console.error("Erro ao excluir agendamento:", err);
+          if (toast) toast("Erro ao excluir agendamento", "error");
+        } finally {
+          setConfirmModal({ open: false, title: "", message: "", onConfirm: null, loading: false });
         }
       }
     });
   };
 
-  const phone = patient?.phone?.replace(/\D/g, "") || "";
-
-  // Mesma lógica do TimelineRow: 2 primeiros caracteres do nome (ex: "Jhersyka" → "JH")
-  const patientName = patient?.name || "Paciente";
-  const cleanName = patientName.trim();
-  const initials = cleanName.length >= 2 ? cleanName.substring(0, 2).toUpperCase() : cleanName.toUpperCase();
-
-  // Mesma paleta e hash determinístico do TimelineRow
-  const avatarColors = [
-    { bg: "var(--sage-light)",   text: "var(--dark-green)" },
-    { bg: "var(--blue-light)",   text: "var(--blue)" },
-    { bg: "var(--peach-light)",  text: "var(--peach)" },
-    { bg: "var(--purple-light)", text: "var(--purple)" },
-  ];
-  let hash = 0;
-  for (let i = 0; i < patientName.length; i++) {
-    hash = patientName.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const avatarStyle = avatarColors[Math.abs(hash) % avatarColors.length];
-
   const statusLabels = {
-    presente: "Realizado",
+    agendado: "Agendado",
+    presente: "Presente",
     falta: "Falta",
-    justificada: "Justificada",
+    justificada: "Justificado",
+    cancelado: "Cancelado"
   };
 
-  const currentStatus = existingAtt?.status;
-  const isActivePresente = !justModal.open && currentStatus === "presente";
-  const isActiveFalta = !justModal.open && currentStatus === "falta";
-  const isActiveJustificado = justModal.open || currentStatus === "justificada";
+  const statusBadgeConfig = {
+    presente: { bg: "var(--status-presente-bg)", color: "var(--status-presente-text)" },
+    falta: { bg: "var(--status-falta-bg)", color: "var(--status-falta-text)" },
+    justificada: { bg: "var(--status-justificada-bg)", color: "var(--status-justificada-text)" },
+    agendado: { bg: "var(--status-confirmado-bg)", color: "var(--status-confirmado-text)" },
+    cancelado: { bg: "var(--status-falta-bg)", color: "var(--status-falta-text)" }
+  };
+  const currentBadgeStyle = statusBadgeConfig[currentStatus] || statusBadgeConfig.agendado;
 
+  const isActivePresente = !justModal.open && selectedStatus === "presente";
+  const isActiveFalta = !justModal.open && selectedStatus === "falta";
+  const isActiveJustificado = justModal.open || selectedStatus === "justificada";
+
+  const phone = patient?.phone ? patient.phone.replace(/\D/g, "") : "";
   const whatsappText = `Olá ${patient?.name?.split(" ")[0] || ""}, lembrete da sua consulta no dia ${sessionDate ? format(sessionDate, "dd/MM") : ""} às ${appointment.time}.`;
 
   return createPortal(
     <>
-      {/* ── Modal Principal ── (ocultado se o modal de justificativa estiver ativo) */}
+      {/* ── Backdrop com suporte Dual (Web: Centralizado | Mobile: Card Flutuante Acima do Menu) ── */}
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-start justify-center pt-[8vh] p-4 sm:p-6 z-[60] transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
+        className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-end sm:items-center justify-center p-3 sm:p-4 md:p-6 z-[60] transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
         onClick={triggerClose}
       >
         <div
-          className={`relative bg-[var(--surface)] w-full max-w-sm h-[70vh] md:h-[580px] rounded-[24px] shadow-2xl flex flex-col border border-[var(--border)] overflow-hidden transition-all duration-300 ease-out ${isClosing ? 'opacity-0 translate-y-4 scale-[0.98]' : 'opacity-100 translate-y-0 scale-100'}`}
+          className={`relative bg-[var(--surface)] w-full max-w-full sm:max-w-md md:max-w-lg rounded-[24px] shadow-2xl flex flex-col border border-[var(--border)] overflow-hidden transition-all duration-300 ease-out mb-[calc(65px+env(safe-area-inset-bottom,0px)+12px)] sm:mb-0 max-h-[calc(80vh-65px)] sm:max-h-[90vh] ${isClosing ? 'opacity-0 translate-y-4 scale-[0.98]' : 'opacity-100 translate-y-0 scale-100'}`}
           onClick={e => e.stopPropagation()}
         >
+          {/* Mobile Drag Pill */}
+          <div className="w-12 h-1.5 bg-slate-300/80 dark:bg-slate-600/80 rounded-full mx-auto my-2.5 shrink-0 sm:hidden" />
           {/* ── HEADER ── */}
           <div className="relative px-6 pt-6 pb-5 overflow-hidden flex-shrink-0">
             {/* Blob decorativo no canto */}
             <div
               className="absolute -top-8 -right-8 w-[120px] h-[120px] rounded-full opacity-20 blur-2xl pointer-events-none"
-              style={{ backgroundColor: avatarStyle.text }}
+              style={{ backgroundColor: avatarColor.text }}
             />
 
             {/* Fechar */}
@@ -350,7 +360,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
               {/* Avatar com mesma lógica de cor do timeline (hash pelo nome) */}
               <div
                 className="w-[56px] h-[56px] rounded-[16px] flex items-center justify-center text-[18px] font-extrabold shrink-0 shadow-sm"
-                style={{ backgroundColor: avatarStyle.bg, color: avatarStyle.text }}
+                style={{ backgroundColor: avatarColor.bg, color: avatarColor.text }}
               >
                 {initials}
               </div>
@@ -364,7 +374,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
                 {/* Badge de status atual */}
                 <span
                   className="inline-flex items-center gap-1 px-[10px] py-[3px] rounded-[8px] text-[10px] font-extrabold uppercase tracking-widest mt-1"
-                  style={{ backgroundColor: avatarStyle.bg, color: avatarStyle.text }}
+                  style={{ backgroundColor: currentBadgeStyle.bg, color: currentBadgeStyle.color }}
                 >
                   {statusLabels[currentStatus] || "Agendado"}
                 </span>
@@ -378,7 +388,7 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
             >
               <Clock size={13} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
               <span className="text-[12px] font-semibold" style={{ color: "var(--text-secondary)" }}>
-                {sessionDate ? format(sessionDate, "dd/MM/yyyy", { locale: ptBR }) : ""} às {appointment.time}
+                {effectiveDate ? format(new Date(effectiveDate), "dd/MM/yyyy", { locale: ptBR }) : ""} às {appointment.time}
               </span>
               <span
                 className="ml-auto text-[11px] font-bold px-2 py-0.5 rounded-[6px]"
@@ -389,287 +399,286 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
             </div>
           </div>
 
-          {/* Scrollable Container Wrapper with Fade-out mask */}
-          <div className="relative flex-1 min-h-0 overflow-hidden flex flex-col">
-            <div className={`px-6 overflow-y-auto hide-scrollbar flex-1 min-h-0 ${justModal.open ? 'pb-16' : 'pb-6'}`}>
-            {/* ── SEÇÃO STATUS ── */}
-            <p
-              className="text-[10px] font-extrabold uppercase tracking-[0.12em] mb-3"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Status do Atendimento
-            </p>
+          {/* ── CONTEÚDO PRINCIPAL COM SCROLL MASK (FADE-OUT SUAVE NA BASE) ── */}
+          <div className="relative flex-1 min-h-0 flex flex-col">
+            <div className="flex-1 min-h-0 overflow-y-auto hide-scrollbar p-5 sm:p-6 space-y-5 pb-8">
+              
+              {/* 1. SELEÇÃO DE STATUS DO ATENDIMENTO */}
+              <div className="space-y-2">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[var(--text-muted)]">
+                  Status do Atendimento
+                </p>
 
-            {/* 3 botões lado a lado com cores próprias */}
-            <div className="grid grid-cols-3 gap-2 mb-4 md:mb-5">
-              {/* Presença — Verde */}
-              <button
-                onClick={() => handleQuickStatus(appointment, "presente", sessionDate)}
-                className="flex flex-col items-center gap-1 md:gap-1.5 py-2 md:py-3 px-1 md:px-2 rounded-[12px] md:rounded-[14px] font-bold text-[9px] md:text-[11px] transition-all duration-200"
-                style={isActivePresente
-                  ? { background: "var(--chip-presente-bg)", color: "var(--chip-presente-text)", border: "2px solid var(--sage)" }
-                  : { background: "var(--chip-presente-bg)", color: "var(--chip-presente-text)", border: "2px solid transparent" }
-                }
-              >
-                <span
-                  className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-colors"
-                  style={{ background: isActivePresente ? "var(--sage)" : "rgba(92,191,144,0.15)" }}
-                >
-                  <Check className="w-3.5 h-3.5 md:w-4 md:h-4" color={isActivePresente ? "white" : "var(--chip-presente-text)"} strokeWidth={2} />
-                </span>
-                Presença
-              </button>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleQuickStatus(appointment, "presente", sessionDate)}
+                    className={`py-2.5 px-2 sm:px-3 rounded-[12px] text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 border ${
+                      isActivePresente
+                        ? "bg-[var(--sage-light)] text-[var(--dark-green)] border-[var(--sage)] shadow-sm"
+                        : "bg-[var(--surface-alt)] text-[var(--text-secondary)] border-transparent hover:bg-[var(--border)]"
+                    }`}
+                  >
+                    <Check size={14} className={isActivePresente ? "text-[var(--dark-green)]" : "text-[var(--text-muted)]"} />
+                    <span>Presença</span>
+                  </button>
 
-              {/* Falta — Vermelho */}
-              <button
-                onClick={() => handleQuickStatus(appointment, "falta", sessionDate)}
-                className="flex flex-col items-center gap-1 md:gap-1.5 py-2 md:py-3 px-1 md:px-2 rounded-[12px] md:rounded-[14px] font-bold text-[9px] md:text-[11px] transition-all duration-200"
-                style={isActiveFalta
-                  ? { background: "var(--chip-falta-bg)", color: "var(--chip-falta-text)", border: "2px solid var(--peach)" }
-                  : { background: "var(--chip-falta-bg)", color: "var(--chip-falta-text)", border: "2px solid transparent" }
-                }
-              >
-                <span
-                  className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-colors"
-                  style={{ background: isActiveFalta ? "var(--peach)" : "rgba(248,162,104,0.15)" }}
-                >
-                  <X className="w-3.5 h-3.5 md:w-4 md:h-4" color={isActiveFalta ? "white" : "var(--chip-falta-text)"} strokeWidth={2} />
-                </span>
-                Falta
-              </button>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickStatus(appointment, "falta", sessionDate)}
+                    className={`py-2.5 px-2 sm:px-3 rounded-[12px] text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 border ${
+                      isActiveFalta
+                        ? "bg-[var(--status-falta-bg)] text-[var(--status-falta-text)] border-[#EF4444] shadow-sm"
+                        : "bg-[var(--surface-alt)] text-[var(--text-secondary)] border-transparent hover:bg-[var(--border)]"
+                    }`}
+                  >
+                    <X size={14} className={isActiveFalta ? "text-[#EF4444]" : "text-[var(--text-muted)]"} />
+                    <span>Falta</span>
+                  </button>
 
-              {/* Justificado — Roxo */}
-              <button
-                onClick={() => handleQuickStatus(appointment, "justificada", sessionDate)}
-                className="flex flex-col items-center gap-1 md:gap-1.5 py-2 md:py-3 px-1 md:px-2 rounded-[12px] md:rounded-[14px] font-bold text-[9px] md:text-[11px] transition-all duration-200"
-                style={isActiveJustificado
-                  ? { background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)", border: "2px solid var(--purple)" }
-                  : { background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)", border: "2px solid transparent" }
-                }
-              >
-                <span
-                  className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-colors"
-                  style={{ background: isActiveJustificado ? "var(--purple)" : "rgba(124,92,255,0.15)" }}
-                >
-                  <AlertCircle className="w-3.5 h-3.5 md:w-4 md:h-4" color={isActiveJustificado ? "white" : "var(--chip-justificado-text)"} strokeWidth={2} />
-                </span>
-                Justificado
-              </button>
-            </div>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickStatus(appointment, "justificada", sessionDate)}
+                    className={`py-2.5 px-2 sm:px-3 rounded-[12px] text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 border ${
+                      isActiveJustificado
+                        ? "bg-[var(--purple-light)] text-[var(--purple)] border-[var(--purple)] shadow-sm"
+                        : "bg-[var(--surface-alt)] text-[var(--text-secondary)] border-transparent hover:bg-[var(--border)]"
+                    }`}
+                  >
+                    <AlertCircle size={14} className={isActiveJustificado ? "text-[var(--purple)]" : "text-[var(--text-muted)]"} />
+                    <span>Justificado</span>
+                  </button>
+                </div>
+              </div>
 
-            {/* ── EXPANSÃO DE JUSTIFICATIVA (PROGRESSIVE DISCLOSURE) ── */}
-            {justModal.open && (
-              <div className="animate-slide-down space-y-3 md:space-y-4 pt-4 md:pt-5 mb-2 border-t border-[var(--border)]">
-                {/* Tipo */}
-                <div>
-                  <p className="text-[9px] md:text-[10px] font-extrabold uppercase tracking-[0.12em] mb-2" style={{ color: "var(--text-muted)" }}>
-                    Tipo de Justificativa
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {/* Remarcar Sessão — Roxo (Justificado) */}
-                    <button
-                      onClick={() => { setJustType("reagendar"); setJustData(prev => ({ ...prev, date: "", time: "" })); }}
-                      className="flex flex-col items-center gap-1 md:gap-1.5 py-2 md:py-3 px-1 md:px-2 rounded-[12px] md:rounded-[14px] font-bold text-[9px] md:text-[11px] transition-all duration-200"
-                      style={justType === "reagendar"
-                        ? { background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)", border: "2px solid var(--purple)" }
-                        : { background: "var(--chip-justificado-bg)", color: "var(--chip-justificado-text)", border: "2px solid transparent" }
-                      }
-                    >
-                      <span
-                        className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-colors"
-                        style={{ background: justType === "reagendar" ? "var(--purple)" : "rgba(124,92,255,0.15)" }}
-                      >
-                        <CalendarClock className="w-3.5 h-3.5 md:w-4 md:h-4" color={justType === "reagendar" ? "white" : "var(--chip-justificado-text)"} strokeWidth={2} />
+              {/* 2. CONTEÚDO CONDICIONAL (Justificativa OU Evolução Clínica/Observação) */}
+              {justModal.open ? (
+                /* PAINEL DE FALTA JUSTIFICADA E REAGENDAMENTO */
+                <div className="space-y-4 pt-3 border-t border-[var(--border)] animate-fade-in">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--purple)] flex items-center gap-1.5">
+                      <AlertCircle size={13} />
+                      Falta Justificada & Reagendamento
+                    </span>
+                    {justModal.existingAtt && (
+                      <span className="text-[9px] font-bold text-[var(--purple)] bg-[var(--purple-light)] px-2 py-0.5 rounded-[6px]">
+                        Editando
                       </span>
-                      Remarcar
+                    )}
+                  </div>
+
+                  {/* Choice Cards (Ação de Reagendar ou Cancelar) */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setJustType("reagendar")}
+                      className={`p-3 rounded-[14px] text-left transition-all border flex flex-col justify-between ${
+                        justType === "reagendar"
+                          ? "bg-[var(--purple-light)] border-[var(--purple)] shadow-sm"
+                          : "bg-[var(--surface-alt)] border-[var(--border)] hover:bg-[var(--border)]"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`text-[11px] font-bold ${justType === "reagendar" ? "text-[var(--purple)]" : "text-[var(--text-primary)]"}`}>
+                          Remarcar Sessão
+                        </span>
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center ${justType === "reagendar" ? "bg-[var(--purple)] text-white" : "border border-[var(--border)]"}`}>
+                          {justType === "reagendar" && <Check size={10} />}
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-[var(--text-muted)] leading-tight">
+                        Abona a falta e cria uma nova sessão em outro dia.
+                      </p>
                     </button>
 
-                    {/* Cancelar — Vermelho (Falta) */}
                     <button
+                      type="button"
                       onClick={() => setJustType("cancelar")}
-                      className="flex flex-col items-center gap-1 md:gap-1.5 py-2 md:py-3 px-1 md:px-2 rounded-[12px] md:rounded-[14px] font-bold text-[9px] md:text-[11px] transition-all duration-200"
-                      style={justType === "cancelar"
-                        ? { background: "var(--chip-falta-bg)", color: "var(--chip-falta-text)", border: "2px solid var(--peach)" }
-                        : { background: "var(--chip-falta-bg)", color: "var(--chip-falta-text)", border: "2px solid transparent" }
-                      }
+                      className={`p-3 rounded-[14px] text-left transition-all border flex flex-col justify-between ${
+                        justType === "cancelar"
+                          ? "bg-[var(--peach-light)] border-[var(--peach)] shadow-sm"
+                          : "bg-[var(--surface-alt)] border-[var(--border)] hover:bg-[var(--border)]"
+                      }`}
                     >
-                      <span
-                        className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-colors"
-                        style={{ background: justType === "cancelar" ? "var(--peach)" : "rgba(248,162,104,0.15)" }}
-                      >
-                        <X className="w-3.5 h-3.5 md:w-4 md:h-4" color={justType === "cancelar" ? "white" : "var(--chip-falta-text)"} strokeWidth={2} />
-                      </span>
-                      Cancelar
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`text-[11px] font-bold ${justType === "cancelar" ? "text-[var(--peach)]" : "text-[var(--text-primary)]"}`}>
+                          Apenas Abonar
+                        </span>
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center ${justType === "cancelar" ? "bg-[var(--peach)] text-white" : "border border-[var(--border)]"}`}>
+                          {justType === "cancelar" && <Check size={10} />}
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-[var(--text-muted)] leading-tight">
+                        Abona a falta sem criar novo horário na agenda.
+                      </p>
                     </button>
                   </div>
-                </div>
 
-                {/* Motivo */}
-                <div>
-                  <p className="text-[9px] md:text-[10px] font-extrabold uppercase tracking-[0.12em] mb-1.5 md:mb-2" style={{ color: "var(--text-muted)" }}>
-                    Motivo
-                  </p>
-                  <textarea
-                    value={justData.notes}
-                    onChange={e => setJustData({ ...justData, notes: e.target.value })}
-                    placeholder="Ex: Férias, doença, viagem..."
-                    className="w-full px-3 md:px-4 py-2.5 md:py-3 rounded-[14px] resize-none text-[12px] md:text-[13px] font-medium h-16 md:h-24 focus:outline-none focus:ring-2 focus:ring-[var(--sage)]"
-                    style={{
-                      background: "var(--surface-alt)",
-                      border: "1px solid var(--border)",
-                      color: "var(--text-primary)",
-                    }}
+                  {/* Motivo / Observação */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-[var(--text-secondary)]">
+                      Motivo / Observação
+                    </label>
+                    <RichTextEditor
+                      value={justData.notes}
+                      onChange={val => setJustData(prev => ({ ...prev, notes: val }))}
+                      placeholder="Descreva o motivo da falta justificada (ex: atestado médico, viagem)..."
+                      minHeight="120px"
+                      maxHeight="180px"
+                    />
+                  </div>
+
+                  {/* Campos de Nova Data e Horário (apenas se 'reagendar') */}
+                  {justType === "reagendar" && (
+                    <div className="grid grid-cols-2 gap-3 pt-1">
+                      <div>
+                        <label className="text-[11px] font-bold text-[var(--text-secondary)] block mb-1">
+                          Nova Data
+                        </label>
+                        <input
+                          type="date"
+                          value={justData.date}
+                          onChange={e => setJustData(prev => ({ ...prev, date: e.target.value }))}
+                          className="w-full px-3 py-2 bg-[var(--surface-alt)] border border-[var(--border)] rounded-[12px] text-xs font-medium text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--purple)] transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-[var(--text-secondary)] block mb-1">
+                          Horário
+                        </label>
+                        <select
+                          value={justData.time}
+                          onChange={e => setJustData(prev => ({ ...prev, time: e.target.value }))}
+                          className="w-full px-3 py-2 bg-[var(--surface-alt)] border border-[var(--border)] rounded-[12px] text-xs font-medium text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--purple)] transition-all"
+                        >
+                          <option value="">--:--</option>
+                          {["07:00","07:30","08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00"].map(t => (
+                            <option key={t} value={t}>{t}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* 3. EVOLUÇÃO CLÍNICA OU REGISTRO DE FALTA */
+                <div className="space-y-3 pt-3 border-t border-[var(--border)]">
+                  <div className="flex items-center justify-between pb-1">
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--text-muted)] flex items-center gap-1.5">
+                      <Sparkles size={12} className={selectedStatus === "falta" ? "text-[#EF4444]" : "text-[var(--sage)]"} />
+                      {selectedStatus === "falta" ? "Observação da Falta / Ausência" : "Evolução Clínica da Sessão"}
+                    </span>
+                    {(selectedStatus === "falta" ? faltaNotes : presenceNotes) && (
+                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-[6px] ${selectedStatus === "falta" ? "text-[#EF4444] bg-[var(--status-falta-bg)]" : "text-[var(--dark-green)] bg-[var(--sage-light)]"}`}>
+                        Preenchido
+                      </span>
+                    )}
+                  </div>
+
+                  <RichTextEditor
+                    value={selectedStatus === "falta" ? faltaNotes : presenceNotes}
+                    onChange={val => selectedStatus === "falta" ? setFaltaNotes(val) : setPresenceNotes(val)}
+                    placeholder={
+                      selectedStatus === "falta"
+                        ? "Descreva o motivo da ausência, aviso prévio, tentativas de contato ou observações sobre a falta..."
+                        : "Descreva como foi o atendimento, relato do paciente, técnicas aplicadas e direcionamentos (suporta Negrito, Itálico, Listas e Títulos)..."
+                    }
+                    minHeight="130px"
+                    maxHeight="220px"
                   />
                 </div>
+              )}
 
-                {/* Nova Data/Horário — só aparece se Reagendar */}
-                {justType === "reagendar" && (
-                  <div className="grid grid-cols-2 gap-2 md:gap-3">
-                    <div>
-                      <p className="text-[9px] md:text-[10px] font-extrabold uppercase tracking-[0.12em] mb-1.5 md:mb-2" style={{ color: "var(--text-muted)" }}>
-                        Nova Data
-                      </p>
-                      <input
-                        type="date"
-                        min={new Date().toISOString().split("T")[0]}
-                        value={justData.date || ""}
-                        onChange={e => setJustData({ ...justData, date: e.target.value })}
-                        className="w-full px-2 md:px-3 py-2 md:py-2.5 rounded-[12px] text-[12px] md:text-[13px] font-medium focus:outline-none focus:ring-2 focus:ring-[var(--sage)]"
-                        style={{
-                          background: "var(--surface-alt)",
-                          border: "1px solid var(--border)",
-                          color: "var(--text-primary)",
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <p className="text-[9px] md:text-[10px] font-extrabold uppercase tracking-[0.12em] mb-1.5 md:mb-2" style={{ color: "var(--text-muted)" }}>
-                        Horário
-                      </p>
-                      <select
-                        value={justData.time || ""}
-                        onChange={e => setJustData({ ...justData, time: e.target.value })}
-                        className="w-full px-2 md:px-3 py-2 md:py-2.5 rounded-[12px] text-[12px] md:text-[13px] font-medium focus:outline-none focus:ring-2 focus:ring-[var(--sage)]"
-                        style={{
-                          background: "var(--surface-alt)",
-                          border: "1px solid var(--border)",
-                          color: "var(--text-primary)",
-                        }}
-                      >
-                        <option value="">--:--</option>
-                        {["07:00","07:30","08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00"].map(t => (
-                          <option key={t} value={t}>{t}</option>
-                        ))}
-                      </select>
-                    </div>
+              {/* 4. AÇÕES RÁPIDAS (WhatsApp, Prontuário, Excluir na mesma linha) */}
+              <div className="space-y-2 pt-3 border-t border-[var(--border)]">
+                <div className="grid grid-cols-3 gap-2">
+                  <a
+                    href={`https://wa.me/55${phone}?text=${encodeURIComponent(whatsappText)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1.5 py-2 px-2 rounded-[12px] text-[11px] font-semibold bg-[var(--surface-alt)] border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--border)] transition-all truncate"
+                  >
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="#25D366" className="shrink-0">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+                    </svg>
+                    <span>WhatsApp</span>
+                  </a>
+
+                  <button
+                    onClick={() => { triggerClose(); setTimeout(() => navigate(`/patients/${patient?.id}`), 200); }}
+                    className="flex items-center justify-center gap-1.5 py-2 px-2 rounded-[12px] text-[11px] font-semibold bg-[var(--surface-alt)] border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--border)] transition-all truncate"
+                  >
+                    <ExternalLink size={14} className="shrink-0" />
+                    <span>Prontuário</span>
+                  </button>
+
+                  <button
+                    onClick={handleDeleteAppointment}
+                    className="flex items-center justify-center gap-1.5 py-2 px-2 rounded-[12px] text-[11px] font-semibold bg-[var(--surface-alt)] border border-[var(--border)] text-red-500 hover:bg-red-50 transition-all truncate"
+                  >
+                    <Trash2 size={14} className="shrink-0" />
+                    <span>Excluir</span>
+                  </button>
+                </div>
+
+                {/* Desfazer Justificativa */}
+                {justModal.existingAtt?.status === "justificada" && !justModal.open && (
+                  <div className="pt-1">
+                    <button
+                      onClick={deleteJustification}
+                      className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-[12px] bg-red-500/10 text-[#EF4444] text-[11px] font-bold uppercase tracking-wider hover:bg-[#EF4444] hover:text-white transition-all"
+                    >
+                      <Trash2 size={14} />
+                      Desfazer Justificativa
+                    </button>
                   </div>
                 )}
-
               </div>
-            )}
-
-            {/* ── AÇÕES (Escondidas se o Justificar estiver aberto) ── */}
-            {!justModal.open && (
-              <div className="pt-4 space-y-2" style={{ borderTop: "1px solid var(--border)" }}>
-
-              {/* WhatsApp */}
-              <a
-                href={`https://wa.me/55${phone}?text=${encodeURIComponent(whatsappText)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-start gap-3 w-full py-3 px-4 rounded-[14px] font-semibold text-[13px] hover:bg-[var(--border)] transition-all"
-                style={{
-                  background: "var(--surface-alt)",
-                  color: "var(--text-secondary)",
-                  border: "1px solid var(--border)",
-                }}
-              >
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="#25D366">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
-                </svg>
-                Lembrete WhatsApp
-              </a>
-
-              {/* Prontuário */}
-              <button
-                onClick={() => { triggerClose(); setTimeout(() => navigate(`/patients/${patient?.id}`), 200); }}
-                className="flex items-center justify-start gap-3 w-full py-3 px-4 rounded-[14px] font-semibold text-[13px] hover:bg-[var(--border)] transition-all"
-                style={{
-                  background: "var(--surface-alt)",
-                  color: "var(--text-secondary)",
-                  border: "1px solid var(--border)",
-                }}
-              >
-                <ExternalLink size={18} strokeWidth={2} style={{ color: "var(--text-muted)" }} />
-                Ir para Prontuário
-              </button>
-
-              {/* Excluir */}
-              <button
-                onClick={handleDeleteAppointment}
-                className="flex items-center justify-start gap-3 w-full py-3 px-4 rounded-[14px] font-semibold text-[13px] hover:bg-[var(--border)] transition-all"
-                style={{
-                  background: "var(--surface-alt)",
-                  color: "var(--text-secondary)",
-                  border: "1px solid var(--border)",
-                }}
-              >
-                <Trash2 size={18} strokeWidth={2} style={{ color: "var(--text-muted)" }} />
-                Excluir Agendamento
-              </button>
-              </div>
-            )}
-
-            {/* Se estamos com justificativa preenchida mas não expandido por completo, podemos dar um botão de remover justificativa */}
-            {justModal.existingAtt?.status === "justificada" && !justModal.open && (
-              <div className="pt-2">
-                <button
-                  onClick={deleteJustification}
-                  className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-[12px] bg-red-500/10 text-[#EF4444] text-[12px] font-bold uppercase tracking-wider hover:bg-[#EF4444] hover:text-white transition-all"
-                >
-                  <Trash2 size={14} />
-                  Desfazer Justificativa
-                </button>
-              </div>
-            )}
 
             </div>
-            {/* Scroll Mask (Efeito Fade-out bottom) */}
-            <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-[var(--surface)] to-transparent pointer-events-none z-10" />
+
+            {/* Scroll Fade Mask Overlay (Efeito esmaecido na base para sinalizar rolagem) */}
+            <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[var(--surface)] via-[var(--surface)]/85 to-transparent pointer-events-none z-10" />
           </div>
 
-          {/* ── FOOTER FIXO ── */}
-          <div className="p-4 md:p-5 border-t border-[var(--border)] bg-[var(--surface)] shrink-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-2 md:gap-3 z-20">
-            {justModal.open ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setJustModal(prev => ({ ...prev, open: false }))}
-                  className="w-full sm:w-auto px-5 py-2.5 bg-[var(--surface)] border border-[var(--border)] text-[var(--text-secondary)] rounded-[12px] text-sm font-semibold hover:bg-[var(--surface-alt)] transition-all"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={saveJustificada}
-                  className="w-full sm:w-auto px-5 py-2.5 bg-[var(--sage)] text-white rounded-[12px] text-sm font-semibold hover:bg-[var(--dark-green)] transition-all flex items-center justify-center gap-2"
-                >
-                  <Check size={16} />
-                  Confirmar
-                </button>
-              </>
-            ) : (
-              <button
-                type="button"
-                onClick={triggerClose}
-                className="w-full sm:w-auto px-5 py-2.5 bg-[var(--surface)] border border-[var(--border)] text-[var(--text-secondary)] rounded-[12px] text-sm font-semibold hover:bg-[var(--surface-alt)] transition-all"
-              >
-                Fechar
-              </button>
-            )}
-          </div>
+        {/* ── RODAPÉ FIXO DO MODAL (Sempre por baixo, mantendo o padrão) ── */}
+        <div 
+          className="px-6 py-3.5 border-t border-[var(--border)] bg-[var(--surface)] flex-shrink-0 flex items-center justify-end gap-2"
+          style={{ paddingBottom: 'max(0.875rem, env(safe-area-inset-bottom))' }}
+        >
+          <button
+            type="button"
+            onClick={triggerClose}
+            className="px-3.5 py-2 bg-[var(--surface-alt)] text-[var(--text-secondary)] rounded-[12px] text-xs font-semibold hover:bg-[var(--border)] transition-all"
+          >
+            Fechar
+          </button>
+          {justModal.open ? (
+            <button
+              type="button"
+              onClick={saveJustificada}
+              className="px-4 py-2 bg-[var(--sage)] hover:bg-[var(--dark-green)] text-white text-xs font-bold rounded-[12px] shadow-sm transition-all flex items-center gap-1.5"
+            >
+              <Check size={15} />
+              Salvar Justificativa
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                const statusToSave = selectedStatus || "presente";
+                const notesToSave = statusToSave === "falta" ? faltaNotes : presenceNotes;
+                handleAttendance(appointment, statusToSave, sessionDate, notesToSave);
+              }}
+              className="px-4 py-2 bg-[var(--sage)] hover:bg-[var(--dark-green)] text-white text-xs font-bold rounded-[12px] shadow-sm transition-all flex items-center gap-1.5"
+            >
+              <Check size={15} />
+              {selectedStatus === "falta" ? "Salvar Falta & Observação" : "Salvar Evolução & Status"}
+            </button>
+          )}
         </div>
       </div>
+    </div>
 
       {confirmModal.open && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center z-[80]" onClick={() => !confirmModal.loading && setConfirmModal({ ...confirmModal, open: false })}>
@@ -690,22 +699,11 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
               <button
                 disabled={confirmModal.loading}
                 onClick={confirmModal.onConfirm}
-                className="flex-1 py-4 bg-[#EF4444] text-white rounded-[12px] hover:bg-red-600 transition-all text-xs font-bold uppercase tracking-widest flex items-center justify-center"
+                className="flex-1 py-4 bg-red-500 hover:bg-red-600 text-white rounded-[12px] text-xs font-bold uppercase tracking-widest shadow-lg shadow-red-500/20 transition-all"
               >
-                {confirmModal.loading ? <RefreshCcw size={16} className="animate-spin" /> : "Confirmar"}
+                Confirmar
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {successMessage && (
-        <div className="fixed bottom-[80px] left-8 right-8 md:left-auto md:bottom-8 md:right-8 z-[100] animate-slide-up">
-          <div className="bg-[var(--sage)] text-white px-4 py-2.5 md:px-6 md:py-4 rounded-[14px] md:rounded-2xl shadow-2xl flex items-center gap-2.5 md:gap-3 border border-[var(--sage)]/50 backdrop-blur-sm mx-auto max-w-xs md:max-w-none">
-            <div className="w-6 h-6 md:w-8 md:h-8 shrink-0 bg-white/20 rounded-full flex items-center justify-center">
-              <Check className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" />
-            </div>
-            <p className="text-[12px] md:text-sm font-bold tracking-tight truncate">{successMessage}</p>
           </div>
         </div>
       )}
@@ -713,4 +711,3 @@ export default function AppointmentDetailModal({ appointment, patient, nextDate,
     document.body
   );
 }
-

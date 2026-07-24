@@ -34,12 +34,12 @@ A espessura de destaque costuma ser `font-bold` (peso 700). Evita-se carregar ou
 
 ## 4.2 Status do Atendimento (Lógica de Cores)
 
-Os status (chips/badges) têm cores engessadas na paleta da identidade:
+Os status (chips/badges/cards) têm cores engessadas na paleta da identidade:
 
-- **Confirmado (Agendado):** Azul (`--blue` e `--blue-light`). Representa o estado basal do tempo.
-- **Realizado (Presença):** Verde Sage (`--sage` e `--sage-light`). Representa algo concluído com sucesso e "saudável".
-- **Falta:** Vermelho/Pêssego (`#EF4444` no botão interativo, `--peach` para chips nativos da marca). Alerta.
-- **Justificada:** Roxo (`--purple` e `--purple-light`). Uma ação neutra, mas resolvida clinicamente.
+- **Confirmado (Agendado):** Azul (`#2E7DFF`, `var(--status-confirmado-bg)` e `var(--status-confirmado-text)`). Representa o estado basal do tempo.
+- **Realizado (Presença):** Verde Sage (`#5CBF90`, `var(--status-presente-bg)` e `var(--status-presente-text)`). Representa algo concluído com sucesso e "saudável".
+- **Falta:** Vermelho (`#EF4444`, `var(--status-falta-bg)` e `var(--status-falta-text)`). Alerta e registro de ausência.
+- **Justificada:** Roxo (`#7C5CFF`, `var(--status-justificada-bg)` e `var(--status-justificada-text)`). Uma ação neutra, mas resolvida clinicamente.
 
 ### Botões de Ação Rápida (Status)
 A escolha do status dentro do `AppointmentDetailModal` utiliza uma grade de botões com estilo "tranquilo" (sem sombras neon ou cores que agridem o usuário no Dark Mode).
@@ -49,7 +49,13 @@ No estado ativo, os botões ganham um preenchimento fosco (matte) correspondente
 
 Na gestão clínica, a integridade do histórico é vital:
 - **Cancelar (Abonar):** Paciente avisou com antecedência. A sessão original vira "Justificada" (histórico mantido) e libera o slot no calendário para eventuais encaixes avulsos, mas o registro de cancelamento não deve ser deletado. A interface usa vermelho para o alerta de cancelamento, mas o status no sistema indica que não haverá cobrança de falta indevida.
-- **Remarcar Sessão (Reagendar):** O mesmo que o anterior, porém o sistema cria uma nova Sessão Avulsa para a data escolhida. O botão no sub-modal segue a cor Âmbar para acompanhar a hierarquia visual do botão primário de "Justificado".
+- **Remarcar Sessão (Reagendar):** O mesmo que o anterior, porém o sistema cria uma nova Sessão Avulsa para a data escolhida. O botão no sub-modal segue a hierarquia visual do botão primário de "Justificado".
+
+### Reabertura e Carregamento de Atendimentos Persistidos
+Ao reabrir um agendamento que já possui registro de atendimento gravado no banco de dados:
+1. **Status Justificado:** O modal deve ser inicializado com o painel de justificativa aberto (`justModal.open = true`), pré-carregando o motivo da ausência (`notes`), o tipo de ação (`reagendar` ou `cancelar`) e as datas/horários reagendados (`rescheduledDate`, `rescheduledTime`).
+2. **Status Falta / Presença:** O status botão e badge do cabeçalho refletem a cor exata do atendimento salvo (Vermelho para Falta, Verde Sage para Presença). As observações escritas são carregadas diretamente no editor de texto correspondente (`faltaNotes` ou `presenceNotes`).
+3. **Rodapé Unificado:** O botão de ação secundária no rodapé do modal é padronizado como **"Fechar"** (que dispara a animação de saída `triggerClose`). O botão primário altera seu texto dinamicamente segundo a ação (*"Salvar Justificativa"*, *"Salvar Falta & Observação"* ou *"Salvar Evolução & Status"*).
 
 **Edição de Justificativas e Garbage Collection (Upsert):**
 Sempre que uma justificativa pré-existente for *editada* (ex: alterar a data do reagendamento ou mudar de "Remarcar" para "Cancelar"), o sistema deve obrigatoriamente realizar as seguintes ações para evitar poluição do banco (registros órfãos e duplicados):
@@ -62,3 +68,4 @@ Sempre que uma justificativa pré-existente for *editada* (ex: alterar a data do
 ## 4.4 Fechamento em Cascata
 Sempre que uma ação é tomada no modal da agenda (ex: Justificar falta que abre um sub-modal), ao clicar em "Salvar", **toda a pilha de modais deve ser fechada simultaneamente**.
 O usuário nunca deve ter que fechar manualmente os modais anteriores depois de concluir o fluxo de sucesso. O código deve executar o `onClose` na cadeia.
+

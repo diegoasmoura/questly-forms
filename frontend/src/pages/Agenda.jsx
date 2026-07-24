@@ -103,7 +103,7 @@ function SessionCard({ session, date, onClick }) {
 
   const statusStyles = {
     presente: "border-[var(--sage)] bg-[var(--status-presente-bg)]/20 text-[var(--status-presente-text)]",
-    falta: "border-[var(--peach)] bg-[var(--status-falta-bg)]/25 text-[var(--status-falta-text)]",
+    falta: "border-[#EF4444] bg-[var(--status-falta-bg)] text-[var(--status-falta-text)]",
     justificada: "border-[var(--purple)] bg-[var(--status-justificada-bg)]/20 text-[var(--status-justificada-text)]",
     default: "border-[var(--border)] bg-[var(--surface)] hover:border-slate-300 text-[var(--text-primary)]"
   };
@@ -131,7 +131,7 @@ function SessionCard({ session, date, onClick }) {
       <div className="shrink-0 ml-2">
         <span className={`w-2 h-2 rounded-full block ${
           attendanceStatus === "presente" ? "bg-[var(--sage)]" :
-          attendanceStatus === "falta" ? "bg-[var(--peach)]" :
+          attendanceStatus === "falta" ? "bg-[#EF4444]" :
           attendanceStatus === "justificada" ? "bg-[var(--purple)]" :
           "bg-[var(--border)]"
         }`} />
@@ -193,14 +193,31 @@ export default function Agenda() {
     loadData();
   }, []);
 
+  useEffect(() => {
+    if (showAddModal) {
+      api.getPatients()
+        .then(data => {
+          const list = Array.isArray(data) ? data : (data?.data || data?.patients || []);
+          setPatients(list);
+        })
+        .catch(err => console.error("Erro ao carregar pacientes ao abrir modal:", err));
+    }
+  }, [showAddModal]);
+
   const loadData = async () => {
     try {
       setLoading(true);
-      const [apps, atts, pats] = await Promise.all([
-        api.getAppointments() || [],
-        api.getAttendances() || [],
-        api.getPatients() || []
+      const [appsRes, attsRes, patsRes] = await Promise.allSettled([
+        api.getAppointments(),
+        api.getAttendances(),
+        api.getPatients()
       ]);
+
+      const apps = appsRes.status === "fulfilled" && Array.isArray(appsRes.value) ? appsRes.value : [];
+      const atts = attsRes.status === "fulfilled" && Array.isArray(attsRes.value) ? attsRes.value : [];
+      const rawPats = patsRes.status === "fulfilled" ? patsRes.value : [];
+      const pats = Array.isArray(rawPats) ? rawPats : (rawPats?.data || rawPats?.patients || []);
+
       setAppointments(apps);
       setAttendances(atts);
       setPatients(pats);
@@ -854,7 +871,7 @@ export default function Agenda() {
     const status = session?.attendance?.status;
     let barColor = "bg-[var(--blue)]";
     if (status === "presente") barColor = "bg-[var(--sage)]";
-    else if (status === "falta") barColor = "bg-[var(--peach)]";
+    else if (status === "falta") barColor = "bg-[#EF4444]";
     else if (status === "justificada") barColor = "bg-[var(--purple)]";
     return (
       <div className="flex items-center gap-1.5 px-1 py-0.5 rounded-[6px] cursor-pointer transition-opacity overflow-hidden w-full">
@@ -1232,9 +1249,17 @@ export default function Agenda() {
                   className="w-full px-4 py-3 bg-[var(--surface-alt)] border border-[var(--border)] rounded-[12px] focus:ring-2 focus:ring-[var(--sage)] focus:bg-[var(--surface)] text-[var(--text-primary)] transition-all text-sm font-medium"
                 >
                   <option value="">Selecione um paciente</option>
-                  {patients.map(p => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
+                  {Array.isArray(patients) && patients.filter(p => p.isActive !== false).length > 0 ? (
+                    patients.filter(p => p.isActive !== false).map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))
+                  ) : (
+                    <option value="" disabled>
+                      {Array.isArray(patients) && patients.length > 0
+                        ? "Nenhum paciente ativo encontrado"
+                        : "Nenhum paciente cadastrado"}
+                    </option>
+                  )}
                 </select>
               </div>
 
@@ -1490,10 +1515,14 @@ export default function Agenda() {
         <AppointmentDetailModal
           appointment={detailModal.session.app}
           patient={detailModal.session.app.patient}
+          attendance={detailModal.session.attendance}
+          attendances={attendances}
+          sessionDate={detailModal.date}
           nextDate={detailModal.date}
           sessionType={detailModal.session.type}
           onClose={() => setDetailModal({ open: false, session: null, date: null })}
           onUpdate={loadData}
+          toast={toast}
         />
       )}
 

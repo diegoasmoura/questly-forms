@@ -117,9 +117,16 @@ Sempre que for refatorar ou criar um novo botão ou card, utilize as seguintes p
 
 5. **Botões de Múltipla Escolha (Status / Justificativas):**
    - A identidade dita um comportamento **Tonal/Outline** adaptativo para opções expansíveis e estados de atendimento.
-   - **Estado Desmarcado (Inativo):** Fundo suave. O ícone fica flutuando num círculo com fundo pastel, puxando a variável de background correspondente (ex: `var(--chip-falta-bg)` ou sua versão `rgba(..., 0.15)` correspondente ao HEX bruto). A borda do botão é `2px solid transparent`.
-   - **Estado Selecionado (Ativo):** O botão recebe destaque (Outline) e ganha uma borda `2px solid` na **cor forte original** (ex: `#5CBF9D`, `#EF4444`, `#F59E0B`). O fundo do ícone é preenchido com a exata mesma cor forte, e o SVG fica branco (`white`).
+   - **Estado Desmarcado (Inativo):** Fundo suave. O ícone fica flutuando num círculo com fundo pastel, puxando a variável de background correspondente (ex: `var(--status-falta-bg)` ou sua versão `rgba(239, 68, 68, 0.15)` correspondente ao HEX bruto). A borda do botão é `2px solid transparent`.
+   - **Estado Selecionado (Ativo):** O botão recebe destaque (Outline) e ganha uma borda `2px solid` na **cor forte original** (ex: `#5CBF9D`, `#EF4444`, `#7C5CFF`).
    - **Herança em Sub-botões (Progressive Disclosure):** Se um botão de status abre opções filhas (ex: Justificado abre "Remarcar" ou "Cancelar"), as opções filhas **devem espelhar rigorosamente** a estética, as cores fortes e os valores translúcidos do botão pai equivalente. O botão "Cancelar (Abonar)" herda toda a estilização e ícone do botão "Falta". O botão "Remarcar" herda toda a estilização do botão "Justificado".
+   - **Padronização de Rodapé do Modal:** A ação secundária do rodapé em modais interativos deve ser uniformemente intitulada **"Fechar"** (em vez de "Voltar"), executando o encerramento fluido da janela (`triggerClose`). A ação primária exibe dinamicamente o verbo de confirmação correspondente ao estado (*"Salvar Justificativa"*, *"Salvar Falta & Observação"*, *"Salvar Evolução & Status"*).
+
+### 4.6 Componentes de Edição de Texto (`RichTextEditor`)
+Os campos de escrita de notas clínicas, ausências e justificativas seguem o padrão padronizado do componente `RichTextEditor`:
+- **Estética & Moldura:** Cantos arredondados `rounded-[16px]` com fundo de superfície `bg-[var(--surface-alt)]` e foco em Verde Menta (`focus-within:ring-2 focus-within:ring-[var(--sage)]`).
+- **Barra de Ferramentas Minimalista:** Apenas botões de formatação direta (*Negrito*, *Itálico*, *Título H2*, *Lista de Tópicos* e *Citação*). É terminantemente proibida a inclusão de ícones genéricos de atualização ou reset (como `RotateCcw`) na barra de ferramentas.
+- **Rolagem Interna Automática (`minHeight` / `maxHeight`):** O editor deve conter propriedade de altura dinâmica com `overflow-y-auto` interno, gerando barra de rolagem quando o texto atinge o limite máximo estipulado (ex: `maxHeight="220px"`), impedindo a expansão desalinhada de modais ou containers pais.
 
 ---
 

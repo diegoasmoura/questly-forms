@@ -1796,8 +1796,15 @@ export default function PatientRecord() {
 
                               {att.notes && (
                                 <div className={`max-w-md p-3 rounded-[12px] border flex-1 ${isFilho ? 'bg-[var(--status-justificada-bg)]/30 border-[var(--status-justificada-text)]/20' : 'bg-[var(--surface)] border-[var(--border)]'}`}>
-                                  <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Observação</p>
-                                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-medium italic">"{att.notes}"</p>
+                                  <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Evolução / Observação</p>
+                                  {att.notes.includes("<") && att.notes.includes(">") ? (
+                                    <div
+                                      className="text-xs text-[var(--text-primary)] leading-relaxed font-medium prose prose-sm max-w-none [&_h2]:text-xs [&_h2]:font-bold [&_h2]:text-[var(--dark-green)] [&_ul]:list-disc [&_ul]:pl-4 [&_blockquote]:border-l-2 [&_blockquote]:border-[var(--sage)] [&_blockquote]:pl-2 [&_blockquote]:italic"
+                                      dangerouslySetInnerHTML={{ __html: att.notes }}
+                                    />
+                                  ) : (
+                                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-medium italic">"{att.notes}"</p>
+                                  )}
                                 </div>
                               )}
                             </div>

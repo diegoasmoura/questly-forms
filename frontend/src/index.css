@@ -27,8 +27,8 @@
   /* Cores de Status (Badges) - Modo Claro */
   --status-presente-bg: #E4F5EE;
   --status-presente-text: #3D786A;
-  --status-falta-bg: #FEEEE1;
-  --status-falta-text: #C97840;
+  --status-falta-bg: #FEE2E2;
+  --status-falta-text: #EF4444;
   --status-justificada-bg: #F0ECFF;
   --status-justificada-text: #5B21B6;
   --status-confirmado-bg: #E7F0FF;
@@ -66,8 +66,8 @@
   /* Cores de Status (Badges) - Modo Escuro */
   --status-presente-bg: #1A3028;
   --status-presente-text: #5CBF90;
-  --status-falta-bg: #2E2018;
-  --status-falta-text: #F8A26B;
+  --status-falta-bg: rgba(239, 68, 68, 0.15);
+  --status-falta-text: #EF4444;
   --status-justificada-bg: #1E1A30;
   --status-justificada-text: #A78BFA;
   --status-confirmado-bg: #152030;
