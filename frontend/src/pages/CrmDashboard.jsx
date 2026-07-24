@@ -360,7 +360,7 @@ export default function CrmDashboard() {
           const stagePatients = patients.filter(p => p.funnelStep === mobileStage);
 
           return (
-            <div className="flex flex-col min-h-full rounded-[16px] border border-[var(--border)] bg-[var(--surface-alt)]/40 overflow-hidden">
+            <div className="flex flex-col min-h-full rounded-[16px] border border-[var(--border)] bg-[var(--surface-alt)] overflow-hidden">
               <div className={`p-3.5 border-b border-[var(--border)] flex justify-between items-center ${currentStage.bgHeader}`}>
                 <span className="text-xs font-black uppercase tracking-wider">{currentStage.label}</span>
                 <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-[var(--surface)]/80 shadow-sm border border-[var(--border)]/50">
@@ -397,7 +397,7 @@ export default function CrmDashboard() {
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, stage.id)}
                 className={`flex flex-col min-h-0 rounded-[16px] border border-[var(--border)] transition-colors duration-200 ${
-                  isOver ? "bg-[var(--surface-alt)] border-dashed border-[var(--text-muted)]" : "bg-[var(--surface-alt)]/50"
+                  isOver ? "bg-[var(--surface-alt)] border-dashed border-[var(--text-muted)]" : "bg-[var(--surface-alt)]"
                 }`}
               >
                 {/* Header da Coluna */}

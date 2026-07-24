@@ -27,10 +27,10 @@ A identidade visual do Questly Forms une **tecnologia** e **acolhimento humaniza
 
 | Elemento / Camada | Variável CSS | Modo Claro (Light) | Modo Escuro (Dark) | Aplicação |
 |---|---|---|---|---|
-| **Fundo da Aplicação** | `--bg` | `#F7F4EE` (Creme orgânico suave) | `#101722` (Navy Profundo) | Tela principal, `body` |
-| **Superfície Principal** | `--surface` | `#FCFAF5` (Marfim / Warm Ivory) | `#192231` (Card Navy) | Cards, Modais, Containers |
-| **Superfície Alternativa** | `--surface-alt` | `#EFEBE0` (Creme Linho Moleskine) | `#202B3C` (Navy Alternativo) | Quadros internos, Inputs, Headers |
-| **Bordas e Divisores** | `--border` | `#E2DCD0` (Borda areia suave) | `#2B3650` (Navy Grafite) | Molduras, linhas de tabela |
+| **Fundo da Aplicação** | `--bg` | `#FAF8F4` (Creme orgânico da marca) | `#101722` (Navy Profundo) | Tela principal, `body` |
+| **Superfície Principal** | `--surface` | `#FFFFFF` (Branco puro reluzente) | `#192231` (Card Navy) | Cards, Modais, Containers |
+| **Superfície Alternativa** | `--surface-alt` | `#EFEBE0` (Creme Linho / Colunas) | `#202B3C` (Navy Alternativo) | Quadros internos, Colunas Kanban, Inputs |
+| **Bordas e Divisores** | `--border` | `#CBD2D9` (Cinza/Areia nítido) | `#2B3650` (Navy Grafite) | Molduras, linhas de tabela |
 
 ---
 
