@@ -28,9 +28,9 @@ A identidade visual do Questly Forms une **tecnologia** e **acolhimento humaniza
 | Elemento / Camada | Variável CSS | Modo Claro (Light) | Modo Escuro (Dark) | Aplicação |
 |---|---|---|---|---|
 | **Fundo da Aplicação** | `--bg` | `#FAF8F4` (Creme orgânico) | `#101722` (Navy Profundo) | Tela principal, `body` |
-| **Superfície Principal** | `--surface` | `#FCFAF5` (Branco quente) | `#192231` (Card Navy) | Cards, Modais, Containers |
-| **Superfície Alternativa** | `--surface-alt` | `#EFEBE0` (Cinza/Bege macio) | `#202B3C` (Navy Alternativo) | Inputs, Badges, Headers |
-| **Bordas e Divisores** | `--border` | `#CBD2D9` (Cinza claro) | `#2B3650` (Navy Grafite) | Molduras, linhas de tabela |
+| **Superfície Principal** | `--surface` | `#FFFFFF` (Branco puro/quente) | `#192231` (Card Navy) | Cards, Modais, Containers |
+| **Superfície Alternativa** | `--surface-alt` | `#F5F2EA` (Creme Moleskine) | `#202B3C` (Navy Alternativo) | Quadros internos, Inputs, Headers |
+| **Bordas e Divisores** | `--border` | `#E2E8F0` (Cinza suave) | `#2B3650` (Navy Grafite) | Molduras, linhas de tabela |
 
 ---
 
