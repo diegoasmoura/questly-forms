@@ -94,9 +94,17 @@ export default function AppointmentDetailModal({
       setSelectedStatus(statusToSet);
       if (statusToSet === "presente") {
         setPresenceNotes(existingAtt.notes || "");
+        setFaltaNotes("");
+        setJustData({ date: "", time: "", notes: "" });
+        setJustModal({ open: false, existingAtt: null });
       } else if (statusToSet === "falta") {
+        setPresenceNotes("");
         setFaltaNotes(existingAtt.notes || "");
+        setJustData({ date: "", time: "", notes: "" });
+        setJustModal({ open: false, existingAtt: null });
       } else if (statusToSet === "justificada") {
+        setPresenceNotes("");
+        setFaltaNotes("");
         setJustModal({ open: true, existingAtt });
         let resDate = existingAtt.rescheduledDate || existingAtt.rescheduled_date || "";
         let resTime = existingAtt.rescheduledTime || existingAtt.rescheduled_time || "";
@@ -120,6 +128,7 @@ export default function AppointmentDetailModal({
       setSelectedStatus("presente");
       setPresenceNotes("");
       setFaltaNotes("");
+      setJustData({ date: "", time: "", notes: "" });
       setJustModal({ open: false, existingAtt: null });
     }
   }, [appointment?.id, targetDateStr, existingAtt?.id, existingAtt?.status, existingAtt?.notes]);
@@ -136,11 +145,16 @@ export default function AppointmentDetailModal({
   // Manipulador rápido de mudança de status (Presença / Falta / Justificada)
   const handleQuickStatus = (app, status, date) => {
     if (status === "justificada") {
-      const targetAtt = existingAtt || attendances?.find(a => (a.appointment_id === app.id || a.appointmentId === app.id) && a.status === "justificada");
-      setJustModal({ open: true, existingAtt: targetAtt });
-      let resDate = targetAtt?.rescheduledDate || targetAtt?.rescheduled_date || "";
-      let resTime = targetAtt?.rescheduledTime || targetAtt?.rescheduled_time || "";
-      let notesText = targetAtt?.notes || "";
+      const targetAtt = existingAtt?.status === "justificada" 
+        ? existingAtt 
+        : attendances?.find(a => (a.appointment_id === app.id || a.appointmentId === app.id) && a.status === "justificada");
+
+      const justAttToSet = targetAtt || null;
+      setJustModal({ open: true, existingAtt: justAttToSet });
+
+      let resDate = justAttToSet?.rescheduledDate || justAttToSet?.rescheduled_date || "";
+      let resTime = justAttToSet?.rescheduledTime || justAttToSet?.rescheduled_time || "";
+      let notesText = justAttToSet?.notes || "";
 
       if (!resDate && notesText.includes("Reagendado para ")) {
         const matchDate = notesText.match(/Reagendado para (\d{4}-\d{2}-\d{2})/);
