@@ -1187,11 +1187,11 @@ const resetImportModal = () => {
             <div className="pointer-events-none absolute bottom-[72px] left-0 right-0 h-12 bg-gradient-to-t from-[var(--surface)] to-transparent z-10" />
 
             {/* Footer */}
-            <div className="p-6 border-t border-[var(--border)] bg-[var(--surface)] shrink-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 z-20">
+            <div className="px-6 py-4 border-t border-[var(--border)] bg-[var(--surface)] shrink-0 flex items-center justify-end gap-3 z-20" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
               <button
                 type="button"
                 onClick={closeAddModal}
-                className="btn btn-secondary !rounded-[12px] !font-sans w-full sm:w-auto"
+                className="px-4 py-2.5 bg-[var(--surface-alt)] text-[var(--text-secondary)] hover:bg-[var(--border)] hover:text-[var(--text-primary)] rounded-[12px] text-xs font-bold transition-all"
               >
                 Cancelar
               </button>
@@ -1199,20 +1199,20 @@ const resetImportModal = () => {
                 type="submit"
                 form="patient-form"
                 disabled={saving || uploading}
-                className="btn btn-primary !rounded-[12px] !font-sans min-w-[120px] w-full sm:w-auto"
+                className="px-5 py-2.5 bg-[var(--sage)] hover:bg-[var(--dark-green)] text-white rounded-[12px] text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 min-w-[120px]"
               >
-                  {saving ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Salvando...
-                    </>
-                  ) : (
-                    <>
-                      <Check size={16} />
-                      Cadastrar
-                    </>
-                  )}
-                </button>
+                {saving ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  <>
+                    <Check size={16} />
+                    Cadastrar
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

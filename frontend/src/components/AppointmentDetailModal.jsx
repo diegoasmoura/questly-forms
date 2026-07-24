@@ -665,23 +665,23 @@ export default function AppointmentDetailModal({
 
         {/* ── RODAPÉ FIXO DO MODAL (Sempre por baixo, mantendo o padrão) ── */}
         <div 
-          className="px-6 py-3.5 border-t border-[var(--border)] bg-[var(--surface)] flex-shrink-0 flex items-center justify-end gap-2"
+          className="px-6 py-3.5 border-t border-[var(--border)] bg-[var(--surface)] flex-shrink-0 flex items-center justify-end gap-3"
           style={{ paddingBottom: 'max(0.875rem, env(safe-area-inset-bottom))' }}
         >
           <button
             type="button"
             onClick={triggerClose}
-            className="px-3.5 py-2 bg-[var(--surface-alt)] text-[var(--text-secondary)] rounded-[12px] text-xs font-semibold hover:bg-[var(--border)] transition-all"
+            className="px-4 py-2.5 bg-[var(--surface-alt)] text-[var(--text-secondary)] hover:bg-[var(--border)] hover:text-[var(--text-primary)] rounded-[12px] text-xs font-bold transition-all"
           >
-            Fechar
+            Cancelar
           </button>
           {justModal.open ? (
             <button
               type="button"
               onClick={saveJustificada}
-              className="px-4 py-2 bg-[var(--sage)] hover:bg-[var(--dark-green)] text-white text-xs font-bold rounded-[12px] shadow-sm transition-all flex items-center gap-1.5"
+              className="px-5 py-2.5 bg-[var(--sage)] hover:bg-[var(--dark-green)] text-white rounded-[12px] text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2"
             >
-              <Check size={15} />
+              <Check size={16} />
               Salvar Justificativa
             </button>
           ) : (
@@ -692,9 +692,9 @@ export default function AppointmentDetailModal({
                 const notesToSave = statusToSave === "falta" ? faltaNotes : presenceNotes;
                 handleAttendance(appointment, statusToSave, sessionDate, notesToSave);
               }}
-              className="px-4 py-2 bg-[var(--sage)] hover:bg-[var(--dark-green)] text-white text-xs font-bold rounded-[12px] shadow-sm transition-all flex items-center gap-1.5"
+              className="px-5 py-2.5 bg-[var(--sage)] hover:bg-[var(--dark-green)] text-white rounded-[12px] text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2"
             >
-              <Check size={15} />
+              <Check size={16} />
               {selectedStatus === "falta" ? "Salvar Falta & Observação" : "Salvar Evolução & Status"}
             </button>
           )}
