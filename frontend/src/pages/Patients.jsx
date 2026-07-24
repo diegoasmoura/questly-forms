@@ -885,7 +885,7 @@ const resetImportModal = () => {
             </div>
 
             {/* Form Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-6 hide-scrollbar">
               <form id="patient-form" onSubmit={handleAddPatient} className="space-y-5">
                 
                 {/* TAB: Identificação */}
