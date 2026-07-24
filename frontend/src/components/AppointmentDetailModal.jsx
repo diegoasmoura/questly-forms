@@ -327,13 +327,13 @@ export default function AppointmentDetailModal({
 
   return createPortal(
     <>
-      {/* ── Backdrop com suporte Dual (Web: Centralizado | Mobile: Card Flutuante Acima do Menu) ── */}
+      {/* ── Backdrop com suporte Dual (Centralizado no espaço útil entre o Topo e o BottomNav no Mobile) ── */}
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-end sm:items-center justify-center p-3 sm:p-4 md:p-6 z-[60] transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
+        className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center p-4 pb-[calc(65px+env(safe-area-inset-bottom,0px)+16px)] sm:pb-4 z-[60] transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
         onClick={triggerClose}
       >
         <div
-          className={`relative bg-[var(--surface)] w-full max-w-full sm:max-w-md md:max-w-lg rounded-[24px] shadow-2xl flex flex-col border border-[var(--border)] overflow-hidden transition-all duration-300 ease-out mb-[calc(65px+env(safe-area-inset-bottom,0px)+12px)] sm:mb-0 max-h-[calc(80vh-65px)] sm:max-h-[90vh] ${isClosing ? 'opacity-0 translate-y-4 scale-[0.98]' : 'opacity-100 translate-y-0 scale-100'}`}
+          className={`relative bg-[var(--surface)] w-full max-w-full sm:max-w-md md:max-w-lg rounded-[24px] shadow-2xl flex flex-col border border-[var(--border)] overflow-hidden transition-all duration-300 ease-out max-h-[calc(100vh-65px-env(safe-area-inset-bottom,0px)-48px)] sm:max-h-[85vh] ${isClosing ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
           onClick={e => e.stopPropagation()}
         >
           {/* Mobile Drag Pill */}

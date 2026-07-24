@@ -158,10 +158,45 @@ Fade-in (páginas):  0.3s ease-out (opacity 0→1, translateY 10px→0)
 Slide-in (sidebar): 0.3s ease-out (opacity 0→1, translateX -10px→0)
 ```
 
-### 6.1 Regras para Modais no Mobile
-- **Sem "Pulos" Verticais (Fixed Height)**: Modais dinâmicos (que expandem com novos campos) não devem estar centralizados verticalmente, pois crescem para cima e para baixo. Eles devem possuir **ancoragem no topo** (ex: `items-start pt-[8vh]`) e **altura fixa absoluta** (ex: `h-[70vh] md:h-[580px]`), garantindo que a caixa nunca mude de tamanho ao interagir com formulários e nunca cubra a navegação inferior.
-- **Scroll Mask (Efeito Fade-out)**: Em vez de exibir barras de rolagem nativas dentro de modais, o design prevê um **esmaecimento na base** do modal (usando um overlay com `bg-gradient-to-t from-[var(--surface)] to-transparent pointer-events-none`). Isso cria uma dica visual premium de que "há mais conteúdo abaixo", dispensando a barra e mantendo o visual super limpo.
-- **Transição de Saída (Exit Animations)**: Modais **nunca devem fechar abruptamente**. Ações de fechamento disparam um estado `isClosing` (usando uma função wrapper como `triggerClose`), aplicando as animações `animate-fade-out` e `animate-scale-out` por 200ms antes da função de desmonte real (`onClose`) ser invocada.
+### 6.1 Regras para Modais no Mobile (Padrão de Centralização Útil)
+
+Para obter harmonia visual perfeita em dispositivos móveis, a posição de todos os modais/cards deve ser **rigorosamente centralizada no espaço útil** (o intervalo vertical compreendido entre o topo da tela e a linha superior da Bottom Navigation Bar):
+
+- **Fórmula de Centralização em Flexbox:**
+  No container backdrop fixo (`fixed inset-0 z-[60]`), utiliza-se alinhamento centralizado com padding inferior dinâmico reservado para a BottomNav:
+  `className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center p-4 pb-[calc(65px+env(safe-area-inset-bottom,0px)+16px)] sm:pb-4"`
+- **Vantagem Geométrica:**
+  Dessa forma, a distância entre o topo do celular e o card fica **exatamente igual** à distância entre a base do card e o topo da barra de navegação móvel.
+- **Limite de Altura Interna (`max-h`):**
+  Para evitar extrapolar a janela útil, limita-se a altura máxima a:
+  `max-h-[calc(100vh-65px-env(safe-area-inset-bottom,0px)-48px)] sm:max-h-[85vh]`
+
+```jsx
+// Template Padronizado para Novos Modais (Copy & Paste):
+import { createPortal } from "react-dom";
+
+return createPortal(
+  <div
+    className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center p-4 pb-[calc(65px+env(safe-area-inset-bottom,0px)+16px)] sm:pb-4 z-[60] transition-opacity duration-300 ${
+      isClosing ? 'opacity-0' : 'opacity-100'
+    }`}
+    onClick={triggerClose}
+  >
+    <div
+      className={`relative bg-[var(--surface)] w-full max-w-lg rounded-[24px] shadow-2xl flex flex-col border border-[var(--border)] overflow-hidden transition-all duration-300 ease-out max-h-[calc(100vh-65px-env(safe-area-inset-bottom,0px)-48px)] sm:max-h-[85vh] ${
+        isClosing ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+      }`}
+      onClick={e => e.stopPropagation()}
+    >
+      {/* Cabeçalho, Conteúdo e Rodapé */}
+    </div>
+  </div>,
+  document.body
+);
+```
+
+- **Scroll Mask (Efeito Fade-out)**: Em vez de exibir barras de rolagem nativas dentro de modais, o design prevê um **esmaecimento na base** do modal (`bg-gradient-to-t from-[var(--surface)] to-transparent pointer-events-none`).
+- **Transição de Saída (Exit Animations)**: Modais **nunca devem fechar abruptamente**. Ações de fechamento disparam um estado `isClosing` (função `triggerClose`), aplicando transição de opacidade e escala por 200ms antes do desmonte.
 
 ---
 
