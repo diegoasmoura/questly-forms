@@ -1,8 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Users, Calendar, FileText, Library } from "lucide-react";
+import { Home, Kanban, Users, Calendar, FileText, Library } from "lucide-react";
 
 const menuItems = [
   { icon: Home, label: "Home", path: "/home" },
+  { icon: Kanban, label: "CRM", path: "/crm" },
   { icon: Users, label: "Pacientes", path: "/patients" },
   { icon: Calendar, label: "Agenda", path: "/agenda" },
   { icon: FileText, label: "Formulários", path: "/my-forms" },
