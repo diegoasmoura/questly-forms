@@ -5,10 +5,10 @@
 @tailwind utilities;
 
 :root {
-  --bg: #FAF8F4;
-  --surface: #FFFFFF;
-  --surface-alt: #F5F2EA;
-  --border: #E2E8F0;
+  --bg: #F7F4EE;
+  --surface: #FCFAF5;
+  --surface-alt: #EFEBE0;
+  --border: #E2DCD0;
   --text-primary: #1F2937;
   --text-secondary: #495057;
   --text-muted: #6B7280;
