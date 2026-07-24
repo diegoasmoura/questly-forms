@@ -38,14 +38,14 @@ export default function Sidebar() {
 
   return (
     <div
-      className={`hidden md:flex bg-[var(--surface)] border-r border-[var(--border)] flex-col relative h-full flex-shrink-0 z-[40] transition-[width] duration-300 ease-in-out ${
+      className={`hidden md:flex bg-[var(--bg)] border-r border-[var(--border)] flex-col relative h-full flex-shrink-0 z-[40] transition-[width] duration-300 ease-in-out ${
         collapsed ? "w-[84px]" : "w-[220px]"
       }`}
     >
       {/* Toggle chevron */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute top-[30px] -right-[13px] w-[26px] h-[26px] rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[var(--text-secondary)] z-10 hover:bg-[var(--surface-alt)] transition-all cursor-pointer"
+        className="absolute top-[30px] -right-[13px] w-[26px] h-[26px] rounded-full bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-[var(--text-secondary)] z-10 hover:bg-[var(--surface-alt)] transition-all cursor-pointer"
         aria-label={collapsed ? "Expandir menu" : "Retrair menu"}
       >
         <ChevronRight

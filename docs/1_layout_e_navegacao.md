@@ -9,6 +9,7 @@ Este documento estabelece as regras e o funcionamento dos componentes estruturai
 A `Sidebar` (`frontend/src/components/Sidebar.jsx`) é a âncora de navegação do usuário. Ela possui um estado colapsável (expandido/retraído) e suas regras visuais não devem ser alteradas sem revisão de UX.
 
 ### 1.1 Regras Visuais
+- **Fundo dos Menus (Sidebar & BottomNav):** A `Sidebar` (Desktop) e a `BottomNav` (Mobile) utilizam obrigatoriamente a cor de fundo nativa da página `bg-[var(--bg)]` tanto no Modo Claro (`#FAF8F4`) quanto no Modo Escuro (`#101722`), integrando perfeitamente a barra ao canvas e permitindo que os cartões e modais (`bg-[var(--surface)]`) flutuem com sobriedade.
 - **Logo (Ícone da Sidebar):** Renderizado 100% via código CSS (fundo gradiente `from-[#5CBF9D] to-[#3D786A]` com sombra sutil) e tipografia nativa (`Caveat Brush` classe `font-brand` a `26px`). **Regra de Ouro:** Nunca substitua este componente por uma imagem PNG estática, pois a compressão destrói a nitidez em tamanhos pequenos (46x46). Aplicações SaaS premium utilizam renderização vetorial ou nativa.
 - **Logo (Texto da Marca):** O texto adjacente "Questly Forms" utiliza a mesma fonte artesanal (`font-brand`) em tamanho imponente (`22px`) para equilibrar visualmente com o ícone.
 - **Favicon:** A logo transparente original exportada (geralmente `QF logo.png`) é utilizada unicamente como `favicon.png` na aba do navegador através do `index.html`.
