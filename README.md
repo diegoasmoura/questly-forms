@@ -36,8 +36,9 @@ Este projeto está otimizado para o Padrão Ouro de Performance Web:
 - **Atualizações Silenciosas (Flicker-Free):** O Dashboard utiliza fluxos de Background Refresh (ex: `loadData(true)`) para se atualizar ao interagir com modais sem "piscar" a tela.
 
 ## 📝 Atualizações Recentes (UI & UX)
-Foi realizada uma ampla refatoração visual focada em padronizar a aplicação para suportar nativamente **Modo Claro** e **Modo Escuro**:
-- **Design System Aplicado:** Componentes legados que utilizavam cores estáticas do Tailwind (ex: `slate-50`, `brand-600`) foram atualizados para utilizar as variáveis semânticas do projeto (`--surface`, `--surface-alt`, `--bg`, `--text-primary`, `--sage`).
-- **Modais Padronizados:** Telas como *Importar Dados*, *Novo Paciente* e *Detalhes do Agendamento* receberam uniformidade total (fundos sólidos com base na variável Surface, bordas sutis e z-index padronizado `z-[100]` com `backdrop-blur`).
-- **Agenda Otimizada:** Componentização dos itens da agenda como cartões interativos distintos com feedbacks visuais claros e neutros ao passar o mouse, abolindo os antigos sublinhados que mesclavam com a interface.
-- **Remoção de Gradientes/Opacidades Problemáticas:** Ajuste do card de aniversariantes no modo lista para respeitar o fundo transparente nativo com badges sólidas (sem misturar transparências opacas no modo escuro).
+Foi realizada uma ampla refatoração visual e funcional focada na padronização da experiência do usuário (UX), responsividade mobile e integridade clínica:
+- **Padrão de Centralização Útil no Mobile (Perfect-Center Standard):** Todos os modais flutuantes agora se posicionam rigorosamente no centro geométrico da área útil da tela mobile (entre o topo do celular e o topo do menu inferior no footer), calibrados com padding inferior dinâmico (`pb-[calc(65px+env(safe-area-inset-bottom)+16px)]`).
+- **Desfoque de Fundo Total no Footer:** Ajustado o `z-index` da navegação inferior móvel (`BottomNav` em `z-40`) e dos modais (`z-[100]`), garantindo que o efeito de desfoque (`backdrop-blur-[3px] bg-black/40`) cubra 100% da viewport, incluindo o menu inferior do celular.
+- **Isolamento de Notas e Status de Atendimento:** Garantido isolamento estrito entre os textos de Presença, Falta e Justificativa. Agendamentos com falta justificada abrem diretamente no painel de justificativa com motivos e reagendamentos pré-carregados do banco.
+- **Padronização de Cores de Status:** Cores de status unificadas na Agenda, Dashboard e Modais: **Falta** em Vermelho (`#EF4444`), **Presença** em Verde Sage (`#5CBF90`), **Justificado** em Roxo (`#7C5CFF`) e **Agendado** em Azul (`#2E7DFF`).
+- **Rodapés e Rótulos Uniformes:** Botão secundário de modais padronizado como **"Fechar"** (`triggerClose`), e cabeçalhos de observações clínica com ícone `<Sparkles />` no tom da ação e badge de estado **"Preenchido"** dinâmico.
