@@ -8,9 +8,12 @@ import {
   Library,
   ChevronRight,
   LogOut,
-  Kanban
+  Kanban,
+  Download
 } from "lucide-react";
 import { useState } from "react";
+import { usePwaInstall } from "../hooks/usePwaInstall";
+import PwaInstallModal from "./PwaInstallModal";
 
 const menuItems = [
   { icon: Home, label: "Home", path: "/home" },
@@ -30,6 +33,17 @@ export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(true);
+  
+  const { isInstallable, isIOS, promptInstall } = usePwaInstall();
+  const [showIosModal, setShowIosModal] = useState(false);
+
+  const handleInstallClick = async () => {
+    if (isIOS) {
+      setShowIosModal(true);
+    } else {
+      await promptInstall();
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -124,7 +138,31 @@ export default function Sidebar() {
       <div className="flex-1" />
 
       {/* Footer — colado ao fundo da viewport */}
-      <div className="border-t border-[var(--border)] pt-2 pb-2 w-full flex-shrink-0">
+      <div className="border-t border-[var(--border)] pt-2 pb-2 w-full flex-shrink-0 flex flex-col gap-1">
+        {isInstallable && (
+          <button
+            onClick={handleInstallClick}
+            className="flex items-center h-[46px] rounded-[14px] mx-[8px] text-[var(--sage)] bg-[var(--sage-light)] hover:brightness-95 dark:text-[#5CBF9D] dark:bg-[rgba(92,191,144,0.15)] transition-colors duration-200 ease-in-out cursor-pointer w-[calc(100%-16px)]"
+            title="Baixar App"
+          >
+            <div
+              className="flex items-center justify-center flex-shrink-0"
+              style={{ width: `calc(${ICON_ZONE} - 16px)` }}
+            >
+              <Download size={21} />
+            </div>
+            <span
+              className={`text-sm font-semibold whitespace-nowrap transition-all duration-300 ease-in-out ${
+                collapsed
+                  ? "opacity-0 translate-x-[-8px] pointer-events-none w-0"
+                  : "opacity-100 translate-x-0 w-auto"
+              }`}
+            >
+              Baixar App
+            </span>
+          </button>
+        )}
+
         <button
           onClick={handleLogout}
           className="flex items-center h-[46px] rounded-[14px] mx-[8px] text-[var(--text-muted)] hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/40 dark:hover:text-red-400 transition-colors duration-200 ease-in-out cursor-pointer w-[calc(100%-16px)]"
@@ -147,6 +185,8 @@ export default function Sidebar() {
           </span>
         </button>
       </div>
+      
+      <PwaInstallModal isOpen={showIosModal} onClose={() => setShowIosModal(false)} />
     </div>
   );
 }

@@ -176,7 +176,7 @@ function SortablePatientCard({ patient, stage, onMoveStage, onReorderVertical, o
           <div className="min-w-0 flex-1">
             <h4
               onClick={(e) => { e.stopPropagation(); onOpenDetail(patient); }}
-              className="font-inter text-[14px] font-bold text-[var(--text-primary)] hover:text-[var(--sage)] transition-colors cursor-pointer truncate leading-snug"
+              className="font-sans text-[15px] font-extrabold tracking-tight text-[var(--text-primary)] hover:text-[var(--sage)] transition-colors cursor-pointer truncate leading-snug"
               title={patient.name}
             >
               {patient.name}

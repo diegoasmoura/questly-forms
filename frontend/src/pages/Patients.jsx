@@ -2292,7 +2292,7 @@ function PatientCard({ patient, onDelete, onEdit }) {
             </div>
             
             <div className="flex flex-col min-w-0">
-              <h3 className="font-inter text-[15px] font-semibold tracking-[0.015em] text-[var(--text-primary)] leading-tight truncate mb-1" title={patient.name}>
+              <h3 className="font-sans text-[16px] font-extrabold tracking-tight text-[var(--text-primary)] leading-tight truncate mb-1" title={patient.name}>
                 {formatShortName(patient.name)}
               </h3>
               <div className="flex items-center gap-1.5 flex-wrap">

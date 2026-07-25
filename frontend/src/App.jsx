@@ -6,6 +6,7 @@ import { useAuth } from "./context/AuthContext";
 import Layout from "./components/Layout";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import ToastContainer from "./components/Toast";
+import PwaUpdateModal from "./components/PwaUpdateModal";
 
 // Pages estáticas para rota crítica (LCP inicial instantâneo)
 import Landing from "./pages/Landing";
@@ -61,6 +62,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <ToastContainer />
+      <PwaUpdateModal />
       <Suspense fallback={<LoadingScreen />}>
         <Routes>
           <Route path="/" element={<Landing />} />
