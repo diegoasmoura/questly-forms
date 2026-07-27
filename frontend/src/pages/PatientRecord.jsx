@@ -3529,10 +3529,10 @@ export default function PatientRecord() {
       {/* Share Modal */}
       {showShareModal && createPortal(
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[3px]">
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-2xl w-full max-w-2xl p-6 animate-scale-in max-h-[90vh] overflow-y-auto patients-scrollbar flex flex-col">
-            <div className="flex items-center justify-between mb-6">
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[24px] shadow-2xl w-full max-w-2xl p-4 sm:p-6 animate-scale-in max-h-[90vh] overflow-y-auto patients-scrollbar flex flex-col">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
               <div>
-                <h2 className="text-lg font-bold text-[var(--text-primary)]">Enviar Instrumento para {patient?.name}</h2>
+                <h2 className="text-base sm:text-lg font-bold text-[var(--text-primary)]">Enviar Instrumento para {patient?.name}</h2>
                 <p className="text-xs text-[var(--text-muted)] mt-1">Crie um link para que o paciente preencha o instrumento</p>
               </div>
               <button onClick={() => setShowShareModal(false)} className="text-[var(--text-secondary)] hover:text-[var(--sage)] transition-colors p-1.5 hover:bg-[var(--surface-alt)] rounded-lg">
@@ -3572,7 +3572,7 @@ export default function PatientRecord() {
                   </div>
                 ) : (
                   <select
-                    className="input"
+                    className="input w-full"
                     value={shareData.formId}
                     onChange={(e) => {
                       setShareData({ ...shareData, formId: e.target.value });
@@ -3600,37 +3600,37 @@ export default function PatientRecord() {
                 </div>
               )}
 
-              <div className="flex gap-2 pt-4">
+              <div className="flex flex-col sm:flex-row gap-2 pt-4">
                 {existingLinkForForm && !forceCreateNew ? (
                   <>
-                    <button type="submit" className="py-2.5 px-4 rounded-[12px] bg-[var(--surface-alt)] border border-[var(--border)] text-[var(--text-primary)] font-bold text-xs hover:opacity-95 transition-all outline-none flex-1">
-                      ↻ Reutilizar Link Existente
+                    <button type="submit" className="w-full sm:w-auto py-2.5 px-4 rounded-[12px] bg-[var(--surface-alt)] border border-[var(--border)] text-[var(--text-primary)] font-bold text-xs hover:opacity-95 transition-all outline-none flex-1">
+                      ↻ Reutilizar Link
                     </button>
                     <button
                       type="button"
                       onClick={() => setForceCreateNew(true)}
-                      className="py-2.5 px-4 rounded-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors font-bold text-xs outline-none"
+                      className="w-full sm:w-auto py-2.5 px-4 rounded-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors font-bold text-xs outline-none"
                     >
                       Criar Novo
                     </button>
                     <button
                       type="button"
                       onClick={() => setShowShareModal(false)}
-                      className="py-2.5 px-4 rounded-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors font-bold text-xs outline-none"
+                      className="w-full sm:w-auto py-2.5 px-4 rounded-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors font-bold text-xs outline-none"
                     >
                       Cancelar
                     </button>
                   </>
                 ) : (
                   <>
-                    <button type="submit" className="py-2.5 px-4 rounded-[12px] bg-[var(--sage)] text-white font-bold text-xs hover:opacity-95 transition-all outline-none flex-1">
+                    <button type="submit" className="w-full sm:w-auto py-2.5 px-4 rounded-[12px] bg-[var(--sage)] text-white font-bold text-xs hover:opacity-95 transition-all outline-none flex-1">
                       Gerar e Copiar Link
                     </button>
                     {existingLinkForForm && forceCreateNew && (
                       <button
                         type="button"
                         onClick={() => setForceCreateNew(false)}
-                        className="py-2.5 px-4 rounded-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors font-bold text-xs outline-none"
+                        className="w-full sm:w-auto py-2.5 px-4 rounded-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors font-bold text-xs outline-none"
                       >
                         ← Voltar
                       </button>
@@ -3638,7 +3638,7 @@ export default function PatientRecord() {
                     <button
                       type="button"
                       onClick={() => setShowShareModal(false)}
-                      className="py-2.5 px-4 rounded-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors font-bold text-xs outline-none"
+                      className="w-full sm:w-auto py-2.5 px-4 rounded-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors font-bold text-xs outline-none"
                     >
                       Cancelar
                     </button>
