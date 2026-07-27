@@ -966,10 +966,10 @@ export default function Agenda() {
                         const dateStr = formatDateKey(arg.date);
                         const eventsCount = calendarEvents.filter(e => formatDateKey(e.start) === dateStr).length;
                         return (
-                          <div className="flex flex-col items-center justify-center w-full h-full relative pb-3">
-                            <span>{arg.dayNumberText}</span>
+                          <div className="flex flex-col items-center justify-center w-full h-full gap-0.5">
+                            <span className="leading-none">{arg.dayNumberText}</span>
                             {eventsCount > 0 && (
-                              <div className="absolute bottom-0.5 px-1.5 py-[2px] rounded-full bg-[var(--sage)] text-white text-[9px] font-black leading-none shadow-sm min-w-[16px] text-center">
+                              <div className="px-1.5 py-[2px] rounded-full bg-[var(--sage)] text-white text-[9px] font-black leading-none shadow-sm min-w-[16px] text-center">
                                 {eventsCount}
                               </div>
                             )}
