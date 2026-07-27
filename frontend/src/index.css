@@ -387,6 +387,48 @@
   border-radius: 12px;
 }
 
+/* FullCalendar Popover for "+ X more" */
+.fc-popover {
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 12px !important;
+  z-index: 50 !important;
+}
+
+.fc-popover-header {
+  background-color: var(--surface-alt) !important;
+  color: var(--text-primary) !important;
+  border-top-left-radius: 12px !important;
+  border-top-right-radius: 12px !important;
+  padding: 8px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.fc-popover-title {
+  font-weight: bold !important;
+  font-size: 0.875rem !important;
+}
+
+.fc-popover-close {
+  color: var(--text-muted) !important;
+  opacity: 1 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.fc-popover-close:hover {
+  color: var(--text-primary) !important;
+}
+
+.fc-popover-body {
+  padding: 8px !important;
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;

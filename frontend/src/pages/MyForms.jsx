@@ -242,10 +242,10 @@ export default function MyForms() {
               {[1, 2, 3].map((i) => (
                 <div key={i} className="card p-4 animate-pulse">
                   <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 bg-brand-50 rounded-xl" />
+                    <div className="h-10 w-10 bg-[var(--surface-alt)] rounded-xl" />
                     <div className="flex-1">
-                      <div className="h-5 bg-brand-100 rounded w-1/3 mb-2" />
-                      <div className="h-4 bg-brand-50 rounded w-1/4" />
+                      <div className="h-5 bg-[var(--surface-alt)] rounded w-1/3 mb-2" />
+                      <div className="h-4 bg-[var(--surface-alt)] rounded w-1/4" />
                     </div>
                   </div>
                 </div>
@@ -812,7 +812,7 @@ function CreateFormModal({ onClose, onCreated }) {
                 )}
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-2">
+                <label className="block text-xs font-bold text-[var(--text-primary)] uppercase tracking-widest mb-2">
                   Código (Sigla)
                 </label>
                 <input
@@ -828,7 +828,7 @@ function CreateFormModal({ onClose, onCreated }) {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-3">
+            <label className="block text-xs font-bold text-[var(--text-primary)] uppercase tracking-widest mb-3">
               Classificação *
             </label>
             <div className="flex flex-wrap gap-2">
@@ -850,7 +850,7 @@ function CreateFormModal({ onClose, onCreated }) {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-900 uppercase tracking-widest mb-3">
+            <label className="block text-xs font-bold text-[var(--text-primary)] uppercase tracking-widest mb-3">
               Público-alvo
             </label>
             <div className="flex gap-2">
@@ -862,7 +862,7 @@ function CreateFormModal({ onClose, onCreated }) {
                   className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
                     formData.audiences.includes(opt.value)
                       ? "bg-brand-500 text-white shadow-lg"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      : "bg-[var(--surface-alt)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                   }`}
                 >
                   {opt.label}
