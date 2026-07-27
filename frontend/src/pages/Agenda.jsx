@@ -932,12 +932,20 @@ export default function Agenda() {
                     initialView="dayGridMonth"
                     locale={ptBrLocale}
                     headerToolbar={false}
-                    events={calendarEvents}
+                    events={isMobile && calendarView === "month" ? [] : calendarEvents}
                     datesSet={handleDatesSet}
-                    dateClick={(info) => setSelectedDay(info.date)}
+                    dateClick={(info) => {
+                      setSelectedDay(info.date);
+                      if (isMobile) {
+                        setTimeout(() => {
+                          const panel = document.getElementById("agenda-detail-panel");
+                          if (panel) panel.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }, 50);
+                      }
+                    }}
                     eventClick={(info) => openDetailModal(info.event.extendedProps.session, info.event.start)}
                     eventContent={renderEventContent}
-                    dayMaxEvents={isMobile ? 1 : true}
+                    dayMaxEvents={true}
                     moreLinkClick={(info) => {
                       if (isMobile || window.innerWidth < 1024) {
                         setSelectedDay(info.date);
@@ -953,6 +961,19 @@ export default function Agenda() {
                     slotMinTime="06:00:00"
                     slotMaxTime="23:00:00"
                     height={isMobile ? "auto" : "100%"}
+                    dayCellContent={(arg) => {
+                      if (isMobile && calendarView === "month") {
+                        const dateStr = formatDateKey(arg.date);
+                        const hasEvents = calendarEvents.some(e => formatDateKey(e.start) === dateStr);
+                        return (
+                          <div className="flex flex-col items-center justify-center w-full h-full relative pb-1">
+                            <span>{arg.dayNumberText}</span>
+                            {hasEvents && <div className="absolute bottom-0.5 w-1.5 h-1.5 rounded-full bg-[var(--sage)] shadow-sm" />}
+                          </div>
+                        );
+                      }
+                      return arg.dayNumberText;
+                    }}
                     dayCellClassNames={(arg) => {
                       const dateStr = formatDateKey(arg.date);
                       const isSelected = selectedDay && dateStr === formatDateKey(selectedDay);
