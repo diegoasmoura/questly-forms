@@ -36,10 +36,10 @@ export default function PatientForm() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-brand-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="animate-spin text-slate-500" size={32} />
-          <p className="text-sm text-slate-600">Carregando formulário...</p>
+          <Loader2 className="animate-spin text-[var(--text-secondary)]" size={32} />
+          <p className="text-sm text-[var(--text-secondary)]">Carregando formulário...</p>
         </div>
       </div>
     );
@@ -47,11 +47,11 @@ export default function PatientForm() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-brand-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center px-4">
         <div className="card max-w-md w-full p-8 text-center">
-          <AlertCircle size={48} className="mx-auto text-red-400 mb-4" />
-          <h1 className="text-xl font-semibold text-slate-900 mb-2">Formulário Indisponível</h1>
-          <p className="text-slate-600 mb-6">{error}</p>
+          <AlertCircle size={48} className="mx-auto text-red-500 mb-4" />
+          <h1 className="text-xl font-semibold text-[var(--text-primary)] mb-2">Formulário Indisponível</h1>
+          <p className="text-[var(--text-secondary)] mb-6">{error}</p>
           <button onClick={() => navigate("/")} className="btn btn-primary">
             Ir para Início
           </button>
@@ -63,14 +63,14 @@ export default function PatientForm() {
   if (!form || !schema) return null;
 
   return (
-    <div className="min-h-screen bg-brand-50">
-      <header className="bg-white border-b border-brand-100">
+    <div className="min-h-screen bg-[var(--bg)]">
+      <header className="bg-[var(--surface)] border-b border-[var(--border)]">
         <div className="max-w-3xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <div className="w-8 h-8 rounded-sm rotate-45 bg-brand-900 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-sm rotate-45 bg-[var(--sage)] flex items-center justify-center">
               <span className="text-white font-bold text-sm -rotate-45">Q</span>
             </div>
-            <span className="text-sm font-medium text-slate-900">Questly Forms</span>
+            <span className="text-sm font-medium text-[var(--text-primary)]">Questly Forms</span>
           </div>
         </div>
       </header>
