@@ -46,10 +46,14 @@ export default function CustomFormRenderer({
       setErrors((prev) => ({ ...prev, [questionId]: null }));
       onChange?.(next);
       if (displayMode === "stepper" && currentIdxRef.current < allQuestionsRef.current.length - 1) {
-        clearTimeout(autoAdvanceRef.current);
-        autoAdvanceRef.current = setTimeout(() => {
-          setCurrentIdx((prev) => Math.min(prev + 1, allQuestionsRef.current.length - 1));
-        }, 500);
+        const q = allQuestionsRef.current.find(q => q.id === questionId);
+        const autoAdvanceTypes = ["radiogroup", "boolean", "rating", "likert"];
+        if (q && autoAdvanceTypes.includes(q.type)) {
+          clearTimeout(autoAdvanceRef.current);
+          autoAdvanceRef.current = setTimeout(() => {
+            setCurrentIdx((prev) => Math.min(prev + 1, allQuestionsRef.current.length - 1));
+          }, 500);
+        }
       }
     },
     [readOnly, onChange, values, displayMode]
@@ -74,12 +78,23 @@ export default function CustomFormRenderer({
       }
     }
     setErrors(errs);
-    return Object.keys(errs).length === 0;
+    return errs;
   }, [schema, values]);
 
   const handleSubmit = useCallback(async () => {
     if (readOnly) return;
-    if (!validate()) return;
+    const errs = validate();
+    const errKeys = Object.keys(errs);
+    if (errKeys.length > 0) {
+      alert("Existem campos obrigatórios não preenchidos. Por favor, revise suas respostas.");
+      if (displayMode === "stepper") {
+        const firstErrorIdx = allQuestionsRef.current.findIndex(q => errKeys.includes(q.id));
+        if (firstErrorIdx !== -1) {
+          setCurrentIdx(firstErrorIdx);
+        }
+      }
+      return;
+    }
     if (preview) {
       setSubmitted(true);
       return;
@@ -93,7 +108,7 @@ export default function CustomFormRenderer({
     } finally {
       setSaving(false);
     }
-  }, [readOnly, preview, validate, onComplete, values]);
+  }, [readOnly, preview, validate, onComplete, values, displayMode]);
 
   const answeredCount = useMemo(() => {
     return allQuestions.filter((q) => {
