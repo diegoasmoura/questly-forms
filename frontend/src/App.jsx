@@ -47,8 +47,19 @@ function ProtectedRoute({ children }) {
 
   if (loading) return <LoadingScreen />;
   if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
-  
-  return <Layout>{children}</Layout>;
+  return (
+    <Layout>
+      <Suspense
+        fallback={
+          <div className="flex-1 flex items-center justify-center min-h-[50vh]">
+            <div className="w-8 h-8 rounded-full border-2 border-[var(--sage)] border-t-transparent animate-spin" />
+          </div>
+        }
+      >
+        {children}
+      </Suspense>
+    </Layout>
+  );
 }
 
 function PublicRoute({ children }) {
