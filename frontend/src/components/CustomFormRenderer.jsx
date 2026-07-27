@@ -66,7 +66,7 @@ export default function CustomFormRenderer({
       for (const q of page.questions || []) {
         if (q.required) {
           const val = values[q.id];
-          if (val === undefined || val === null || val === "" || val === false) {
+          if (val === undefined || val === null || val === "") {
             errs[q.id] = "Campo obrigatório";
           } else if (Array.isArray(val) && val.length === 0) {
             errs[q.id] = "Campo obrigatório";
