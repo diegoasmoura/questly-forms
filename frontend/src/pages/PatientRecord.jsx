@@ -3572,28 +3572,35 @@ export default function PatientRecord() {
                     <div className="animate-spin w-4 h-4 border-2 border-[var(--sage)] border-t-transparent rounded-full mx-auto" />
                   </div>
                 ) : (
-                  <div className="relative w-full">
-                    <select
-                      className="input w-full appearance-none pr-10 text-ellipsis overflow-hidden whitespace-nowrap bg-[var(--surface)] text-[var(--text-primary)] text-base"
-                      value={shareData.formId}
-                      onChange={(e) => {
-                        setShareData({ ...shareData, formId: e.target.value });
-                        const existing = checkExistingLinkForForm(e.target.value);
-                        setExistingLinkForForm(existing);
-                        setForceCreateNew(false);
-                      }}
-                      required
-                    >
-                      <option value="">Selecionar instrumento...</option>
-                      {forms.map(form => (
-                        <option key={form.id} value={form.id} title={form.title}>
-                          {form.title.length > 45 ? form.title.substring(0, 45) + "..." : form.title}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[var(--text-secondary)]">
-                      <ChevronDown size={16} />
-                    </div>
+                  <div className="max-h-[220px] overflow-y-auto patients-scrollbar border border-[var(--border)] rounded-[12px] divide-y divide-[var(--border)] bg-[var(--surface-alt)]/30">
+                    {forms.map(form => {
+                      const isSelected = shareData.formId === form.id;
+                      return (
+                        <button
+                          key={form.id}
+                          type="button"
+                          onClick={() => {
+                            setShareData({ ...shareData, formId: form.id });
+                            const existing = checkExistingLinkForForm(form.id);
+                            setExistingLinkForForm(existing);
+                            setForceCreateNew(false);
+                          }}
+                          className={`w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between ${
+                            isSelected 
+                              ? 'bg-[var(--sage)]/10 text-[var(--sage)] font-bold' 
+                              : 'text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] hover:text-[var(--text-primary)]'
+                          }`}
+                        >
+                          <span className="pr-2 leading-tight">{form.title}</span>
+                          {isSelected && <Check size={16} className="shrink-0" />}
+                        </button>
+                      );
+                    })}
+                    {forms.length === 0 && (
+                      <div className="p-4 text-center text-sm text-[var(--text-muted)]">
+                        Nenhum instrumento disponível.
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
