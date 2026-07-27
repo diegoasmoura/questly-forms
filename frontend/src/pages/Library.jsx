@@ -84,7 +84,7 @@ export default function Library() {
   );
 
   return (
-    <div className="h-full flex flex-col overflow-y-auto lg:overflow-hidden animate-fade-in relative pb-28 lg:pb-0 [&::-webkit-scrollbar]:hidden">
+    <div className="flex-1 flex flex-col animate-fade-in">
 
       {/* BARRA SUPERIOR UNIFICADA (Padronizada com Pacientes, CRM e Instrumentos) */}
       <div className="px-3 sm:px-6 py-4 flex flex-row items-center justify-between gap-2 sm:gap-4 shrink-0 sticky top-0 z-40 bg-[var(--bg)] shadow-[0_10px_20px_-10px_var(--bg)]">
@@ -146,10 +146,10 @@ export default function Library() {
       </div>
 
       {/* Conteúdo do Acervo */}
-      <div className="flex-1 flex flex-col px-3 sm:px-6 pb-3 sm:pb-6 min-h-0">
+      <div className="px-3 sm:px-6 pb-6">
         {/* Template Grid */}
         {viewMode === "grid" ? (
-          <div className="flex-1 overflow-y-auto hide-scrollbar pt-3">
+          <div className="pt-3">
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pt-1">
               {filteredTemplates.map((template) => (
                 <div 
@@ -223,7 +223,7 @@ export default function Library() {
             </div>
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto space-y-3 hide-scrollbar pt-3">
+          <div className="space-y-3 pt-3">
             {filteredTemplates.map((template) => (
               <LibraryListRow
                 key={template.id}
