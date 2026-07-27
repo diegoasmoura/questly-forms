@@ -3574,7 +3574,7 @@ export default function PatientRecord() {
                 ) : (
                   <div className="relative w-full">
                     <select
-                      className="input w-full appearance-none pr-10 text-ellipsis overflow-hidden whitespace-nowrap bg-[var(--surface)] text-[var(--text-primary)]"
+                      className="input w-full appearance-none pr-10 text-ellipsis overflow-hidden whitespace-nowrap bg-[var(--surface)] text-[var(--text-primary)] text-base"
                       value={shareData.formId}
                       onChange={(e) => {
                         setShareData({ ...shareData, formId: e.target.value });
@@ -3584,10 +3584,10 @@ export default function PatientRecord() {
                       }}
                       required
                     >
-                      <option value="" className="bg-[var(--surface)] text-[var(--text-primary)]">Selecionar instrumento...</option>
+                      <option value="">Selecionar instrumento...</option>
                       {forms.map(form => (
-                        <option key={form.id} value={form.id} className="bg-[var(--surface)] text-[var(--text-primary)]">
-                          {form.title}
+                        <option key={form.id} value={form.id} title={form.title}>
+                          {form.title.length > 45 ? form.title.substring(0, 45) + "..." : form.title}
                         </option>
                       ))}
                     </select>
