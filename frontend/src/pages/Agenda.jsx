@@ -964,11 +964,15 @@ export default function Agenda() {
                     dayCellContent={(arg) => {
                       if (isMobile && calendarView === "month") {
                         const dateStr = formatDateKey(arg.date);
-                        const hasEvents = calendarEvents.some(e => formatDateKey(e.start) === dateStr);
+                        const eventsCount = calendarEvents.filter(e => formatDateKey(e.start) === dateStr).length;
                         return (
-                          <div className="flex flex-col items-center justify-center w-full h-full relative pb-1">
+                          <div className="flex flex-col items-center justify-center w-full h-full relative pb-3">
                             <span>{arg.dayNumberText}</span>
-                            {hasEvents && <div className="absolute bottom-0.5 w-1.5 h-1.5 rounded-full bg-[var(--sage)] shadow-sm" />}
+                            {eventsCount > 0 && (
+                              <div className="absolute bottom-0.5 px-1.5 py-[2px] rounded-full bg-[var(--sage)] text-white text-[9px] font-black leading-none shadow-sm min-w-[16px] text-center">
+                                {eventsCount}
+                              </div>
+                            )}
                           </div>
                         );
                       }
