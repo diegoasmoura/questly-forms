@@ -201,7 +201,7 @@
     overflow: hidden;
   }
   .card-hover {
-    @apply hover:shadow-md hover:border-slate-300 hover:bg-white hover:scale-[1.02] transition-all duration-150 ease-out;
+    @apply hover:shadow-md hover:border-[var(--sage)] hover:bg-[var(--bg)] hover:scale-[1.02] transition-all duration-150 ease-out;
   }
 }
 
