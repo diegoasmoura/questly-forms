@@ -937,7 +937,18 @@ export default function Agenda() {
                     dateClick={(info) => setSelectedDay(info.date)}
                     eventClick={(info) => openDetailModal(info.event.extendedProps.session, info.event.start)}
                     eventContent={renderEventContent}
-                    dayMaxEvents={true}
+                    dayMaxEvents={isMobile ? 1 : true}
+                    moreLinkClick={(info) => {
+                      if (isMobile || window.innerWidth < 1024) {
+                        setSelectedDay(info.date);
+                        setTimeout(() => {
+                          const panel = document.getElementById("agenda-detail-panel");
+                          if (panel) panel.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }, 50);
+                        return "prevent";
+                      }
+                      return "popover";
+                    }}
                     allDaySlot={false}
                     slotMinTime="06:00:00"
                     slotMaxTime="23:00:00"
@@ -975,7 +986,7 @@ export default function Agenda() {
             </div>
 
             {/* Right: Detail Panel */}
-            <div className="w-full lg:w-[25%] flex flex-col gap-3 mb-4 lg:mb-0">
+            <div id="agenda-detail-panel" className="w-full lg:w-[25%] flex flex-col gap-3 mb-4 lg:mb-0">
               <h3 className="text-[18px] font-bold font-heading text-[var(--text-primary)] shrink-0">Agendamentos</h3>
               <div className="flex-1 min-h-0">
                 {selectedDay ? (
