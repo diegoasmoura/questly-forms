@@ -531,22 +531,38 @@ const resetImportModal = () => {
       {/* patients List */}
       <div className="flex-1 flex flex-col px-3 sm:px-6 pb-3 sm:pb-6 min-h-0">
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="card p-6 animate-pulse">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-slate-200" />
-                  <div className="flex-1">
-                    <div className="h-4 bg-slate-200 rounded w-3/4 mb-2" />
-                    <div className="h-3 bg-slate-100 rounded w-1/2" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="h-3 bg-slate-100 rounded w-full" />
-                  <div className="h-3 bg-slate-100 rounded w-full" />
-                </div>
+          <div className="flex flex-col flex-1 md:bg-[var(--surface)] md:border md:border-[var(--border)] md:rounded-[24px] md:shadow-sm mt-2 md:min-h-0 md:overflow-hidden">
+            <div className="flex-1 md:overflow-y-auto patients-scrollbar p-1 md:p-4">
+              <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4" : "flex flex-col"}>
+                {[1, 2, 3, 4, 5, 6].map(i => (
+                  viewMode === "grid" ? (
+                    <div key={i} className="card p-6 animate-pulse border border-[var(--border)]">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 rounded-full bg-[var(--surface-alt)]" />
+                        <div className="flex-1">
+                          <div className="h-4 bg-[var(--surface-alt)] rounded w-3/4 mb-2" />
+                          <div className="h-3 bg-[var(--surface-alt)] rounded w-1/2" />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-3 bg-[var(--surface-alt)] rounded w-full" />
+                        <div className="h-3 bg-[var(--surface-alt)] rounded w-full" />
+                      </div>
+                    </div>
+                  ) : (
+                    <div key={i} className="flex items-center gap-4 p-4 border-b border-[var(--border)] animate-pulse last:border-0">
+                      <div className="w-10 h-10 rounded-full bg-[var(--surface-alt)] shrink-0" />
+                      <div className="flex-1">
+                        <div className="h-4 bg-[var(--surface-alt)] rounded w-[200px] mb-2" />
+                        <div className="h-3 bg-[var(--surface-alt)] rounded w-[150px]" />
+                      </div>
+                      <div className="hidden md:block w-32 h-4 bg-[var(--surface-alt)] rounded" />
+                      <div className="hidden md:block w-24 h-4 bg-[var(--surface-alt)] rounded" />
+                    </div>
+                  )
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         ) : viewMode === "grid" && filteredPatients.length > 0 ? (
           <div className="flex flex-col flex-1 md:bg-[var(--surface)] md:border md:border-[var(--border)] md:rounded-[24px] md:shadow-sm mt-2 md:min-h-0 md:overflow-hidden">
