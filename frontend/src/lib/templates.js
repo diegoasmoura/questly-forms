@@ -445,27 +445,27 @@ export const clinicalTemplates = [
         {
           title: "Perguntas de 1 a 21",
           questions: [
-            { id: "dass_1", type: "likert", title: "Achei difícil me acalmar.", options: [{value:"0",label:"0 - Não se aplicou de maneira alguma a mim"},{value:"1",label:"1 - Aplicou-se a mim em algum grau ou por algum tempo"},{value:"2",label:"2 - Aplicou-se a mim em um grau considerável ou por uma boa parte do tempo"},{value:"3",label:"3 - Aplicou-se a mim muito ou na maioria do tempo"}], required: true },
-            { id: "dass_2", type: "likert", title: "Senti minha boca seca.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_3", type: "likert", title: "Não consegui vivenciar nenhum sentimento positivo.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_4", type: "likert", title: "Tive dificuldade em respirar (ex: respiração rápida, falta de ar na ausência de esforço físico).", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_5", type: "likert", title: "Achei difícil ter iniciativa para fazer as coisas.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_6", type: "likert", title: "Tive a tendência de reagir de forma exagerada às situações.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_7", type: "likert", title: "Senti tremores (ex: nas mãos).", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_8", type: "likert", title: "Senti que estava sempre nervoso.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_9", type: "likert", title: "Preocupe-me com situações em que eu pudesse entrar em pânico e parecer ridículo.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_10", type: "likert", title: "Senti que não tinha nada a desejar para o futuro.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_11", type: "likert", title: "Senti-me impaciente.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_12", type: "likert", title: "Achei difícil relaxar.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_13", type: "likert", title: "Senti-me deprimido e sem ânimo.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_14", type: "likert", title: "Fui intolerante com qualquer coisa que me impedisse de continuar o que estava fazendo.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_15", type: "likert", title: "Senti que estava prestes a entrar em pânico.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_16", type: "likert", title: "Fui incapaz de me entusiasmar com qualquer coisa.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_17", type: "likert", title: "Senti que não tinha muito valor como pessoa.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_18", type: "likert", title: "Senti que estava bastante emotivo/sensível.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_19", type: "likert", title: "Percebi batimentos cardíacos na ausência de esforço físico (ex: palpitações).", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_20", type: "likert", title: "Senti medo sem nenhum motivo aparente.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true },
-            { id: "dass_21", type: "likert", title: "Senti que a vida não tinha sentido.", options: [{value:"0",label:"0 - Não se aplicou"},{value:"1",label:"1 - Algum grau"},{value:"2",label:"2 - Grau considerável"},{value:"3",label:"3 - Maioria do tempo"}], required: true }
+            { id: "dass_1", type: "likert", title: "Achei difícil me acalmar.", options: [{value:"0",label:"Não se aplicou de maneira alguma a mim"},{value:"1",label:"Aplicou-se a mim em algum grau ou por algum tempo"},{value:"2",label:"Aplicou-se a mim em um grau considerável ou por uma boa parte do tempo"},{value:"3",label:"Aplicou-se a mim muito ou na maioria do tempo"}], required: true },
+            { id: "dass_2", type: "likert", title: "Senti minha boca seca.", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_3", type: "likert", title: "Não consegui vivenciar nenhum sentimento positivo.", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_4", type: "likert", title: "Tive dificuldade em respirar (ex: respiração rápida, falta de ar na ausência de esforço físico).", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_5", type: "likert", title: "Achei difícil ter iniciativa para fazer as coisas.", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_6", type: "likert", title: "Tive a tendência de reagir de forma exagerada às situações.", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_7", type: "likert", title: "Senti tremores (ex: nas mãos).", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_8", type: "likert", title: "Senti que estava sempre nervoso.", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_9", type: "likert", title: "Preocupe-me com situações em que eu pudesse entrar em pânico e parecer ridículo.", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_10", type: "likert", title: "Senti que não tinha nada a desejar para o futuro.", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_11", type: "likert", title: "Senti-me impaciente.", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_12", type: "likert", title: "Achei difícil relaxar.", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_13", type: "likert", title: "Senti-me deprimido e sem ânimo.", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_14", type: "likert", title: "Fui intolerante com qualquer coisa que me impedisse de continuar o que estava fazendo.", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_15", type: "likert", title: "Senti que estava prestes a entrar em pânico.", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_16", type: "likert", title: "Fui incapaz de me entusiasmar com qualquer coisa.", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_17", type: "likert", title: "Senti que não tinha muito valor como pessoa.", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_18", type: "likert", title: "Senti que estava bastante emotivo/sensível.", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_19", type: "likert", title: "Percebi batimentos cardíacos na ausência de esforço físico (ex: palpitações).", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_20", type: "likert", title: "Senti medo sem nenhum motivo aparente.", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true },
+            { id: "dass_21", type: "likert", title: "Senti que a vida não tinha sentido.", options: [{value:"0",label:"Não se aplicou"},{value:"1",label:"Algum grau"},{value:"2",label:"Grau considerável"},{value:"3",label:"Maioria do tempo"}], required: true }
           ]
         }
       ]
@@ -485,28 +485,28 @@ export const clinicalTemplates = [
           title: "Sintomas Depressivos",
           questions: [
             { id: "bdi_1", type: "choice", title: "1. Tristeza", options: [
-              { value: "0", label: "0 - Não me sinto triste." },
-              { value: "1", label: "1 - Eu me sinto triste a maior parte do tempo." },
-              { value: "2", label: "2 - Estou sempre triste e não consigo sair disso." },
-              { value: "3", label: "3 - Estou tão triste ou infeliz que não consigo aguentar." }
+              { value: "0", label:"Não me sinto triste." },
+              { value: "1", label:"Eu me sinto triste a maior parte do tempo." },
+              { value: "2", label:"Estou sempre triste e não consigo sair disso." },
+              { value: "3", label:"Estou tão triste ou infeliz que não consigo aguentar." }
             ], multiple: false, required: true },
             { id: "bdi_2", type: "choice", title: "2. Pessimismo", options: [
-              { value: "0", label: "0 - Não estou desanimado quanto ao meu futuro." },
-              { value: "1", label: "1 - Eu me sinto mais desanimado quanto ao meu futuro do que costumava estar." },
-              { value: "2", label: "2 - Não espero que as coisas deem certo para mim." },
-              { value: "3", label: "3 - Sinto que meu futuro é sem esperança e que as coisas só vão piorar." }
+              { value: "0", label:"Não estou desanimado quanto ao meu futuro." },
+              { value: "1", label:"Eu me sinto mais desanimado quanto ao meu futuro do que costumava estar." },
+              { value: "2", label:"Não espero que as coisas deem certo para mim." },
+              { value: "3", label:"Sinto que meu futuro é sem esperança e que as coisas só vão piorar." }
             ], multiple: false, required: true },
             { id: "bdi_3", type: "choice", title: "3. Fracasso Passado", options: [
-              { value: "0", label: "0 - Não me sinto um fracasso." },
-              { value: "1", label: "1 - Sinto que fracassei mais do que a maioria das pessoas." },
-              { value: "2", label: "2 - Quando olho para trás, vejo muitos fracassos." },
-              { value: "3", label: "3 - Sinto que sou um fracasso total como pessoa." }
+              { value: "0", label:"Não me sinto um fracasso." },
+              { value: "1", label:"Sinto que fracassei mais do que a maioria das pessoas." },
+              { value: "2", label:"Quando olho para trás, vejo muitos fracassos." },
+              { value: "3", label:"Sinto que sou um fracasso total como pessoa." }
             ], multiple: false, required: true },
             { id: "bdi_4", type: "choice", title: "4. Perda de Prazer", options: [
-              { value: "0", label: "0 - Obtenho tanto prazer quanto antes com as coisas que gosto." },
-              { value: "1", label: "1 - Não sinto tanto prazer com as coisas como costumava sentir." },
-              { value: "2", label: "2 - Obtenho muito pouco prazer com as coisas que costumava gostar." },
-              { value: "3", label: "3 - Não consigo obter nenhum prazer com as coisas que costumava gostar." }
+              { value: "0", label:"Obtenho tanto prazer quanto antes com as coisas que gosto." },
+              { value: "1", label:"Não sinto tanto prazer com as coisas como costumava sentir." },
+              { value: "2", label:"Obtenho muito pouco prazer com as coisas que costumava gostar." },
+              { value: "3", label:"Não consigo obter nenhum prazer com as coisas que costumava gostar." }
             ], multiple: false, required: true }
           ]
         }
@@ -526,10 +526,10 @@ export const clinicalTemplates = [
         {
           title: "Sintomas de Ansiedade",
           questions: [
-            { id: "bai_1", type: "likert", title: "Dormência ou formigamento.", options: [{value:"0",label:"0 - Absolutamente não"},{value:"1",label:"1 - Levemente"},{value:"2",label:"2 - Moderadamente"},{value:"3",label:"3 - Gravemente"}], required: true },
-            { id: "bai_2", type: "likert", title: "Sensação de calor.", options: [{value:"0",label:"0 - Absolutamente não"},{value:"1",label:"1 - Levemente"},{value:"2",label:"2 - Moderadamente"},{value:"3",label:"3 - Gravemente"}], required: true },
-            { id: "bai_3", type: "likert", title: "Tremores nas pernas.", options: [{value:"0",label:"0 - Absolutamente não"},{value:"1",label:"1 - Levemente"},{value:"2",label:"2 - Moderadamente"},{value:"3",label:"3 - Gravemente"}], required: true },
-            { id: "bai_4", type: "likert", title: "Incapaz de relaxar.", options: [{value:"0",label:"0 - Absolutamente não"},{value:"1",label:"1 - Levemente"},{value:"2",label:"2 - Moderadamente"},{value:"3",label:"3 - Gravemente"}], required: true }
+            { id: "bai_1", type: "likert", title: "Dormência ou formigamento.", options: [{value:"0",label:"Absolutamente não"},{value:"1",label:"Levemente"},{value:"2",label:"Moderadamente"},{value:"3",label:"Gravemente"}], required: true },
+            { id: "bai_2", type: "likert", title: "Sensação de calor.", options: [{value:"0",label:"Absolutamente não"},{value:"1",label:"Levemente"},{value:"2",label:"Moderadamente"},{value:"3",label:"Gravemente"}], required: true },
+            { id: "bai_3", type: "likert", title: "Tremores nas pernas.", options: [{value:"0",label:"Absolutamente não"},{value:"1",label:"Levemente"},{value:"2",label:"Moderadamente"},{value:"3",label:"Gravemente"}], required: true },
+            { id: "bai_4", type: "likert", title: "Incapaz de relaxar.", options: [{value:"0",label:"Absolutamente não"},{value:"1",label:"Levemente"},{value:"2",label:"Moderadamente"},{value:"3",label:"Gravemente"}], required: true }
           ]
         }
       ]
@@ -548,9 +548,9 @@ export const clinicalTemplates = [
         {
           title: "Parte A - Sintomas de Desatenção",
           questions: [
-            { id: "asrs_1", type: "likert", title: "Com que frequência você comete erros por descuido quando tem de trabalhar em um projeto chato ou difícil?", options: [{value:"0",label:"0 - Nunca"},{value:"1",label:"1 - Raramente"},{value:"2",label:"2 - Às vezes"},{value:"3",label:"3 - Frequentemente"},{value:"4",label:"4 - Muito frequentemente"}], required: true },
-            { id: "asrs_2", type: "likert", title: "Com que frequência você tem dificuldade para manter a atenção quando está fazendo um trabalho chato ou repetitivo?", options: [{value:"0",label:"0 - Nunca"},{value:"1",label:"1 - Raramente"},{value:"2",label:"2 - Às vezes"},{value:"3",label:"3 - Frequentemente"},{value:"4",label:"4 - Muito frequentemente"}], required: true },
-            { id: "asrs_3", type: "likert", title: "Com que frequência você tem dificuldade para se concentrar no que as pessoas dizem, mesmo quando estão falando diretamente com você?", options: [{value:"0",label:"0 - Nunca"},{value:"1",label:"1 - Raramente"},{value:"2",label:"2 - Às vezes"},{value:"3",label:"3 - Frequentemente"},{value:"4",label:"4 - Muito frequentemente"}], required: true }
+            { id: "asrs_1", type: "likert", title: "Com que frequência você comete erros por descuido quando tem de trabalhar em um projeto chato ou difícil?", options: [{value:"0",label:"Nunca"},{value:"1",label:"Raramente"},{value:"2",label:"Às vezes"},{value:"3",label:"Frequentemente"},{value:"4",label:"Muito frequentemente"}], required: true },
+            { id: "asrs_2", type: "likert", title: "Com que frequência você tem dificuldade para manter a atenção quando está fazendo um trabalho chato ou repetitivo?", options: [{value:"0",label:"Nunca"},{value:"1",label:"Raramente"},{value:"2",label:"Às vezes"},{value:"3",label:"Frequentemente"},{value:"4",label:"Muito frequentemente"}], required: true },
+            { id: "asrs_3", type: "likert", title: "Com que frequência você tem dificuldade para se concentrar no que as pessoas dizem, mesmo quando estão falando diretamente com você?", options: [{value:"0",label:"Nunca"},{value:"1",label:"Raramente"},{value:"2",label:"Às vezes"},{value:"3",label:"Frequentemente"},{value:"4",label:"Muito frequentemente"}], required: true }
           ]
         }
       ]
