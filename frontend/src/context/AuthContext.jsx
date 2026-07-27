@@ -13,7 +13,14 @@ export function AuthProvider({ children }) {
       return null;
     }
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    // Se temos um token mas NENHUM usuário em cache, precisamos bloquear a tela até buscar
+    // Se já temos o usuário em cache, carregamos a interface instantaneamente (Optimistic UI)
+    const token = localStorage.getItem("token");
+    const savedUser = localStorage.getItem("user");
+    if (token && !savedUser) return true;
+    return false;
+  });
 
   const login = useCallback(async (credentials) => {
     const data = await api.login(credentials);
