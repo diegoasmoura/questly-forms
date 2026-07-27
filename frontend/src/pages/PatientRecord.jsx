@@ -122,7 +122,8 @@ import {
   CreditCard,
   Receipt,
   Save,
-  Send
+  Send,
+  ChevronDown
 } from "lucide-react";
 
 export default function PatientRecord() {
@@ -3565,28 +3566,35 @@ export default function PatientRecord() {
               }
             }} className="space-y-4">
               <div>
-                <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Selecione um Instrumento *</label>
+                <label className="block text-xs sm:text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Selecione um Instrumento *</label>
                 {loadingForms ? (
                   <div className="text-center py-4 text-[var(--text-muted)]">
                     <div className="animate-spin w-4 h-4 border-2 border-[var(--sage)] border-t-transparent rounded-full mx-auto" />
                   </div>
                 ) : (
-                  <select
-                    className="input w-full"
-                    value={shareData.formId}
-                    onChange={(e) => {
-                      setShareData({ ...shareData, formId: e.target.value });
-                      const existing = checkExistingLinkForForm(e.target.value);
-                      setExistingLinkForForm(existing);
-                      setForceCreateNew(false);
-                    }}
-                    required
-                  >
-                    <option value="" className="bg-[var(--surface)] text-[var(--text-primary)]">Selecionar instrumento...</option>
-                    {forms.map(form => (
-                      <option key={form.id} value={form.id} className="bg-[var(--surface)] text-[var(--text-primary)]">{form.title}</option>
-                    ))}
-                  </select>
+                  <div className="relative w-full">
+                    <select
+                      className="input w-full appearance-none pr-10 text-ellipsis overflow-hidden whitespace-nowrap bg-[var(--surface)] text-[var(--text-primary)]"
+                      value={shareData.formId}
+                      onChange={(e) => {
+                        setShareData({ ...shareData, formId: e.target.value });
+                        const existing = checkExistingLinkForForm(e.target.value);
+                        setExistingLinkForForm(existing);
+                        setForceCreateNew(false);
+                      }}
+                      required
+                    >
+                      <option value="" className="bg-[var(--surface)] text-[var(--text-primary)]">Selecionar instrumento...</option>
+                      {forms.map(form => (
+                        <option key={form.id} value={form.id} className="bg-[var(--surface)] text-[var(--text-primary)]">
+                          {form.title}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[var(--text-secondary)]">
+                      <ChevronDown size={16} />
+                    </div>
+                  </div>
                 )}
               </div>
 
