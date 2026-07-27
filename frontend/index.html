@@ -13,6 +13,23 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <title>Questly Forms | Gestão Clínica</title>
+    <!-- Anti-flicker: aplica o tema ANTES do React iniciar -->
+    <script>
+      (function() {
+        try {
+          var t = localStorage.getItem('theme');
+          if (t === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.colorScheme = 'dark';
+          }
+        } catch(e) {}
+      })();
+    </script>
+    <style>
+      /* Cor de fundo nativa para eliminar flash branco no carregamento inicial */
+      html.dark { background-color: #101722; }
+      html:not(.dark) { background-color: #F8F6F0; }
+    </style>
   </head>
   <body>
     <div id="root"></div>

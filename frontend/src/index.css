@@ -88,11 +88,9 @@
 }
 
 @layer base {
-  /* Abordagem correta: apenas os elementos root recebem a transição. 
-     Elementos filhos que herdam cor não precisam de transição própria — herdam automaticamente.
-     Isso elimina o double-transition flicker. */
+  /* Tema aplicado instantaneamente — sem transição para evitar piscada branca na troca de rota */
   html {
-    transition: color-scheme 300ms ease-in-out;
+    /* Sem transition de color-scheme: era a causa primária do flash branco ao trocar de aba */
   }
 
   /* Elementos que usam variáveis CSS de cor diretamente e precisam de transição suave de tema */
