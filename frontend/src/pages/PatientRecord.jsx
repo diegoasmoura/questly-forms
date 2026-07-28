@@ -113,6 +113,7 @@ import {
   Settings,
   X,
   Check,
+  Link2,
   Paperclip,
   File,
   Pencil,
@@ -2731,10 +2732,10 @@ export default function PatientRecord() {
                                       await navigator.clipboard.writeText(shareUrl);
                                       alert("Link copiado!");
                                     }}
-                                    className="text-[10px] font-bold text-[var(--sage)] hover:opacity-90 bg-[var(--sage-light)] px-2 py-1 rounded-lg transition-colors border border-[var(--sage)]/20"
+                                    className="text-[var(--sage)] hover:opacity-90 bg-[var(--sage-light)] p-1.5 rounded-lg transition-colors border border-[var(--sage)]/20 inline-flex items-center justify-center"
                                     title="Copiar Link"
                                   >
-                                    Link
+                                    <Link2 size={14} />
                                   </button>
                                 );
                               })()}
@@ -2807,9 +2808,10 @@ export default function PatientRecord() {
                                     await navigator.clipboard.writeText(shareUrl);
                                     alert("Link copiado!");
                                   }}
-                                  className="text-[10px] font-bold text-[var(--sage)] hover:opacity-90 bg-[var(--sage-light)] px-2 py-1 rounded-lg transition-colors border border-[var(--sage)]/20"
+                                  className="text-[var(--sage)] hover:opacity-90 bg-[var(--sage-light)] p-1.5 rounded-lg transition-colors border border-[var(--sage)]/20 inline-flex items-center justify-center"
+                                  title="Copiar Link"
                                 >
-                                  Link
+                                  <Link2 size={14} />
                                 </button>
                                 <a
                                   href={`https://wa.me/?text=${encodeURIComponent(`Olá! Por favor, preencha o seguinte instrumento clínico:\n\n${shareUrl}`)}`}
